@@ -1,0 +1,12 @@
+{
+  "private": true,
+  "scripts": {
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev || echo \"no backend dev script\"",
+    "dev": "node scripts/dev.js",
+    "install:all": "npm --prefix frontend install && npm --prefix backend install"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0"
+  }
+}
