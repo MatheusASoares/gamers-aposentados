@@ -1,5 +1,6 @@
 import { GameCard } from '@/components/game/GameCard';
 import { Game } from '@/types/game';
+import { prisma } from '@/lib/prisma';
 
 const mapDbToGame = (db: any): Game => ({
   id: db.id,
@@ -17,13 +18,12 @@ export default async function Home() {
   let games: Game[] = [];
 
   try {
-    const res = await fetch('/api/games');
-    if (res.ok) {
-      const data = await res.json();
-      if (Array.isArray(data)) games = data.map(mapDbToGame);
-    }
+    const rawGames = await prisma.game.findMany({
+      orderBy: { created_at: "desc" },
+      include: { nominator: true }
+    });
+    games = rawGames.map(mapDbToGame);
   } catch (err) {
-    // keep empty list on error
     console.error('Failed to fetch games:', err);
   }
 

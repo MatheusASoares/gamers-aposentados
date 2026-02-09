@@ -28,7 +28,9 @@ enum QuestType {
 model User {
   id           String   @id @default(uuid())
   username     String   @unique
-  email        String?
+  email        String?  @unique // Email is required for auth, unique
+  password     String?  // Hashed password for Credentials auth
+  image        String?  // Avatar URL
   display_name String?
   created_at   DateTime @default(now())
 
