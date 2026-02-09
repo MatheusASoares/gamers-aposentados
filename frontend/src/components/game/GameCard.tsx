@@ -1,49 +1,61 @@
+// src/components/game/GameCard.tsx
 import React from 'react';
 import { Game } from '@/types/game';
+// Importamos os componentes "craftados" pelo shadcn
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 
 interface GameCardProps {
-    game: Game;
+  game: Game;
 }
 
 export function GameCard({ game }: GameCardProps) {
-    const statusColors = {
-        SUGGESTED: 'bg-gray-200 text-gray-700',
-        ACTIVE: 'bg-blue-100 text-blue-800',
-        COMPLETED: 'bg-green-100 text-green-800',
-        DROPPED: 'bg-red-100 text-red-800',
-    };
+  // Mapeamento de cores para o Badge do shadcn
+  // O shadcn usa variantes: 'default', 'secondary', 'destructive', 'outline'
+  const getBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'ACTIVE': return 'default';      // Preto/Escuro
+      case 'COMPLETED': return 'secondary'; // Cinza claro/Verde (se customizar)
+      case 'DROPPED': return 'destructive'; // Vermelho
+      default: return 'outline';            // Borda simples
+    }
+  };
 
-    return (
-    // Card Container com Tailwind
-    // border, rounded-lg, shadow-sm: Estética básica
-    <div className="border border-gray-200 rounded-lg p-4 shadow-sm hover:shadow-md transition-shadow bg-white">
-      
-      {/* Header do Card: Título e Badge de Status */}
-      <div className="flex justify-between items-start mb-2">
-        <h3 className="font-bold text-lg text-gray-900 line-clamp-1" title={game.title}>
+  return (
+    // O componente Card substitui a div com borda
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-bold truncate pr-2" title={game.title}>
           {game.title}
-        </h3>
-        <span className={`text-xs px-2 py-1 rounded-full font-medium ${statusColors[game.status]}`}>
+        </CardTitle>
+        <Badge variant={getBadgeVariant(game.status)}>
           {game.status}
-        </span>
-      </div>
+        </Badge>
+      </CardHeader>
 
-      {/* Meta Infos */}
-      <div className="text-sm text-gray-600 space-y-1">
-        <p>
-          <span className="font-semibold">Indicado por:</span> {game.nominatedBy}
-        </p>
-        <p>
-          <span className="font-semibold">Tipo:</span> {game.questType === 'MAIN_QUEST' ? '🛡️ Main Quest' : '⚔️ Side Quest'}
-        </p>
-        
-        {/* Renderização Condicional: Só mostra HLTB se existir */}
-        {game.hltbTime && (
-          <p>
-            <span className="font-semibold">Tempo:</span> ~{game.hltbTime}h
-          </p>
-        )}
-      </div>
-    </div>
+      <CardContent>
+        <div className="text-sm text-muted-foreground space-y-2">
+          <div className="flex justify-between">
+            <span>Indicado por:</span>
+            <span className="font-medium text-foreground">{game.nominatedBy}</span>
+          </div>
+
+          <Separator /> {/* Uma linha divisória elegante */}
+
+          <div className="flex justify-between">
+            <span>Tipo:</span>
+            <span>{game.questType === 'MAIN_QUEST' ? '🛡️ Main' : '⚔️ Side'}</span>
+          </div>
+
+          {game.hltbTime && (
+            <div className="flex justify-between">
+              <span>Tempo:</span>
+              <span>~{game.hltbTime}h</span>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
