@@ -1,47 +1,45 @@
 import { GameCard } from '@/components/game/GameCard';
 import { Game } from '@/types/game';
 
+const mapDbToGame = (db: any): Game => ({
+  id: db.id,
+  title: db.title,
+  coverUrl: db.cover_url ?? '',
+  status: db.status,
+  questType: db.quest_type,
+  nominatedBy: db.nominator?.display_name ?? db.nominated_by_id ?? null,
+  hltbTime: db.hltb_time ?? null,
+  createdAt: db.created_at ? new Date(db.created_at) : new Date(),
+  completedAt: db.end_date ? new Date(db.end_date) : undefined,
+});
 
-export default function Home() {
-  // MOCK DATA: Dados simulados para visualizar a UI sem backend.
-  // Isso permite que o Frontend trabalhe independente do Backend.
-  const mockGame: Game = {
-    id: '1',
-    title: 'Mad Max',
-    coverUrl: 'https://exemplo.com/capa.jpg',
-    status: 'ACTIVE',
-    questType: 'MAIN_QUEST',
-    nominatedBy: 'Lucas', // Testando sua string flexível
-    hltbTime: 20,
-    createdAt: new Date(),
-  };
+export default async function Home() {
+  let games: Game[] = [];
 
-  const mockSideQuest: Game = {
-    id: '2',
-    title: 'Streets of Rage 4',
-    coverUrl: '',
-    status: 'SUGGESTED',
-    questType: 'SIDE_QUEST',
-    nominatedBy: 'Matheus',
-    hltbTime: 3,
-    createdAt: new Date(),
-  };
+  try {
+    const res = await fetch('/api/games');
+    if (res.ok) {
+      const data = await res.json();
+      if (Array.isArray(data)) games = data.map(mapDbToGame);
+    }
+  } catch (err) {
+    // keep empty list on error
+    console.error('Failed to fetch games:', err);
+  }
 
   return (
     <main className="min-h-screen p-8 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-8 text-gray-800">
-        Gamers Aposentados 🎮
-      </h1>
-
-
+      <h1 className="text-3xl font-bold mb-8 text-gray-800">Gamers Aposentados 🎮</h1>
 
       <section>
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Test Area</h2>
+        <h2 className="text-xl font-semibold mb-4 text-gray-700">Jogos</h2>
 
-        {/* Grid System: 1 coluna no mobile, 3 no desktop */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <GameCard game={mockGame} />
-          <GameCard game={mockSideQuest} />
+          {games.length === 0 ? (
+            <p className="text-gray-600">Nenhum jogo disponível.</p>
+          ) : (
+            games.map((g) => <GameCard key={g.id} game={g} />)
+          )}
         </div>
       </section>
     </main>
