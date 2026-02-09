@@ -1,0 +1,131 @@
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS (As regras fixas) ---
+enum GameStatus {
+  SUGGESTED   // Está no backlog
+  IN_POOL     // Entrou no sorteio (Randomizer)
+  ACTIVE      // Foi o escolhido (Winner)
+  COMPLETED   // Zerado
+  DROPPED     // Dropado
+}
+
+enum QuestType {
+  MAIN_QUEST
+  SIDE_QUEST
+}
+
+// --- MODELS (As Tabelas do seu Diagrama) ---
+
+model User {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  email        String?
+  display_name String?
+  created_at   DateTime @default(now())
+
+  // Relações (O User tem vários...)
+  nominations  Game[]            @relation("Nominator") // Jogos que indicou
+  reviews      Review[]                                 // Reviews que fez
+  poolEntries  PoolEntry[]                              // Entradas no sorteio
+
+  @@map("users")
+}
+
+model Game {
+  id             String      @id @default(uuid())
+  title          String
+  platform       String?     // PC, Switch, PS5...
+  cover_url      String?     // Capa do jogo
+
+  // Regras de Negócio
+  quest_type     QuestType   // Main ou Side? [Critico para as regras]
+  status         GameStatus  @default(SUGGESTED)
+  
+  // Tempos
+  hltb_time      Int?        // "How Long to Beat" (Regra < 10h)
+  
+  // Quem indicou? (FK para User)
+  nominated_by_id String
+  nominator       User      @relation("Nominator", fields: [nominated_by_id], references: [id])
+
+  // Datas
+  created_at     DateTime    @default(now())
+  start_date     DateTime?   // Quando virou ACTIVE
+  end_date       DateTime?   // Quando virou COMPLETED
+
+  // Relações
+  reviews        Review[]
+  poolEntries    PoolEntry[] // Participações em sorteios
+  wonPools       Pool[]      @relation("WinnerGame") // Potes que esse jogo venceu
+
+  @@map("games")
+}
+
+// Equivalente ao seu "Reviews" (Perfeito!)
+model Review {
+  id           String   @id @default(uuid())
+  rating       Int      // 0 a 10 ou 0 a 5
+  difficulty   Int?     // 1 a 5
+  review_text  String?  @db.Text
+  hours_played Int?     // Seu "hours = played" (Stats reais)
+  
+  // Conexões
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id])
+  game_id      String
+  game         Game     @relation(fields: [game_id], references: [id])
+
+  created_at   DateTime @default(now())
+
+  @@map("reviews")
+}
+
+// Equivalente ao seu "Randomizer" (Generalizado para Main e Side)
+model Pool {
+  id           String    @id @default(uuid())
+  
+  // Se for Side Quest, tem mês/ano. Se for Main, pode ser nulo.
+  month        Int?
+  year         Int?
+  type         QuestType 
+  
+  status       String    @default("OPEN") // OPEN, CLOSED
+
+  // O Vencedor (Sorteado)
+  winner_game_id String?
+  winner_game    Game?     @relation("WinnerGame", fields: [winner_game_id], references: [id])
+
+  // Os jogos que estão concorrendo neste pote
+  entries      PoolEntry[]
+
+  created_at   DateTime  @default(now())
+
+  @@map("pools")
+}
+
+// Equivalente ao seu "RandomizerEntries" (Tabela Pivô)
+model PoolEntry {
+  id        String   @id @default(uuid())
+  
+  pool_id   String
+  pool      Pool     @relation(fields: [pool_id], references: [id])
+  
+  game_id   String
+  game      Game     @relation(fields: [game_id], references: [id])
+  
+  // Quem colocou esse jogo NESTE pote específico? 
+  // (Importante: As regras dizem Input Voce vs Padrinho )
+  user_id   String
+  user      User     @relation(fields: [user_id], references: [id])
+
+  @@map("pool_entries")
+}

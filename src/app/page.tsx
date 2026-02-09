@@ -1,6 +1,6 @@
-// src/app/page.tsx
 import { GameCard } from '@/components/game/GameCard';
 import { Game } from '@/types/game';
+
 
 export default function Home() {
   // MOCK DATA: Dados simulados para visualizar a UI sem backend.
@@ -11,7 +11,7 @@ export default function Home() {
     coverUrl: 'https://exemplo.com/capa.jpg',
     status: 'ACTIVE',
     questType: 'MAIN_QUEST',
-    nominatedBy: 'Padrinho', // Testando sua string flexível
+    nominatedBy: 'Lucas', // Testando sua string flexível
     hltbTime: 20,
     createdAt: new Date(),
   };
@@ -33,9 +33,11 @@ export default function Home() {
         Gamers Aposentados 🎮
       </h1>
 
+
+
       <section>
         <h2 className="text-xl font-semibold mb-4 text-gray-700">Test Area</h2>
-        
+
         {/* Grid System: 1 coluna no mobile, 3 no desktop */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <GameCard game={mockGame} />

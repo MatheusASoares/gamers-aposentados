@@ -1,12 +1,40 @@
 {
+  "name": "gamers-aposentados",
+  "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev:frontend": "npm --prefix frontend run dev",
-    "dev:backend": "npm --prefix backend run dev || echo \"no backend dev script\"",
-    "dev": "node scripts/dev.js",
-    "install:all": "npm --prefix frontend install && npm --prefix backend install"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.0.0",
+    "@radix-ui/react-separator": "^1.1.8",
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "dotenv": "^17.2.4",
+    "lucide-react": "^0.563.0",
+    "next": "16.0.7",
+    "pg": "^8.18.0",
+    "prisma": "^6.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "tailwind-merge": "^3.4.0",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
-    "concurrently": "^8.2.0"
+    "@tailwindcss/postcss": "^4",
+    "@types/node": "^20",
+    "@types/react": "^19.2.7",
+    "@types/react-dom": "^19",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.7",
+    "tailwindcss": "^4",
+    "tsx": "^4.21.0",
+    "typescript": "^5"
   }
 }
