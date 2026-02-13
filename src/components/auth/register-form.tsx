@@ -49,10 +49,16 @@ export default function RegisterForm() {
                         <Input id="password" type="password" name="password" required minLength={6} />
                     </div>
                 </CardContent>
-                <CardFooter className="flex flex-col">
+                <CardFooter className="flex flex-col gap-4">
                     <Button className="w-full" disabled={isPending}>
                         Register
                     </Button>
+                    <div className="text-center text-sm">
+                        Already have an account?{" "}
+                        <a href="/login" className="underline underline-offset-4 hover:text-primary">
+                            Log in
+                        </a>
+                    </div>
                     <div
                         className="flex h-8 items-end space-x-1"
                         aria-live="polite"
