@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gamers Aposentados - Game Reviews</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#bd0df2",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#09090b", // Deep Zinc/Black
+                        "surface-dark": "#18181b",    // Zinc-900
+                        "border-dark": "#27272a",     // Zinc-800
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(189, 13, 242, 0.3);
+        }
+        .neon-border {
+            border: 1px solid rgba(189, 13, 242, 0.5);
+        }
+        .glass-card {
+            background: rgba(24, 24, 27, 0.8);
+            backdrop-filter: blur(8px);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-zinc-900 dark:text-zinc-100 font-display min-h-screen">
+<div class="relative flex min-h-screen w-full flex-col overflow-x-hidden">
+<!-- Top Navigation -->
+<main class="flex-1 w-full max-w-7xl mx-auto px-6 py-8">
+<!-- Hero Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+<div class="space-y-2">
+<h2 class="text-4xl md:text-5xl font-black tracking-tight text-zinc-900 dark:text-white">GAME REVIEWS</h2>
+<p class="text-zinc-500 dark:text-zinc-400 max-w-md text-lg">Honest takes from the retired vanguard of the golden era.</p>
+</div>
+<button class="flex items-center gap-2 bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg font-bold text-sm tracking-wide transition-all neon-glow active:scale-95 group">
+<span class="material-symbols-outlined group-hover:rotate-90 transition-transform">add</span>
+                    WRITE A REVIEW
+                </button>
+</div>
+<!-- Filters Bar -->
+<div class="flex flex-wrap items-center gap-4 p-4 mb-8 bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200 dark:border-zinc-800 rounded-xl">
+<div class="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-zinc-800 rounded-lg border border-zinc-200 dark:border-zinc-700">
+<span class="text-xs font-bold text-zinc-400 uppercase">Sort:</span>
+<select class="bg-transparent border-none text-sm font-medium focus:ring-0 py-0 pr-8">
+<option>Newest Finished</option>
+<option>Highest Rated</option>
+<option>Oldest</option>
+</select>
+</div>
+<div class="flex flex-wrap gap-2">
+<button class="px-4 py-1.5 rounded-full text-xs font-bold border border-primary bg-primary/10 text-primary uppercase">All Genres</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-primary/50 transition-colors uppercase">RPG</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-primary/50 transition-colors uppercase">Souls-like</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-primary/50 transition-colors uppercase">Metroidvania</button>
+<button class="px-4 py-1.5 rounded-full text-xs font-bold border border-zinc-200 dark:border-zinc-700 text-zinc-500 hover:border-primary/50 transition-colors uppercase">Action</button>
+</div>
+<div class="ml-auto hidden lg:flex items-center gap-4">
+<span class="text-xs font-bold text-zinc-500 uppercase tracking-widest">Displaying 12 Reviews</span>
+<div class="flex border border-zinc-200 dark:border-zinc-700 rounded-lg overflow-hidden">
+<button class="p-1.5 bg-zinc-200 dark:bg-zinc-700 text-primary">
+<span class="material-symbols-outlined text-lg">grid_view</span>
+</button>
+<button class="p-1.5 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-500">
+<span class="material-symbols-outlined text-lg">view_list</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Review Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+<!-- Card 1 -->
+<div class="group relative bg-surface-dark border border-border-dark rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Cinematic fantasy game landscape artwork" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwLabGegM-6Mx1qkpfCMYzTgqXYPqh2DYvXrDpAtdBc7Ela4v2HMqz0tx6qNWubuU1kiE61d3681FoyYcvRGcABmMskDlaHXiBKzUOenrip2NZUGxu2m-34_fJvuEOZX4z33hoc7kqdNioab_49cqW0fPLG1RBxnA3tufhvjQytD1RzFgMPaLSUmz4ftbf8ReLnoUZAZzPseE-Cqv7Ls8_qM5MUspAgf3qGWKSg9rbQkHnH2isSP0X6QJm5PjRJ6hPCmABwLsRA6U"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 right-4 h-12 w-12 rounded-full bg-surface-dark/80 backdrop-blur-md border-2 border-primary flex items-center justify-center neon-glow">
+<span class="text-lg font-black text-white">10</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">Action RPG</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-400 uppercase tracking-wider">Souls-like</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">Elden Ring: Shadow of the Erdtree</h3>
+<div class="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+<span class="material-symbols-outlined text-sm">person</span>
+<span>Review by <strong class="text-zinc-300">Lucas</strong></span>
+<span class="mx-1">•</span>
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Finished: Jun 24, 2024</span>
+</div>
+<p class="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-6">
+                            An absolute masterpiece of world design and challenge. The expansion elevates the lore to new heights and provides some of the most memorable boss encounters in gaming history...
+                        </p>
+<div class="mt-auto pt-6 border-t border-border-dark flex items-center justify-between">
+<button class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                                VIEW FULL REVIEW <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 text-zinc-500">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">share</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit_square</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group relative bg-surface-dark border border-border-dark rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Vibrant anime style character art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVsi8Z4pIO2bVd6k_UzfvUAowwo06GONzZ6r5Fz_DfhAhVU1BR6UYR8jvUaYOxLpKPJYVMeVNUnCWzXuUedYOTG6DhqZquNVrlBpC5MCIr0k4pkDvyK2cHx7fg6kkuBpzHMw3gpQ2rRFpSH8G7gzHEZyMjsflPOgQasJpbMUFaLvv-u0PevGjQm11NkgGDFbyUCUNnP1dBa3D-Gg4Vuk51PH4V_cpq97w8-mY3tUsP8-_D5OTu2AKkgCT0zhIDxgO3DMp7lf4T6Os"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 right-4 h-12 w-12 rounded-full bg-surface-dark/80 backdrop-blur-md border-2 border-primary flex items-center justify-center neon-glow">
+<span class="text-lg font-black text-white">9.5</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">JRPG</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-400 uppercase tracking-wider">Turn-based</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">Persona 5 Royal</h3>
+<div class="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+<span class="material-symbols-outlined text-sm">person</span>
+<span>Review by <strong class="text-zinc-300">Matheus</strong></span>
+<span class="mx-1">•</span>
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Finished: Feb 10, 2024</span>
+</div>
+<p class="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-6">
+                            Stylish, deep, and emotionally resonant. A masterclass in UI design and narrative pacing. It's rare for a game of this length to maintain such high quality throughout...
+                        </p>
+<div class="mt-auto pt-6 border-t border-border-dark flex items-center justify-between">
+<button class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                                VIEW FULL REVIEW <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 text-zinc-500">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">share</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit_square</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group relative bg-surface-dark border border-border-dark rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Atmospheric dark insect world art" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB6hWMnzpX5nS6_5s6t6z7I4Hpyi2FCsqn7VhxxHZ0DTusWkz1PuDpJXKOc1XX1XTU10YZ0Mc2BJ_h71ol8pSaSITNkRCzfc935UbPncarnJGRYUJd5_EJN5aa7KNCTOSR-0WfGJNws9zGiPSKz2YDRxSq64PLY3zsUfv5MMIXdVi9OSK9oflTrl3_MgVhVwdZNVUYQjF_d_FRAdTrjxvtvhMolZGT1o4ly1tIkz4qtj0oTn8B4aH4H8g8S5L95xMVKIFKix1oCkMk"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 right-4 h-12 w-12 rounded-full bg-surface-dark/80 backdrop-blur-md border-2 border-primary flex items-center justify-center neon-glow">
+<span class="text-lg font-black text-white">9</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">Metroidvania</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-400 uppercase tracking-wider">Indie</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">Hollow Knight</h3>
+<div class="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+<span class="material-symbols-outlined text-sm">person</span>
+<span>Review by <strong class="text-zinc-300">Yan</strong></span>
+<span class="mx-1">•</span>
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Finished: Jan 20, 2024</span>
+</div>
+<p class="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-6">
+                            Atmospheric exploration and tight combat in a beautifully melancholic bug's world. Hallownest is one of the most rewarding worlds to explore ever created...
+                        </p>
+<div class="mt-auto pt-6 border-t border-border-dark flex items-center justify-between">
+<button class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                                VIEW FULL REVIEW <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 text-zinc-500">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">share</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit_square</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 4 (Horizontal/Wide Mockup) -->
+<div class="group relative bg-surface-dark border border-border-dark rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="Futuristic neon city game landscape" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIT1js7UdUCFm-zMH6oRc2W_eiUAOecwLSmd4jZjroJt2_B8LqdBQTsZRWaM7VNqhyB2yVjgE0Kn-H1RUXY8Qs6yfFBZa9KtwpCAQb1FuVi5DhbqsvKWfRsej8Xm2oO9V9YdUgDreZyOY2aAMea03MHnyCUD-Q2T3ZeYKaCAPMFw5I0SAbUmOJPCqx6BTg54We2cardtONpOYiVH7Fvb7ZwXvH8U8pKJuhzVT1CxAJU-biTyj-6T9xnByk47lo5FFNjdXpRGtiUkU"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 right-4 h-12 w-12 rounded-full bg-surface-dark/80 backdrop-blur-md border-2 border-primary flex items-center justify-center neon-glow">
+<span class="text-lg font-black text-white">8.5</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">Action</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-400 uppercase tracking-wider">Cyberpunk</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">Cyberpunk 2077</h3>
+<div class="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+<span class="material-symbols-outlined text-sm">person</span>
+<span>Review by <strong class="text-zinc-300">Lucas</strong></span>
+<span class="mx-1">•</span>
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Finished: Dec 15, 2023</span>
+</div>
+<p class="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-6">
+                            After years of updates and the Phantom Liberty expansion, this is finally the RPG we were promised. Night City is dense, immersive, and visually unmatched...
+                        </p>
+<div class="mt-auto pt-6 border-t border-border-dark flex items-center justify-between">
+<button class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                                VIEW FULL REVIEW <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 text-zinc-500">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">share</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit_square</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="group relative bg-surface-dark border border-border-dark rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex flex-col">
+<div class="relative aspect-video overflow-hidden">
+<img class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" data-alt="High speed futuristic racing car" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD_KKVDa0W9IDgA8wkZGXZKZ5oDfMoESy7-2YjmXfu-aFE5XJI-OZDQGCa2SZ8wzdbJcwl9la_796CK_Rf8G5WChMaOB4LjlZ2qJ1_nNx-VkFvXUjfQN9SkK8eQQbUVTc7Yzqb2C-B9USJen6IimO5UWi_fRLR3S4HnQsICp9snYGn7J1eimr9Fxls8j6UlE4SCNz0QsqQgWKU3fQ9Eowv-wAx8NMKPKO7j9dXvJDnXr8SPxCh01GNjfE1VFN36b_MHS_BN_zWKRdQ"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface-dark via-transparent to-transparent"></div>
+<div class="absolute top-4 right-4 h-12 w-12 rounded-full bg-surface-dark/80 backdrop-blur-md border-2 border-primary flex items-center justify-center neon-glow">
+<span class="text-lg font-black text-white">7.0</span>
+</div>
+</div>
+<div class="p-6 flex flex-col flex-1">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-primary/20 text-primary uppercase tracking-wider">Racing</span>
+<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-zinc-800 text-zinc-400 uppercase tracking-wider">Arcade</span>
+</div>
+<h3 class="text-xl font-bold text-white mb-1 group-hover:text-primary transition-colors">Forza Horizon 5</h3>
+<div class="flex items-center gap-2 text-xs text-zinc-500 mb-4">
+<span class="material-symbols-outlined text-sm">person</span>
+<span>Review by <strong class="text-zinc-300">Matheus</strong></span>
+<span class="mx-1">•</span>
+<span class="material-symbols-outlined text-sm">calendar_today</span>
+<span>Finished: Oct 05, 2023</span>
+</div>
+<p class="text-zinc-400 text-sm leading-relaxed line-clamp-3 mb-6">
+                            Technically impressive and fun in short bursts, but the lack of true progression and repetitive events start to weigh down the experience after 20 hours...
+                        </p>
+<div class="mt-auto pt-6 border-t border-border-dark flex items-center justify-between">
+<button class="text-xs font-bold text-primary hover:underline flex items-center gap-1">
+                                VIEW FULL REVIEW <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+<div class="flex items-center gap-3 text-zinc-500">
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">share</span></button>
+<button class="hover:text-primary transition-colors"><span class="material-symbols-outlined text-xl">edit_square</span></button>
+</div>
+</div>
+</div>
+</div>
+<!-- Add Review Placeholder Card -->
+<div class="group relative bg-zinc-900/30 border-2 border-dashed border-zinc-800 rounded-xl overflow-hidden hover:border-primary/50 transition-all duration-300 flex items-center justify-center min-h-[400px]">
+<div class="flex flex-col items-center gap-4 text-zinc-500 group-hover:text-primary transition-colors">
+<div class="h-16 w-16 rounded-full border-2 border-dashed border-zinc-700 flex items-center justify-center group-hover:border-primary/50 group-hover:neon-glow transition-all">
+<span class="material-symbols-outlined text-3xl">add</span>
+</div>
+<div class="text-center">
+<p class="font-bold uppercase tracking-widest text-sm">Add New Review</p>
+<p class="text-xs mt-1 text-zinc-600">Share your gaming wisdom</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination -->
+<div class="mt-16 flex items-center justify-center gap-2">
+<button class="h-10 w-10 flex items-center justify-center rounded-lg border border-zinc-800 text-zinc-500 hover:text-primary hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<button class="h-10 w-10 flex items-center justify-center rounded-lg bg-primary text-white font-bold neon-glow">1</button>
+<button class="h-10 w-10 flex items-center justify-center rounded-lg border border-zinc-800 text-zinc-400 hover:text-white transition-all">2</button>
+<button class="h-10 w-10 flex items-center justify-center rounded-lg border border-zinc-800 text-zinc-400 hover:text-white transition-all">3</button>
+<span class="text-zinc-600 px-2">...</span>
+<button class="h-10 w-10 flex items-center justify-center rounded-lg border border-zinc-800 text-zinc-400 hover:text-white transition-all">12</button>
+<button class="h-10 w-10 flex items-center justify-center rounded-lg border border-zinc-800 text-zinc-500 hover:text-primary hover:border-primary/50 transition-all">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</main>
+<!-- Footer -->
+
+</div>
+</body></html>

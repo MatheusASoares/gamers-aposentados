@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="pt-BR"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#bd0df2",
+                        "background-light": "#f8f5f8",
+                        "background-dark": "#09090b", // Zinc-950 equivalent
+                    },
+                    fontFamily: {
+                        "display": ["Inter", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .neon-glow {
+            box-shadow: 0 0 15px -3px rgba(189, 13, 242, 0.4);
+        }
+        .glass-card {
+            background: rgba(24, 24, 27, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(39, 39, 42, 1);
+        }
+    </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-zinc-900 dark:text-zinc-100 min-h-screen p-6 md:p-10">
+<div class="max-w-6xl mx-auto space-y-8"><!-- Header -->
+
+<!-- Header / Title (Subtle) -->
+<!-- Row 1: Main Quest -->
+<div class="grid grid-cols-1 gap-8" id="hero-grid"><!-- Row 1: Main Quest -->
+<div class="glass-card rounded-xl overflow-hidden flex flex-col md:flex-row min-h-[320px]">
+<div class="md:w-1/2 relative min-h-[200px]">
+<img alt="FFVII Rebirth" class="absolute inset-0 w-full h-full object-cover opacity-60" src="https://images.unsplash.com/photo-1614728263952-84ea206f99b6?q=80&amp;w=2000&amp;auto=format&amp;fit=crop"/>
+<div class="absolute inset-0 bg-gradient-to-r from-background-dark/80 to-transparent"></div>
+</div>
+<div class="md:w-1/2 p-8 flex flex-col justify-center space-y-6">
+<div class="space-y-2">
+<div class="flex items-center gap-3">
+<span class="px-2 py-0.5 bg-primary/20 text-primary text-[10px] font-black rounded uppercase tracking-widest">Main Quest</span>
+<span class="text-zinc-500 text-[10px] uppercase tracking-widest">Ongoing Adventure</span>
+</div>
+<h2 class="text-3xl font-black text-white">Final Fantasy VII Rebirth</h2>
+<div class="flex items-center gap-2 text-zinc-400">
+<span class="material-symbols-outlined text-sm">flag</span>
+<p class="text-xs">Objetivo: Reach the Forgotten Capital</p>
+</div>
+</div>
+<div class="space-y-3">
+<div class="flex justify-between text-[10px] font-bold uppercase tracking-wider">
+<span class="text-zinc-500">Progresso da Campanha</span>
+<span class="text-primary">82%</span>
+</div>
+<div class="h-2 bg-zinc-900 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-[82%] shadow-[0_0_15px_rgba(189,13,242,0.6)]"></div>
+</div>
+</div>
+<div class="flex items-center gap-6">
+<button class="bg-primary hover:bg-primary/90 text-white px-8 py-3 rounded-lg font-black text-sm flex items-center gap-2 transition-all transform hover:scale-105 active:scale-95">
+<span class="material-symbols-outlined">play_arrow</span>
+                RESUME
+            </button>
+<span class="text-zinc-500 text-[10px] italic">Última sessão: Há 2 horas</span>
+</div>
+</div>
+</div>
+<!-- Row 2: Side Quest -->
+<div class="glass-card rounded-xl p-6 flex flex-col md:flex-row items-center gap-6 border-l-4 border-l-primary">
+<div class="w-16 h-16 bg-zinc-900 border border-zinc-800 rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-primary text-3xl">local_fire_department</span>
+</div>
+<div class="flex-1 space-y-1">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">Side Quest</span>
+<span class="text-zinc-700">•</span>
+<span class="text-[10px] font-bold text-zinc-400 uppercase tracking-widest">Current Run</span>
+</div>
+<h3 class="text-xl font-bold text-white">Hades</h3>
+<p class="text-xs text-zinc-500">Escape Attempt: Heat Level 5 • Zagreus Aspect</p>
+</div>
+<div class="md:w-1/3 space-y-2">
+<div class="flex justify-between text-[9px] font-bold uppercase text-zinc-500">
+<span>Styx Progress</span>
+<span>Area 3/4</span>
+</div>
+<div class="h-1.5 bg-zinc-900 rounded-full overflow-hidden">
+<div class="h-full bg-primary/60 w-3/4"></div>
+</div>
+</div>
+<button class="px-6 py-2 border border-zinc-800 hover:border-primary/50 rounded-lg text-xs font-bold text-zinc-300 transition-colors">
+        Continue Run
+    </button>
+</div></div>
+<!-- Row 2: Side Quest -->
+<!-- Row 3: Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Achievements -->
+<div class="glass-card rounded-xl p-6 space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-sm font-bold text-zinc-400 uppercase tracking-wider">Conquistas Recentes</h4>
+<span class="material-symbols-outlined text-primary text-xl">emoji_events</span>
+</div>
+<div class="flex justify-around py-2">
+<div class="relative group">
+<div class="absolute -inset-1 bg-primary/20 rounded-full blur opacity-0 group-hover:opacity-100 transition"></div>
+<div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-primary/80">military_tech</span>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-1 bg-primary/20 rounded-full blur opacity-0 group-hover:opacity-100 transition"></div>
+<div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-primary/80">workspace_premium</span>
+</div>
+</div>
+<div class="relative group">
+<div class="absolute -inset-1 bg-primary/20 rounded-full blur opacity-0 group-hover:opacity-100 transition"></div>
+<div class="w-12 h-12 rounded-full bg-zinc-900 border border-zinc-800 flex items-center justify-center relative">
+<span class="material-symbols-outlined text-primary/80">verified</span>
+</div>
+</div>
+</div>
+<p class="text-[10px] text-center text-zinc-500">Última conquista: "One-Winged Angel" (Platina)</p>
+</div>
+<!-- Last Review -->
+<div class="glass-card rounded-xl p-6 space-y-3">
+<div class="flex items-center justify-between">
+<h4 class="text-sm font-bold text-zinc-400 uppercase tracking-wider">Última Review</h4>
+<div class="px-2 py-0.5 bg-primary text-white text-xs font-black rounded italic">9.5</div>
+</div>
+<div class="space-y-1">
+<h5 class="font-bold text-sm">Baldur's Gate 3</h5>
+<p class="text-xs text-zinc-500 leading-relaxed line-clamp-2">
+                        "Simplesmente o melhor RPG da década. A liberdade de escolha é insana e os personagens são memoráveis..."
+                    </p>
+</div>
+<button class="text-[10px] text-primary font-bold hover:underline uppercase tracking-widest flex items-center gap-1">
+                    Ler Review Completa
+                    <span class="material-symbols-outlined text-xs">arrow_forward</span>
+</button>
+</div>
+<!-- Collection Progress -->
+<div class="glass-card rounded-xl p-6 space-y-4">
+<div class="flex items-center justify-between">
+<h4 class="text-sm font-bold text-zinc-400 uppercase tracking-wider">Backlog Burner</h4>
+<span class="material-symbols-outlined text-zinc-500 text-xl">inventory_2</span>
+</div>
+<div class="relative flex items-center justify-center py-2">
+<!-- Semi-circle mock-up -->
+<div class="text-center">
+<span class="text-2xl font-black text-white">4<span class="text-zinc-600 text-lg">/10</span></span>
+<p class="text-[10px] text-zinc-500 font-medium uppercase mt-1">Zerados este mês</p>
+</div>
+</div>
+<div class="flex gap-1 justify-center">
+<div class="h-1.5 w-4 rounded bg-primary shadow-[0_0_8px_rgba(189,13,242,0.4)]"></div>
+<div class="h-1.5 w-4 rounded bg-primary shadow-[0_0_8px_rgba(189,13,242,0.4)]"></div>
+<div class="h-1.5 w-4 rounded bg-primary shadow-[0_0_8px_rgba(189,13,242,0.4)]"></div>
+<div class="h-1.5 w-4 rounded bg-primary shadow-[0_0_8px_rgba(189,13,242,0.4)]"></div>
+<div class="h-1.5 w-4 rounded bg-zinc-800"></div>
+<div class="h-1.5 w-4 rounded bg-zinc-800"></div>
+<div class="h-1.5 w-4 rounded bg-zinc-800"></div>
+<div class="h-1.5 w-4 rounded bg-zinc-800"></div>
+<div class="h-1.5 w-4 rounded bg-zinc-800"></div>
+<div class="h-1.5 w-4 rounded bg-zinc-800"></div>
+</div>
+</div>
+</div>
+<!-- Footer / Credits -->
+
+</div>
+</body></html>

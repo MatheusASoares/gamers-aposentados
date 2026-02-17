@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sidebar Component - Gamers Aposentados</title>
+<!-- Tailwind CSS v3 CDN -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Lucide Icons Script -->
+<script src="https://unpkg.com/lucide@latest"></script>
+<style data-purpose="custom-layout">
+    /* Custom scrollbar for a cleaner look if content overflows */
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 10px;
+    }
+    /* Smooth transition for hover states */
+    .nav-item-transition {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+  </style>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            'gaming-purple': '#a855f7',
+            'gaming-dark': '#09090b',
+            'sidebar-bg': '#121214',
+          }
+        }
+      }
+    }
+  </script>
+</head>
+<body class="bg-zinc-950 flex items-center justify-center min-h-screen p-8">
+<!-- BEGIN: Sidebar Container -->
+<!-- The main container for the sidebar, isolated for demonstration -->
+<aside class="w-64 h-[900px] bg-sidebar-bg border-r border-zinc-800/50 flex flex-col shadow-2xl rounded-l-2xl overflow-hidden" data-purpose="navigation-sidebar" id="main-sidebar">
+<!-- BEGIN: Sidebar Logo -->
+<div class="p-8 flex items-center gap-3" data-purpose="branding">
+<div class="w-10 h-10 bg-gaming-purple rounded-lg flex items-center justify-center shadow-[0_0_15px_rgba(168,85,247,0.4)]">
+<i class="text-white w-6 h-6" data-lucide="gamepad-2"></i>
+</div>
+<div>
+<h1 class="text-white font-bold text-lg leading-tight">Gamers</h1>
+<p class="text-gaming-purple font-medium text-sm">Aposentados</p>
+</div>
+</div>
+<!-- END: Sidebar Logo -->
+<!-- BEGIN: Navigation Links -->
+<nav class="flex-1 px-4 mt-4 space-y-2 custom-scrollbar overflow-y-auto" data-purpose="main-navigation">
+<!-- Dashboard Item (Active State) -->
+<a class="nav-item-transition flex items-center gap-3 px-4 py-3.5 rounded-xl bg-purple-500/10 text-gaming-purple border border-purple-500/20 group" data-purpose="nav-dashboard" href="#">
+<i class="w-5 h-5" data-lucide="layout-dashboard"></i>
+<span class="font-semibold">Dashboard</span>
+</a>
+<!-- Quests Item -->
+<a class="nav-item-transition flex items-center gap-3 px-4 py-3.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/50 group" data-purpose="nav-quests" href="#">
+<i class="w-5 h-5" data-lucide="swords"></i>
+<span class="font-medium">Quests</span>
+</a>
+<!-- History Item -->
+<a class="nav-item-transition flex items-center gap-3 px-4 py-3.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/50 group" data-purpose="nav-history" href="#">
+<i class="w-5 h-5" data-lucide="scroll-text"></i>
+<span class="font-medium">History</span>
+</a>
+<!-- Randomizer Item -->
+<a class="nav-item-transition flex items-center gap-3 px-4 py-3.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/50 group" data-purpose="nav-randomizer" href="#">
+<i class="w-5 h-5" data-lucide="dices"></i>
+<span class="font-medium">Randomizer</span>
+</a>
+<!-- Shop Item with Badge -->
+<a class="nav-item-transition flex items-center justify-between px-4 py-3.5 rounded-xl text-zinc-500 cursor-not-allowed group opacity-60" data-purpose="nav-shop" href="#">
+<div class="flex items-center gap-3">
+<i class="w-5 h-5" data-lucide="store"></i>
+<span class="font-medium">Shop</span>
+</div>
+<span class="text-[10px] uppercase tracking-wider font-bold bg-zinc-800 px-2 py-0.5 rounded text-zinc-400">Soon</span>
+</a>
+</nav>
+<!-- END: Navigation Links -->
+<!-- BEGIN: Sidebar Footer -->
+<div class="p-4 border-t border-zinc-800/50 space-y-2" data-purpose="sidebar-footer">
+<!-- Settings Button -->
+<button class="nav-item-transition flex items-center gap-3 w-full px-4 py-3 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800/50 group">
+<i class="w-5 h-5" data-lucide="settings"></i>
+<span class="font-medium text-sm">Settings</span>
+</button>
+<!-- Logout Button -->
+<button class="nav-item-transition flex items-center gap-3 w-full px-4 py-3 rounded-xl text-zinc-400 hover:text-red-400 hover:bg-red-500/5 group">
+<i class="w-5 h-5" data-lucide="log-out"></i>
+<span class="font-medium text-sm">Logout</span>
+</button>
+</div>
+<!-- END: Sidebar Footer -->
+</aside>
+<!-- END: Sidebar Container -->
+<!-- JavaScript for Icon Rendering -->
+<script data-purpose="icon-initialization">
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body></html>
