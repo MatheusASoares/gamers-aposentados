@@ -1,47 +1,66 @@
-import { GameCard } from '@/components/game/GameCard';
-import { Game } from '@/types/game';
 import { prisma } from '@/lib/prisma';
+import { auth } from '@/auth';
+import { ActiveQuestHero } from '@/components/dashboard/ActiveQuestHero';
+import { SideQuestBar } from '@/components/dashboard/SideQuestBar';
+import { StatsGrid } from '@/components/dashboard/StatsGrid';
+import { RecentGames } from '@/components/dashboard/RecentGames';
 
-const mapDbToGame = (db: any): Game => ({
-  id: db.id,
-  title: db.title,
-  coverUrl: db.cover_url ?? '',
-  status: db.status,
-  questType: db.quest_type,
-  nominatedBy: db.nominator?.display_name ?? db.nominated_by_id ?? null,
-  hltbTime: db.hltb_time ?? null,
-  createdAt: db.created_at ? new Date(db.created_at) : new Date(),
-  completedAt: db.end_date ? new Date(db.end_date) : undefined,
-});
+export default async function DashboardPage() {
+  const session = await auth();
 
-export default async function Home() {
-  let games: Game[] = [];
+  // Parallel data fetching (vercel best practice: async-parallel)
+  const [
+    activeMainQuest,
+    activeSideQuest,
+    totalGames,
+    completedGames,
+    recentGames,
+    lastReview,
+  ] = await Promise.all([
+    prisma.game.findFirst({
+      where: { status: 'ACTIVE', quest_type: 'MAIN_QUEST' },
+      include: { nominator: true },
+    }),
+    prisma.game.findFirst({
+      where: { status: 'ACTIVE', quest_type: 'SIDE_QUEST' },
+      include: { nominator: true },
+    }),
+    prisma.game.count(),
+    prisma.game.count({ where: { status: 'COMPLETED' } }),
+    prisma.game.findMany({
+      take: 5,
+      orderBy: { created_at: 'desc' },
+      include: { nominator: true },
+    }),
+    prisma.review.findFirst({
+      orderBy: { created_at: 'desc' },
+      include: { game: true, user: true },
+    }),
+  ]);
 
-  try {
-    const rawGames = await prisma.game.findMany({
-      orderBy: { created_at: "desc" },
-      include: { nominator: true }
-    });
-    games = rawGames.map(mapDbToGame);
-  } catch (err) {
-    console.error('Failed to fetch games:', err);
-  }
+  const suggestedGames = await prisma.game.count({ where: { status: 'SUGGESTED' } });
 
   return (
-    <main className="min-h-screen p-8 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-8 text-gray-800">Gamers Aposentados 🎮</h1>
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Row 1: Active Main Quest Hero Card */}
+      <ActiveQuestHero
+        game={activeMainQuest}
+        userName={session?.user?.name ?? 'Comandante'}
+      />
 
-      <section>
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Jogos</h2>
+      {/* Row 2: Side Quest Bar */}
+      <SideQuestBar game={activeSideQuest} />
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {games.length === 0 ? (
-            <p className="text-gray-600">Nenhum jogo disponível.</p>
-          ) : (
-            games.map((g) => <GameCard key={g.id} game={g} />)
-          )}
-        </div>
-      </section>
-    </main>
+      {/* Row 3: Stats Cards Grid */}
+      <StatsGrid
+        totalGames={totalGames}
+        completedGames={completedGames}
+        suggestedGames={suggestedGames}
+        lastReview={lastReview}
+      />
+
+      {/* Row 4: Recent Activity */}
+      <RecentGames games={recentGames} />
+    </div>
   );
 }

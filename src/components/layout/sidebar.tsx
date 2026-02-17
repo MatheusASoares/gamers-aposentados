@@ -36,10 +36,10 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
                 <div className="px-3 py-2">
                     <nav className="space-y-1">
-                        <Link href="/dashboard" passHref>
+                        <Link href="/" passHref>
                             <Button
-                                variant={isActive("/dashboard") ? "secondary" : "ghost"}
-                                className={cn("w-full justify-start gap-2", isActive("/dashboard") && "bg-primary/10 text-primary hover:bg-primary/20")}
+                                variant={isActive("/") ? "secondary" : "ghost"}
+                                className={cn("w-full justify-start gap-2", isActive("/") && "bg-primary/10 text-primary hover:bg-primary/20")}
                             >
                                 <LayoutDashboard className="h-4 w-4" />
                                 Dashboard
