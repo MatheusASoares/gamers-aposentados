@@ -45,7 +45,7 @@ export function Sidebar({ className }: SidebarProps) {
                                 Dashboard
                             </Button>
                         </Link>
-                        <Link href="/quests" passHref>
+                        {/* <Link href="/quests" passHref>
                             <Button
                                 variant={isActive("/quests") ? "secondary" : "ghost"}
                                 className={cn("w-full justify-start gap-2", isActive("/quests") && "bg-primary/10 text-primary hover:bg-primary/20")}
@@ -53,14 +53,14 @@ export function Sidebar({ className }: SidebarProps) {
                                 <Swords className="h-4 w-4" />
                                 Quests
                             </Button>
-                        </Link>
-                        <Link href="/history" passHref>
+                        </Link> */}
+                        <Link href="/reviews" passHref>
                             <Button
-                                variant={isActive("/history") ? "secondary" : "ghost"}
-                                className={cn("w-full justify-start gap-2", isActive("/history") && "bg-primary/10 text-primary hover:bg-primary/20")}
+                                variant={isActive("/reviews") ? "secondary" : "ghost"}
+                                className={cn("w-full justify-start gap-2", isActive("/reviews") && "bg-primary/10 text-primary hover:bg-primary/20")}
                             >
                                 <History className="h-4 w-4" />
-                                History
+                                Reviews
                             </Button>
                         </Link>
                         <Link href="/randomizer" passHref>
@@ -72,24 +72,24 @@ export function Sidebar({ className }: SidebarProps) {
                                 Randomizer
                             </Button>
                         </Link>
-                        <div className="relative">
+                        {/* <div className="relative">
                             <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground" disabled>
                                 <Store className="h-4 w-4" />
                                 Shop
                             </Button>
                             <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">SOON</span>
-                        </div>
+                        </div> */}
                     </nav>
                 </div>
             </div>
 
             <div className="mt-auto px-3 py-4 space-y-1">
-                <Link href="/settings" passHref>
+                {/* <Link href="/settings" passHref>
                     <Button variant="ghost" className="w-full justify-start gap-2">
                         <Settings className="h-4 w-4" />
                         Settings
                     </Button>
-                </Link>
+                </Link> */}
                 <form action={handleSignOut}>
                     <Button variant="ghost" className="w-full justify-start gap-2 text-red-500 hover:text-red-600 hover:bg-red-500/10">
                         <LogOut className="h-4 w-4" />

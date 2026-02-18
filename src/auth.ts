@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import Google from "next-auth/providers/google";
 
 // const prisma = new PrismaClient(); // Removed
 
@@ -20,6 +21,10 @@ async function getUser(email: string) {
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
     providers: [
+        Google({
+            clientId: process.env.AUTH_GOOGLE_ID,
+            clientSecret: process.env.AUTH_GOOGLE_SECRET,
+        }),
         Credentials({
             async authorize(credentials) {
                 const parsedCredentials = z

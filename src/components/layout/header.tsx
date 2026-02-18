@@ -2,7 +2,8 @@ import { auth } from "@/auth";
 import { Breadcrumbs } from "./breadcrumbs";
 import { Separator } from "@/components/ui/separator";
 import { User, Coins } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // I need to check if I have Avatar component, probably not. I'll check after writing.
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AuthButtons } from "./auth-buttons";
 
 import { MobileNav } from "./mobile-nav";
 
@@ -18,21 +19,8 @@ export async function Header() {
             </div>
 
             <div className="flex items-center gap-6">
-
-                {/* User Profile */}
-                <div className="flex items-center gap-3">
-                    <div className="text-right hidden sm:block">
-                        <p className="text-sm font-medium leading-none">{user?.name || "Guest"}</p>
-                        <p className="text-xs text-muted-foreground mt-1">Pro Player</p>
-                    </div>
-                    <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
-                        {user?.image ? (
-                            <img src={user.image} alt={user.name || "User"} className="h-full w-full object-cover" />
-                        ) : (
-                            <User className="h-5 w-5 text-muted-foreground" />
-                        )}
-                    </div>
-                </div>
+                {/* User Profile / Auth Actions */}
+                <AuthButtons user={user} />
             </div>
         </header>
     );
