@@ -9,7 +9,7 @@ interface RecentGame {
     quest_type: string;
     hltb_time: number | null;
     created_at: Date;
-    nominator: { display_name: string | null; username: string } | null;
+    nominator: { name: string | null; username: string | null } | null;
 }
 
 interface RecentGamesProps {
@@ -101,7 +101,7 @@ export function RecentGames({ games }: RecentGamesProps) {
                                     {game.nominator && (
                                         <span className="text-[11px] flex items-center gap-1">
                                             <User className="h-3 w-3" />
-                                            {game.nominator.display_name ?? game.nominator.username}
+                                            {game.nominator.name ?? game.nominator.username ?? 'Anônimo'}
                                         </span>
                                     )}
                                     {game.hltb_time && (

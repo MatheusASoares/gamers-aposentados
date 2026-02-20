@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -27,6 +27,7 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                 className="sm:max-w-md p-0 overflow-hidden bg-card border-border border-primary/20"
                 onInteractOutside={(e) => e.preventDefault()}
             >
+                <DialogTitle className="sr-only">Login to your account</DialogTitle>
                 <div className="p-8 relative">
                     {/* Background Pattern */}
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,...')] opacity-5 pointer-events-none" />

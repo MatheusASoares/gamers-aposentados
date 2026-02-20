@@ -13,8 +13,8 @@ async function main() {
   await prisma.user.deleteMany();
 
   // Create users
-  const alice = await prisma.user.create({ data: { username: 'alice', email: 'alice@example.com', display_name: 'Alice' } });
-  const bob = await prisma.user.create({ data: { username: 'bob', email: 'bob@example.com', display_name: 'Bob' } });
+  const alice = await prisma.user.create({ data: { username: 'alice', email: 'alice@example.com', name: 'Alice' } });
+  const bob = await prisma.user.create({ data: { username: 'bob', email: 'bob@example.com', name: 'Bob' } });
 
   // Create games
   const game1 = await prisma.game.create({

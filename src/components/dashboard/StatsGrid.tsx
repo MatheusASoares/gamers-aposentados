@@ -8,7 +8,7 @@ interface StatsGridProps {
         rating: number;
         review_text: string | null;
         game: { title: string };
-        user: { display_name: string | null; username: string };
+        user: { name: string | null; username: string | null };
     } | null;
 }
 
@@ -47,8 +47,8 @@ export function StatsGrid({
                         <div
                             key={i}
                             className={`h-1.5 w-4 rounded ${i < Math.min(completedGames, 10)
-                                    ? 'bg-[#bd0df2] shadow-[0_0_8px_rgba(189,13,242,0.4)]'
-                                    : 'bg-zinc-800'
+                                ? 'bg-[#bd0df2] shadow-[0_0_8px_rgba(189,13,242,0.4)]'
+                                : 'bg-zinc-800'
                                 }`}
                         />
                     ))}
@@ -82,7 +82,7 @@ export function StatsGrid({
                             </p>
                         )}
                         <p className="text-[10px] text-zinc-600 mt-1">
-                            por {lastReview.user.display_name ?? lastReview.user.username}
+                            por {lastReview.user.name ?? lastReview.user.username ?? 'Anônimo'}
                         </p>
                     </div>
                 ) : (

@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -24,6 +24,7 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
                 className="sm:max-w-md p-0 overflow-hidden bg-card border-border border-primary/20"
                 onInteractOutside={(e) => e.preventDefault()}
             >
+                <DialogTitle className="sr-only">Create an account</DialogTitle>
                 <div className="p-8">
                     <div className="flex flex-col items-center mb-6 text-center">
                         <div className="p-2 bg-primary/10 rounded-full mb-2">

@@ -7,16 +7,17 @@ export const authConfig = {
     callbacks: {
         authorized({ auth, request: { nextUrl } }) {
             const isLoggedIn = !!auth?.user;
-            const isOnDashboard = nextUrl.pathname.startsWith('/dashboard') || nextUrl.pathname.startsWith('/protected');
-            // Adicione rotas protegidas aqui conforme necessário
-            if (isOnDashboard) {
+            const isAuthRoute = nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/register');
+            const isApiRoute = nextUrl.pathname.startsWith('/api');
+            const isPublicRoute = isAuthRoute || isApiRoute;
+
+            if (!isPublicRoute) {
+                // Se a rota não for pública e o usuário não estiver logado, bloqueia
                 if (isLoggedIn) return true;
-                return false; // Redirect unauthenticated users to login page
-            } else if (isLoggedIn) {
-                // Se já está logado e tenta acessar login/register, redireciona para home ou dashboard
-                if (nextUrl.pathname.startsWith('/login') || nextUrl.pathname.startsWith('/register')) {
-                    return Response.redirect(new URL('/', nextUrl));
-                }
+                return false; // Vai ser redirecionado para /login
+            } else if (isLoggedIn && isAuthRoute) {
+                // Se já está logado e tenta acessar login/register, redireciona para home
+                return Response.redirect(new URL('/', nextUrl));
             }
             return true;
         },

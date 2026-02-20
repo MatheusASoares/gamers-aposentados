@@ -5,6 +5,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import Google from "next-auth/providers/google";
+import { PrismaAdapter } from "@auth/prisma-adapter";
 
 // const prisma = new PrismaClient(); // Removed
 
@@ -20,6 +21,8 @@ async function getUser(email: string) {
 
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
+    adapter: PrismaAdapter(prisma),
+    session: { strategy: "jwt" },
     providers: [
         Google({
             clientId: process.env.AUTH_GOOGLE_ID,
