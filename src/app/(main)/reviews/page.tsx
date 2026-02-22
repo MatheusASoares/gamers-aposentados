@@ -1,15 +1,27 @@
-import { Rocket } from "lucide-react";
+import { getGamesForReview, getReviews } from "@/app/lib/data";
+import { ReviewsClient } from "@/components/reviews/ReviewsClient";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
-export default function ReviewsPage() {
+export const metadata = {
+    title: "Game Reviews | Gamers Aposentados",
+    description: "Honest takes from the retired vanguard of the golden era.",
+};
+
+export default async function ReviewsPage() {
+    const session = await auth();
+
+    if (!session?.user) {
+        redirect("/login");
+    }
+
+    const reviews = await getReviews();
+    const games = await getGamesForReview();
+
     return (
-        <div className="flex flex-col items-center justify-center p-24 text-center">
-            <div className="p-4 bg-primary/10 rounded-full mb-6">
-                <Rocket className="h-12 w-12 text-primary" />
-            </div>
-            <h1 className="text-3xl font-bold tracking-tight mb-2">Game Reviews</h1>
-            <p className="text-muted-foreground text-lg mb-8 max-w-md">
-                Our squad is currently exploring new worlds. The review archives will be available soon.
-            </p>
-        </div>
+        <ReviewsClient
+            reviews={reviews}
+            games={games}
+        />
     );
 }

@@ -42,6 +42,7 @@ model User {
   nominations  Game[]            @relation("Nominator") // Jogos que indicou
   reviews      Review[]                                 // Reviews que fez
   poolEntries  PoolEntry[]                              // Entradas no sorteio
+  gameProgress GameProgress[]                           // Progresso nos jogos
 
   @@map("users")
 }
@@ -84,7 +85,6 @@ model Game {
 
   // Regras de Negócio
   quest_type     QuestType   // Main ou Side? [Critico para as regras]
-  status         GameStatus  @default(SUGGESTED)
   
   // Tempos
   hltb_time      Int?        // "How Long to Beat" (Regra < 10h)
@@ -95,15 +95,37 @@ model Game {
 
   // Datas
   created_at     DateTime    @default(now())
-  start_date     DateTime?   // Quando virou ACTIVE
-  end_date       DateTime?   // Quando virou COMPLETED
 
   // Relações
   reviews        Review[]
   poolEntries    PoolEntry[] // Participações em sorteios
   wonPools       Pool[]      @relation("WinnerGame") // Potes que esse jogo venceu
+  progress       GameProgress[]
 
   @@map("games")
+}
+
+// Novo modelo: Rastreia o progresso de cada gamer em cada jogo (Regra 3)
+model GameProgress {
+  id                  String     @id @default(uuid())
+  user_id             String
+  user                User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  
+  game_id             String
+  game                Game       @relation(fields: [game_id], references: [id], onDelete: Cascade)
+
+  status              GameStatus @default(SUGGESTED) // O status agora é individual
+  progress_percentage Int        @default(0)         // De 0 a 100
+
+  start_date          DateTime?  // Quando este usuário começou
+  end_date            DateTime?  // Quando completou ou dropou
+
+  created_at          DateTime   @default(now())
+  updated_at          DateTime   @updatedAt
+
+  // Garantir que um usuário tenha apenas 1 progresso por jogo
+  @@unique([user_id, game_id])
+  @@map("game_progress")
 }
 
 // Equivalente ao seu "Reviews" (Perfeito!)

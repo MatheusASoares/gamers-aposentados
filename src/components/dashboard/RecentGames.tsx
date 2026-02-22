@@ -4,12 +4,14 @@ import { Clock, User, ChevronRight } from 'lucide-react';
 
 interface RecentGame {
     id: string;
-    title: string;
     status: string;
-    quest_type: string;
-    hltb_time: number | null;
-    created_at: Date;
-    nominator: { name: string | null; username: string | null } | null;
+    updated_at: Date;
+    game: {
+        title: string;
+        quest_type: string;
+        hltb_time: number | null;
+        nominator: { name: string | null; username: string | null } | null;
+    };
 }
 
 interface RecentGamesProps {
@@ -82,14 +84,14 @@ export function RecentGames({ games }: RecentGamesProps) {
                             {/* Quest Type Icon */}
                             <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center flex-shrink-0">
                                 <span className="text-lg">
-                                    {game.quest_type === 'MAIN_QUEST' ? '🛡️' : '⚔️'}
+                                    {game.game.quest_type === 'MAIN_QUEST' ? '🛡️' : '⚔️'}
                                 </span>
                             </div>
 
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-center gap-2">
                                     <h4 className="text-sm font-bold text-white truncate">
-                                        {game.title}
+                                        {game.game.title}
                                     </h4>
                                     <span
                                         className={`px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase tracking-wider flex-shrink-0 ${getStatusColor(game.status)}`}
@@ -98,16 +100,16 @@ export function RecentGames({ games }: RecentGamesProps) {
                                     </span>
                                 </div>
                                 <div className="flex items-center gap-3 mt-1 text-zinc-500">
-                                    {game.nominator && (
+                                    {game.game.nominator && (
                                         <span className="text-[11px] flex items-center gap-1">
                                             <User className="h-3 w-3" />
-                                            {game.nominator.name ?? game.nominator.username ?? 'Anônimo'}
+                                            {game.game.nominator.name ?? game.game.nominator.username ?? 'Anônimo'}
                                         </span>
                                     )}
-                                    {game.hltb_time && (
+                                    {game.game.hltb_time && (
                                         <span className="text-[11px] flex items-center gap-1">
                                             <Clock className="h-3 w-3" />
-                                            ~{game.hltb_time}h
+                                            ~{game.game.hltb_time}h
                                         </span>
                                     )}
                                 </div>
@@ -115,7 +117,7 @@ export function RecentGames({ games }: RecentGamesProps) {
                         </div>
 
                         <span className="text-[10px] text-zinc-600 font-medium flex-shrink-0">
-                            {formatDate(game.created_at)}
+                            {formatDate(game.updated_at)}
                         </span>
                     </div>
                 ))}

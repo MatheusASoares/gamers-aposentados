@@ -9,6 +9,7 @@ export interface SaveRandomizerRollParams {
         id: string; // ID from IGDB
         nome: string;
         imageUrl: string;
+        nominator?: string;
     }[];
     winnerId: string; // Result from local state roll
 }
@@ -30,10 +31,10 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
         // Usa uma transação para garantir que tudo salva junto
         const result = await prisma.$transaction(async (tx) => {
 
+            // Buscar todos os usuários para atrelar o progresso
+            const allUsers = await tx.user.findMany();
+
             // 1. Criar ou atualizar os Jogos na tabela Game
-            // Como IDs podem conflitar com UUID padrão (se usarmos o ID do IGDB), 
-            // no nosso esquema `Game` usa UUID default. Vamos buscar por 'title' como heurística 
-            // ou criar novo se não existir, para não poluir com duplicados no banco
             const savedGames = await Promise.all(candidates.map(async (candidate) => {
                 const existingGame = await tx.game.findFirst({
                     where: { title: candidate.nome }
@@ -50,17 +51,43 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
                     return existingGame;
                 }
 
-                // Definimos como SUGGESTED inicialmente
+                // Tentar descobrir quem indicou pelo texto "Lucas" ou "Matheus"
+                let nominatorId = userId;
+                if (candidate.nominator) {
+                    const matchedUser = allUsers.find(u =>
+                        u.name?.toLowerCase().includes(candidate.nominator!.toLowerCase()) ||
+                        u.username?.toLowerCase().includes(candidate.nominator!.toLowerCase())
+                    );
+                    if (matchedUser) nominatorId = matchedUser.id;
+                }
+
                 return tx.game.create({
                     data: {
                         title: candidate.nome,
                         cover_url: candidate.imageUrl,
                         quest_type: typeEnum,
-                        status: "SUGGESTED",
-                        nominated_by_id: userId
+                        nominated_by_id: nominatorId
                     }
                 });
             }));
+
+            // 1.5. Garantir que todo jogo inserido/atualizado tem um GameProgress (SUGGESTED) para cada usuário
+            for (const game of savedGames) {
+                for (const u of allUsers) {
+                    const existingProgress = await tx.gameProgress.findUnique({
+                        where: { user_id_game_id: { user_id: u.id, game_id: game.id } }
+                    });
+                    if (!existingProgress) {
+                        await tx.gameProgress.create({
+                            data: {
+                                user_id: u.id,
+                                game_id: game.id,
+                                status: "SUGGESTED"
+                            }
+                        });
+                    }
+                }
+            }
 
             // Identificar o vencedor recém-retornado ou criado do banco
             const winnerCandidate = candidates.find(c => c.id === winnerId);
@@ -70,9 +97,9 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
                 throw new Error("Erro ao identificar o jogo vencedor.");
             }
 
-            // 2. Atualizar o vencedor para ACTIVE
-            await tx.game.update({
-                where: { id: savedWinner.id },
+            // 2. Atualizar o GameProgress do vencedor para ACTIVE para todos os usuários
+            await tx.gameProgress.updateMany({
+                where: { game_id: savedWinner.id },
                 data: {
                     status: "ACTIVE",
                     start_date: new Date()

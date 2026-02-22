@@ -8,29 +8,29 @@ import { RecentGames } from '@/components/dashboard/RecentGames';
 export default async function DashboardPage() {
   const session = await auth();
 
-  // Parallel data fetching (vercel best practice: async-parallel)
+  // Parallel data fetching
   const [
-    activeMainQuest,
-    activeSideQuest,
+    mainQuestProgress,
+    sideQuestProgress,
     totalGames,
     completedGames,
     recentGames,
     lastReview,
   ] = await Promise.all([
-    prisma.game.findFirst({
-      where: { status: 'ACTIVE', quest_type: 'MAIN_QUEST' },
-      include: { nominator: true },
+    prisma.gameProgress.findFirst({
+      where: { status: 'ACTIVE', game: { quest_type: 'MAIN_QUEST' } },
+      include: { game: { include: { nominator: true } } },
     }),
-    prisma.game.findFirst({
-      where: { status: 'ACTIVE', quest_type: 'SIDE_QUEST' },
-      include: { nominator: true },
+    prisma.gameProgress.findFirst({
+      where: { status: 'ACTIVE', game: { quest_type: 'SIDE_QUEST' } },
+      include: { game: { include: { nominator: true } } },
     }),
     prisma.game.count(),
-    prisma.game.count({ where: { status: 'COMPLETED' } }),
-    prisma.game.findMany({
+    prisma.gameProgress.count({ where: { status: 'COMPLETED' } }),
+    prisma.gameProgress.findMany({
       take: 4,
-      orderBy: { created_at: 'desc' },
-      include: { nominator: true },
+      orderBy: { updated_at: 'desc' },
+      include: { game: { include: { nominator: true } } },
     }),
     prisma.review.findFirst({
       orderBy: { created_at: 'desc' },
@@ -38,17 +38,17 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const suggestedGames = await prisma.game.count({ where: { status: 'SUGGESTED' } });
+  const suggestedGames = await prisma.gameProgress.count({ where: { status: 'SUGGESTED' } });
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Row 1: Active Quests */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <ActiveQuestHero
-          game={activeMainQuest}
+          progress={mainQuestProgress}
           userName={session?.user?.name ?? 'Comandante'}
         />
-        <SideQuestBar game={activeSideQuest} />
+        <SideQuestBar progress={sideQuestProgress} />
       </div>
 
       {/* Row 3: Stats Cards Grid */}

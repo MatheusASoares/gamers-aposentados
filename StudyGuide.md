@@ -231,3 +231,34 @@ Não é uma biblioteca — são componentes copiados para o seu projeto. Usa Rad
 > - Adicionar uma nova stat card ao Dashboard
 > - Mudar a cor primária no `globals.css` e ver como o tema inteiro muda
 > - Criar uma nova rota em `(main)/` e ver como o layout é aplicado automaticamente
+
+---
+
+## 11. API Routes (Route Handlers) & Integração com APIs Externas (IGDB)
+
+### Por que usamos
+Quando tentamos chamar uma Server Action que faz `fetch` para uma API externa (como a Twitch/IGDB) diretamente dentro de um Client Component (como o Autocomplete de busca), o Next.js às vezes pode tentar serializar event handlers ou sofrer conflitos com o Edge Runtime, resultando no erro: `Error: Event handlers cannot be passed to Client Component props`. 
+
+Para resolver isso com estabilidade máxima, criamos uma Rota de API tradicional (`app/api/igdb/route.ts`). O Client Component faz um `fetch('/api/igdb')` via HTTP normal, isolando o frontend do backend de verdade.
+
+### O que estudar
+- **Route Handlers (`route.ts`)**: Equivalente às antigas API Routes (`pages/api`). Suportam `GET`, `POST`, `PUT`, etc.
+- **Request & NextResponse**: Objetos padrão da Web API usados para ler corpo e enviar JSON.
+- **Autenticação Server-to-Server**: O IGDB requer um Bearer Token da Twitch (OAuth2 Client Credentials). O servidor Next.js gera e armazena esse token em cache na memória (`src/app/lib/igdb.ts`), tirando a carga do front-end.
+- **Nuances de APIs de Terceiros (Omit by Default & Hierarchy)**: APIs como a do IGDB frequentemente "escondem" (omitem) propriedades quando elas assumem valores padrão. 
+  - Exemplo: O Jogo Base é a categoria `0`. Se um jogo é um jogo base, o JSON do IGDB na pesquisa vem sem o campo `category` inteiro em vez de mandar `category: 0`.
+  - Exceções e Edge Cases: Para filtrar efetivamente apenas jogos base (excluindo DLCs, remasters ou compilados), não se pode depender de um único campo; o filtro precisa validar a ausência de propriedades hierárquicas como `parent_game` e `version_parent`, além de verificar o próprio `game_type`.
+
+### Onde foi usado no projeto
+```typescript
+// app/api/igdb/route.ts
+export async function POST(request: Request) {
+    const { query } = await request.json();
+    const results = await searchGamesIGDB(query); // Abstrai o fetch externo complexo
+    return NextResponse.json(results);
+}
+```
+
+### 📖 Referência
+- [Next.js Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
+- [IGDB API Documentation (Game Category Enum)](https://api-docs.igdb.com/#game-enums)

@@ -49,8 +49,8 @@ export async function POST(request: Request) {
         ...data,
         entries: entries
           ? {
-              create: entries.map((e: any) => ({ game_id: e.gameId, user_id: e.userId })),
-            }
+            create: entries.map((e: any) => ({ game_id: e.gameId, user_id: e.userId })),
+          }
           : undefined,
       },
       include: { entries: true },
@@ -84,7 +84,7 @@ export async function PUT(request: Request) {
 
       const [updatedPool, updatedGame] = await prisma.$transaction([
         prisma.pool.update({ where: { id }, data: { winner_game_id: winnerEntry.game_id, status: "CLOSED" } }),
-        prisma.game.update({ where: { id: winnerEntry.game_id }, data: { status: "ACTIVE", start_date: now } }),
+        prisma.gameProgress.updateMany({ where: { game_id: winnerEntry.game_id }, data: { status: "ACTIVE", start_date: now } }),
       ]);
 
       return NextResponse.json({ pool: updatedPool, winner: updatedGame });

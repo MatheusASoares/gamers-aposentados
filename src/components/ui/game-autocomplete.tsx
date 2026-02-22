@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { Search, Loader2, Gamepad2 } from "lucide-react";
-import { searchGamesIGDB } from "@/app/lib/igdb";
 import { Input } from "@/components/ui/input";
 
 export interface GameSearchResult {
@@ -30,10 +29,16 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
             if (query.trim().length > 2) {
                 setIsLoading(true);
                 try {
-                    const data = await searchGamesIGDB(query);
+                    const response = await fetch('/api/igdb', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: query.trim() })
+                    });
+                    if (!response.ok) throw new Error("API Route Failed");
+                    const data = await response.json();
                     setResults(data);
                 } catch (error) {
-                    console.error(error);
+                    console.error("IGDB Route fetch error:", error);
                 } finally {
                     setIsLoading(false);
                 }
