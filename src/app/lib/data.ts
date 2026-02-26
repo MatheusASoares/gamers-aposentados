@@ -31,14 +31,27 @@ export async function getReviews() {
     }
 }
 
+import { auth } from "@/auth";
+
 export async function getGamesForReview() {
     try {
-        // Ideally we only review ACTIVE or COMPLETED games, but let's allow all just in case
-        const games = await prisma.game.findMany({
-            orderBy: {
-                title: 'asc'
+        const session = await auth();
+        if (!session?.user?.id) return [];
+
+        // Buscamos apenas jogos que o usuário tem um GameProgress como COMPLETED
+        const progressRecords = await prisma.gameProgress.findMany({
+            where: {
+                user_id: session.user.id,
+                status: 'COMPLETED'
+            },
+            include: {
+                game: true
             }
         });
+
+        // Extrai apenas os jogos do progresso
+        const games = progressRecords.map(record => record.game).sort((a, b) => a.title.localeCompare(b.title));
+        
         return games;
     } catch (error) {
         console.error("Error fetching games:", error);

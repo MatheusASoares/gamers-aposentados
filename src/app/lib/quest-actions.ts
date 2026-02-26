@@ -9,6 +9,24 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
     try {
+        const existingProgress = await prisma.gameProgress.findUnique({
+            where: {
+                user_id_game_id: {
+                    user_id: session.user.id,
+                    game_id: gameId
+                }
+            }
+        });
+
+        const dataToUpdate: any = { progress_percentage: percentage };
+        if (percentage === 100) {
+            dataToUpdate.status = "COMPLETED";
+            dataToUpdate.end_date = new Date();
+        } else if (existingProgress && (existingProgress.status === "COMPLETED" || existingProgress.status === "DROPPED")) {
+            dataToUpdate.status = "ACTIVE";
+            dataToUpdate.end_date = null;
+        }
+
         await prisma.gameProgress.upsert({
             where: {
                 user_id_game_id: {
@@ -16,15 +34,14 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
                     game_id: gameId
                 }
             },
-            update: {
-                progress_percentage: percentage
-            },
+            update: dataToUpdate,
             create: {
                 user_id: session.user.id,
                 game_id: gameId,
                 progress_percentage: percentage,
-                status: "ACTIVE",
-                start_date: new Date()
+                status: percentage === 100 ? "COMPLETED" : "ACTIVE",
+                start_date: new Date(),
+                ...(percentage === 100 ? { end_date: new Date() } : {})
             }
         });
 

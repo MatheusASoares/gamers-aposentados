@@ -262,3 +262,57 @@ export async function POST(request: Request) {
 ### 📖 Referência
 - [Next.js Route Handlers](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
 - [IGDB API Documentation (Game Category Enum)](https://api-docs.igdb.com/#game-enums)
+
+---
+
+## 12. Tratamento de Cache, Navegação e Reactivity (Next.js)
+
+### Por que usamos
+Durante o desenvolvimento do Dashboard, notamos que Server Actions mutavam os dados no banco (ex: Completar uma Quest), mas a UI não refletia isso imediatamente através do `router.refresh()`. O Next.js agrupa e faz cache agressivo de requisições de rotas no lado do cliente (Client-side Router Cache). O `window.location.reload()` precisou ser usado como fallback em instâncias onde a reatividade soft não foi suficiente, ou ajustamos as Server Actions para usar `revalidatePath`.
+
+### O que estudar
+- **Client-side Router Cache**: O Next.js armazena o payload dos React Server Components em memória no navegador para navegações instantâneas.
+- **`router.refresh()` vs `window.location.reload()`**: `router.refresh()` faz um fetch no background para o servidor e tenta atualizar o DOM sem perder o estado do React. Se o cache for forte demais, a tela não atualiza. O hard reload descarrega o estado da página.
+- **RevalidatePath / RevalidateTag**: Funções usadas dentro das Server Actions para instruir o servidor a expurgar o cache de um caminho específico ANTES de devolver a resposta.
+
+### Onde foi usado no projeto
+```tsx
+// Exemplo em SideQuestBar.tsx (Contornando o Cache do Router)
+const res = await completeQuest(progress.game.id);
+if (res.success) {
+    // Força um hard refresh porque o router.refresh() isolado do Next.js
+    // estava mantendo a UI antiga visível após a mutação da Quest
+    window.location.reload(); 
+}
+```
+
+### 📖 Referência
+- [Next.js Caching Documentation](https://nextjs.org/docs/app/building-your-application/caching)
+- [Router Cache](https://nextjs.org/docs/app/building-your-application/caching#client-side-router-cache)
+
+---
+
+## 13. UI/UX: Interações sem Redirecionamento e Supressão do Navegador
+
+### Por que usamos
+Evitar redirecionar o usuário para outras páginas ("Ver Detalhes") mantém o fluxo de leitura contínuo e a página responsiva. Em vez de criar múltiplas rotas de detalhe, usamos expansão inline. Além disso, substituímos fluxos bloqueantes nativos devido a limitações dos navegadores modernos.
+
+### O que estudar
+- **Line Clamp Toggle**: Alternar entre `line-clamp-X` e nenhuma restrição de linha através de um state booleano (`isExpanded`). Isso permite que blocos longos cresçam verticalmente sem empurrar agressivamente os componentes vizinhos na Grid da Review.
+- **Navigator Clipboard API**: Acesso ao clipboard local para ação de "Share" (copia o texto formatado da Review sem precisar de dependências).
+- **`window.confirm()` Supressão**: Browsers silenciam alertas nativos (`alert`, `confirm`) se disparados com muita frequência ou se considerarem abusivos na stack. O Chrome silenciosamente travava a exclusão da review sem log. A alternativa definitiva é contruir modais de confirmação via `Dialog` customizados do `shadcn/ui` ou realizar a deleção de forma direta.
+
+### Onde foi usado no projeto
+```tsx
+// ReviewCard.tsx - Expansão de Texto Inline Vertical
+<p className={`text-zinc-300 text-base transition-all ${isExpanded ? "" : "line-clamp-4"}`}>
+    {review.review_text}
+</p>
+<button onClick={() => setIsExpanded(!isExpanded)}>
+    {isExpanded ? "SHOW LESS" : "VIEW FULL REVIEW"}
+</button>
+```
+
+### 📖 Referência
+- [MDN: navigator.clipboard](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard)
+- [Tailwind CSS Line Clamp](https://tailwindcss.com/docs/line-clamp)

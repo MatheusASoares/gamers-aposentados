@@ -8,26 +8,39 @@ import { RecentGames } from '@/components/dashboard/RecentGames';
 export default async function DashboardPage() {
   const session = await auth();
 
-  // Parallel data fetching
+  const userId = session?.user?.id || '';
+
+  // Get the latest drawn pools
+  const [latestMainPool, latestSidePool] = await Promise.all([
+    prisma.pool.findFirst({
+      where: { type: 'MAIN_QUEST', winner_game_id: { not: null } },
+      orderBy: { created_at: 'desc' },
+      include: { winner_game: { include: { nominator: true } } }
+    }),
+    prisma.pool.findFirst({
+      where: { type: 'SIDE_QUEST', winner_game_id: { not: null } },
+      orderBy: { created_at: 'desc' },
+      include: { winner_game: { include: { nominator: true } } }
+    }),
+  ]);
+
+  // Parallel data fetching for user progress based on current pools
   const [
     mainQuestProgress,
     sideQuestProgress,
-    totalGames,
-    completedGames,
     recentGames,
     lastReview,
   ] = await Promise.all([
-    prisma.gameProgress.findFirst({
-      where: { status: 'ACTIVE', game: { quest_type: 'MAIN_QUEST' } },
+    latestMainPool?.winner_game_id ? prisma.gameProgress.findUnique({
+      where: { user_id_game_id: { user_id: userId, game_id: latestMainPool.winner_game_id } },
       include: { game: { include: { nominator: true } } },
-    }),
-    prisma.gameProgress.findFirst({
-      where: { status: 'ACTIVE', game: { quest_type: 'SIDE_QUEST' } },
+    }) : null,
+    latestSidePool?.winner_game_id ? prisma.gameProgress.findUnique({
+      where: { user_id_game_id: { user_id: userId, game_id: latestSidePool.winner_game_id } },
       include: { game: { include: { nominator: true } } },
-    }),
-    prisma.game.count(),
-    prisma.gameProgress.count({ where: { status: 'COMPLETED' } }),
+    }) : null,
     prisma.gameProgress.findMany({
+      where: { user_id: userId },
       take: 4,
       orderBy: { updated_at: 'desc' },
       include: { game: { include: { nominator: true } } },
@@ -38,12 +51,10 @@ export default async function DashboardPage() {
     }),
   ]);
 
-  const suggestedGames = await prisma.gameProgress.count({ where: { status: 'SUGGESTED' } });
-
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-[1400px] mx-auto space-y-8 w-full p-2">
       {/* Row 1: Active Quests */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
         <ActiveQuestHero
           progress={mainQuestProgress}
           userName={session?.user?.name ?? 'Comandante'}
@@ -53,9 +64,6 @@ export default async function DashboardPage() {
 
       {/* Row 3: Stats Cards Grid */}
       <StatsGrid
-        totalGames={totalGames}
-        completedGames={completedGames}
-        suggestedGames={suggestedGames}
         lastReview={lastReview}
       />
 

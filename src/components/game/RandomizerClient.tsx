@@ -61,7 +61,7 @@ export function RandomizerClient() {
     // Very basic rolling animation
     const handleRoll = async () => {
         const allCandidates = [...lucasCandidates, ...matheusCandidates];
-        if (allCandidates.length !== (maxPerPerson * 2) || isRolling || isSaving || lockStatus.locked) return;
+        if (allCandidates.length !== (maxPerPerson * 2) || isRolling || isSaving || lockStatus.locked || winner) return;
 
         setIsRolling(true);
         setWinner(null);
@@ -155,53 +155,53 @@ export function RandomizerClient() {
                 {/* Left Column: Candidates Pool */}
                 <div className="lg:col-span-4 flex flex-col gap-6">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-white/80 font-bold uppercase tracking-widest text-xs">Candidates Pool</h3>
-                        <span className="text-primary text-xs font-bold">{lucasCandidates.length + matheusCandidates.length}/{maxPerPerson * 2} SELECTED</span>
+                        <h3 className="text-white/80 font-bold uppercase tracking-widest text-sm">Candidates Pool</h3>
+                        <span className="text-primary text-sm font-bold">{lucasCandidates.length + matheusCandidates.length}/{maxPerPerson * 2} SELECTED</span>
                     </div>
 
                     {/* Lucas's Choices */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="text-zinc-400 font-bold text-xs uppercase tracking-widest">Lucas's Choices</span>
-                            <span className="text-zinc-500 text-xs">{lucasCandidates.length}/{maxPerPerson}</span>
+                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-zinc-400 font-bold text-sm uppercase tracking-widest">Lucas's Choices</span>
+                            <span className="text-zinc-500 text-sm">{lucasCandidates.length}/{maxPerPerson}</span>
                         </div>
                         {lucasCandidates.map(c => (
                             <div key={c.id} className="group relative bg-zinc-800/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all flex items-center p-2">
-                                <div className="size-10 rounded-lg bg-zinc-700 shrink-0 overflow-hidden mr-3">
+                                <div className="size-12 rounded-lg bg-zinc-700 shrink-0 overflow-hidden mr-4">
                                     {c.imageUrl && <img src={c.imageUrl} alt={c.nome} className="w-full h-full object-cover" />}
                                 </div>
-                                <h4 className="text-white font-bold text-xs truncate flex-1">{c.nome}</h4>
-                                <button onClick={() => setLucasCandidates(prev => prev.filter(cand => cand.id !== c.id))} className="text-zinc-500 hover:text-red-400 p-2">x</button>
+                                <h4 className="text-white font-bold text-sm lg:text-base truncate flex-1">{c.nome}</h4>
+                                <button onClick={() => !winner && setLucasCandidates(prev => prev.filter(cand => cand.id !== c.id))} className={cn("text-zinc-500 hover:text-red-400 p-2", winner && "opacity-20 cursor-not-allowed")}>x</button>
                             </div>
                         ))}
-                        {lucasCandidates.length < maxPerPerson && (addingTo === "Lucas" ? (
-                            <div className="mt-2"><GameAutocomplete onSelect={handleAddGame} onCancel={() => setAddingTo(null)} /></div>
+                        {lucasCandidates.length < maxPerPerson && !winner && (addingTo === "Lucas" ? (
+                            <div className="mt-3"><GameAutocomplete onSelect={handleAddGame} onCancel={() => setAddingTo(null)} /></div>
                         ) : (
-                            <button onClick={() => setAddingTo("Lucas")} className="w-full py-3 border border-dashed border-white/10 rounded-xl text-white/30 text-xs font-bold hover:text-white/60 hover:border-white/20 transition-all">
+                            <button onClick={() => setAddingTo("Lucas")} className="w-full py-4 border border-dashed border-white/10 rounded-xl text-white/40 text-sm font-bold hover:text-white/80 hover:border-white/30 transition-all">
                                 + ADD GAME
                             </button>
                         ))}
                     </div>
 
                     {/* Matheus's Choices */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-4 flex flex-col gap-3">
-                        <div className="flex justify-between items-center mb-1">
-                            <span className="text-zinc-400 font-bold text-xs uppercase tracking-widest">Matheus's Choices</span>
-                            <span className="text-zinc-500 text-xs">{matheusCandidates.length}/{maxPerPerson}</span>
+                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-zinc-400 font-bold text-sm uppercase tracking-widest">Matheus's Choices</span>
+                            <span className="text-zinc-500 text-sm">{matheusCandidates.length}/{maxPerPerson}</span>
                         </div>
                         {matheusCandidates.map(c => (
                             <div key={c.id} className="group relative bg-zinc-800/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all flex items-center p-2">
-                                <div className="size-10 rounded-lg bg-zinc-700 shrink-0 overflow-hidden mr-3">
+                                <div className="size-12 rounded-lg bg-zinc-700 shrink-0 overflow-hidden mr-4">
                                     {c.imageUrl && <img src={c.imageUrl} alt={c.nome} className="w-full h-full object-cover" />}
                                 </div>
-                                <h4 className="text-white font-bold text-xs truncate flex-1">{c.nome}</h4>
-                                <button onClick={() => setMatheusCandidates(prev => prev.filter(cand => cand.id !== c.id))} className="text-zinc-500 hover:text-red-400 p-2">x</button>
+                                <h4 className="text-white font-bold text-sm lg:text-base truncate flex-1">{c.nome}</h4>
+                                <button onClick={() => !winner && setMatheusCandidates(prev => prev.filter(cand => cand.id !== c.id))} className={cn("text-zinc-500 hover:text-red-400 p-2", winner && "opacity-20 cursor-not-allowed")}>x</button>
                             </div>
                         ))}
-                        {matheusCandidates.length < maxPerPerson && (addingTo === "Matheus" ? (
-                            <div className="mt-2"><GameAutocomplete onSelect={handleAddGame} onCancel={() => setAddingTo(null)} /></div>
+                        {matheusCandidates.length < maxPerPerson && !winner && (addingTo === "Matheus" ? (
+                            <div className="mt-3"><GameAutocomplete onSelect={handleAddGame} onCancel={() => setAddingTo(null)} /></div>
                         ) : (
-                            <button onClick={() => setAddingTo("Matheus")} className="w-full py-3 border border-dashed border-white/10 rounded-xl text-white/30 text-xs font-bold hover:text-white/60 hover:border-white/20 transition-all">
+                            <button onClick={() => setAddingTo("Matheus")} className="w-full py-4 border border-dashed border-white/10 rounded-xl text-white/40 text-sm font-bold hover:text-white/80 hover:border-white/30 transition-all">
                                 + ADD GAME
                             </button>
                         ))}
@@ -228,19 +228,19 @@ export function RandomizerClient() {
                                                 <span className="text-primary font-black text-3xl tracking-tighter uppercase animate-pulse">ROLLING...</span>
                                             </div>
                                         ) : winner ? (
-                                            <div className="flex flex-col items-center gap-4 animate-in zoom-in spin-in-2duration-500">
+                                            <div className="flex flex-col items-center gap-4 animate-in zoom-in spin-in-2 duration-500">
                                                 <div className="relative">
                                                     <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
                                                     {winner.imageUrl && (
-                                                        <img src={winner.imageUrl} alt={winner.nome} className="w-32 h-40 object-cover rounded-xl border-2 border-primary shadow-[0_0_30px_rgba(189,13,242,0.5)] relative z-10" />
+                                                        <img src={winner.imageUrl} alt={winner.nome} className="w-40 h-56 object-cover rounded-2xl border-2 border-primary shadow-[0_0_40px_rgba(189,13,242,0.6)] relative z-10" />
                                                     )}
                                                 </div>
-                                                <span className="text-white font-black text-3xl md:text-5xl tracking-tighter uppercase leading-tight text-shadow-glow">
+                                                <span className="text-white font-black text-4xl md:text-6xl tracking-tighter uppercase leading-tight text-shadow-glow">
                                                     {winner.nome}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className="text-primary font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter uppercase leading-tight opacity-50">
+                                            <span className="text-primary font-black text-4xl md:text-6xl lg:text-7xl tracking-tighter uppercase leading-tight opacity-50">
                                                 {(lucasCandidates.length === maxPerPerson && matheusCandidates.length === maxPerPerson) ? "READY TO SPIN" : "ADD GAMES FIRST"}
                                             </span>
                                         )}
@@ -250,27 +250,42 @@ export function RandomizerClient() {
 
                             {/* Roll Button */}
                             {lockStatus.locked ? (
-                                <div className="px-6 py-4 bg-red-500/10 border border-red-500/30 rounded-xl text-center max-w-sm w-full mx-auto">
-                                    <p className="text-red-400 font-bold text-sm leading-relaxed uppercase tracking-wide">
+                                <div className="px-8 py-5 bg-red-500/10 border-[1.5px] border-red-500/30 rounded-2xl text-center max-w-sm w-full mx-auto">
+                                    <p className="text-red-400 font-black text-base md:text-lg leading-relaxed uppercase tracking-widest drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]">
                                         ❌ SORTEIO BLOQUEADO
                                     </p>
-                                    <p className="text-red-300/80 text-xs mt-1">
+                                    <p className="text-red-300/90 text-sm mt-2 font-medium">
                                         {lockStatus.message}
                                     </p>
                                 </div>
+                            ) : winner ? (
+                                <button
+                                    onClick={() => {
+                                        setLucasCandidates([]);
+                                        setMatheusCandidates([]);
+                                        setWinner(null);
+                                        setSaveStatus(null);
+                                    }}
+                                    className="px-8 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all w-full max-w-sm mx-auto bg-zinc-800 text-white hover:bg-zinc-700 hover:scale-105 active:scale-95"
+                                >
+                                    <History className="h-6 w-6" />
+                                    <span className="text-xl font-bold tracking-tighter uppercase">
+                                        Limpar Quadro
+                                    </span>
+                                </button>
                             ) : (
                                 <button
                                     onClick={handleRoll}
                                     disabled={lucasCandidates.length < maxPerPerson || matheusCandidates.length < maxPerPerson || isRolling || isSaving}
                                     className={cn(
                                         "px-12 py-5 rounded-2xl flex items-center justify-center gap-4 transition-all w-full max-w-sm mx-auto",
-                                        (lucasCandidates.length === maxPerPerson && matheusCandidates.length === maxPerPerson) && !isRolling && !isSaving
+                                        (lucasCandidates.length === maxPerPerson && matheusCandidates.length === maxPerPerson) && !isRolling && !isSaving && !winner
                                             ? "bg-primary text-white hover:scale-105 active:scale-95 shadow-[0_10px_40px_rgba(189,13,242,0.4)]"
                                             : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                                     )}
                                 >
-                                    <Trophy className={cn("h-8 w-8", (isRolling || isSaving) && "animate-spin")} />
-                                    <span className="text-2xl font-black tracking-tighter uppercase">
+                                    <Trophy className={cn("h-10 w-10", (isRolling || isSaving) && "animate-spin")} />
+                                    <span className="text-3xl font-black tracking-tighter uppercase">
                                         {isSaving ? "Saving..." : "Roll the Dice"}
                                     </span>
                                 </button>

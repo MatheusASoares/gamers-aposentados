@@ -1,6 +1,7 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Badge } from '@/components/ui/badge';
-import { Clock, User, ChevronRight } from 'lucide-react';
+import { Clock, User, ChevronRight, Gamepad2 } from 'lucide-react';
 
 interface RecentGame {
     id: string;
@@ -9,6 +10,7 @@ interface RecentGame {
     game: {
         title: string;
         quest_type: string;
+        cover_url: string | null;
         hltb_time: number | null;
         nominator: { name: string | null; username: string | null } | null;
     };
@@ -60,17 +62,20 @@ export function RecentGames({ games }: RecentGamesProps) {
 
     return (
         <div
-            className="glass-card overflow-hidden animate-fade-in-up"
+            className="glass-card overflow-hidden animate-fade-in-up border border-zinc-800"
             style={{ animationDelay: '500ms' }}
         >
-            <div className="px-6 py-4 border-b border-zinc-800 flex items-center justify-between">
-                <h3 className="font-bold text-sm text-white">Atividade Recente</h3>
+            <div className="px-6 py-5 border-b border-zinc-800 flex items-center justify-between">
+                <h3 className="font-bold text-base text-white uppercase tracking-widest flex items-center gap-2">
+                    <Clock className="w-5 h-5 text-[#bd0df2]" />
+                    Atividade Recente
+                </h3>
                 <Link
                     href="/quests"
-                    className="text-xs text-[#bd0df2] font-bold hover:underline flex items-center gap-1"
+                    className="text-sm text-[#bd0df2] font-bold hover:underline flex items-center gap-1 uppercase tracking-wider"
                 >
-                    Ver Todos
-                    <ChevronRight className="h-3 w-3" />
+                    Ver Todas
+                    <ChevronRight className="h-4 w-4" />
                 </Link>
             </div>
 
@@ -78,37 +83,44 @@ export function RecentGames({ games }: RecentGamesProps) {
                 {games.map((game) => (
                     <div
                         key={game.id}
-                        className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/20 transition-colors group"
+                        className="px-6 py-4 flex items-center justify-between hover:bg-zinc-800/30 transition-colors group"
                     >
                         <div className="flex items-center gap-4 flex-1 min-w-0">
-                            {/* Quest Type Icon */}
-                            <div className="w-10 h-10 rounded-lg bg-zinc-900 border border-zinc-800 flex items-center justify-center flex-shrink-0">
-                                <span className="text-lg">
-                                    {game.game.quest_type === 'MAIN_QUEST' ? '🛡️' : '⚔️'}
-                                </span>
+                            {/* Quest Thumbnail */}
+                            <div className="w-14 h-20 rounded-md bg-zinc-900 border border-zinc-800 flex items-center justify-center flex-shrink-0 relative overflow-hidden group-hover:border-[#bd0df2]/50 transition-colors shadow-md">
+                                {game.game.cover_url ? (
+                                    <Image
+                                        src={game.game.cover_url}
+                                        alt={game.game.title}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <Gamepad2 className="w-6 h-6 text-zinc-700" />
+                                )}
                             </div>
 
                             <div className="min-w-0 flex-1">
-                                <div className="flex items-center gap-2">
-                                    <h4 className="text-sm font-bold text-white truncate">
+                                <div className="flex items-center gap-3">
+                                    <h4 className="text-base font-bold text-white truncate">
                                         {game.game.title}
                                     </h4>
                                     <span
-                                        className={`px-1.5 py-0.5 text-[9px] font-bold rounded border uppercase tracking-wider flex-shrink-0 ${getStatusColor(game.status)}`}
+                                        className={`px-2 py-0.5 text-[10px] font-black rounded border uppercase tracking-widest flex-shrink-0 ${getStatusColor(game.status)}`}
                                     >
                                         {getStatusLabel(game.status)}
                                     </span>
                                 </div>
-                                <div className="flex items-center gap-3 mt-1 text-zinc-500">
+                                <div className="flex items-center gap-4 mt-1.5 text-zinc-400">
                                     {game.game.nominator && (
-                                        <span className="text-[11px] flex items-center gap-1">
-                                            <User className="h-3 w-3" />
+                                        <span className="text-xs font-medium flex items-center gap-1.5">
+                                            <User className="h-3.5 w-3.5" />
                                             {game.game.nominator.name ?? game.game.nominator.username ?? 'Anônimo'}
                                         </span>
                                     )}
                                     {game.game.hltb_time && (
-                                        <span className="text-[11px] flex items-center gap-1">
-                                            <Clock className="h-3 w-3" />
+                                        <span className="text-xs font-medium flex items-center gap-1.5">
+                                            <Clock className="h-3.5 w-3.5" />
                                             ~{game.game.hltb_time}h
                                         </span>
                                     )}
@@ -116,7 +128,7 @@ export function RecentGames({ games }: RecentGamesProps) {
                             </div>
                         </div>
 
-                        <span className="text-[10px] text-zinc-600 font-medium flex-shrink-0">
+                        <span className="text-xs text-zinc-500 font-bold tracking-wider uppercase flex-shrink-0">
                             {formatDate(game.updated_at)}
                         </span>
                     </div>

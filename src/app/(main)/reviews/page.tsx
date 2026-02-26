@@ -22,6 +22,7 @@ export default async function ReviewsPage() {
         <ReviewsClient
             reviews={reviews}
             games={games}
+            currentUserId={session.user.id}
         />
     );
 }
