@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { User, LogOut, Settings } from "lucide-react";
 import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
+import { SettingsModal } from "@/components/auth/settings-modal";
 import { handleSignOut } from "@/lib/actions";
+import Link from "next/link";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -22,6 +24,7 @@ interface AuthButtonsProps {
 export function AuthButtons({ user }: AuthButtonsProps) {
     const [loginOpen, setLoginOpen] = useState(false);
     const [registerOpen, setRegisterOpen] = useState(false);
+    const [settingsOpen, setSettingsOpen] = useState(false);
 
     const openLogin = () => {
         setRegisterOpen(false);
@@ -35,40 +38,60 @@ export function AuthButtons({ user }: AuthButtonsProps) {
 
     if (user) {
         return (
-            <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                    <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-                        <div className="text-right hidden sm:block">
-                            <p className="text-sm font-medium leading-none">{user.name || "Gamer"}</p>
-                            <p className="text-xs text-muted-foreground mt-1">Pro Player</p>
+            <>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <div className="flex cursor-pointer items-center gap-3 transition-opacity hover:opacity-80">
+                            <div className="hidden text-right sm:block">
+                                <p className="text-sm leading-none font-medium">
+                                    {user.name || "Gamer"}
+                                </p>
+                                <p className="text-muted-foreground mt-1 text-xs">
+                                    @{user.username || "user"}
+                                </p>
+                            </div>
+                            <div className="bg-secondary border-border flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
+                                {user.image ? (
+                                    <img
+                                        src={user.image}
+                                        alt={user.name || "User"}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <User className="text-muted-foreground h-5 w-5" />
+                                )}
+                            </div>
                         </div>
-                        <div className="h-10 w-10 rounded-full bg-secondary flex items-center justify-center overflow-hidden border border-border">
-                            {user.image ? (
-                                <img src={user.image} alt={user.name || "User"} className="h-full w-full object-cover" />
-                            ) : (
-                                <User className="h-5 w-5 text-muted-foreground" />
-                            )}
-                        </div>
-                    </div>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer">
-                        <User className="mr-2 h-4 w-4" />
-                        <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="cursor-pointer">
-                        <Settings className="mr-2 h-4 w-4" />
-                        <span>Settings</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem className="cursor-pointer text-red-500 focus:text-red-500 focus:bg-red-500/10" onClick={() => handleSignOut()}>
-                        <LogOut className="mr-2 h-4 w-4" />
-                        <span>Log out</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                        <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem className="cursor-pointer" asChild>
+                            <Link href="/profile">
+                                <User className="mr-2 h-4 w-4" />
+                                <span>Profile</span>
+                            </Link>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            className="cursor-pointer"
+                            onClick={() => setSettingsOpen(true)}
+                        >
+                            <Settings className="mr-2 h-4 w-4" />
+                            <span>Settings</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                            className="cursor-pointer text-red-500 focus:bg-red-500/10 focus:text-red-500"
+                            onClick={() => handleSignOut()}
+                        >
+                            <LogOut className="mr-2 h-4 w-4" />
+                            <span>Log out</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <SettingsModal open={settingsOpen} onOpenChange={setSettingsOpen} user={user} />
+            </>
         );
     }
 

@@ -30,7 +30,10 @@ export async function updateProgressPercentage(progressId: string, percentage: n
         if (percentage === 100) {
             dataToUpdate.status = "COMPLETED";
             dataToUpdate.end_date = new Date();
-        } else if (existingProgress.status === "COMPLETED" || existingProgress.status === "DROPPED") {
+        } else if (
+            existingProgress.status === "COMPLETED" ||
+            existingProgress.status === "DROPPED"
+        ) {
             dataToUpdate.status = "ACTIVE";
             dataToUpdate.end_date = null;
         }

@@ -22,7 +22,7 @@ export async function getTwitchToken(): Promise<string | null> {
     try {
         const response = await fetch(
             `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`,
-            { method: 'POST', cache: 'no-store' }
+            { method: "POST", cache: "no-store" },
         );
 
         if (!response.ok) {
@@ -33,7 +33,7 @@ export async function getTwitchToken(): Promise<string | null> {
 
         cachedToken = data.access_token;
         // Set expiration time, subtracting 5 minutes as a safety buffer
-        tokenExpirationTime = Date.now() + (data.expires_in * 1000) - (5 * 60 * 1000);
+        tokenExpirationTime = Date.now() + data.expires_in * 1000 - 5 * 60 * 1000;
 
         return cachedToken;
     } catch (error) {
@@ -56,17 +56,17 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
     }
 
     try {
-        const response = await fetch('https://api.igdb.com/v4/games', {
-            method: 'POST',
+        const response = await fetch("https://api.igdb.com/v4/games", {
+            method: "POST",
             headers: {
-                'Client-ID': clientId,
-                'Authorization': `Bearer ${token}`,
-                'Accept': 'application/json',
-                'Content-Type': 'text/plain',
+                "Client-ID": clientId,
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+                "Content-Type": "text/plain",
             },
             // Request hierarchy fields to filter out DLCs, alternate editions, and bundles in-memory
             body: `search "${query}"; fields name, cover.image_id, category, game_type, parent_game, version_parent; limit 50;`,
-            cache: 'no-store'
+            cache: "no-store",
         });
 
         if (!response.ok) {
@@ -86,23 +86,25 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
 
         // A true base game has category 0 (or undefined) AND no parent game (DLC/Expansion) AND no version parent (GOTY/Remaster)
         // We also reject game_type 3 (Bundles) and category 3 (Bundles).
-        const mainGames = games.filter((g: any) => {
-            const isBaseCategory = g.category === 0 || g.category === undefined;
-            const isNotBundle = g.game_type !== 3 && g.category !== 3;
-            const noParents = !g.parent_game && !g.version_parent;
+        const mainGames = games
+            .filter((g: any) => {
+                const isBaseCategory = g.category === 0 || g.category === undefined;
+                const isNotBundle = g.game_type !== 3 && g.category !== 3;
+                const noParents = !g.parent_game && !g.version_parent;
 
-            // Extra sanity check to filter out literal " + " bundles that misreport their category
-            const noPlusInName = !g.name.includes(" + ");
+                // Extra sanity check to filter out literal " + " bundles that misreport their category
+                const noPlusInName = !g.name.includes(" + ");
 
-            return isBaseCategory && isNotBundle && noParents && noPlusInName;
-        }).slice(0, 10);
+                return isBaseCategory && isNotBundle && noParents && noPlusInName;
+            })
+            .slice(0, 10);
 
         return mainGames.map((game: any) => ({
             id: game.id.toString(),
             nome: game.name,
             imageUrl: game.cover?.image_id
                 ? `https://images.igdb.com/igdb/image/upload/t_cover_big/${game.cover.image_id}.jpg`
-                : ''
+                : "",
         }));
     } catch (error) {
         console.error("Error searching IGDB:", error);

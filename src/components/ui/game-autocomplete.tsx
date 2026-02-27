@@ -29,10 +29,10 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
             if (query.trim().length > 2) {
                 setIsLoading(true);
                 try {
-                    const response = await fetch('/api/igdb', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ query: query.trim() })
+                    const response = await fetch("/api/igdb", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ query: query.trim() }),
                     });
                     if (!response.ok) throw new Error("API Route Failed");
                     const data = await response.json();
@@ -62,51 +62,53 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
     }, [onCancel]);
 
     return (
-        <div ref={wrapperRef} className="relative w-full z-50">
-            <div className="flex items-center gap-2 w-full">
+        <div ref={wrapperRef} className="relative z-50 w-full">
+            <div className="flex w-full items-center gap-2">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                     <Input
                         autoFocus
                         placeholder="Buscar jogo no IGDB..."
-                        className="w-full pl-9 pr-4 py-6 bg-zinc-900/80 border-white/10 focus-visible:ring-primary focus-visible:border-primary text-white placeholder:text-zinc-500 rounded-xl"
+                        className="focus-visible:ring-primary focus-visible:border-primary w-full rounded-xl border-white/10 bg-zinc-900/80 py-6 pr-4 pl-9 text-white placeholder:text-zinc-500"
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
                     />
                     {isLoading && (
-                        <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-primary animate-spin" />
+                        <Loader2 className="text-primary absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 animate-spin" />
                     )}
                 </div>
                 <button
                     onClick={onCancel}
-                    className="p-3 text-zinc-500 hover:text-white transition-colors"
+                    className="p-3 text-zinc-500 transition-colors hover:text-white"
                 >
                     Cancelar
                 </button>
             </div>
 
             {results.length > 0 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-2xl overflow-hidden max-h-80 overflow-y-auto z-50">
-                    <div className="p-2 flex flex-col gap-1">
+                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-80 overflow-hidden overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 shadow-2xl">
+                    <div className="flex flex-col gap-1 p-2">
                         {results.map((game) => (
                             <button
                                 key={game.id}
                                 onClick={() => onSelect(game)}
-                                className="flex items-center gap-4 w-full p-2 text-left hover:bg-white/5 rounded-lg transition-colors group"
+                                className="group flex w-full items-center gap-4 rounded-lg p-2 text-left transition-colors hover:bg-white/5"
                             >
-                                <div className="size-10 md:size-12 rounded bg-zinc-800 shrink-0 overflow-hidden flex items-center justify-center">
+                                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded bg-zinc-800 md:size-12">
                                     {game.imageUrl ? (
                                         <img
                                             src={game.imageUrl}
                                             alt={game.nome}
-                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform"
+                                            className="h-full w-full object-cover transition-transform group-hover:scale-110"
                                         />
                                     ) : (
                                         <Gamepad2 className="h-5 w-5 text-zinc-600" />
                                     )}
                                 </div>
-                                <div className="flex flex-col flex-1 min-w-0">
-                                    <span className="text-white font-bold text-sm truncate">{game.nome}</span>
+                                <div className="flex min-w-0 flex-1 flex-col">
+                                    <span className="truncate text-sm font-bold text-white">
+                                        {game.nome}
+                                    </span>
                                 </div>
                             </button>
                         ))}

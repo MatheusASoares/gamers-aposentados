@@ -9,7 +9,7 @@ export async function getReviews() {
                         name: true,
                         username: true,
                         image: true,
-                    }
+                    },
                 },
                 game: {
                     select: {
@@ -17,12 +17,12 @@ export async function getReviews() {
                         cover_url: true,
                         platform: true,
                         quest_type: true,
-                    }
-                }
+                    },
+                },
             },
             orderBy: {
-                created_at: 'desc'
-            }
+                created_at: "desc",
+            },
         });
         return reviews;
     } catch (error) {
@@ -42,16 +42,18 @@ export async function getGamesForReview() {
         const progressRecords = await prisma.gameProgress.findMany({
             where: {
                 user_id: session.user.id,
-                status: 'COMPLETED'
+                status: "COMPLETED",
             },
             include: {
-                game: true
-            }
+                game: true,
+            },
         });
 
         // Extrai apenas os jogos do progresso
-        const games = progressRecords.map(record => record.game).sort((a, b) => a.title.localeCompare(b.title));
-        
+        const games = progressRecords
+            .map((record) => record.game)
+            .sort((a, b) => a.title.localeCompare(b.title));
+
         return games;
     } catch (error) {
         console.error("Error fetching games:", error);

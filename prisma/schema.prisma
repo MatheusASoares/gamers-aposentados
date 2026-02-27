@@ -43,6 +43,7 @@ model User {
   reviews      Review[]                                 // Reviews que fez
   poolEntries  PoolEntry[]                              // Entradas no sorteio
   gameProgress GameProgress[]                           // Progresso nos jogos
+  favoriteGames Game[]           @relation("UserFavorites") // Jogos favoritos
 
   @@map("users")
 }
@@ -101,6 +102,7 @@ model Game {
   poolEntries    PoolEntry[] // Participações em sorteios
   wonPools       Pool[]      @relation("WinnerGame") // Potes que esse jogo venceu
   progress       GameProgress[]
+  favoritedBy    User[]      @relation("UserFavorites") // Usuários que favoritararam
 
   @@map("games")
 }

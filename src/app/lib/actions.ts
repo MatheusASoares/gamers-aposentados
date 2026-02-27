@@ -1,11 +1,11 @@
-'use server';
+"use server";
 
-import { signIn } from '@/auth';
-import { AuthError } from 'next-auth';
-import { z } from 'zod';
-import bcrypt from 'bcryptjs';
+import { signIn } from "@/auth";
+import { AuthError } from "next-auth";
+import { z } from "zod";
+import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
-import { redirect } from 'next/navigation';
+import { redirect } from "next/navigation";
 
 // const prisma = new PrismaClient(); // Removed
 
@@ -19,7 +19,7 @@ export async function register(prevState: string | undefined, formData: FormData
     const validatedFields = RegisterSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
-        return 'Invalid fields. Please check your input.';
+        return "Invalid fields. Please check your input.";
     }
 
     const { email, password, username } = validatedFields.data;
@@ -27,15 +27,12 @@ export async function register(prevState: string | undefined, formData: FormData
     try {
         const existingUser = await prisma.user.findFirst({
             where: {
-                OR: [
-                    { email },
-                    { username }
-                ]
-            }
+                OR: [{ email }, { username }],
+            },
         });
 
         if (existingUser) {
-            return 'User with this email or username already exists.';
+            return "User with this email or username already exists.";
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
@@ -47,29 +44,24 @@ export async function register(prevState: string | undefined, formData: FormData
                 password: hashedPassword,
             },
         });
-
     } catch (error) {
-        console.error('Registration error:', error);
-        return 'Failed to register user.';
+        console.error("Registration error:", error);
+        return "Failed to register user.";
     }
 
-    redirect('/login');
+    redirect("/login");
 }
 
-
-export async function authenticate(
-    prevState: string | undefined,
-    formData: FormData,
-) {
+export async function authenticate(prevState: string | undefined, formData: FormData) {
     try {
-        await signIn('credentials', formData);
+        await signIn("credentials", formData);
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {
-                case 'CredentialsSignin':
-                    return 'Invalid credentials.';
+                case "CredentialsSignin":
+                    return "Invalid credentials.";
                 default:
-                    return 'Something went wrong.';
+                    return "Something went wrong.";
             }
         }
         throw error;

@@ -4,12 +4,12 @@ import { ReactNode } from "react";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
     return (
-        <div className="flex min-h-screen bg-background">
-            <Sidebar className="fixed left-0 top-0 h-full hidden md:flex z-50" />
+        <div className="bg-background flex min-h-screen">
+            <Sidebar className="fixed top-0 left-0 z-50 hidden h-full md:flex" />
 
-            <div className="flex-1 md:ml-64 flex flex-col min-h-screen">
+            <div className="flex min-h-screen flex-1 flex-col md:ml-64">
                 <Header />
-                <main className="flex-1 p-6 overflow-auto">
+                <main className="mx-auto w-full max-w-[1600px] flex-1 overflow-auto p-6">
                     {children}
                 </main>
             </div>

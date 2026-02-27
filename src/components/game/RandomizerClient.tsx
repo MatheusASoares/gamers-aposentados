@@ -20,12 +20,16 @@ export function RandomizerClient() {
     const [lucasCandidates, setLucasCandidates] = useState<Candidate[]>([]);
     const [matheusCandidates, setMatheusCandidates] = useState<Candidate[]>([]);
     const [addingTo, setAddingTo] = useState<"Lucas" | "Matheus" | null>(null);
-    const [lockStatus, setLockStatus] = useState<{ locked: boolean; message?: string }>({ locked: false });
+    const [lockStatus, setLockStatus] = useState<{ locked: boolean; message?: string }>({
+        locked: false,
+    });
 
     const [isRolling, setIsRolling] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [winner, setWinner] = useState<Candidate | null>(null);
-    const [saveStatus, setSaveStatus] = useState<{ success?: boolean; message?: string } | null>(null);
+    const [saveStatus, setSaveStatus] = useState<{ success?: boolean; message?: string } | null>(
+        null,
+    );
 
     const maxPerPerson = questType === "MAIN" ? 2 : 3;
 
@@ -46,9 +50,17 @@ export function RandomizerClient() {
         if (!addingTo) return;
 
         if (addingTo === "Lucas") {
-            setLucasCandidates(prev => prev.find(c => c.id === game.id) ? prev : [...prev, { ...game, nominator: "Lucas" }]);
+            setLucasCandidates((prev) =>
+                prev.find((c) => c.id === game.id)
+                    ? prev
+                    : [...prev, { ...game, nominator: "Lucas" }],
+            );
         } else {
-            setMatheusCandidates(prev => prev.find(c => c.id === game.id) ? prev : [...prev, { ...game, nominator: "Matheus" }]);
+            setMatheusCandidates((prev) =>
+                prev.find((c) => c.id === game.id)
+                    ? prev
+                    : [...prev, { ...game, nominator: "Matheus" }],
+            );
         }
 
         setAddingTo(null);
@@ -61,7 +73,14 @@ export function RandomizerClient() {
     // Very basic rolling animation
     const handleRoll = async () => {
         const allCandidates = [...lucasCandidates, ...matheusCandidates];
-        if (allCandidates.length !== (maxPerPerson * 2) || isRolling || isSaving || lockStatus.locked || winner) return;
+        if (
+            allCandidates.length !== maxPerPerson * 2 ||
+            isRolling ||
+            isSaving ||
+            lockStatus.locked ||
+            winner
+        )
+            return;
 
         setIsRolling(true);
         setWinner(null);
@@ -79,13 +98,13 @@ export function RandomizerClient() {
             try {
                 const response = await saveRandomizerRoll({
                     questType,
-                    candidates: allCandidates.map(c => ({
+                    candidates: allCandidates.map((c) => ({
                         id: c.id,
                         nome: c.nome,
                         imageUrl: c.imageUrl,
-                        nominator: c.nominator
+                        nominator: c.nominator,
                     })),
-                    winnerId: luckyWinner.id
+                    winnerId: luckyWinner.id,
                 });
 
                 if (response.success) {
@@ -99,149 +118,262 @@ export function RandomizerClient() {
             } finally {
                 setIsSaving(false);
             }
-
         }, 3000); // 3 seconds roll
     };
 
     return (
-        <div className="w-full flex flex-col gap-8">
+        <div className="flex w-full flex-col gap-8">
             {/* Header Area extracted from stitch HTML */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
+            <div className="flex flex-col justify-between gap-6 border-b border-white/5 pb-8 md:flex-row md:items-end">
                 <div>
-                    <h1 className="text-white text-4xl lg:text-5xl font-black tracking-tight mb-2">THE GREAT RANDOMIZER</h1>
-                    <p className="text-white/60 italic text-lg">May the RNG be in your favor, Commander.</p>
+                    <h1 className="mb-2 text-4xl font-black tracking-tight text-white lg:text-5xl">
+                        THE GREAT RANDOMIZER
+                    </h1>
+                    <p className="text-lg text-white/60 italic">
+                        May the RNG be in your favor, Commander.
+                    </p>
                 </div>
-                <div className="inline-flex p-1 bg-zinc-900/50 rounded-xl border border-white/5">
+                <div className="inline-flex rounded-xl border border-white/5 bg-zinc-900/50 p-1">
                     <button
                         onClick={() => handleQuestTypeChange("MAIN")}
-                        className={cn("px-6 py-2 rounded-lg text-sm font-bold transition-all",
+                        className={cn(
+                            "rounded-lg px-6 py-2 text-sm font-bold transition-all",
                             questType === "MAIN"
-                                ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                : "text-white/50 hover:text-white"
+                                ? "bg-primary shadow-primary/20 text-white shadow-lg"
+                                : "text-white/50 hover:text-white",
                         )}
                     >
-                        Main Quest <span className={cn("font-normal ml-1", questType === "MAIN" ? "text-white/60" : "text-white/40")}>(3m)</span>
+                        Main Quest{" "}
+                        <span
+                            className={cn(
+                                "ml-1 font-normal",
+                                questType === "MAIN" ? "text-white/60" : "text-white/40",
+                            )}
+                        >
+                            (3m)
+                        </span>
                     </button>
                     <button
                         onClick={() => handleQuestTypeChange("SIDE")}
-                        className={cn("px-6 py-2 rounded-lg text-sm font-bold transition-all",
+                        className={cn(
+                            "rounded-lg px-6 py-2 text-sm font-bold transition-all",
                             questType === "SIDE"
-                                ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                : "text-white/50 hover:text-white"
+                                ? "bg-primary shadow-primary/20 text-white shadow-lg"
+                                : "text-white/50 hover:text-white",
                         )}
                     >
-                        Side Quest <span className={cn("font-normal ml-1", questType === "SIDE" ? "text-white/60" : "text-white/40")}>(1m)</span>
+                        Side Quest{" "}
+                        <span
+                            className={cn(
+                                "ml-1 font-normal",
+                                questType === "SIDE" ? "text-white/60" : "text-white/40",
+                            )}
+                        >
+                            (1m)
+                        </span>
                     </button>
                 </div>
             </div>
 
             {/* Alert Notification */}
             {saveStatus && (
-                <div className={cn(
-                    "px-4 py-3 rounded-xl flex items-center gap-3 animate-in fade-in slide-in-from-top-4 border",
-                    saveStatus.success
-                        ? "bg-primary/10 border-primary/50 text-white"
-                        : "bg-red-500/10 border-red-500/50 text-red-400"
-                )}>
-                    <Trophy className={cn("h-5 w-5", saveStatus.success ? "text-primary" : "text-red-400")} />
-                    <p className="font-bold text-sm">
-                        {saveStatus.message}
-                    </p>
+                <div
+                    className={cn(
+                        "animate-in fade-in slide-in-from-top-4 flex items-center gap-3 rounded-xl border px-4 py-3",
+                        saveStatus.success
+                            ? "bg-primary/10 border-primary/50 text-white"
+                            : "border-red-500/50 bg-red-500/10 text-red-400",
+                    )}
+                >
+                    <Trophy
+                        className={cn(
+                            "h-5 w-5",
+                            saveStatus.success ? "text-primary" : "text-red-400",
+                        )}
+                    />
+                    <p className="text-sm font-bold">{saveStatus.message}</p>
                 </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
+            <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16">
                 {/* Left Column: Candidates Pool */}
-                <div className="lg:col-span-4 flex flex-col gap-6">
+                <div className="flex flex-col gap-6">
                     <div className="flex items-center justify-between">
-                        <h3 className="text-white/80 font-bold uppercase tracking-widest text-sm">Candidates Pool</h3>
-                        <span className="text-primary text-sm font-bold">{lucasCandidates.length + matheusCandidates.length}/{maxPerPerson * 2} SELECTED</span>
+                        <h3 className="text-sm font-bold tracking-widest text-white/80 uppercase">
+                            Candidates Pool
+                        </h3>
+                        <span className="text-primary text-sm font-bold">
+                            {lucasCandidates.length + matheusCandidates.length}/{maxPerPerson * 2}{" "}
+                            SELECTED
+                        </span>
                     </div>
 
                     {/* Lucas's Choices */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-zinc-400 font-bold text-sm uppercase tracking-widest">Lucas's Choices</span>
-                            <span className="text-zinc-500 text-sm">{lucasCandidates.length}/{maxPerPerson}</span>
+                    <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-5">
+                        <div className="mb-2 flex items-center justify-between">
+                            <span className="text-sm font-bold tracking-widest text-zinc-400 uppercase">
+                                Lucas's Choices
+                            </span>
+                            <span className="text-sm text-zinc-500">
+                                {lucasCandidates.length}/{maxPerPerson}
+                            </span>
                         </div>
-                        {lucasCandidates.map(c => (
-                            <div key={c.id} className="group relative bg-zinc-800/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all flex items-center p-2">
-                                <div className="size-12 rounded-lg bg-zinc-700 shrink-0 overflow-hidden mr-4">
-                                    {c.imageUrl && <img src={c.imageUrl} alt={c.nome} className="w-full h-full object-cover" />}
+                        {lucasCandidates.map((c) => (
+                            <div
+                                key={c.id}
+                                className="group hover:border-primary/50 relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-800/80 p-2 transition-all"
+                            >
+                                <div className="mr-4 size-12 shrink-0 overflow-hidden rounded-lg bg-zinc-700">
+                                    {c.imageUrl && (
+                                        <img
+                                            src={c.imageUrl}
+                                            alt={c.nome}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    )}
                                 </div>
-                                <h4 className="text-white font-bold text-sm lg:text-base truncate flex-1">{c.nome}</h4>
-                                <button onClick={() => !winner && setLucasCandidates(prev => prev.filter(cand => cand.id !== c.id))} className={cn("text-zinc-500 hover:text-red-400 p-2", winner && "opacity-20 cursor-not-allowed")}>x</button>
+                                <h4 className="flex-1 truncate text-sm font-bold text-white lg:text-base">
+                                    {c.nome}
+                                </h4>
+                                <button
+                                    onClick={() =>
+                                        !winner &&
+                                        setLucasCandidates((prev) =>
+                                            prev.filter((cand) => cand.id !== c.id),
+                                        )
+                                    }
+                                    className={cn(
+                                        "p-2 text-zinc-500 hover:text-red-400",
+                                        winner && "cursor-not-allowed opacity-20",
+                                    )}
+                                >
+                                    x
+                                </button>
                             </div>
                         ))}
-                        {lucasCandidates.length < maxPerPerson && !winner && (addingTo === "Lucas" ? (
-                            <div className="mt-3"><GameAutocomplete onSelect={handleAddGame} onCancel={() => setAddingTo(null)} /></div>
-                        ) : (
-                            <button onClick={() => setAddingTo("Lucas")} className="w-full py-4 border border-dashed border-white/10 rounded-xl text-white/40 text-sm font-bold hover:text-white/80 hover:border-white/30 transition-all">
-                                + ADD GAME
-                            </button>
-                        ))}
+                        {lucasCandidates.length < maxPerPerson &&
+                            !winner &&
+                            (addingTo === "Lucas" ? (
+                                <div className="mt-3">
+                                    <GameAutocomplete
+                                        onSelect={handleAddGame}
+                                        onCancel={() => setAddingTo(null)}
+                                    />
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setAddingTo("Lucas")}
+                                    className="w-full rounded-xl border border-dashed border-white/10 py-4 text-sm font-bold text-white/40 transition-all hover:border-white/30 hover:text-white/80"
+                                >
+                                    + ADD GAME
+                                </button>
+                            ))}
                     </div>
 
                     {/* Matheus's Choices */}
-                    <div className="bg-zinc-900/40 border border-white/5 rounded-2xl p-5 flex flex-col gap-4">
-                        <div className="flex justify-between items-center mb-2">
-                            <span className="text-zinc-400 font-bold text-sm uppercase tracking-widest">Matheus's Choices</span>
-                            <span className="text-zinc-500 text-sm">{matheusCandidates.length}/{maxPerPerson}</span>
+                    <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-5">
+                        <div className="mb-2 flex items-center justify-between">
+                            <span className="text-sm font-bold tracking-widest text-zinc-400 uppercase">
+                                Matheus's Choices
+                            </span>
+                            <span className="text-sm text-zinc-500">
+                                {matheusCandidates.length}/{maxPerPerson}
+                            </span>
                         </div>
-                        {matheusCandidates.map(c => (
-                            <div key={c.id} className="group relative bg-zinc-800/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all flex items-center p-2">
-                                <div className="size-12 rounded-lg bg-zinc-700 shrink-0 overflow-hidden mr-4">
-                                    {c.imageUrl && <img src={c.imageUrl} alt={c.nome} className="w-full h-full object-cover" />}
+                        {matheusCandidates.map((c) => (
+                            <div
+                                key={c.id}
+                                className="group hover:border-primary/50 relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-800/80 p-2 transition-all"
+                            >
+                                <div className="mr-4 size-12 shrink-0 overflow-hidden rounded-lg bg-zinc-700">
+                                    {c.imageUrl && (
+                                        <img
+                                            src={c.imageUrl}
+                                            alt={c.nome}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    )}
                                 </div>
-                                <h4 className="text-white font-bold text-sm lg:text-base truncate flex-1">{c.nome}</h4>
-                                <button onClick={() => !winner && setMatheusCandidates(prev => prev.filter(cand => cand.id !== c.id))} className={cn("text-zinc-500 hover:text-red-400 p-2", winner && "opacity-20 cursor-not-allowed")}>x</button>
+                                <h4 className="flex-1 truncate text-sm font-bold text-white lg:text-base">
+                                    {c.nome}
+                                </h4>
+                                <button
+                                    onClick={() =>
+                                        !winner &&
+                                        setMatheusCandidates((prev) =>
+                                            prev.filter((cand) => cand.id !== c.id),
+                                        )
+                                    }
+                                    className={cn(
+                                        "p-2 text-zinc-500 hover:text-red-400",
+                                        winner && "cursor-not-allowed opacity-20",
+                                    )}
+                                >
+                                    x
+                                </button>
                             </div>
                         ))}
-                        {matheusCandidates.length < maxPerPerson && !winner && (addingTo === "Matheus" ? (
-                            <div className="mt-3"><GameAutocomplete onSelect={handleAddGame} onCancel={() => setAddingTo(null)} /></div>
-                        ) : (
-                            <button onClick={() => setAddingTo("Matheus")} className="w-full py-4 border border-dashed border-white/10 rounded-xl text-white/40 text-sm font-bold hover:text-white/80 hover:border-white/30 transition-all">
-                                + ADD GAME
-                            </button>
-                        ))}
+                        {matheusCandidates.length < maxPerPerson &&
+                            !winner &&
+                            (addingTo === "Matheus" ? (
+                                <div className="mt-3">
+                                    <GameAutocomplete
+                                        onSelect={handleAddGame}
+                                        onCancel={() => setAddingTo(null)}
+                                    />
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={() => setAddingTo("Matheus")}
+                                    className="w-full rounded-xl border border-dashed border-white/10 py-4 text-sm font-bold text-white/40 transition-all hover:border-white/30 hover:text-white/80"
+                                >
+                                    + ADD GAME
+                                </button>
+                            ))}
                     </div>
                 </div>
 
                 {/* Right Column: Randomizer Tool Area */}
-                <div className="lg:col-span-8">
-                    <div className="bg-zinc-900/30 rounded-3xl border border-white/10 p-8 lg:p-12 min-h-[500px] flex flex-col items-center justify-center relative overflow-hidden group">
-
+                <div>
+                    <div className="group relative flex min-h-[500px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/30 p-8 lg:p-12">
                         {/* Glow effect */}
-                        <div className="absolute -top-24 -right-24 size-64 bg-primary/20 blur-[100px] rounded-full"></div>
+                        <div className="bg-primary/20 absolute -top-24 -right-24 size-64 rounded-full blur-[100px]"></div>
 
-                        <div className="relative w-full max-w-lg flex flex-col items-center gap-8 z-10">
-
+                        <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-8">
                             {/* Display Box */}
-                            <div className="w-full flex flex-col items-center gap-4">
-                                <div className="w-full py-10 px-6 bg-zinc-950/80 border-2 border-primary rounded-2xl flex flex-col items-center justify-center relative overflow-hidden shadow-[0_0_40px_rgba(189,13,242,0.2)]">
-                                    <div className="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent"></div>
-                                    <div className="relative z-10 min-h-16 flex items-center justify-center overflow-hidden w-full text-center">
+                            <div className="flex w-full flex-col items-center gap-4">
+                                <div className="border-primary relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-2 bg-zinc-950/80 px-6 py-10 shadow-[0_0_40px_rgba(189,13,242,0.2)]">
+                                    <div className="from-primary/5 absolute inset-0 bg-gradient-to-t to-transparent"></div>
+                                    <div className="relative z-10 flex min-h-16 w-full items-center justify-center overflow-hidden text-center">
                                         {isRolling ? (
                                             <div className="flex flex-col items-center gap-3">
-                                                <Loader2 className="h-8 w-8 text-primary animate-spin" />
-                                                <span className="text-primary font-black text-3xl tracking-tighter uppercase animate-pulse">ROLLING...</span>
+                                                <Loader2 className="text-primary h-8 w-8 animate-spin" />
+                                                <span className="text-primary animate-pulse text-3xl font-black tracking-tighter uppercase">
+                                                    ROLLING...
+                                                </span>
                                             </div>
                                         ) : winner ? (
-                                            <div className="flex flex-col items-center gap-4 animate-in zoom-in spin-in-2 duration-500">
+                                            <div className="animate-in zoom-in spin-in-2 flex flex-col items-center gap-4 duration-500">
                                                 <div className="relative">
-                                                    <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full"></div>
+                                                    <div className="bg-primary/20 absolute inset-0 rounded-full blur-xl"></div>
                                                     {winner.imageUrl && (
-                                                        <img src={winner.imageUrl} alt={winner.nome} className="w-40 h-56 object-cover rounded-2xl border-2 border-primary shadow-[0_0_40px_rgba(189,13,242,0.6)] relative z-10" />
+                                                        <img
+                                                            src={winner.imageUrl}
+                                                            alt={winner.nome}
+                                                            className="border-primary relative z-10 h-56 w-40 rounded-2xl border-2 object-cover shadow-[0_0_40px_rgba(189,13,242,0.6)]"
+                                                        />
                                                     )}
                                                 </div>
-                                                <span className="text-white font-black text-4xl md:text-6xl tracking-tighter uppercase leading-tight text-shadow-glow">
+                                                <span className="text-shadow-glow text-4xl leading-tight font-black tracking-tighter text-white uppercase md:text-6xl">
                                                     {winner.nome}
                                                 </span>
                                             </div>
                                         ) : (
-                                            <span className="text-primary font-black text-4xl md:text-6xl lg:text-7xl tracking-tighter uppercase leading-tight opacity-50">
-                                                {(lucasCandidates.length === maxPerPerson && matheusCandidates.length === maxPerPerson) ? "READY TO SPIN" : "ADD GAMES FIRST"}
+                                            <span className="text-primary text-4xl leading-tight font-black tracking-tighter uppercase opacity-50 md:text-5xl lg:text-6xl">
+                                                {lucasCandidates.length === maxPerPerson &&
+                                                matheusCandidates.length === maxPerPerson
+                                                    ? "READY TO SPIN"
+                                                    : "ADD GAMES FIRST"}
                                             </span>
                                         )}
                                     </div>
@@ -250,11 +382,11 @@ export function RandomizerClient() {
 
                             {/* Roll Button */}
                             {lockStatus.locked ? (
-                                <div className="px-8 py-5 bg-red-500/10 border-[1.5px] border-red-500/30 rounded-2xl text-center max-w-sm w-full mx-auto">
-                                    <p className="text-red-400 font-black text-base md:text-lg leading-relaxed uppercase tracking-widest drop-shadow-[0_0_5px_rgba(248,113,113,0.5)]">
+                                <div className="mx-auto w-full max-w-sm rounded-2xl border-[1.5px] border-red-500/30 bg-red-500/10 px-8 py-5 text-center">
+                                    <p className="text-base leading-relaxed font-black tracking-widest text-red-400 uppercase drop-shadow-[0_0_5px_rgba(248,113,113,0.5)] md:text-lg">
                                         ❌ SORTEIO BLOQUEADO
                                     </p>
-                                    <p className="text-red-300/90 text-sm mt-2 font-medium">
+                                    <p className="mt-2 text-sm font-medium text-red-300/90">
                                         {lockStatus.message}
                                     </p>
                                 </div>
@@ -266,7 +398,7 @@ export function RandomizerClient() {
                                         setWinner(null);
                                         setSaveStatus(null);
                                     }}
-                                    className="px-8 py-4 rounded-2xl flex items-center justify-center gap-3 transition-all w-full max-w-sm mx-auto bg-zinc-800 text-white hover:bg-zinc-700 hover:scale-105 active:scale-95"
+                                    className="mx-auto flex w-full max-w-sm items-center justify-center gap-3 rounded-2xl bg-zinc-800 px-8 py-4 text-white transition-all hover:scale-105 hover:bg-zinc-700 active:scale-95"
                                 >
                                     <History className="h-6 w-6" />
                                     <span className="text-xl font-bold tracking-tighter uppercase">
@@ -276,21 +408,34 @@ export function RandomizerClient() {
                             ) : (
                                 <button
                                     onClick={handleRoll}
-                                    disabled={lucasCandidates.length < maxPerPerson || matheusCandidates.length < maxPerPerson || isRolling || isSaving}
+                                    disabled={
+                                        lucasCandidates.length < maxPerPerson ||
+                                        matheusCandidates.length < maxPerPerson ||
+                                        isRolling ||
+                                        isSaving
+                                    }
                                     className={cn(
-                                        "px-12 py-5 rounded-2xl flex items-center justify-center gap-4 transition-all w-full max-w-sm mx-auto",
-                                        (lucasCandidates.length === maxPerPerson && matheusCandidates.length === maxPerPerson) && !isRolling && !isSaving && !winner
-                                            ? "bg-primary text-white hover:scale-105 active:scale-95 shadow-[0_10px_40px_rgba(189,13,242,0.4)]"
-                                            : "bg-zinc-800 text-zinc-500 cursor-not-allowed"
+                                        "mx-auto flex w-full max-w-sm items-center justify-center gap-4 rounded-2xl px-12 py-5 transition-all",
+                                        lucasCandidates.length === maxPerPerson &&
+                                            matheusCandidates.length === maxPerPerson &&
+                                            !isRolling &&
+                                            !isSaving &&
+                                            !winner
+                                            ? "bg-primary text-white shadow-[0_10px_40px_rgba(189,13,242,0.4)] hover:scale-105 active:scale-95"
+                                            : "cursor-not-allowed bg-zinc-800 text-zinc-500",
                                     )}
                                 >
-                                    <Trophy className={cn("h-10 w-10", (isRolling || isSaving) && "animate-spin")} />
+                                    <Trophy
+                                        className={cn(
+                                            "h-10 w-10",
+                                            (isRolling || isSaving) && "animate-spin",
+                                        )}
+                                    />
                                     <span className="text-3xl font-black tracking-tighter uppercase">
                                         {isSaving ? "Saving..." : "Roll the Dice"}
                                     </span>
                                 </button>
                             )}
-
                         </div>
                     </div>
                 </div>

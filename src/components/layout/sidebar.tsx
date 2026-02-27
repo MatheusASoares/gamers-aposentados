@@ -10,7 +10,7 @@ import {
     Store,
     Settings,
     LogOut,
-    Gamepad2
+    Gamepad2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -26,20 +26,34 @@ export function Sidebar({ className }: SidebarProps) {
     const isActive = (path: string) => pathname === path;
 
     return (
-        <div className={cn("pb-12 min-h-screen w-64 bg-card border-r border-border flex flex-col", className)}>
+        <div
+            className={cn(
+                "bg-card border-border flex min-h-screen w-64 flex-col border-r pb-12",
+                className,
+            )}
+        >
             <div className="space-y-4 py-4">
-                <div className="px-6 py-2 flex items-center gap-2">
-                    <Gamepad2 className="h-8 w-8 text-primary" />
-                    <h2 className="text-xl font-bold tracking-tight bg-gradient-to-r from-primary to-purple-400 bg-clip-text text-transparent">
-                        Gamers<br />Aposentados
+                <Link
+                    href="/"
+                    className="flex items-center gap-2 px-6 py-2 transition-opacity hover:opacity-80"
+                >
+                    <Gamepad2 className="text-primary h-8 w-8" />
+                    <h2 className="from-primary bg-gradient-to-r to-purple-400 bg-clip-text text-xl font-bold tracking-tight text-transparent">
+                        Gamers
+                        <br />
+                        Aposentados
                     </h2>
-                </div>
+                </Link>
                 <div className="px-3 py-2">
                     <nav className="space-y-1">
                         <Link href="/" passHref>
                             <Button
                                 variant={isActive("/") ? "secondary" : "ghost"}
-                                className={cn("w-full justify-start gap-2", isActive("/") && "bg-primary/10 text-primary hover:bg-primary/20")}
+                                className={cn(
+                                    "w-full justify-start gap-2",
+                                    isActive("/") &&
+                                        "bg-primary/10 text-primary hover:bg-primary/20",
+                                )}
                             >
                                 <LayoutDashboard className="h-4 w-4" />
                                 Dashboard
@@ -57,7 +71,11 @@ export function Sidebar({ className }: SidebarProps) {
                         <Link href="/reviews" passHref>
                             <Button
                                 variant={isActive("/reviews") ? "secondary" : "ghost"}
-                                className={cn("w-full justify-start gap-2", isActive("/reviews") && "bg-primary/10 text-primary hover:bg-primary/20")}
+                                className={cn(
+                                    "w-full justify-start gap-2",
+                                    isActive("/reviews") &&
+                                        "bg-primary/10 text-primary hover:bg-primary/20",
+                                )}
                             >
                                 <History className="h-4 w-4" />
                                 Reviews
@@ -66,7 +84,11 @@ export function Sidebar({ className }: SidebarProps) {
                         <Link href="/randomizer" passHref>
                             <Button
                                 variant={isActive("/randomizer") ? "secondary" : "ghost"}
-                                className={cn("w-full justify-start gap-2", isActive("/randomizer") && "bg-primary/10 text-primary hover:bg-primary/20")}
+                                className={cn(
+                                    "w-full justify-start gap-2",
+                                    isActive("/randomizer") &&
+                                        "bg-primary/10 text-primary hover:bg-primary/20",
+                                )}
                             >
                                 <Dices className="h-4 w-4" />
                                 Randomizer
@@ -83,7 +105,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
             </div>
 
-            <div className="mt-auto px-3 py-4 space-y-1">
+            <div className="mt-auto space-y-1 px-3 py-4">
                 {/* <Link href="/settings" passHref>
                     <Button variant="ghost" className="w-full justify-start gap-2">
                         <Settings className="h-4 w-4" />
@@ -91,7 +113,10 @@ export function Sidebar({ className }: SidebarProps) {
                     </Button>
                 </Link> */}
                 <form action={handleSignOut}>
-                    <Button variant="ghost" className="w-full justify-start gap-2 text-red-500 hover:text-red-600 hover:bg-red-500/10">
+                    <Button
+                        variant="ghost"
+                        className="w-full justify-start gap-2 text-red-500 hover:bg-red-500/10 hover:text-red-600"
+                    >
                         <LogOut className="h-4 w-4" />
                         Logout
                     </Button>

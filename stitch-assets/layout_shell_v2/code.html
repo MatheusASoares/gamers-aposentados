@@ -1,295 +1,537 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Gamers Aposentados - Dashboard</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#bd0df2",
-                        "background-light": "#f8f5f8",
-                        "background-dark": "#09090b", // Zinc 950 feel
-                        "card-dark": "#18181b", // Zinc 900
-                        "border-dark": "#27272a", // Zinc 800
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
+<html class="dark" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Gamers Aposentados - Dashboard</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: "#bd0df2",
+                            "background-light": "#f8f5f8",
+                            "background-dark": "#09090b", // Zinc 950 feel
+                            "card-dark": "#18181b", // Zinc 900
+                            "border-dark": "#27272a", // Zinc 800
+                        },
+                        fontFamily: {
+                            display: ["Inter", "sans-serif"],
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.25rem",
+                            lg: "0.5rem",
+                            xl: "0.75rem",
+                            full: "9999px",
+                        },
                     },
                 },
-            },
-        }
-    </script>
-<style>
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .sidebar-active {
-            background-color: rgba(189, 13, 242, 0.1);
-            color: #bd0df2;
-            border-right: 2px solid #bd0df2;
-        }
-    </style>
-</head>
-<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 antialiased h-screen overflow-hidden">
-<div class="flex h-full w-full">
-<!-- Sidebar -->
-<aside class="w-64 border-r border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark flex flex-col transition-all duration-300">
-<div class="p-6 flex items-center gap-3">
-<div class="size-8 bg-primary rounded-lg flex items-center justify-center text-white shadow-lg shadow-primary/20">
-<span class="material-symbols-outlined">sports_esports</span>
-</div>
-<h1 class="font-bold text-lg tracking-tight text-slate-900 dark:text-white">Gamers <span class="text-primary">Aposentados</span></h1>
-</div>
-<nav class="flex-1 px-3 space-y-1">
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg sidebar-active transition-colors" href="#">
-<span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-<span class="text-sm font-medium">Dashboard</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" href="#">
-<span class="material-symbols-outlined" data-icon="sword">swords</span>
-<span class="text-sm font-medium">Quests</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" href="#">
-<span class="material-symbols-outlined" data-icon="history">scrollable_header</span>
-<span class="text-sm font-medium">History</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" href="#">
-<span class="material-symbols-outlined" data-icon="casino">casino</span>
-<span class="text-sm font-medium">Randomizer</span>
-</a>
-<a class="flex items-center justify-between px-3 py-2.5 rounded-lg text-slate-400 dark:text-slate-500 cursor-not-allowed group relative" href="#">
-<div class="flex items-center gap-3">
-<span class="material-symbols-outlined" data-icon="store">storefront</span>
-<span class="text-sm font-medium">Shop</span>
-</div>
-<span class="text-[10px] bg-zinc-200 dark:bg-zinc-800 px-1.5 py-0.5 rounded uppercase font-bold tracking-wider">Soon</span>
-<div class="absolute left-full ml-2 hidden group-hover:block bg-zinc-800 text-white text-[10px] py-1 px-2 rounded whitespace-nowrap z-50">v1.1 coming soon</div>
-</a>
-</nav>
-<div class="p-4 border-t border-slate-200 dark:border-border-dark space-y-1">
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors" href="#">
-<span class="material-symbols-outlined">settings</span>
-<span class="text-sm font-medium">Settings</span>
-</a>
-<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-red-500 hover:bg-red-50 dark:hover:bg-red-500/10 transition-colors" href="#">
-<span class="material-symbols-outlined">logout</span>
-<span class="text-sm font-medium">Logout</span>
-</a>
-</div>
-</aside>
-<!-- Main Content Area -->
-<div class="flex-1 flex flex-col h-full overflow-hidden">
-<!-- Header -->
-<header class="h-16 border-b border-slate-200 dark:border-border-dark bg-white/50 dark:bg-card-dark/50 backdrop-blur-md flex items-center justify-between px-8 z-10">
-<!-- Breadcrumbs -->
-<div class="flex items-center gap-2 text-sm">
-<span class="text-slate-500">Home</span>
-<span class="material-symbols-outlined text-xs text-slate-400">chevron_right</span>
-<span class="font-medium text-slate-900 dark:text-white">Dashboard</span>
-</div>
-<!-- Player Status -->
-<div class="flex items-center gap-6">
-<div class="flex items-center gap-4">
-<div class="flex flex-col items-end">
-<div class="flex items-center gap-2">
-<span class="text-[10px] font-bold text-primary uppercase">Level 5</span>
-<div class="w-24 h-1.5 bg-slate-200 dark:bg-zinc-800 rounded-full overflow-hidden">
-<div class="h-full bg-primary" style="width: 65%;"></div>
-</div>
-</div>
-<span class="text-[10px] text-slate-500 font-medium">1250 / 2000 XP</span>
-</div>
-<div class="h-8 w-px bg-slate-200 dark:border-border-dark"></div>
-<div class="flex items-center gap-1.5">
-<span class="material-symbols-outlined text-amber-500 text-lg">payments</span>
-<span class="text-sm font-bold">300</span>
-</div>
-</div>
-<div class="flex items-center gap-3 pl-4 border-l border-slate-200 dark:border-border-dark cursor-pointer group">
-<div class="text-right">
-<p class="text-xs font-bold leading-none">OldSnake_99</p>
-<p class="text-[10px] text-slate-500 uppercase tracking-tighter">Pro Player</p>
-</div>
-<div class="relative">
-<div class="size-9 rounded-full bg-primary/20 border-2 border-primary overflow-hidden">
-<img alt="User avatar" class="size-full object-cover" data-alt="Stylized gamer avatar with headphones" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyJtPVLEqFMKgfediM2ZIqYPyDeOIS4MUNQmt-odMx6YfdHAk5C53MTqicfr0bGaaLWZHF1X5IcnNZu7IVbkc5oxlt7lIepf0m3zEkyztmYjsMuTnbEVD5bQFLGN-Aq3guFz0qF2Q3lr-fNvJMPxN5a8aUiZ_-7DWUFHM3wEwrVYweyvvDjFTJiUMkd1zMs3xGkXHqCtHRUlQihjLS0irdXuyDM1Yx4zIaJa2iJoRla3SqnMmtP5ddJn4eF8QqjF0G3Ogfn5a19YA"/>
-</div>
-<div class="absolute bottom-0 right-0 size-2.5 bg-green-500 border-2 border-white dark:border-card-dark rounded-full"></div>
-</div>
-</div>
-</div>
-</header>
-<!-- Dashboard Body -->
-<main class="flex-1 overflow-y-auto p-8 space-y-8 bg-background-light dark:bg-background-dark">
-<!-- Top Section: Welcome & Featured -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-<!-- Current Game Card -->
-<div class="lg:col-span-2 relative overflow-hidden rounded-xl bg-zinc-900 border border-border-dark group h-64 shadow-2xl">
-<div class="absolute inset-0 opacity-60 group-hover:scale-105 transition-transform duration-700 bg-center bg-cover" data-alt="Atmospheric landscape of an open world adventure game" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuBpqjAct4450lIlGxhc-D-b8wkiqANggBBpSbKO2dl519KkKuJANOo2ONID_YEa86FG3FnrAaORXpVKxVki-PJcMSogCkpwI-XYpQLrBGF-dwtTkp_pUPp7LJMBRXZJxqFH_qFfnOimuJNQp6E_QU0f5H8HR8iyI0TPB3KClwfUT3u4eZVY4bYiHndGWmo4MIM6F-P6Npk-UW4cYw4SkPeJxGRMGGZ82pF-tKONp3v0Y4o6DCMEkzNZew7HRr_Yt82s_8QJLK__udw');"></div>
-<div class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"></div>
-<div class="relative h-full p-8 flex flex-col justify-end">
-<div class="flex items-center gap-2 mb-2">
-<span class="bg-primary px-2 py-0.5 rounded text-[10px] font-bold text-white uppercase tracking-widest">Active Session</span>
-<span class="text-zinc-400 text-xs font-medium">Chapter 12: A Journey's End</span>
-</div>
-<h2 class="text-3xl font-bold text-white mb-4">Final Fantasy VII Rebirth</h2>
-<div class="flex items-center gap-4">
-<button class="bg-primary hover:bg-primary/90 text-white px-6 py-2 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
-<span class="material-symbols-outlined text-sm">play_arrow</span>
-                                    Resume Game
+            };
+        </script>
+        <style>
+            body {
+                font-family: "Inter", sans-serif;
+            }
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+            .sidebar-active {
+                background-color: rgba(189, 13, 242, 0.1);
+                color: #bd0df2;
+                border-right: 2px solid #bd0df2;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-background-light dark:bg-background-dark h-screen overflow-hidden text-slate-900 antialiased dark:text-slate-100"
+    >
+        <div class="flex h-full w-full">
+            <!-- Sidebar -->
+            <aside
+                class="dark:border-border-dark dark:bg-card-dark flex w-64 flex-col border-r border-slate-200 bg-white transition-all duration-300"
+            >
+                <div class="flex items-center gap-3 p-6">
+                    <div
+                        class="bg-primary shadow-primary/20 flex size-8 items-center justify-center rounded-lg text-white shadow-lg"
+                    >
+                        <span class="material-symbols-outlined">sports_esports</span>
+                    </div>
+                    <h1 class="text-lg font-bold tracking-tight text-slate-900 dark:text-white">
+                        Gamers <span class="text-primary">Aposentados</span>
+                    </h1>
+                </div>
+                <nav class="flex-1 space-y-1 px-3">
+                    <a
+                        class="sidebar-active flex items-center gap-3 rounded-lg px-3 py-2.5 transition-colors"
+                        href="#"
+                    >
+                        <span class="material-symbols-outlined" data-icon="dashboard"
+                            >dashboard</span
+                        >
+                        <span class="text-sm font-medium">Dashboard</span>
+                    </a>
+                    <a
+                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-zinc-800"
+                        href="#"
+                    >
+                        <span class="material-symbols-outlined" data-icon="sword">swords</span>
+                        <span class="text-sm font-medium">Quests</span>
+                    </a>
+                    <a
+                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-zinc-800"
+                        href="#"
+                    >
+                        <span class="material-symbols-outlined" data-icon="history"
+                            >scrollable_header</span
+                        >
+                        <span class="text-sm font-medium">History</span>
+                    </a>
+                    <a
+                        class="flex items-center gap-3 rounded-lg px-3 py-2.5 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-zinc-800"
+                        href="#"
+                    >
+                        <span class="material-symbols-outlined" data-icon="casino">casino</span>
+                        <span class="text-sm font-medium">Randomizer</span>
+                    </a>
+                    <a
+                        class="group relative flex cursor-not-allowed items-center justify-between rounded-lg px-3 py-2.5 text-slate-400 dark:text-slate-500"
+                        href="#"
+                    >
+                        <div class="flex items-center gap-3">
+                            <span class="material-symbols-outlined" data-icon="store"
+                                >storefront</span
+                            >
+                            <span class="text-sm font-medium">Shop</span>
+                        </div>
+                        <span
+                            class="rounded bg-zinc-200 px-1.5 py-0.5 text-[10px] font-bold tracking-wider uppercase dark:bg-zinc-800"
+                            >Soon</span
+                        >
+                        <div
+                            class="absolute left-full z-50 ml-2 hidden rounded bg-zinc-800 px-2 py-1 text-[10px] whitespace-nowrap text-white group-hover:block"
+                        >
+                            v1.1 coming soon
+                        </div>
+                    </a>
+                </nav>
+                <div class="dark:border-border-dark space-y-1 border-t border-slate-200 p-4">
+                    <a
+                        class="flex items-center gap-3 rounded-lg px-3 py-2 text-slate-600 transition-colors hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-zinc-800"
+                        href="#"
+                    >
+                        <span class="material-symbols-outlined">settings</span>
+                        <span class="text-sm font-medium">Settings</span>
+                    </a>
+                    <a
+                        class="flex items-center gap-3 rounded-lg px-3 py-2 text-red-500 transition-colors hover:bg-red-50 dark:hover:bg-red-500/10"
+                        href="#"
+                    >
+                        <span class="material-symbols-outlined">logout</span>
+                        <span class="text-sm font-medium">Logout</span>
+                    </a>
+                </div>
+            </aside>
+            <!-- Main Content Area -->
+            <div class="flex h-full flex-1 flex-col overflow-hidden">
+                <!-- Header -->
+                <header
+                    class="dark:border-border-dark dark:bg-card-dark/50 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/50 px-8 backdrop-blur-md"
+                >
+                    <!-- Breadcrumbs -->
+                    <div class="flex items-center gap-2 text-sm">
+                        <span class="text-slate-500">Home</span>
+                        <span class="material-symbols-outlined text-xs text-slate-400"
+                            >chevron_right</span
+                        >
+                        <span class="font-medium text-slate-900 dark:text-white">Dashboard</span>
+                    </div>
+                    <!-- Player Status -->
+                    <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-4">
+                            <div class="flex flex-col items-end">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-primary text-[10px] font-bold uppercase"
+                                        >Level 5</span
+                                    >
+                                    <div
+                                        class="h-1.5 w-24 overflow-hidden rounded-full bg-slate-200 dark:bg-zinc-800"
+                                    >
+                                        <div class="bg-primary h-full" style="width: 65%"></div>
+                                    </div>
+                                </div>
+                                <span class="text-[10px] font-medium text-slate-500"
+                                    >1250 / 2000 XP</span
+                                >
+                            </div>
+                            <div class="dark:border-border-dark h-8 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-lg text-amber-500"
+                                    >payments</span
+                                >
+                                <span class="text-sm font-bold">300</span>
+                            </div>
+                        </div>
+                        <div
+                            class="dark:border-border-dark group flex cursor-pointer items-center gap-3 border-l border-slate-200 pl-4"
+                        >
+                            <div class="text-right">
+                                <p class="text-xs leading-none font-bold">OldSnake_99</p>
+                                <p class="text-[10px] tracking-tighter text-slate-500 uppercase">
+                                    Pro Player
+                                </p>
+                            </div>
+                            <div class="relative">
+                                <div
+                                    class="bg-primary/20 border-primary size-9 overflow-hidden rounded-full border-2"
+                                >
+                                    <img
+                                        alt="User avatar"
+                                        class="size-full object-cover"
+                                        data-alt="Stylized gamer avatar with headphones"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuDyJtPVLEqFMKgfediM2ZIqYPyDeOIS4MUNQmt-odMx6YfdHAk5C53MTqicfr0bGaaLWZHF1X5IcnNZu7IVbkc5oxlt7lIepf0m3zEkyztmYjsMuTnbEVD5bQFLGN-Aq3guFz0qF2Q3lr-fNvJMPxN5a8aUiZ_-7DWUFHM3wEwrVYweyvvDjFTJiUMkd1zMs3xGkXHqCtHRUlQihjLS0irdXuyDM1Yx4zIaJa2iJoRla3SqnMmtP5ddJn4eF8QqjF0G3Ogfn5a19YA"
+                                    />
+                                </div>
+                                <div
+                                    class="dark:border-card-dark absolute right-0 bottom-0 size-2.5 rounded-full border-2 border-white bg-green-500"
+                                ></div>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+                <!-- Dashboard Body -->
+                <main
+                    class="bg-background-light dark:bg-background-dark flex-1 space-y-8 overflow-y-auto p-8"
+                >
+                    <!-- Top Section: Welcome & Featured -->
+                    <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <!-- Current Game Card -->
+                        <div
+                            class="border-border-dark group relative h-64 overflow-hidden rounded-xl border bg-zinc-900 shadow-2xl lg:col-span-2"
+                        >
+                            <div
+                                class="absolute inset-0 bg-cover bg-center opacity-60 transition-transform duration-700 group-hover:scale-105"
+                                data-alt="Atmospheric landscape of an open world adventure game"
+                                style="
+                                    background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuBpqjAct4450lIlGxhc-D-b8wkiqANggBBpSbKO2dl519KkKuJANOo2ONID_YEa86FG3FnrAaORXpVKxVki-PJcMSogCkpwI-XYpQLrBGF-dwtTkp_pUPp7LJMBRXZJxqFH_qFfnOimuJNQp6E_QU0f5H8HR8iyI0TPB3KClwfUT3u4eZVY4bYiHndGWmo4MIM6F-P6Npk-UW4cYw4SkPeJxGRMGGZ82pF-tKONp3v0Y4o6DCMEkzNZew7HRr_Yt82s_8QJLK__udw&quot;);
+                                "
+                            ></div>
+                            <div
+                                class="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent"
+                            ></div>
+                            <div class="relative flex h-full flex-col justify-end p-8">
+                                <div class="mb-2 flex items-center gap-2">
+                                    <span
+                                        class="bg-primary rounded px-2 py-0.5 text-[10px] font-bold tracking-widest text-white uppercase"
+                                        >Active Session</span
+                                    >
+                                    <span class="text-xs font-medium text-zinc-400"
+                                        >Chapter 12: A Journey's End</span
+                                    >
+                                </div>
+                                <h2 class="mb-4 text-3xl font-bold text-white">
+                                    Final Fantasy VII Rebirth
+                                </h2>
+                                <div class="flex items-center gap-4">
+                                    <button
+                                        class="bg-primary hover:bg-primary/90 shadow-primary/20 flex items-center gap-2 rounded-lg px-6 py-2 text-sm font-bold text-white shadow-lg transition-all"
+                                    >
+                                        <span class="material-symbols-outlined text-sm"
+                                            >play_arrow</span
+                                        >
+                                        Resume Game
+                                    </button>
+                                    <button
+                                        class="rounded-lg border border-white/10 bg-white/10 px-6 py-2 text-sm font-bold text-white backdrop-blur-md transition-all hover:bg-white/20"
+                                    >
+                                        Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Main Quest Tracker -->
+                        <div
+                            class="dark:border-border-dark dark:bg-card-dark flex flex-col rounded-xl border border-slate-200 bg-white p-6"
+                        >
+                            <div class="mb-6 flex items-center justify-between">
+                                <h3 class="flex items-center gap-2 font-bold">
+                                    <span class="material-symbols-outlined text-primary"
+                                        >priority_high</span
+                                    >
+                                    Main Quest
+                                </h3>
+                                <span class="text-xs font-medium text-slate-500">82% Complete</span>
+                            </div>
+                            <div class="flex-1 space-y-6">
+                                <div class="space-y-2">
+                                    <div class="mb-1 flex justify-between text-xs">
+                                        <span class="text-slate-500">The Final Descent</span>
+                                        <span class="text-primary font-bold">In Progress</span>
+                                    </div>
+                                    <div
+                                        class="h-2 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800"
+                                    >
+                                        <div class="bg-primary h-full" style="width: 82%"></div>
+                                    </div>
+                                </div>
+                                <ul class="space-y-4">
+                                    <li class="flex items-start gap-3 text-xs">
+                                        <span
+                                            class="material-symbols-outlined text-sm text-green-500"
+                                            >check_circle</span
+                                        >
+                                        <span class="text-slate-600 dark:text-slate-300"
+                                            >Assemble the Ancient Artifacts</span
+                                        >
+                                    </li>
+                                    <li class="flex items-start gap-3 text-xs">
+                                        <span
+                                            class="material-symbols-outlined text-sm text-green-500"
+                                            >check_circle</span
+                                        >
+                                        <span class="text-slate-600 dark:text-slate-300"
+                                            >Breach the Inner Sanctum</span
+                                        >
+                                    </li>
+                                    <li class="flex items-start gap-3 text-xs opacity-50">
+                                        <span
+                                            class="material-symbols-outlined text-sm text-slate-400"
+                                            >radio_button_unchecked</span
+                                        >
+                                        <span class="text-slate-400">Defeat the Shadow Warden</span>
+                                    </li>
+                                </ul>
+                            </div>
+                            <button
+                                class="dark:border-border-dark mt-auto w-full rounded-lg border border-slate-200 py-2 text-xs font-bold transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800"
+                            >
+                                View Quest Log
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Bottom Section: Guild & Stats -->
+                    <div class="grid grid-cols-1 gap-6 pb-8 lg:grid-cols-3">
+                        <!-- Guild Activities -->
+                        <div
+                            class="dark:border-border-dark dark:bg-card-dark overflow-hidden rounded-xl border border-slate-200 bg-white lg:col-span-2"
+                        >
+                            <div
+                                class="dark:border-border-dark flex items-center justify-between border-b border-slate-200 bg-slate-50/50 px-6 py-4 dark:bg-zinc-800/20"
+                            >
+                                <h3 class="text-sm font-bold">Guild Activity Feed</h3>
+                                <button class="text-primary text-xs font-bold hover:underline">
+                                    View All
                                 </button>
-<button class="bg-white/10 hover:bg-white/20 backdrop-blur-md text-white px-6 py-2 rounded-lg text-sm font-bold transition-all border border-white/10">
-                                    Details
-                                </button>
-</div>
-</div>
-</div>
-<!-- Main Quest Tracker -->
-<div class="rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark p-6 flex flex-col">
-<div class="flex items-center justify-between mb-6">
-<h3 class="font-bold flex items-center gap-2">
-<span class="material-symbols-outlined text-primary">priority_high</span>
-                                Main Quest
-                            </h3>
-<span class="text-xs text-slate-500 font-medium">82% Complete</span>
-</div>
-<div class="flex-1 space-y-6">
-<div class="space-y-2">
-<div class="flex justify-between text-xs mb-1">
-<span class="text-slate-500">The Final Descent</span>
-<span class="text-primary font-bold">In Progress</span>
-</div>
-<div class="w-full h-2 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-<div class="h-full bg-primary" style="width: 82%;"></div>
-</div>
-</div>
-<ul class="space-y-4">
-<li class="flex items-start gap-3 text-xs">
-<span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
-<span class="text-slate-600 dark:text-slate-300">Assemble the Ancient Artifacts</span>
-</li>
-<li class="flex items-start gap-3 text-xs">
-<span class="material-symbols-outlined text-green-500 text-sm">check_circle</span>
-<span class="text-slate-600 dark:text-slate-300">Breach the Inner Sanctum</span>
-</li>
-<li class="flex items-start gap-3 text-xs opacity-50">
-<span class="material-symbols-outlined text-slate-400 text-sm">radio_button_unchecked</span>
-<span class="text-slate-400">Defeat the Shadow Warden</span>
-</li>
-</ul>
-</div>
-<button class="mt-auto w-full py-2 border border-slate-200 dark:border-border-dark rounded-lg text-xs font-bold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-colors">
-                            View Quest Log
-                        </button>
-</div>
-</div>
-<!-- Bottom Section: Guild & Stats -->
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-6 pb-8">
-<!-- Guild Activities -->
-<div class="lg:col-span-2 rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark overflow-hidden">
-<div class="px-6 py-4 border-b border-slate-200 dark:border-border-dark flex items-center justify-between bg-slate-50/50 dark:bg-zinc-800/20">
-<h3 class="font-bold text-sm">Guild Activity Feed</h3>
-<button class="text-xs text-primary font-bold hover:underline">View All</button>
-</div>
-<div class="divide-y divide-slate-100 dark:divide-border-dark">
-<div class="px-6 py-4 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-<div class="flex items-center gap-4">
-<div class="size-10 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden">
-<img alt="Member avatar" class="size-full" data-alt="Member avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbdkWQc8hNfk_Vzc7YQjRQ7xZNPuERvdJE99KsJhipf7xkubqwIOnf1rzHmS_xLTEwqlH0h4yZtfhpX4-P2zKAC2SBt4V1iRa2_hXcENUWfUUGlVcq2-rtiyqBSdf-3_SGrvit8G1AlaHxKpt4HY0Dq52knlKoEA90bbllpbR_hAP0NrblA7YLjsPvsBM6TqUsXeZDDpGDHMsvMTT_FhNlOGw8YO91aM6S8WkB4h6p5MYvDwLvXO3wUzt1qmerrexQuS6q-Pu4_bc"/>
-</div>
-<div>
-<p class="text-sm font-medium"><span class="font-bold text-primary">KingArthur</span> reached Level 10</p>
-<p class="text-[11px] text-slate-500">2 minutes ago • RPG Mastery Guild</p>
-</div>
-</div>
-<span class="material-symbols-outlined text-slate-300 group-hover:text-primary transition-colors">celebration</span>
-</div>
-<div class="px-6 py-4 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-<div class="flex items-center gap-4">
-<div class="size-10 rounded-full bg-zinc-800 border border-zinc-700 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary text-xl">event_available</span>
-</div>
-<div>
-<p class="text-sm font-medium">New Raid scheduled: <span class="font-bold text-slate-900 dark:text-white">Crystal Abyss</span></p>
-<p class="text-[11px] text-slate-500">Today at 21:00 • 12 members attending</p>
-</div>
-</div>
-<button class="text-[10px] bg-primary/10 text-primary px-3 py-1 rounded font-bold uppercase tracking-wider">Attend</button>
-</div>
-<div class="px-6 py-4 flex items-center justify-between group hover:bg-slate-50 dark:hover:bg-zinc-800/30 transition-colors">
-<div class="flex items-center gap-4">
-<div class="size-10 rounded-full bg-zinc-800 border border-zinc-700 overflow-hidden">
-<img alt="Member avatar" class="size-full" data-alt="Member avatar" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Q_-ZtdMA0Rfb_h-VHz6NsLdG8fQHFfTTzgPOSNqz5Fd8BC0NQfbxQJdCL_NtZBC0MKDuYzTZUUV3KpRO1k8A0XW0--L9Aqe2phGvdilJCjlOQ1YtSBTG5eA9ZxDc5KaCpk72UnwbT8rHFqkUmuU6d4Kx9UtQOQg5TDLWICL1oUQnMoeWR_XQFBGfq0tRBCEGj_IZfN5B5xyMPofGLJAw5-aWnUxyxATVMdfSo4LRLah0j_r7l2wRaBTyPtaBjI0C8r-Dn6rM_oY"/>
-</div>
-<div>
-<p class="text-sm font-medium"><span class="font-bold text-primary">Morgana_Fay</span> shared a new screenshot</p>
-<p class="text-[11px] text-slate-500">1 hour ago • Gallery</p>
-</div>
-</div>
-<div class="size-12 rounded bg-zinc-200 dark:bg-zinc-800 overflow-hidden border border-zinc-700">
-<img class="size-full object-cover" data-alt="Thumbnail of game screenshot" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA92WfNlfr3v_tfY_3RN0qFbY3rTCRrMtpfeV3Qe4WNijcefdPhcuz3Lx04xMBrSJ8ycZX79fB-DFbWkqYGb7vsYR7Am5vagVZYhZtyqi12psL142thEzNXD8IbRu7UxrcUf7fSJuH4GeE2rCiaLDjK-15wjUh2DrEraeLPKW_HuxIqymSiSOpB0uRCqKLLjsvyhsxGYKv-uhVdyCYZ56PPx_X5MVamaoKoege0MJDwu58LvISxTuD4VPOrvQNpOeJnnfzVsG96nzs"/>
-</div>
-</div>
-</div>
-</div>
-<!-- Mini Achievements -->
-<div class="rounded-xl border border-slate-200 dark:border-border-dark bg-white dark:bg-card-dark p-6">
-<h3 class="font-bold text-sm mb-6">Recent Achievements</h3>
-<div class="grid grid-cols-3 gap-4">
-<div class="aspect-square rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center p-2 text-center group cursor-pointer hover:border-primary border border-transparent transition-all">
-<span class="material-symbols-outlined text-amber-500 text-2xl group-hover:scale-110 transition-transform">emoji_events</span>
-<span class="text-[8px] font-bold mt-2 uppercase text-slate-500 dark:text-zinc-400">First Blood</span>
-</div>
-<div class="aspect-square rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center p-2 text-center group cursor-pointer hover:border-primary border border-transparent transition-all">
-<span class="material-symbols-outlined text-blue-500 text-2xl group-hover:scale-110 transition-transform">auto_awesome</span>
-<span class="text-[8px] font-bold mt-2 uppercase text-slate-500 dark:text-zinc-400">Wise Soul</span>
-</div>
-<div class="aspect-square rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center p-2 text-center group cursor-pointer hover:border-primary border border-transparent transition-all">
-<span class="material-symbols-outlined text-primary text-2xl group-hover:scale-110 transition-transform">bolt</span>
-<span class="text-[8px] font-bold mt-2 uppercase text-slate-500 dark:text-zinc-400">Lightning</span>
-</div>
-<div class="aspect-square rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center p-2 text-center opacity-30 grayscale">
-<span class="material-symbols-outlined text-slate-400 text-2xl">lock</span>
-<span class="text-[8px] font-bold mt-2 uppercase text-slate-500">Locked</span>
-</div>
-<div class="aspect-square rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center p-2 text-center opacity-30 grayscale">
-<span class="material-symbols-outlined text-slate-400 text-2xl">lock</span>
-<span class="text-[8px] font-bold mt-2 uppercase text-slate-500">Locked</span>
-</div>
-<div class="aspect-square rounded-lg bg-zinc-100 dark:bg-zinc-800 flex flex-col items-center justify-center p-2 text-center opacity-30 grayscale">
-<span class="material-symbols-outlined text-slate-400 text-2xl">lock</span>
-<span class="text-[8px] font-bold mt-2 uppercase text-slate-500">Locked</span>
-</div>
-</div>
-<div class="mt-6 pt-6 border-t border-slate-200 dark:border-border-dark">
-<div class="flex items-center justify-between text-[11px] mb-2">
-<span class="font-medium">Collection Progress</span>
-<span class="text-primary font-bold">12/48</span>
-</div>
-<div class="w-full h-1.5 bg-slate-100 dark:bg-zinc-800 rounded-full overflow-hidden">
-<div class="h-full bg-primary" style="width: 25%;"></div>
-</div>
-</div>
-</div>
-</div>
-</main>
-</div>
-</div>
-</body></html>
+                            </div>
+                            <div class="dark:divide-border-dark divide-y divide-slate-100">
+                                <div
+                                    class="group flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/30"
+                                >
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="size-10 overflow-hidden rounded-full border border-zinc-700 bg-zinc-800"
+                                        >
+                                            <img
+                                                alt="Member avatar"
+                                                class="size-full"
+                                                data-alt="Member avatar"
+                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuDbdkWQc8hNfk_Vzc7YQjRQ7xZNPuERvdJE99KsJhipf7xkubqwIOnf1rzHmS_xLTEwqlH0h4yZtfhpX4-P2zKAC2SBt4V1iRa2_hXcENUWfUUGlVcq2-rtiyqBSdf-3_SGrvit8G1AlaHxKpt4HY0Dq52knlKoEA90bbllpbR_hAP0NrblA7YLjsPvsBM6TqUsXeZDDpGDHMsvMTT_FhNlOGw8YO91aM6S8WkB4h6p5MYvDwLvXO3wUzt1qmerrexQuS6q-Pu4_bc"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium">
+                                                <span class="text-primary font-bold"
+                                                    >KingArthur</span
+                                                >
+                                                reached Level 10
+                                            </p>
+                                            <p class="text-[11px] text-slate-500">
+                                                2 minutes ago • RPG Mastery Guild
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <span
+                                        class="material-symbols-outlined group-hover:text-primary text-slate-300 transition-colors"
+                                        >celebration</span
+                                    >
+                                </div>
+                                <div
+                                    class="group flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/30"
+                                >
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="flex size-10 items-center justify-center rounded-full border border-zinc-700 bg-zinc-800"
+                                        >
+                                            <span
+                                                class="material-symbols-outlined text-primary text-xl"
+                                                >event_available</span
+                                            >
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium">
+                                                New Raid scheduled:
+                                                <span
+                                                    class="font-bold text-slate-900 dark:text-white"
+                                                    >Crystal Abyss</span
+                                                >
+                                            </p>
+                                            <p class="text-[11px] text-slate-500">
+                                                Today at 21:00 • 12 members attending
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <button
+                                        class="bg-primary/10 text-primary rounded px-3 py-1 text-[10px] font-bold tracking-wider uppercase"
+                                    >
+                                        Attend
+                                    </button>
+                                </div>
+                                <div
+                                    class="group flex items-center justify-between px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-zinc-800/30"
+                                >
+                                    <div class="flex items-center gap-4">
+                                        <div
+                                            class="size-10 overflow-hidden rounded-full border border-zinc-700 bg-zinc-800"
+                                        >
+                                            <img
+                                                alt="Member avatar"
+                                                class="size-full"
+                                                data-alt="Member avatar"
+                                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Q_-ZtdMA0Rfb_h-VHz6NsLdG8fQHFfTTzgPOSNqz5Fd8BC0NQfbxQJdCL_NtZBC0MKDuYzTZUUV3KpRO1k8A0XW0--L9Aqe2phGvdilJCjlOQ1YtSBTG5eA9ZxDc5KaCpk72UnwbT8rHFqkUmuU6d4Kx9UtQOQg5TDLWICL1oUQnMoeWR_XQFBGfq0tRBCEGj_IZfN5B5xyMPofGLJAw5-aWnUxyxATVMdfSo4LRLah0j_r7l2wRaBTyPtaBjI0C8r-Dn6rM_oY"
+                                            />
+                                        </div>
+                                        <div>
+                                            <p class="text-sm font-medium">
+                                                <span class="text-primary font-bold"
+                                                    >Morgana_Fay</span
+                                                >
+                                                shared a new screenshot
+                                            </p>
+                                            <p class="text-[11px] text-slate-500">
+                                                1 hour ago • Gallery
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div
+                                        class="size-12 overflow-hidden rounded border border-zinc-700 bg-zinc-200 dark:bg-zinc-800"
+                                    >
+                                        <img
+                                            class="size-full object-cover"
+                                            data-alt="Thumbnail of game screenshot"
+                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA92WfNlfr3v_tfY_3RN0qFbY3rTCRrMtpfeV3Qe4WNijcefdPhcuz3Lx04xMBrSJ8ycZX79fB-DFbWkqYGb7vsYR7Am5vagVZYhZtyqi12psL142thEzNXD8IbRu7UxrcUf7fSJuH4GeE2rCiaLDjK-15wjUh2DrEraeLPKW_HuxIqymSiSOpB0uRCqKLLjsvyhsxGYKv-uhVdyCYZ56PPx_X5MVamaoKoege0MJDwu58LvISxTuD4VPOrvQNpOeJnnfzVsG96nzs"
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Mini Achievements -->
+                        <div
+                            class="dark:border-border-dark dark:bg-card-dark rounded-xl border border-slate-200 bg-white p-6"
+                        >
+                            <h3 class="mb-6 text-sm font-bold">Recent Achievements</h3>
+                            <div class="grid grid-cols-3 gap-4">
+                                <div
+                                    class="group hover:border-primary flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-transparent bg-zinc-100 p-2 text-center transition-all dark:bg-zinc-800"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-2xl text-amber-500 transition-transform group-hover:scale-110"
+                                        >emoji_events</span
+                                    >
+                                    <span
+                                        class="mt-2 text-[8px] font-bold text-slate-500 uppercase dark:text-zinc-400"
+                                        >First Blood</span
+                                    >
+                                </div>
+                                <div
+                                    class="group hover:border-primary flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-transparent bg-zinc-100 p-2 text-center transition-all dark:bg-zinc-800"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-2xl text-blue-500 transition-transform group-hover:scale-110"
+                                        >auto_awesome</span
+                                    >
+                                    <span
+                                        class="mt-2 text-[8px] font-bold text-slate-500 uppercase dark:text-zinc-400"
+                                        >Wise Soul</span
+                                    >
+                                </div>
+                                <div
+                                    class="group hover:border-primary flex aspect-square cursor-pointer flex-col items-center justify-center rounded-lg border border-transparent bg-zinc-100 p-2 text-center transition-all dark:bg-zinc-800"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-primary text-2xl transition-transform group-hover:scale-110"
+                                        >bolt</span
+                                    >
+                                    <span
+                                        class="mt-2 text-[8px] font-bold text-slate-500 uppercase dark:text-zinc-400"
+                                        >Lightning</span
+                                    >
+                                </div>
+                                <div
+                                    class="flex aspect-square flex-col items-center justify-center rounded-lg bg-zinc-100 p-2 text-center opacity-30 grayscale dark:bg-zinc-800"
+                                >
+                                    <span class="material-symbols-outlined text-2xl text-slate-400"
+                                        >lock</span
+                                    >
+                                    <span class="mt-2 text-[8px] font-bold text-slate-500 uppercase"
+                                        >Locked</span
+                                    >
+                                </div>
+                                <div
+                                    class="flex aspect-square flex-col items-center justify-center rounded-lg bg-zinc-100 p-2 text-center opacity-30 grayscale dark:bg-zinc-800"
+                                >
+                                    <span class="material-symbols-outlined text-2xl text-slate-400"
+                                        >lock</span
+                                    >
+                                    <span class="mt-2 text-[8px] font-bold text-slate-500 uppercase"
+                                        >Locked</span
+                                    >
+                                </div>
+                                <div
+                                    class="flex aspect-square flex-col items-center justify-center rounded-lg bg-zinc-100 p-2 text-center opacity-30 grayscale dark:bg-zinc-800"
+                                >
+                                    <span class="material-symbols-outlined text-2xl text-slate-400"
+                                        >lock</span
+                                    >
+                                    <span class="mt-2 text-[8px] font-bold text-slate-500 uppercase"
+                                        >Locked</span
+                                    >
+                                </div>
+                            </div>
+                            <div
+                                class="dark:border-border-dark mt-6 border-t border-slate-200 pt-6"
+                            >
+                                <div class="mb-2 flex items-center justify-between text-[11px]">
+                                    <span class="font-medium">Collection Progress</span>
+                                    <span class="text-primary font-bold">12/48</span>
+                                </div>
+                                <div
+                                    class="h-1.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-zinc-800"
+                                >
+                                    <div class="bg-primary h-full" style="width: 25%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,91 +1,141 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Gamers Aposentados Header</title>
-<!-- Tailwind CSS v3 CDN -->
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            'gaming-dark': '#0d0d0f',
-            'gaming-card': '#16161a',
-            'gaming-purple': '#9333ea',
-            'gaming-text-dim': '#9ca3af',
-            'gaming-border': '#27272a',
-          }
-        }
-      }
-    }
-  </script>
-<style data-purpose="custom-scrollbar">
-    /* Subtle scrollbar for modern feel if needed */
-    ::-webkit-scrollbar {
-      width: 6px;
-    }
-    ::-webkit-scrollbar-track {
-      background: #0d0d0f;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #27272a;
-      border-radius: 10px;
-    }
-  </style>
-</head>
-<body class="bg-gaming-dark text-white font-sans antialiased flex items-center justify-center min-h-screen p-4">
-<!-- BEGIN: SiteHeader -->
-<header class="w-full max-w-6xl bg-gaming-dark/50 backdrop-blur-md border border-gaming-border rounded-xl flex items-center justify-between px-6 py-3 shadow-2xl" data-purpose="dashboard-header">
-<!-- Left Side: Breadcrumbs -->
-<!-- BEGIN: Breadcrumbs -->
-<nav aria-label="Breadcrumb" class="flex items-center space-x-2 text-sm">
-<a class="text-gaming-text-dim hover:text-white transition-colors duration-200" href="#">Home</a>
-<svg class="w-4 h-4 text-gaming-text-dim" fill="none" stroke="currentColor" viewbox="0 0 24 24">
-<path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-</svg>
-<span class="text-white font-medium">Dashboard</span>
-</nav>
-<!-- END: Breadcrumbs -->
-<!-- Right Side: Player Status & Profile -->
-<!-- BEGIN: PlayerStatusContainer -->
-<div class="flex items-center space-x-8">
-<!-- Experience / Level Bar -->
-<!-- This block displays the player's level and current XP progress -->
-<div class="hidden md:flex flex-col items-end" data-purpose="xp-status">
-<div class="flex items-center space-x-2 mb-1">
-<span class="text-[10px] uppercase tracking-wider text-gaming-text-dim font-bold">Level 5</span>
-<div class="w-32 h-1.5 bg-zinc-800 rounded-full overflow-hidden">
-<div class="h-full bg-gradient-to-r from-gaming-purple to-fuchsia-500" style="width: 62.5%"></div>
-</div>
-</div>
-<span class="text-[10px] text-gaming-text-dim">1250 / 2000 XP</span>
-</div>
-<!-- Currency / Gold -->
-<div class="flex items-center space-x-2 border-l border-gaming-border pl-8" data-purpose="currency-display">
-<div class="bg-yellow-500/10 p-1.5 rounded-lg border border-yellow-500/20">
-<svg class="w-4 h-4 text-yellow-500" fill="currentColor" viewbox="0 0 20 20">
-<path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
-<path clip-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 112 0 1 1 0 01-2 0zm9-1a1 1 0 100 2 1 1 0 000-2z" fill-rule="evenodd"></path>
-</svg>
-</div>
-<span class="font-bold text-sm">300</span>
-</div>
-<!-- User Avatar & Identity -->
-<div class="flex items-center space-x-3 cursor-pointer hover:opacity-80 transition-opacity" data-purpose="user-dropdown">
-<div class="flex flex-col items-end">
-<span class="text-sm font-bold leading-none">OldSnake_99</span>
-<span class="text-[10px] text-gaming-purple font-black tracking-tighter uppercase">Pro Player</span>
-</div>
-<div class="relative">
-<img alt="User Avatar" class="w-10 h-10 rounded-full border-2 border-gaming-purple shadow-[0_0_10px_rgba(147,51,234,0.3)]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMqIocLDe8gyqES5w2riLjKZw_6xuQGZiaYcztodfn_vvwaLUdMbWQprnr7ffWwAeer_FzHpPcwVoZutmR3Fh8ceUQNROXvSjIxvN7CtUtvi8bwWQxa9t79vLdUNp_9nD2cVzeAkqjJijlaIzvMuIVw9o_IOt3lPH3mwx_5B4P0ViyFUY8kABaQWf903IOd8chUX1TPAmViq9sw20_qa53WnGBINE532qaLDHwITVvFQ1WwuGqIS-O0LweO6HuW2YqarQjexuhB3s"/>
-<!-- Online Status Indicator -->
-<div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-gaming-dark rounded-full"></div>
-</div>
-</div>
-</div>
-<!-- END: PlayerStatusContainer -->
-</header>
-<!-- END: SiteHeader -->
-</body></html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Gamers Aposentados Header</title>
+        <!-- Tailwind CSS v3 CDN -->
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <script>
+            tailwind.config = {
+                theme: {
+                    extend: {
+                        colors: {
+                            "gaming-dark": "#0d0d0f",
+                            "gaming-card": "#16161a",
+                            "gaming-purple": "#9333ea",
+                            "gaming-text-dim": "#9ca3af",
+                            "gaming-border": "#27272a",
+                        },
+                    },
+                },
+            };
+        </script>
+        <style data-purpose="custom-scrollbar">
+            /* Subtle scrollbar for modern feel if needed */
+            ::-webkit-scrollbar {
+                width: 6px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #0d0d0f;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: #27272a;
+                border-radius: 10px;
+            }
+        </style>
+    </head>
+    <body
+        class="bg-gaming-dark flex min-h-screen items-center justify-center p-4 font-sans text-white antialiased"
+    >
+        <!-- BEGIN: SiteHeader -->
+        <header
+            class="bg-gaming-dark/50 border-gaming-border flex w-full max-w-6xl items-center justify-between rounded-xl border px-6 py-3 shadow-2xl backdrop-blur-md"
+            data-purpose="dashboard-header"
+        >
+            <!-- Left Side: Breadcrumbs -->
+            <!-- BEGIN: Breadcrumbs -->
+            <nav aria-label="Breadcrumb" class="flex items-center space-x-2 text-sm">
+                <a
+                    class="text-gaming-text-dim transition-colors duration-200 hover:text-white"
+                    href="#"
+                    >Home</a
+                >
+                <svg
+                    class="text-gaming-text-dim h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    viewbox="0 0 24 24"
+                >
+                    <path
+                        d="M9 5l7 7-7 7"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        stroke-width="2"
+                    ></path>
+                </svg>
+                <span class="font-medium text-white">Dashboard</span>
+            </nav>
+            <!-- END: Breadcrumbs -->
+            <!-- Right Side: Player Status & Profile -->
+            <!-- BEGIN: PlayerStatusContainer -->
+            <div class="flex items-center space-x-8">
+                <!-- Experience / Level Bar -->
+                <!-- This block displays the player's level and current XP progress -->
+                <div class="hidden flex-col items-end md:flex" data-purpose="xp-status">
+                    <div class="mb-1 flex items-center space-x-2">
+                        <span
+                            class="text-gaming-text-dim text-[10px] font-bold tracking-wider uppercase"
+                            >Level 5</span
+                        >
+                        <div class="h-1.5 w-32 overflow-hidden rounded-full bg-zinc-800">
+                            <div
+                                class="from-gaming-purple h-full bg-gradient-to-r to-fuchsia-500"
+                                style="width: 62.5%"
+                            ></div>
+                        </div>
+                    </div>
+                    <span class="text-gaming-text-dim text-[10px]">1250 / 2000 XP</span>
+                </div>
+                <!-- Currency / Gold -->
+                <div
+                    class="border-gaming-border flex items-center space-x-2 border-l pl-8"
+                    data-purpose="currency-display"
+                >
+                    <div class="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-1.5">
+                        <svg
+                            class="h-4 w-4 text-yellow-500"
+                            fill="currentColor"
+                            viewbox="0 0 20 20"
+                        >
+                            <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
+                            <path
+                                clip-rule="evenodd"
+                                d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 112 0 1 1 0 01-2 0zm9-1a1 1 0 100 2 1 1 0 000-2z"
+                                fill-rule="evenodd"
+                            ></path>
+                        </svg>
+                    </div>
+                    <span class="text-sm font-bold">300</span>
+                </div>
+                <!-- User Avatar & Identity -->
+                <div
+                    class="flex cursor-pointer items-center space-x-3 transition-opacity hover:opacity-80"
+                    data-purpose="user-dropdown"
+                >
+                    <div class="flex flex-col items-end">
+                        <span class="text-sm leading-none font-bold">OldSnake_99</span>
+                        <span
+                            class="text-gaming-purple text-[10px] font-black tracking-tighter uppercase"
+                            >Pro Player</span
+                        >
+                    </div>
+                    <div class="relative">
+                        <img
+                            alt="User Avatar"
+                            class="border-gaming-purple h-10 w-10 rounded-full border-2 shadow-[0_0_10px_rgba(147,51,234,0.3)]"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAMqIocLDe8gyqES5w2riLjKZw_6xuQGZiaYcztodfn_vvwaLUdMbWQprnr7ffWwAeer_FzHpPcwVoZutmR3Fh8ceUQNROXvSjIxvN7CtUtvi8bwWQxa9t79vLdUNp_9nD2cVzeAkqjJijlaIzvMuIVw9o_IOt3lPH3mwx_5B4P0ViyFUY8kABaQWf903IOd8chUX1TPAmViq9sw20_qa53WnGBINE532qaLDHwITVvFQ1WwuGqIS-O0LweO6HuW2YqarQjexuhB3s"
+                        />
+                        <!-- Online Status Indicator -->
+                        <div
+                            class="border-gaming-dark absolute right-0 bottom-0 h-3 w-3 rounded-full border-2 bg-green-500"
+                        ></div>
+                    </div>
+                </div>
+            </div>
+            <!-- END: PlayerStatusContainer -->
+        </header>
+        <!-- END: SiteHeader -->
+    </body>
+</html>

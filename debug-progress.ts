@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
@@ -6,8 +6,8 @@ async function main() {
     const all = await prisma.gameProgress.findMany({
         include: {
             user: { select: { email: true, name: true, username: true } },
-            game: { select: { title: true } }
-        }
+            game: { select: { title: true } },
+        },
     });
     console.log(JSON.stringify(all, null, 2));
 }

@@ -1,0 +1,148 @@
+
+> gamers-aposentados@0.1.0 lint
+> eslint .
+
+
+C:\Users\mathe\Desktop\gamers-aposentados\prisma\seed.ts
+  43:9  warning  'pool' is assigned a value but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\(main)\profile\page.tsx
+  103:49  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\api\games\route.ts
+  4:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  5:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\api\igdb\route.ts
+  13:19  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\api\pools\route.ts
+   4:30  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   5:15  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  52:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\lib\igdb.ts
+   89:44  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  100:37  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\lib\progress-actions.ts
+  29:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\lib\quest-actions.ts
+   21:29  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   50:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  118:17  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\lib\randomizer-actions.ts
+  136:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  140:20  error  A `require()` style import is forbidden   @typescript-eslint/no-require-imports
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\app\lib\review-actions.ts
+   52:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+   85:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  134:21  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\auth\login-modal.tsx
+  3:33  warning  'DialogTrigger' is defined but never used  @typescript-eslint/no-unused-vars
+  9:8   warning  'Image' is defined but never used          @typescript-eslint/no-unused-vars
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\auth\register-modal.tsx
+  10:28  warning  'CheckCircle' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\auth\settings-modal.tsx
+  22:11  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\auth\user-menu.tsx
+  24:70  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\dashboard\ActiveQuestHero.tsx
+   23:10  warning  'getTimeSince' is defined but never used                                                                                                                                                                                                                                                 @typescript-eslint/no-unused-vars
+   33:45  warning  'userName' is defined but never used                                                                                                                                                                                                                                                     @typescript-eslint/no-unused-vars
+   34:11  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  104:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\dashboard\RecentGames.tsx
+  3:10  warning  'Badge' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\dashboard\SideQuestBar.tsx
+  23:11  warning  'router' is assigned a value but never used                                                                                                                                                                                                                                              @typescript-eslint/no-unused-vars
+  85:29  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\game\RandomizerClient.tsx
+    4:10  warning  'PlusCircle' is defined but never used                                                                                                                                                                                                                                                   @typescript-eslint/no-unused-vars
+   41:34  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  171:52  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  195:52  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+  235:57  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\layout\auth-buttons.tsx
+  21:11  error    Unexpected any. Specify a different type                                                                                                                                                                                                                                                 @typescript-eslint/no-explicit-any
+  51:37  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\layout\header.tsx
+  3:10  warning  'Separator' is defined but never used       @typescript-eslint/no-unused-vars
+  4:10  warning  'User' is defined but never used            @typescript-eslint/no-unused-vars
+  4:16  warning  'Coins' is defined but never used           @typescript-eslint/no-unused-vars
+  5:10  warning  'Avatar' is defined but never used          @typescript-eslint/no-unused-vars
+  5:18  warning  'AvatarFallback' is defined but never used  @typescript-eslint/no-unused-vars
+  5:34  warning  'AvatarImage' is defined but never used     @typescript-eslint/no-unused-vars
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\layout\mobile-nav.tsx
+  15:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\layout\mobile-nav.tsx:15:9
+  13 |     // Close menu when route changes
+  14 |     useEffect(() => {
+> 15 |         setOpen(false);
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  16 |     }, [pathname]);
+  17 |
+  18 |     return (  react-hooks/set-state-in-effect
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\layout\sidebar.tsx
+   7:5  warning  'Swords' is defined but never used    @typescript-eslint/no-unused-vars
+  10:5  warning  'Store' is defined but never used     @typescript-eslint/no-unused-vars
+  11:5  warning  'Settings' is defined but never used  @typescript-eslint/no-unused-vars
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\profile\favorite-games-module.tsx
+  28:13  error    Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\profile\favorite-games-module.tsx:28:13
+  26 |     useEffect(() => {
+  27 |         if (!isEditing) {
+> 28 |             setFavorites(
+     |             ^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  29 |                 initialFavorites.map(g => ({
+  30 |                     id: g.id,
+  31 |                     nome: g.title,  react-hooks/set-state-in-effect
+  91:33  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\reviews\ReviewCard.tsx
+    3:32  warning  'Edit' is defined but never used          @typescript-eslint/no-unused-vars
+  112:68  error    Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\reviews\ReviewsClient.tsx
+   9:14  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+  10:12  error  Unexpected any. Specify a different type  @typescript-eslint/no-explicit-any
+
+C:\Users\mathe\Desktop\gamers-aposentados\src\components\ui\game-autocomplete.tsx
+  99:41  warning  Using `<img>` could result in slower LCP and higher bandwidth. Consider using `<Image />` from `next/image` or a custom image loader to automatically optimize images. This may incur additional usage or cost from your provider. See: https://nextjs.org/docs/messages/no-img-element  @next/next/no-img-element
+
+C:\Users\mathe\Desktop\gamers-aposentados\tailwind.config.ts
+  77:15  error  A `require()` style import is forbidden  @typescript-eslint/no-require-imports
+
+Γ£û 57 problems (28 errors, 29 warnings)
+

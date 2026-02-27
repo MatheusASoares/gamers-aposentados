@@ -18,11 +18,5 @@ export default async function ReviewsPage() {
     const reviews = await getReviews();
     const games = await getGamesForReview();
 
-    return (
-        <ReviewsClient
-            reviews={reviews}
-            games={games}
-            currentUserId={session.user.id}
-        />
-    );
+    return <ReviewsClient reviews={reviews} games={games} currentUserId={session.user.id} />;
 }

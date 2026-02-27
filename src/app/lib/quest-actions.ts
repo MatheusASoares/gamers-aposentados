@@ -13,16 +13,19 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
             where: {
                 user_id_game_id: {
                     user_id: session.user.id,
-                    game_id: gameId
-                }
-            }
+                    game_id: gameId,
+                },
+            },
         });
 
         const dataToUpdate: any = { progress_percentage: percentage };
         if (percentage === 100) {
             dataToUpdate.status = "COMPLETED";
             dataToUpdate.end_date = new Date();
-        } else if (existingProgress && (existingProgress.status === "COMPLETED" || existingProgress.status === "DROPPED")) {
+        } else if (
+            existingProgress &&
+            (existingProgress.status === "COMPLETED" || existingProgress.status === "DROPPED")
+        ) {
             dataToUpdate.status = "ACTIVE";
             dataToUpdate.end_date = null;
         }
@@ -31,8 +34,8 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
             where: {
                 user_id_game_id: {
                     user_id: session.user.id,
-                    game_id: gameId
-                }
+                    game_id: gameId,
+                },
             },
             update: dataToUpdate,
             create: {
@@ -41,8 +44,8 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
                 progress_percentage: percentage,
                 status: percentage === 100 ? "COMPLETED" : "ACTIVE",
                 start_date: new Date(),
-                ...(percentage === 100 ? { end_date: new Date() } : {})
-            }
+                ...(percentage === 100 ? { end_date: new Date() } : {}),
+            },
         });
 
         revalidatePath("/");
@@ -62,13 +65,13 @@ export async function completeQuest(gameId: string) {
             where: {
                 user_id_game_id: {
                     user_id: session.user.id,
-                    game_id: gameId
-                }
+                    game_id: gameId,
+                },
             },
             update: {
                 progress_percentage: 100,
                 status: "COMPLETED",
-                end_date: new Date()
+                end_date: new Date(),
             },
             create: {
                 user_id: session.user.id,
@@ -76,8 +79,8 @@ export async function completeQuest(gameId: string) {
                 progress_percentage: 100,
                 status: "COMPLETED",
                 start_date: new Date(),
-                end_date: new Date()
-            }
+                end_date: new Date(),
+            },
         });
 
         revalidatePath("/");
@@ -97,20 +100,20 @@ export async function dropQuest(gameId: string) {
             where: {
                 user_id_game_id: {
                     user_id: session.user.id,
-                    game_id: gameId
-                }
+                    game_id: gameId,
+                },
             },
             update: {
                 status: "DROPPED",
-                end_date: new Date()
+                end_date: new Date(),
             },
             create: {
                 user_id: session.user.id,
                 game_id: gameId,
                 status: "DROPPED",
                 start_date: new Date(),
-                end_date: new Date()
-            }
+                end_date: new Date(),
+            },
         });
 
         revalidatePath("/");
@@ -127,7 +130,7 @@ export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST"
         // Acha qual é o jogo atual da quest type selecionada (pegamos da pool ativa mais recente)
         const lastPool = await prisma.pool.findFirst({
             where: { type: questType, winner_game_id: { not: null } },
-            orderBy: { created_at: "desc" }
+            orderBy: { created_at: "desc" },
         });
 
         if (!lastPool || !lastPool.winner_game_id) {
@@ -140,19 +143,19 @@ export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST"
         const activeProgresses = await prisma.gameProgress.findMany({
             where: {
                 game_id: activeGameId,
-                status: "ACTIVE"
+                status: "ACTIVE",
             },
-            include: { user: true }
+            include: { user: true },
         });
 
         if (activeProgresses.length > 0) {
             const usersPending = activeProgresses
-                .map(p => p.user.name || p.user.username || "Alguém")
+                .map((p) => p.user.name || p.user.username || "Alguém")
                 .join(" e ");
 
             return {
                 locked: true,
-                message: `O jogo atual da quest ainda está aberto para: ${usersPending}. Eles precisam Drop ou Completar antes de um novo sorteio.`
+                message: `O jogo atual da quest ainda está aberto para: ${usersPending}. Eles precisam Drop ou Completar antes de um novo sorteio.`,
             };
         }
 

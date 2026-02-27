@@ -12,7 +12,7 @@ export async function Header() {
     const user = session?.user;
 
     return (
-        <header className="h-16 border-b border-border bg-card px-6 flex items-center justify-between sticky top-0 z-10 w-full">
+        <header className="border-border bg-card sticky top-0 z-10 flex h-16 w-full items-center justify-between border-b px-6">
             <div className="flex items-center gap-2">
                 <MobileNav />
                 <Breadcrumbs />

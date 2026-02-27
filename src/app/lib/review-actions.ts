@@ -27,8 +27,8 @@ export async function createReview(params: CreateReviewParams) {
         const existingReview = await prisma.review.findFirst({
             where: {
                 user_id: userId,
-                game_id: gameId
-            }
+                game_id: gameId,
+            },
         });
 
         if (existingReview) {
@@ -43,7 +43,7 @@ export async function createReview(params: CreateReviewParams) {
                 review_text: reviewText,
                 game_id: gameId,
                 user_id: userId,
-            }
+            },
         });
 
         revalidatePath("/dashboard/reviews");
@@ -64,7 +64,7 @@ export async function deleteReview(reviewId: string) {
 
     try {
         const review = await prisma.review.findUnique({
-            where: { id: reviewId }
+            where: { id: reviewId },
         });
 
         if (!review) {
@@ -76,7 +76,7 @@ export async function deleteReview(reviewId: string) {
         }
 
         await prisma.review.delete({
-            where: { id: reviewId }
+            where: { id: reviewId },
         });
 
         revalidatePath("/dashboard/reviews");
@@ -107,7 +107,7 @@ export async function updateReview(params: UpdateReviewParams) {
 
     try {
         const review = await prisma.review.findUnique({
-            where: { id: reviewId }
+            where: { id: reviewId },
         });
 
         if (!review) {
@@ -125,7 +125,7 @@ export async function updateReview(params: UpdateReviewParams) {
                 difficulty,
                 hours_played: hoursPlayed,
                 review_text: reviewText,
-            }
+            },
         });
 
         revalidatePath("/dashboard/reviews");

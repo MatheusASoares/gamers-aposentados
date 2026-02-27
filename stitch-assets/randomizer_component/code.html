@@ -1,211 +1,352 @@
-<!DOCTYPE html>
+<!doctype html>
 
-<html class="dark" lang="en"><head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>The Great Randomizer - Gamers Aposentados</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "primary": "#bd0df2",
-                        "background-light": "#f8f5f8",
-                        "background-dark": "#120b14",
-                        "zinc-950": "#09090b",
-                        "zinc-900": "#18181b",
-                        "zinc-800": "#27272a",
-                        "legendary-orange": "#f59e0b"
-                    },
-                    fontFamily: {
-                        "display": ["Inter", "sans-serif"]
-                    },
-                    borderRadius: {
-                        "DEFAULT": "0.25rem",
-                        "lg": "0.5rem",
-                        "xl": "0.75rem",
-                        "full": "9999px"
+<html class="dark" lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>The Great Randomizer - Gamers Aposentados</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            primary: "#bd0df2",
+                            "background-light": "#f8f5f8",
+                            "background-dark": "#120b14",
+                            "zinc-950": "#09090b",
+                            "zinc-900": "#18181b",
+                            "zinc-800": "#27272a",
+                            "legendary-orange": "#f59e0b",
+                        },
+                        fontFamily: {
+                            display: ["Inter", "sans-serif"],
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.25rem",
+                            lg: "0.5rem",
+                            xl: "0.75rem",
+                            full: "9999px",
+                        },
                     },
                 },
-            },
-        }
-    </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .legendary-glow {
-            box-shadow: 0 0 20px rgba(189, 13, 242, 0.3);
-        }
-        .slot-blur {
-            filter: blur(2px);
-            opacity: 0.5;
-        }
-    
-        @keyframes slot-cycle {
-            0% { transform: translateY(100%); opacity: 0; }
-            10% { opacity: 1; }
-            90% { opacity: 1; }
-            100% { transform: translateY(-100%); opacity: 0; }
-        }
-        .animate-slot-cycle {
-            animation: slot-cycle 0.2s linear infinite;
-        }
-        @keyframes winner-pulse {
-            0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(189, 13, 242, 0.4); }
-            50% { transform: scale(1.1); box-shadow: 0 0 50px rgba(189, 13, 242, 0.8); }
-        }
-        .winner-celebration {
-            animation: winner-pulse 0.5s ease-in-out 3;
-        }
-        .spin-icon {
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-    
-        @keyframes glow-pulse {
-            0%, 100% { 
-                box-shadow: 0 0 20px rgba(189, 13, 242, 0.4), inset 0 0 10px rgba(189, 13, 242, 0.2);
-                border-color: rgba(189, 13, 242, 0.8);
+            };
+        </script>
+        <style>
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
             }
-            50% { 
-                box-shadow: 0 0 40px rgba(189, 13, 242, 0.7), inset 0 0 20px rgba(189, 13, 242, 0.4);
-                border-color: rgba(189, 13, 242, 1);
+            .legendary-glow {
+                box-shadow: 0 0 20px rgba(189, 13, 242, 0.3);
             }
-        }
-        .neon-glow-pulse {
-            animation: glow-pulse 3s ease-in-out infinite;
-        }
-    </style>
-</head>
-<body class="bg-zinc-950 font-display text-white overflow-x-hidden min-h-screen flex items-center justify-center"><div class="max-w-7xl w-full p-6 lg:p-12 flex flex-col gap-8">
-<!-- Header -->
-<div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-white/5 pb-8">
-<div>
-<h1 class="text-white text-4xl lg:text-5xl font-black tracking-tight mb-2">THE GREAT RANDOMIZER</h1>
-<p class="text-white/60 italic text-lg">May the RNG be in your favor, Commander.</p>
-</div>
-<div class="inline-flex p-1 bg-zinc-900/50 rounded-xl border border-white/5">
-<button class="px-6 py-2 rounded-lg bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20">
-                Main Quest <span class="text-white/60 font-normal ml-1">(3m)</span>
-</button>
-<button class="px-6 py-2 rounded-lg text-white/50 hover:text-white text-sm font-bold transition-colors">
-                Side Quest <span class="text-white/40 font-normal ml-1">(1m)</span>
-</button>
-</div>
-</div>
-<!-- Main Content Grid -->
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-<!-- Left Column: Candidates Pool -->
-<div class="lg:col-span-4 flex flex-col gap-6">
-<div class="flex items-center justify-between">
-<h3 class="text-white/80 font-bold uppercase tracking-widest text-xs">Candidates Pool</h3>
-<span class="text-primary text-xs font-bold">3 SELECTED</span>
-</div>
-<div class="flex flex-col gap-3">
-<!-- Card 1 -->
-<div class="group relative bg-zinc-900/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all">
-<div class="flex gap-4 p-3">
-<div class="size-16 rounded-lg bg-zinc-800 shrink-0 overflow-hidden">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtXyhxt64XAWjH4Mi4fNq0igTpV1XZRPAGuhmWujCFSVvkkiFejWexC-1dYnwZK8e_9cif7X6MBCEEJw5nN_DpP7bwVRP79vPFa2OH1qMX8nAQc0-873tuXoWeyBAi-7ZNrl4rMcr_wqCFgwMmJtYLyRREdMmKYsOyQ_ABWpvZvLAmeEfWgDuWmQF1Gr96lBqD_mEAIGLQYJHfKZeXrMCu9Iu_hRtq-554O62mYjTlMYcLHqUdeG02FcgoRzn1xtYhkNalybKXlbI"/>
-</div>
-<div class="flex flex-col justify-center">
-<h4 class="text-white font-bold text-sm">Elden Ring</h4>
-<span class="text-white/40 text-xs">by Lucas</span>
-</div>
-</div>
-<div class="absolute top-2 right-2 px-1.5 py-0.5 rounded bg-legendary-orange/20 text-legendary-orange text-[8px] font-bold uppercase">Legendary</div>
-</div>
-<!-- Card 2 -->
-<div class="group relative bg-zinc-900/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all">
-<div class="flex gap-4 p-3">
-<div class="size-16 rounded-lg bg-zinc-800 shrink-0 overflow-hidden">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXctclppEnCgzYj9jxa1CRYL5e5g6ACw5cebEGUfHUeZO9N4pnpkAuNN_qeVNYBieC4Qj-mxHAzN7oQ_vdYYE1h3R9GoEamRqn6L5AB6ffiinR5ZSjvGbZ5rGmiYStnnoMy0t_yeyF5M3JDlRWgGlAVMHMosJ_36bniF2Qc7XVis4IWLa94HiERU9h9aNwPrTkcY-Qzo_RMwN_Ql6PG7lIX5pVxWwgCzNjC7Wdm3CnZuayMso9UYvJl3xI6jZgZfassukX0aPVUAo"/>
-</div>
-<div class="flex flex-col justify-center">
-<h4 class="text-white font-bold text-sm">Final Fantasy VII Rebirth</h4>
-<span class="text-white/40 text-xs">by Matheus</span>
-</div>
-</div>
-</div>
-<!-- Card 3 -->
-<div class="group relative bg-zinc-900/80 rounded-xl overflow-hidden border border-white/5 hover:border-primary/50 transition-all">
-<div class="flex gap-4 p-3">
-<div class="size-16 rounded-lg bg-zinc-800 shrink-0 overflow-hidden">
-<img class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9T-asPQHWk-wz6TG7Il-vxNN_-xVXr-wmCpesjJUzou2UgSX8-uHHxPSavVcC4LVfiNp7hbRQmeyHvTlqpoHN1hJUqN0Llsxk0VpxEjFBK3b0K9I4znZ6PZ64OcgL0SS68HBjfjF1X0v77oBdy7ROEm90gd_E5r37cZ58kjbHF0PFwXBMSnZmRMD8xYS5ZRQXNbiSumpFb8opvIAx7wjJd1r1TqBMuqHy_1cXZ5C9XGxZTM4kl3iEK6eMCi-qd7JbgFwuJeb_TeE"/>
-</div>
-<div class="flex flex-col justify-center">
-<h4 class="text-white font-bold text-sm">Baldur's Gate 3</h4>
-<span class="text-white/40 text-xs">by Yan</span>
-</div>
-</div>
-</div>
-</div>
-<button class="w-full py-4 border-2 border-dashed border-white/10 rounded-xl text-white/30 text-sm font-medium hover:text-white/60 hover:border-white/20 transition-all flex items-center justify-center gap-2">
-<span class="material-symbols-outlined">add_circle</span>
-                Add Suggestion
-            </button>
-</div>
-<!-- Right Column: Randomizer Tool -->
-<div class="lg:col-span-8">
-<div class="bg-zinc-900/30 rounded-3xl border border-white/10 p-8 lg:p-12 h-full flex flex-col items-center justify-center relative overflow-hidden legendary-glow">
-<div class="absolute -top-24 -right-24 size-64 bg-primary/20 blur-[100px] rounded-full"></div>
-<div class="relative w-full max-w-lg flex flex-col items-center gap-8">
-<!-- Ready to Spin Box -->
-<div class="w-full flex flex-col items-center gap-4">
-<div class="slot-blur text-white/10 text-xl font-black uppercase tracking-widest scale-75">Final Fantasy VII</div>
-<div class="w-full py-10 px-6 bg-zinc-950/80 border-2 border-primary rounded-2xl flex flex-col items-center justify-center relative overflow-hidden neon-glow-pulse">
-<div class="absolute inset-0 bg-gradient-to-t from-primary/5 to-transparent"></div>
-<div class="relative z-10 h-16 flex items-center justify-center overflow-hidden w-full">
-<span class="text-primary font-black text-3xl md:text-5xl lg:text-6xl tracking-tighter uppercase text-center leading-tight" id="status-text">READY TO SPIN</span>
-</div>
-</div>
-<div class="slot-blur text-white/10 text-xl font-black uppercase tracking-widest scale-75">Baldur's Gate 3</div>
-</div>
-<!-- Roll Button -->
-<div class="flex flex-col items-center gap-6">
-<button class="group relative px-12 py-5 bg-primary rounded-2xl flex items-center gap-4 hover:scale-105 active:scale-95 transition-all shadow-[0_10px_40px_rgba(189,13,242,0.4)]" id="roll-button">
-<span class="material-symbols-outlined text-3xl" id="dice-icon">casino</span>
-<span class="text-2xl font-black tracking-tighter uppercase">Roll the Dice</span>
-</button>
-<div class="flex items-center gap-4 text-white/40">
-<div class="flex -space-x-2">
-<div class="size-8 rounded-full border-2 border-zinc-950 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuC4SKTuPtUQfzdDjSVrbi90EaeMezZiyXt1id_FHw_uKGk33AyXZbUmkfL3RX_-qXIB2_naCgM7cDBw-c_z4a5S5E5xHF4jFcYpCVd6UF3oJvtWAN_87hM21AudFLoIoTCYhGLsDmb7hSoX2ewBHh9Zp423yis8XWqskhDVGrMwk1n8MGyIT7FHuDdCH3Jdi2qqP1kclwzR3QEETKVzcibSJw0iNQVHyOpyA1vaHmbI-mf6mU4sOR3tUuLY-M-dD_uK8vNgzNMwal4');"></div>
-<div class="size-8 rounded-full border-2 border-zinc-950 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCULYArYvHPq4yIWmdXvGPxp5JOsnWf2HQvZ_tcLE-8YJj75vUddFvDKUsHDiW6DHyvy88bGrdHN2GTTAXyGPJ_Ce-czriOVpST2rU9p8pWgiCexfl2jcZllya1lFgAXmasm0Qcc1eXjzqo62IOJmLK2ueZWrcugs2xJXMsb2hKLSS_uy5HyAQmHhLF5ROKlmzr1O8VIs3wMq5qkmZ8Jczh2DA7MIDRAH1gTpUigs7Xccwgk9_8453UCUKulKgKCd_P266M4yIVC4U');"></div>
-<div class="size-8 rounded-full border-2 border-zinc-950 bg-cover bg-center" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCS72-v47y7GLUZvLJ77o5_Wuur11PKEuXXtlvj0g_L5iEPhfwyclyXBvQsVoyLoDAcLUODIXY7VMfjUnruEdxq7QlSgwa0mjI2kqs5NPhoDBUaiFG0EOpxCziARpRGG28SkGMxbVUpF9uEz1Chl_wXlDf4JBu8DeiJ1e0I7-ABO7Y68VAekvWvWBz9Uh0wzv-RXe8T44P4puQsEnJ84jA2hZyaOnwWtilxln82PCz2GhSJV7knq5GAx2SgOEAeRpiT8I__tms_CYU');"></div>
-</div>
-<p class="text-xs font-medium uppercase tracking-wider">3 Commanders Online</p>
-</div>
-</div>
-</div>
-<div class="absolute top-8 right-8 text-white/5 rotate-12 pointer-events-none">
-<span class="material-symbols-outlined text-[120px]">trophy</span>
-</div>
-</div>
-</div>
-</div>
-<!-- Bottom Banner: Last Winner -->
-<div class="bg-zinc-900/50 rounded-2xl border border-white/5 p-5 flex flex-wrap items-center justify-between gap-6">
-<div class="flex items-center gap-4">
-<span class="material-symbols-outlined text-legendary-orange">history</span>
-<div>
-<h5 class="text-white/40 text-[10px] font-bold uppercase tracking-widest">Last Month's Winner</h5>
-<p class="text-white font-bold">God of War Ragnarök</p>
-</div>
-</div>
-<div class="flex items-center gap-3">
-<span class="text-white/40 text-sm">Winner's Bounty:</span>
-<div class="flex gap-2">
-<span class="px-3 py-1 bg-primary/20 text-primary rounded-lg text-xs font-bold">+500 XP</span>
-<span class="px-3 py-1 bg-legendary-orange/20 text-legendary-orange rounded-lg text-xs font-bold">+200 Gold</span>
-</div>
-</div>
-</div>
-</div></body></html>
+            .slot-blur {
+                filter: blur(2px);
+                opacity: 0.5;
+            }
+
+            @keyframes slot-cycle {
+                0% {
+                    transform: translateY(100%);
+                    opacity: 0;
+                }
+                10% {
+                    opacity: 1;
+                }
+                90% {
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+            }
+            .animate-slot-cycle {
+                animation: slot-cycle 0.2s linear infinite;
+            }
+            @keyframes winner-pulse {
+                0%,
+                100% {
+                    transform: scale(1);
+                    box-shadow: 0 0 30px rgba(189, 13, 242, 0.4);
+                }
+                50% {
+                    transform: scale(1.1);
+                    box-shadow: 0 0 50px rgba(189, 13, 242, 0.8);
+                }
+            }
+            .winner-celebration {
+                animation: winner-pulse 0.5s ease-in-out 3;
+            }
+            .spin-icon {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                from {
+                    transform: rotate(0deg);
+                }
+                to {
+                    transform: rotate(360deg);
+                }
+            }
+
+            @keyframes glow-pulse {
+                0%,
+                100% {
+                    box-shadow:
+                        0 0 20px rgba(189, 13, 242, 0.4),
+                        inset 0 0 10px rgba(189, 13, 242, 0.2);
+                    border-color: rgba(189, 13, 242, 0.8);
+                }
+                50% {
+                    box-shadow:
+                        0 0 40px rgba(189, 13, 242, 0.7),
+                        inset 0 0 20px rgba(189, 13, 242, 0.4);
+                    border-color: rgba(189, 13, 242, 1);
+                }
+            }
+            .neon-glow-pulse {
+                animation: glow-pulse 3s ease-in-out infinite;
+            }
+        </style>
+    </head>
+    <body
+        class="font-display flex min-h-screen items-center justify-center overflow-x-hidden bg-zinc-950 text-white"
+    >
+        <div class="flex w-full max-w-7xl flex-col gap-8 p-6 lg:p-12">
+            <!-- Header -->
+            <div
+                class="flex flex-col justify-between gap-6 border-b border-white/5 pb-8 md:flex-row md:items-end"
+            >
+                <div>
+                    <h1 class="mb-2 text-4xl font-black tracking-tight text-white lg:text-5xl">
+                        THE GREAT RANDOMIZER
+                    </h1>
+                    <p class="text-lg text-white/60 italic">
+                        May the RNG be in your favor, Commander.
+                    </p>
+                </div>
+                <div class="inline-flex rounded-xl border border-white/5 bg-zinc-900/50 p-1">
+                    <button
+                        class="bg-primary shadow-primary/20 rounded-lg px-6 py-2 text-sm font-bold text-white shadow-lg"
+                    >
+                        Main Quest <span class="ml-1 font-normal text-white/60">(3m)</span>
+                    </button>
+                    <button
+                        class="rounded-lg px-6 py-2 text-sm font-bold text-white/50 transition-colors hover:text-white"
+                    >
+                        Side Quest <span class="ml-1 font-normal text-white/40">(1m)</span>
+                    </button>
+                </div>
+            </div>
+            <!-- Main Content Grid -->
+            <div class="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-12">
+                <!-- Left Column: Candidates Pool -->
+                <div class="flex flex-col gap-6 lg:col-span-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-xs font-bold tracking-widest text-white/80 uppercase">
+                            Candidates Pool
+                        </h3>
+                        <span class="text-primary text-xs font-bold">3 SELECTED</span>
+                    </div>
+                    <div class="flex flex-col gap-3">
+                        <!-- Card 1 -->
+                        <div
+                            class="group hover:border-primary/50 relative overflow-hidden rounded-xl border border-white/5 bg-zinc-900/80 transition-all"
+                        >
+                            <div class="flex gap-4 p-3">
+                                <div
+                                    class="size-16 shrink-0 overflow-hidden rounded-lg bg-zinc-800"
+                                >
+                                    <img
+                                        class="h-full w-full object-cover"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtXyhxt64XAWjH4Mi4fNq0igTpV1XZRPAGuhmWujCFSVvkkiFejWexC-1dYnwZK8e_9cif7X6MBCEEJw5nN_DpP7bwVRP79vPFa2OH1qMX8nAQc0-873tuXoWeyBAi-7ZNrl4rMcr_wqCFgwMmJtYLyRREdMmKYsOyQ_ABWpvZvLAmeEfWgDuWmQF1Gr96lBqD_mEAIGLQYJHfKZeXrMCu9Iu_hRtq-554O62mYjTlMYcLHqUdeG02FcgoRzn1xtYhkNalybKXlbI"
+                                    />
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <h4 class="text-sm font-bold text-white">Elden Ring</h4>
+                                    <span class="text-xs text-white/40">by Lucas</span>
+                                </div>
+                            </div>
+                            <div
+                                class="bg-legendary-orange/20 text-legendary-orange absolute top-2 right-2 rounded px-1.5 py-0.5 text-[8px] font-bold uppercase"
+                            >
+                                Legendary
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div
+                            class="group hover:border-primary/50 relative overflow-hidden rounded-xl border border-white/5 bg-zinc-900/80 transition-all"
+                        >
+                            <div class="flex gap-4 p-3">
+                                <div
+                                    class="size-16 shrink-0 overflow-hidden rounded-lg bg-zinc-800"
+                                >
+                                    <img
+                                        class="h-full w-full object-cover"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXctclppEnCgzYj9jxa1CRYL5e5g6ACw5cebEGUfHUeZO9N4pnpkAuNN_qeVNYBieC4Qj-mxHAzN7oQ_vdYYE1h3R9GoEamRqn6L5AB6ffiinR5ZSjvGbZ5rGmiYStnnoMy0t_yeyF5M3JDlRWgGlAVMHMosJ_36bniF2Qc7XVis4IWLa94HiERU9h9aNwPrTkcY-Qzo_RMwN_Ql6PG7lIX5pVxWwgCzNjC7Wdm3CnZuayMso9UYvJl3xI6jZgZfassukX0aPVUAo"
+                                    />
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <h4 class="text-sm font-bold text-white">
+                                        Final Fantasy VII Rebirth
+                                    </h4>
+                                    <span class="text-xs text-white/40">by Matheus</span>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div
+                            class="group hover:border-primary/50 relative overflow-hidden rounded-xl border border-white/5 bg-zinc-900/80 transition-all"
+                        >
+                            <div class="flex gap-4 p-3">
+                                <div
+                                    class="size-16 shrink-0 overflow-hidden rounded-lg bg-zinc-800"
+                                >
+                                    <img
+                                        class="h-full w-full object-cover"
+                                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB9T-asPQHWk-wz6TG7Il-vxNN_-xVXr-wmCpesjJUzou2UgSX8-uHHxPSavVcC4LVfiNp7hbRQmeyHvTlqpoHN1hJUqN0Llsxk0VpxEjFBK3b0K9I4znZ6PZ64OcgL0SS68HBjfjF1X0v77oBdy7ROEm90gd_E5r37cZ58kjbHF0PFwXBMSnZmRMD8xYS5ZRQXNbiSumpFb8opvIAx7wjJd1r1TqBMuqHy_1cXZ5C9XGxZTM4kl3iEK6eMCi-qd7JbgFwuJeb_TeE"
+                                    />
+                                </div>
+                                <div class="flex flex-col justify-center">
+                                    <h4 class="text-sm font-bold text-white">Baldur's Gate 3</h4>
+                                    <span class="text-xs text-white/40">by Yan</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button
+                        class="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-white/10 py-4 text-sm font-medium text-white/30 transition-all hover:border-white/20 hover:text-white/60"
+                    >
+                        <span class="material-symbols-outlined">add_circle</span>
+                        Add Suggestion
+                    </button>
+                </div>
+                <!-- Right Column: Randomizer Tool -->
+                <div class="lg:col-span-8">
+                    <div
+                        class="legendary-glow relative flex h-full flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/30 p-8 lg:p-12"
+                    >
+                        <div
+                            class="bg-primary/20 absolute -top-24 -right-24 size-64 rounded-full blur-[100px]"
+                        ></div>
+                        <div class="relative flex w-full max-w-lg flex-col items-center gap-8">
+                            <!-- Ready to Spin Box -->
+                            <div class="flex w-full flex-col items-center gap-4">
+                                <div
+                                    class="slot-blur scale-75 text-xl font-black tracking-widest text-white/10 uppercase"
+                                >
+                                    Final Fantasy VII
+                                </div>
+                                <div
+                                    class="border-primary neon-glow-pulse relative flex w-full flex-col items-center justify-center overflow-hidden rounded-2xl border-2 bg-zinc-950/80 px-6 py-10"
+                                >
+                                    <div
+                                        class="from-primary/5 absolute inset-0 bg-gradient-to-t to-transparent"
+                                    ></div>
+                                    <div
+                                        class="relative z-10 flex h-16 w-full items-center justify-center overflow-hidden"
+                                    >
+                                        <span
+                                            class="text-primary text-center text-3xl leading-tight font-black tracking-tighter uppercase md:text-5xl lg:text-6xl"
+                                            id="status-text"
+                                            >READY TO SPIN</span
+                                        >
+                                    </div>
+                                </div>
+                                <div
+                                    class="slot-blur scale-75 text-xl font-black tracking-widest text-white/10 uppercase"
+                                >
+                                    Baldur's Gate 3
+                                </div>
+                            </div>
+                            <!-- Roll Button -->
+                            <div class="flex flex-col items-center gap-6">
+                                <button
+                                    class="group bg-primary relative flex items-center gap-4 rounded-2xl px-12 py-5 shadow-[0_10px_40px_rgba(189,13,242,0.4)] transition-all hover:scale-105 active:scale-95"
+                                    id="roll-button"
+                                >
+                                    <span class="material-symbols-outlined text-3xl" id="dice-icon"
+                                        >casino</span
+                                    >
+                                    <span class="text-2xl font-black tracking-tighter uppercase"
+                                        >Roll the Dice</span
+                                    >
+                                </button>
+                                <div class="flex items-center gap-4 text-white/40">
+                                    <div class="flex -space-x-2">
+                                        <div
+                                            class="size-8 rounded-full border-2 border-zinc-950 bg-cover bg-center"
+                                            style="
+                                                background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuC4SKTuPtUQfzdDjSVrbi90EaeMezZiyXt1id_FHw_uKGk33AyXZbUmkfL3RX_-qXIB2_naCgM7cDBw-c_z4a5S5E5xHF4jFcYpCVd6UF3oJvtWAN_87hM21AudFLoIoTCYhGLsDmb7hSoX2ewBHh9Zp423yis8XWqskhDVGrMwk1n8MGyIT7FHuDdCH3Jdi2qqP1kclwzR3QEETKVzcibSJw0iNQVHyOpyA1vaHmbI-mf6mU4sOR3tUuLY-M-dD_uK8vNgzNMwal4&quot;);
+                                            "
+                                        ></div>
+                                        <div
+                                            class="size-8 rounded-full border-2 border-zinc-950 bg-cover bg-center"
+                                            style="
+                                                background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCULYArYvHPq4yIWmdXvGPxp5JOsnWf2HQvZ_tcLE-8YJj75vUddFvDKUsHDiW6DHyvy88bGrdHN2GTTAXyGPJ_Ce-czriOVpST2rU9p8pWgiCexfl2jcZllya1lFgAXmasm0Qcc1eXjzqo62IOJmLK2ueZWrcugs2xJXMsb2hKLSS_uy5HyAQmHhLF5ROKlmzr1O8VIs3wMq5qkmZ8Jczh2DA7MIDRAH1gTpUigs7Xccwgk9_8453UCUKulKgKCd_P266M4yIVC4U&quot;);
+                                            "
+                                        ></div>
+                                        <div
+                                            class="size-8 rounded-full border-2 border-zinc-950 bg-cover bg-center"
+                                            style="
+                                                background-image: url(&quot;https://lh3.googleusercontent.com/aida-public/AB6AXuCS72-v47y7GLUZvLJ77o5_Wuur11PKEuXXtlvj0g_L5iEPhfwyclyXBvQsVoyLoDAcLUODIXY7VMfjUnruEdxq7QlSgwa0mjI2kqs5NPhoDBUaiFG0EOpxCziARpRGG28SkGMxbVUpF9uEz1Chl_wXlDf4JBu8DeiJ1e0I7-ABO7Y68VAekvWvWBz9Uh0wzv-RXe8T44P4puQsEnJ84jA2hZyaOnwWtilxln82PCz2GhSJV7knq5GAx2SgOEAeRpiT8I__tms_CYU&quot;);
+                                            "
+                                        ></div>
+                                    </div>
+                                    <p class="text-xs font-medium tracking-wider uppercase">
+                                        3 Commanders Online
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="pointer-events-none absolute top-8 right-8 rotate-12 text-white/5"
+                        >
+                            <span class="material-symbols-outlined text-[120px]">trophy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Bottom Banner: Last Winner -->
+            <div
+                class="flex flex-wrap items-center justify-between gap-6 rounded-2xl border border-white/5 bg-zinc-900/50 p-5"
+            >
+                <div class="flex items-center gap-4">
+                    <span class="material-symbols-outlined text-legendary-orange">history</span>
+                    <div>
+                        <h5 class="text-[10px] font-bold tracking-widest text-white/40 uppercase">
+                            Last Month's Winner
+                        </h5>
+                        <p class="font-bold text-white">God of War Ragnarök</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="text-sm text-white/40">Winner's Bounty:</span>
+                    <div class="flex gap-2">
+                        <span
+                            class="bg-primary/20 text-primary rounded-lg px-3 py-1 text-xs font-bold"
+                            >+500 XP</span
+                        >
+                        <span
+                            class="bg-legendary-orange/20 text-legendary-orange rounded-lg px-3 py-1 text-xs font-bold"
+                            >+200 Gold</span
+                        >
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

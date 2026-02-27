@@ -12,6 +12,9 @@ export async function POST(request: Request) {
         return NextResponse.json(data);
     } catch (err: any) {
         console.error("IGDB API Route Error:", err.message || err);
-        return NextResponse.json({ error: "Internal Server Error", details: err.message }, { status: 500 });
+        return NextResponse.json(
+            { error: "Internal Server Error", details: err.message },
+            { status: 500 },
+        );
     }
 }
