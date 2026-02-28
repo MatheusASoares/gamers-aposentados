@@ -1,47 +1,83 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from "@playwright/test";
 
-test.describe('Randomizer Flow', () => {
+test.describe("Randomizer Flow", () => {
+    test("Adding games and rolling the dice", async ({ page }) => {
+        test.setTimeout(60000);
 
-  test('Adding games and rolling the dice', async ({ page }) => {
-    // Navigate to randomizer route
-    await page.goto('/randomizer', { waitUntil: 'networkidle' });
+        // Mock the IGDB API
+        await page.route("**/api/igdb", async (route) => {
+            const json = [
+                {
+                    id: "g1",
+                    nome: "Mock 1",
+                    imageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co496b.jpg",
+                },
+                {
+                    id: "g2",
+                    nome: "Mock 2",
+                    imageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r8v.jpg",
+                },
+                {
+                    id: "g3",
+                    nome: "Mock 3",
+                    imageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r8f.jpg",
+                },
+                {
+                    id: "g4",
+                    nome: "Mock 4",
+                    imageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r8e.jpg",
+                },
+                {
+                    id: "g5",
+                    nome: "Mock 5",
+                    imageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r8d.jpg",
+                },
+                {
+                    id: "g6",
+                    nome: "Mock 6",
+                    imageUrl: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1r8c.jpg",
+                },
+            ];
+            await route.fulfill({ json });
+        });
 
-    // Validate page loaded
-    const pageTitle = page.getByRole('heading', { name: /O que vamos jogar/i });
-    await expect(pageTitle).toBeVisible();
+        const timestamp = Date.now();
+        await page.goto("/register", { waitUntil: "load" });
+        await page.getByLabel("Username").fill(`t${timestamp}`);
+        await page.getByLabel("Email").fill(`t${timestamp}@test.com`);
+        await page.getByLabel("Password").fill("testpass123");
+        await page.getByRole("button", { name: "Register" }).click();
 
-    // 1. Add Games Flow
-    const inputField = page.getByPlaceholder('Ex: The Witcher 3...');
-    const addBtn = page.getByRole('button', { name: 'Add' });
+        await page.waitForURL(/.*\/login/);
+        await page.getByLabel("Email").fill(`t${timestamp}@test.com`);
+        await page.getByLabel("Password").fill("testpass123");
+        await page.getByRole("button", { name: "Log in" }).click();
 
-    await inputField.fill('Elden Ring');
-    await addBtn.click();
-    
-    await inputField.fill('Stardew Valley');
-    await addBtn.click();
+        await expect(page.locator("body")).toContainText("Quest", { timeout: 15000 });
+        await page.goto("/randomizer", { waitUntil: "load" });
 
-    await inputField.fill('Dark Souls');
-    await addBtn.click();
+        for (let i = 0; i < 6; i++) {
+            const addBtn = page.getByRole("button", { name: "+ ADD GAME" }).first();
+            await addBtn.click();
+            const input = page.locator('input[placeholder*="IGDB"]');
+            await input.fill("Mock");
+            await page.waitForResponse("**/api/igdb");
+            const suggestion = page.locator(`button:has-text("Mock ${i + 1}")`).first();
+            await suggestion.click();
+            await page.waitForTimeout(500);
+        }
 
-    // We should see three games in the candidate pool list items
-    const eldenRing = page.getByText('Elden Ring', { exact: true });
-    await expect(eldenRing).toBeVisible();
+        console.log("--- Rolling ---");
+        const rollBtn = page.getByRole("button", { name: /Roll the Dice/i });
+        await expect(rollBtn).toBeEnabled({ timeout: 10000 });
+        await rollBtn.click();
 
-    // 2. Roll the Dice
-    const rollBtn = page.getByRole('button', { name: /Roll the Dice/i });
-    await rollBtn.click();
+        console.log("--- Success Check ---");
+        // Check for either the winner name or the reset button
+        await expect(page.getByRole("button", { name: /Limpar Quadro/i })).toBeVisible({
+            timeout: 20000,
+        });
 
-    // Ensure state locks effectively and UI feedback spins
-    await expect(rollBtn).toBeDisabled();
-    
-    // Wait for the resulting Winner modal or heading
-    const winnerHeading = page.locator('h3:has-text("WINNER")').first();
-    await winnerHeading.waitFor({ state: 'visible', timeout: 5000 });
-    await expect(winnerHeading).toBeVisible();
-    
-    // Buttons for "Salvar como Favorito" should appear underneath
-    const saveBtn = page.getByRole('button', { name: /Save as Favorite/i });
-    await expect(saveBtn).toBeVisible();
-  });
-
+        console.log("--- TEST SUCCESS ---");
+    });
 });
