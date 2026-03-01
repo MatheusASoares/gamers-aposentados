@@ -45,3 +45,6 @@ next-env.d.ts
 # Playwright Test Output
 /tests/playwright-report/
 /tests/test-results/
+
+# Historical data (CSVs with personal info)
+/data/historical/
