@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import "./globals.css";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 export const metadata = {
     title: "Gamers Aposentados",
@@ -13,6 +14,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <html lang="pt-BR" className="dark" suppressHydrationWarning>
             <body className="bg-background text-foreground font-sans antialiased">
                 <Providers>{children}</Providers>
+                <SpeedInsights />
             </body>
         </html>
     );
