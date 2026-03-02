@@ -412,7 +412,7 @@ export function RandomizerClient({
                             {canAddGames && (isEditing || (savedSnapshot.length === 0 && mySelections.length > 0)) && (
                                 <button
                                     onClick={handleSaveSelections}
-                                    disabled={isSaving || mySelections.length === 0}
+                                    disabled={isSaving}
                                     className={cn(
                                         "mt-2 flex w-full items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold transition-all",
                                         isSaving
@@ -425,7 +425,7 @@ export function RandomizerClient({
                                     ) : (
                                         <Save className="h-4 w-4" />
                                     )}
-                                    {isSaving ? "Salvando..." : "Salvar Seleções"}
+                                    {isSaving ? "Salvando..." : mySelections.length === 0 ? "Limpar Seleções" : "Salvar Seleções"}
                                 </button>
                             )}
                         </div>
