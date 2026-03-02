@@ -1,0 +1,58 @@
+PrismaClientKnownRequestError: 
+Invalid `tx.poolEntry.create()` invocation in
+C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\[root-of-the-server]__25a33235._.js:425:37
+
+  422 // 4. Atrelar os jogos à Pool
+  423 // (A regra de "quem adicionou" está indo o usuário atual para todos nesta V1)
+  424 await Promise.all(savedGames.map((game)=>{
+→ 425     return tx.poolEntry.create(
+Foreign key constraint violated on the constraint: `pool_entries_user_id_fkey`
+Stack:
+PrismaClientKnownRequestError: 
+Invalid `tx.poolEntry.create()` invocation in
+C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\[root-of-the-server]__25a33235._.js:425:37
+
+  422 // 4. Atrelar os jogos à Pool
+  423 // (A regra de "quem adicionou" está indo o usuário atual para todos nesta V1)
+  424 await Promise.all(savedGames.map((game)=>{
+→ 425     return tx.poolEntry.create(
+Foreign key constraint violated on the constraint: `pool_entries_user_id_fkey`
+    at ei.handleRequestError (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\@prisma\client\runtime\library.js:121:7268)
+    at ei.handleAndLogRequestError (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\@prisma\client\runtime\library.js:121:6593)
+    at ei.request (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\@prisma\client\runtime\library.js:121:6300)
+    at async a (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\@prisma\client\runtime\library.js:130:9551)
+    at async Promise.all (index 0)
+    at async C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\[root-of-the-server]__25a33235._.js:424:13
+    at async Proxy._transactionWithCallback (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\@prisma\client\runtime\library.js:130:8120)
+    at async saveRandomizerRoll (C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\[root-of-the-server]__25a33235._.js:335:24)
+    at async executeActionAndPrepareForRender (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:36:3803)
+    at async C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:36:1109
+    at async handleAction (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:34:23616)
+    at async renderToHTMLOrFlightImpl (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:41:42130)
+    at async doRender (C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\node_modules_next_dist_985197dd._.js:3101:28)
+    at async AppPageRouteModule.handleResponse (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\compiled\next-server\app-page-turbo.runtime.dev.js:43:64241)
+    at async handleResponse (C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\node_modules_next_dist_985197dd._.js:3307:32)
+    at async Module.handler (C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\node_modules_next_dist_985197dd._.js:3678:20)
+    at async DevServer.renderToResponseWithComponentsImpl (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\base-server.js:1442:9)
+    at async DevServer.renderPageComponent (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\base-server.js:1494:24)
+    at async DevServer.renderToResponseImpl (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\base-server.js:1544:32)
+    at async DevServer.pipeImpl (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\base-server.js:1038:25)
+    at async NextNodeServer.handleCatchallRenderRequest (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\next-server.js:395:17)
+    at async DevServer.handleRequestImpl (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\base-server.js:929:17)
+    at async C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\dev\next-dev-server.js:387:20
+    at async Span.traceAsyncFn (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\trace\trace.js:157:20)
+    at async DevServer.handleRequest (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\dev\next-dev-server.js:383:24)
+    at async invokeRender (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\lib\router-server.js:248:21)
+    at async handleRequest (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\lib\router-server.js:447:24)
+    at async requestHandlerImpl (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\lib\router-server.js:496:13)
+    at async Server.requestListener (C:\Users\mathe\Desktop\gamers-aposentados\node_modules\next\dist\server\lib\start-server.js:226:13)
+Message:
+
+Invalid `tx.poolEntry.create()` invocation in
+C:\Users\mathe\Desktop\gamers-aposentados\.next\dev\server\chunks\ssr\[root-of-the-server]__25a33235._.js:425:37
+
+  422 // 4. Atrelar os jogos à Pool
+  423 // (A regra de "quem adicionou" está indo o usuário atual para todos nesta V1)
+  424 await Promise.all(savedGames.map((game)=>{
+→ 425     return tx.poolEntry.create(
+Foreign key constraint violated on the constraint: `pool_entries_user_id_fkey`
