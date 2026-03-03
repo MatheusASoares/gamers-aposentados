@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Gamepad2, Info, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { updateQuestProgress, completeQuest, dropQuest } from "@/app/lib/quest-actions";
+import { UserLink } from "@/components/ui/user-link";
 
 interface ActiveQuestHeroProps {
     progress: {
@@ -14,7 +15,7 @@ interface ActiveQuestHeroProps {
             title: string;
             cover_url: string | null;
             hltb_time: number | null;
-            nominator: { name: string | null; username: string | null } | null;
+            nominator: { id: string; name: string | null; username: string | null } | null;
         };
     } | null;
     userName: string;
@@ -137,9 +138,15 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                             <Info className="h-4 w-4" />
                             <p className="text-xs">
                                 Indicado por:{" "}
-                                {progress.game.nominator?.name ??
-                                    progress.game.nominator?.username ??
-                                    "Anônimo"}
+                                {progress.game.nominator ? (
+                                    <UserLink
+                                        userId={progress.game.nominator.id}
+                                        name={progress.game.nominator.name}
+                                        username={progress.game.nominator.username}
+                                    />
+                                ) : (
+                                    "Anônimo"
+                                )}
                             </p>
                         </div>
                     </div>

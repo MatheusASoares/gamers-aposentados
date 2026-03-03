@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Flame, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { updateQuestProgress, completeQuest, dropQuest } from "@/app/lib/quest-actions";
+import { UserLink } from "@/components/ui/user-link";
 
 interface SideQuestBarProps {
     progress: {
@@ -14,7 +15,7 @@ interface SideQuestBarProps {
             title: string;
             cover_url: string | null;
             hltb_time: number | null;
-            nominator: { name: string | null; username: string | null } | null;
+            nominator: { id: string; name: string | null; username: string | null } | null;
         };
     } | null;
 }
@@ -121,11 +122,15 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                         </h3>
                         <p className="text-sm font-medium text-zinc-400">
                             Indicado por:{" "}
-                            <span className="text-white">
-                                {progress.game.nominator?.name ??
-                                    progress.game.nominator?.username ??
-                                    "Desconhecido"}
-                            </span>
+                            {progress.game.nominator ? (
+                                <UserLink
+                                    userId={progress.game.nominator.id}
+                                    name={progress.game.nominator.name}
+                                    username={progress.game.nominator.username}
+                                />
+                            ) : (
+                                <span className="text-white">Desconhecido</span>
+                            )}
                         </p>
                     </div>
 

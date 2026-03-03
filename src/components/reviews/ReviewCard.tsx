@@ -4,6 +4,7 @@ import { ArrowRight, Calendar, Edit, Share2, User, Trash2, Check } from "lucide-
 import { format } from "date-fns";
 import { deleteReview } from "@/app/lib/review-actions";
 import { EditReviewModal } from "./EditReviewModal";
+import { UserLink } from "@/components/ui/user-link";
 
 export interface ReviewCardProps {
     review: {
@@ -94,7 +95,14 @@ export function ReviewCard({ review, currentUserId }: ReviewCardProps) {
                 <div className="mb-5 flex items-center gap-2 text-sm font-medium text-zinc-400">
                     <User className="h-4 w-4 text-zinc-500" />
                     <span>
-                        Review by <strong className="text-zinc-200">{reviewerName}</strong>
+                        Review by{" "}
+                        <strong className="text-zinc-200">
+                            <UserLink
+                                userId={review.user_id}
+                                name={review.user.name}
+                                username={review.user.username}
+                            />
+                        </strong>
                     </span>
                     <span className="mx-1.5 text-zinc-600">•</span>
                     <Calendar className="h-4 w-4 text-zinc-500" />

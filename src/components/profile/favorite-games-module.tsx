@@ -9,9 +9,10 @@ import { Button } from "@/components/ui/button";
 
 interface FavoriteGamesModuleProps {
     initialFavorites: Game[];
+    isOwner?: boolean;
 }
 
-export function FavoriteGamesModule({ initialFavorites }: FavoriteGamesModuleProps) {
+export function FavoriteGamesModule({ initialFavorites, isOwner = true }: FavoriteGamesModuleProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [isPending, startTransition] = useTransition();
     const [favorites, setFavorites] = useState<GameSearchResult[]>(
@@ -65,43 +66,45 @@ export function FavoriteGamesModule({ initialFavorites }: FavoriteGamesModulePro
                     <Heart className="text-primary fill-primary h-5 w-5" />
                     Top 3 Games
                 </h2>
-                {!isEditing ? (
-                    <button
-                        onClick={() => setIsEditing(true)}
-                        className="text-zinc-500 transition-colors hover:text-white"
-                    >
-                        <Edit2 className="h-4 w-4" />
-                    </button>
-                ) : (
-                    <div className="flex gap-2">
+                {isOwner && (
+                    !isEditing ? (
                         <button
-                            onClick={() => {
-                                setFavorites(
-                                    initialFavorites.map((g) => ({
-                                        id: g.id,
-                                        nome: g.title,
-                                        imageUrl: g.cover_url || "",
-                                    })),
-                                );
-                                setIsEditing(false);
-                            }}
-                            className="p-1 text-zinc-500 hover:text-red-400 disabled:opacity-50"
-                            disabled={isPending}
+                            onClick={() => setIsEditing(true)}
+                            className="text-zinc-500 transition-colors hover:text-white"
                         >
-                            <X className="h-5 w-5" />
+                            <Edit2 className="h-4 w-4" />
                         </button>
-                        <button
-                            onClick={handleSave}
-                            className="text-primary p-1 hover:text-white disabled:opacity-50"
-                            disabled={isPending}
-                        >
-                            {isPending ? (
-                                <Loader2 className="h-5 w-5 animate-spin" />
-                            ) : (
-                                <Check className="h-5 w-5" />
-                            )}
-                        </button>
-                    </div>
+                    ) : (
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => {
+                                    setFavorites(
+                                        initialFavorites.map((g) => ({
+                                            id: g.id,
+                                            nome: g.title,
+                                            imageUrl: g.cover_url || "",
+                                        })),
+                                    );
+                                    setIsEditing(false);
+                                }}
+                                className="p-1 text-zinc-500 hover:text-red-400 disabled:opacity-50"
+                                disabled={isPending}
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                            <button
+                                onClick={handleSave}
+                                className="text-primary p-1 hover:text-white disabled:opacity-50"
+                                disabled={isPending}
+                            >
+                                {isPending ? (
+                                    <Loader2 className="h-5 w-5 animate-spin" />
+                                ) : (
+                                    <Check className="h-5 w-5" />
+                                )}
+                            </button>
+                        </div>
+                    )
                 )}
             </div>
 

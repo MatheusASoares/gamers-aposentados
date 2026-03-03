@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Clock, User, ChevronRight, Gamepad2 } from "lucide-react";
+import { UserLink } from "@/components/ui/user-link";
 
 interface RecentGame {
     id: string;
@@ -12,7 +13,7 @@ interface RecentGame {
         quest_type: string;
         cover_url: string | null;
         hltb_time: number | null;
-        nominator: { name: string | null; username: string | null } | null;
+        nominator: { id: string; name: string | null; username: string | null } | null;
     };
 }
 
@@ -121,9 +122,11 @@ export function RecentGames({ games }: RecentGamesProps) {
                                     {game.game.nominator && (
                                         <span className="flex items-center gap-1.5 text-xs font-medium">
                                             <User className="h-3.5 w-3.5" />
-                                            {game.game.nominator.name ??
-                                                game.game.nominator.username ??
-                                                "Anônimo"}
+                                            <UserLink
+                                                userId={game.game.nominator.id}
+                                                name={game.game.nominator.name}
+                                                username={game.game.nominator.username}
+                                            />
                                         </span>
                                     )}
                                     {game.game.hltb_time && (

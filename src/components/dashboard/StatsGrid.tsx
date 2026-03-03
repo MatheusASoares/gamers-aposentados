@@ -1,12 +1,13 @@
 import { Star, BookOpen, Quote } from "lucide-react";
 import Image from "next/image";
+import { UserLink } from "@/components/ui/user-link";
 
 interface StatsGridProps {
     lastReview: {
         rating: number;
         review_text: string | null;
         game: { title: string; cover_url: string | null };
-        user: { name: string | null; username: string | null };
+        user: { id: string; name: string | null; username: string | null };
     } | null;
 }
 
@@ -82,7 +83,11 @@ export function StatsGrid({ lastReview }: StatsGridProps) {
                         <p className="text-sm font-bold tracking-widest text-zinc-500 uppercase">
                             por{" "}
                             <span className="ml-1 rounded-md bg-zinc-800/50 px-2 py-1 text-white">
-                                {lastReview.user.name ?? lastReview.user.username ?? "Anônimo"}
+                                <UserLink
+                                    userId={lastReview.user.id}
+                                    name={lastReview.user.name}
+                                    username={lastReview.user.username}
+                                />
                             </span>
                         </p>
                         <button className="flex items-center gap-1 rounded-lg bg-[#bd0df2]/10 px-4 py-2 text-sm font-black tracking-widest text-[#bd0df2] uppercase transition-colors hover:bg-[#bd0df2]/20 hover:underline">
