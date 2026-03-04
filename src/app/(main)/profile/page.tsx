@@ -7,7 +7,7 @@ export default async function ProfilePage() {
         redirect("/login");
     }
 
-    // Redirect to the dynamic user profile route
-    redirect(`/profile/${session.user.id}`);
+    // Redirect to the dynamic user profile route using username if available, else id
+    const identifier = session.user.username || session.user.id;
+    redirect(`/profile/${identifier}`);
 }
-

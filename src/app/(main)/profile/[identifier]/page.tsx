@@ -9,23 +9,27 @@ import { Separator } from "@/components/ui/separator";
 // Em Next.js App Router (15+), `params` em Server Components costuma precisar de await ou desestruturação async
 // Como estamos usando RSC padrão, `params` é uma Promise.
 interface ProfilePageProps {
-    params: Promise<{ id: string }>;
+    params: Promise<{ identifier: string }>;
 }
 
 export default async function ProfilePage({ params }: ProfilePageProps) {
     const session = await auth();
-    const { id } = await params;
+    const { identifier } = await params;
 
     if (!session?.user?.id) {
         redirect("/login");
     }
 
     const currentUserId = session.user.id;
-    const isOwner = currentUserId === id;
 
     // Fetch user with favorite games
-    const user = await prisma.user.findUnique({
-        where: { id },
+    const user = await prisma.user.findFirst({
+        where: {
+            OR: [
+                { id: identifier },
+                { username: identifier }
+            ]
+        },
         include: {
             favoriteGames: true,
         },
@@ -35,14 +39,16 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
         notFound();
     }
 
+    const isOwner = currentUserId === user.id;
+
     // Fetch stats
     const completedGamesCount = await prisma.gameProgress.count({
-        where: { user_id: id, status: "COMPLETED" },
+        where: { user_id: user.id, status: "COMPLETED" },
     });
 
     // Fetch recent reviews
     const recentReviews = await prisma.review.findMany({
-        where: { user_id: id },
+        where: { user_id: user.id },
         orderBy: { created_at: "desc" },
         take: 3,
         include: { game: true },

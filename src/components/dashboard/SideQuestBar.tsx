@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Flame, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { updateQuestProgress, completeQuest, dropQuest } from "@/app/lib/quest-actions";
+import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
 import { UserLink } from "@/components/ui/user-link";
 
 interface SideQuestBarProps {
@@ -18,15 +18,26 @@ interface SideQuestBarProps {
             nominator: { id: string; name: string | null; username: string | null } | null;
         };
     } | null;
+    activePool?: {
+        winner_game: null | {
+            id: string;
+            title: string;
+            cover_url: string | null;
+            hltb_time: number | null;
+            nominator: { id: string; name: string | null; username: string | null } | null;
+        };
+    } | null;
 }
 
-export function SideQuestBar({ progress }: SideQuestBarProps) {
+export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
     const router = useRouter();
     const [isUpdating, setIsUpdating] = useState(false);
     const [percentage, setPercentage] = useState(progress?.progress_percentage || 0);
     const [isLoading, setIsLoading] = useState(false);
 
-    if (!progress) {
+    const game = progress?.game || activePool?.winner_game;
+
+    if (!game) {
         return (
             <div
                 className="glass-card animate-fade-in-up group flex h-full min-h-[400px] flex-col overflow-hidden border-t-4 border-t-zinc-700 opacity-60"
@@ -54,14 +65,14 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
     }
 
     const getThemeClasses = () => {
-        if (progress.status === "COMPLETED")
+        if (progress?.status === "COMPLETED")
             return {
                 border: "border-t-green-500 hover:border-green-500/50 shadow-[0_0_20px_rgba(34,197,94,0.15)]",
                 text: "text-green-500",
                 bg: "bg-green-500",
                 badge: "bg-green-500/20 border-green-500/50 text-green-500",
             };
-        if (progress.status === "DROPPED")
+        if (progress?.status === "DROPPED")
             return {
                 border: "border-t-red-500 hover:border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.15)]",
                 text: "text-red-500",
@@ -84,17 +95,17 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
         >
             {/* Cover Image Side (Top Banner) */}
             <div className="relative flex h-48 w-full flex-shrink-0 items-center justify-center overflow-hidden bg-zinc-950/80 sm:h-64">
-                {progress.game.cover_url ? (
+                {game.cover_url ? (
                     <>
                         <div
                             className="absolute inset-0 scale-110 transform bg-cover bg-center opacity-40 blur-xl"
-                            style={{ backgroundImage: `url(${progress.game.cover_url})` }}
+                            style={{ backgroundImage: `url(${game.cover_url})` }}
                         />
                         <div className="relative z-10 mt-8 h-44 w-32 overflow-hidden rounded-lg border border-white/10 shadow-[0_0_40px_rgba(189,13,242,0.4)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
                             <img
-                                alt={progress.game.title}
+                                alt={game.title}
                                 className="h-full w-full object-cover"
-                                src={progress.game.cover_url}
+                                src={game.cover_url}
                             />
                         </div>
                     </>
@@ -118,15 +129,15 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                             </span>
                         </div>
                         <h3 className="text-3xl leading-tight font-black text-white">
-                            {progress.game.title}
+                            {game.title}
                         </h3>
                         <p className="text-sm font-medium text-zinc-400">
                             Indicado por:{" "}
-                            {progress.game.nominator ? (
+                            {game.nominator ? (
                                 <UserLink
-                                    userId={progress.game.nominator.id}
-                                    name={progress.game.nominator.name}
-                                    username={progress.game.nominator.username}
+                                    userId={game.nominator.id}
+                                    name={game.nominator.name}
+                                    username={game.nominator.username}
                                 />
                             ) : (
                                 <span className="text-white">Desconhecido</span>
@@ -135,36 +146,65 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                     </div>
 
                     {/* Progress & HLTB Time */}
-                    <div className="space-y-3 pt-3">
-                        <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
-                            <span>
-                                Progresso{" "}
-                                {progress.status === "COMPLETED"
-                                    ? "Finalizado"
-                                    : progress.status === "DROPPED"
-                                      ? "Dropado"
-                                      : "Atual"}{" "}
-                                <span className="text-zinc-300">
-                                    ({progress.progress_percentage}%)
+                    {progress ? (
+                        <div className="space-y-3 pt-3">
+                            <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                                <span>
+                                    Progresso{" "}
+                                    {progress.status === "COMPLETED"
+                                        ? "Finalizado"
+                                        : progress.status === "DROPPED"
+                                          ? "Dropado"
+                                          : "Atual"}{" "}
+                                    <span className="text-zinc-300">
+                                        ({progress.progress_percentage}%)
+                                    </span>
                                 </span>
-                            </span>
-                            {progress.game.hltb_time && (
-                                <span className={theme.text}>
-                                    HLTB: ~{progress.game.hltb_time}h
+                                {game.hltb_time && (
+                                    <span className={theme.text}>
+                                        HLTB: ~{game.hltb_time}h
+                                    </span>
+                                )}
+                            </div>
+                            <div className="h-4 overflow-hidden rounded-full border border-zinc-800/50 bg-zinc-900">
+                                <div
+                                    className={`h-full ${theme.bg} progress-glow rounded-full transition-all duration-1000`}
+                                    style={{ width: `${progress.progress_percentage}%` }}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="pt-3">
+                            {game.hltb_time && (
+                                <span className={`text-xs font-bold tracking-wider uppercase ${theme.text}`}>
+                                    HLTB: ~{game.hltb_time}h
                                 </span>
                             )}
                         </div>
-                        <div className="h-4 overflow-hidden rounded-full border border-zinc-800/50 bg-zinc-900">
-                            <div
-                                className={`h-full ${theme.bg} progress-glow rounded-full transition-all duration-1000`}
-                                style={{ width: `${progress.progress_percentage}%` }}
-                            />
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 <div className="mt-6 flex flex-col gap-2">
-                    {!isUpdating && progress.status === "COMPLETED" ? (
+                    {!progress ? (
+                        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-zinc-900/40 py-6">
+                            <p className="text-center text-sm font-medium text-zinc-400 px-4">
+                                Você não está participando desta quest com a comunidade.
+                            </p>
+                            <button
+                                disabled={isLoading}
+                                onClick={async () => {
+                                    setIsLoading(true);
+                                    const res = await joinQuest(game.id);
+                                    if (!res.success) alert(res.error);
+                                    else window.location.reload();
+                                    setIsLoading(false);
+                                }}
+                                className={`mt-2 ${theme.bg} rounded-xl px-8 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.3)] transition-all hover:scale-105 disabled:opacity-50`}
+                            >
+                                Entrar na Quest
+                            </button>
+                        </div>
+                    ) : !isUpdating && progress.status === "COMPLETED" ? (
                         <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-green-500/20 bg-green-500/10 py-6">
                             <CheckCircle className="mb-1 h-10 w-10 text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
                             <p className="text-center text-xl font-black text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.3)]">
@@ -222,7 +262,7 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                                     onClick={async () => {
                                         setIsLoading(true);
                                         const res = await updateQuestProgress(
-                                            progress.game.id,
+                                            game.id,
                                             percentage,
                                         );
                                         if (!res.success) {
@@ -240,7 +280,7 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                                 <button
                                     onClick={() => {
                                         setIsUpdating(false);
-                                        setPercentage(progress.progress_percentage);
+                                        setPercentage(progress?.progress_percentage || 0);
                                     }}
                                     className="rounded-xl bg-zinc-800 px-6 py-3 text-sm font-bold text-white transition-all hover:bg-zinc-700"
                                 >
@@ -262,7 +302,7 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                                     disabled={isLoading}
                                     onClick={async () => {
                                         setIsLoading(true);
-                                        const res = await completeQuest(progress.game.id);
+                                        const res = await completeQuest(game.id);
                                         if (!res.success) {
                                             alert(res.error || "Erro ao completar a quest.");
                                         } else {
@@ -279,7 +319,7 @@ export function SideQuestBar({ progress }: SideQuestBarProps) {
                                     disabled={isLoading}
                                     onClick={async () => {
                                         setIsLoading(true);
-                                        const res = await dropQuest(progress.game.id);
+                                        const res = await dropQuest(game.id);
                                         if (!res.success) {
                                             alert(res.error || "Erro ao dropar a quest.");
                                         } else {

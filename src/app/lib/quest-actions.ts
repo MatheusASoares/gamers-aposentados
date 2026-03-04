@@ -165,3 +165,26 @@ export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST"
         return { locked: true, message: "Erro de validação do banco." };
     }
 }
+
+export async function joinQuest(gameId: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+    try {
+        await prisma.gameProgress.create({
+            data: {
+                user_id: session.user.id,
+                game_id: gameId,
+                status: "ACTIVE",
+                progress_percentage: 0,
+                start_date: new Date(),
+            },
+        });
+
+        revalidatePath("/");
+        return { success: true };
+    } catch (e: any) {
+        console.error("Error joining quest:", e);
+        return { success: false, error: "Este jogo já está na sua lista ou ocorreu um erro." };
+    }
+}

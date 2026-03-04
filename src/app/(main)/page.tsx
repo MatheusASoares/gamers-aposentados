@@ -59,10 +59,14 @@ export default async function DashboardPage() {
             {/* Row 1: Active Quests */}
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <ActiveQuestHero
+                    activePool={latestMainPool}
                     progress={mainQuestProgress}
                     userName={session?.user?.name ?? "Comandante"}
                 />
-                <SideQuestBar progress={sideQuestProgress} />
+                <SideQuestBar 
+                    activePool={latestSidePool}
+                    progress={sideQuestProgress} 
+                />
             </div>
 
             {/* Row 3: Stats Cards Grid */}

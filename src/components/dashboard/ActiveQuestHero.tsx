@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Gamepad2, Info, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { updateQuestProgress, completeQuest, dropQuest } from "@/app/lib/quest-actions";
+import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
 import { UserLink } from "@/components/ui/user-link";
 
 interface ActiveQuestHeroProps {
@@ -11,6 +11,15 @@ interface ActiveQuestHeroProps {
         status: string;
         progress_percentage: number;
         game: {
+            id: string;
+            title: string;
+            cover_url: string | null;
+            hltb_time: number | null;
+            nominator: { id: string; name: string | null; username: string | null } | null;
+        };
+    } | null;
+    activePool?: {
+        winner_game: null | {
             id: string;
             title: string;
             cover_url: string | null;
@@ -31,13 +40,15 @@ function getTimeSince(date: Date | null): string {
     return `Há ${days} dias`;
 }
 
-export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
+export function ActiveQuestHero({ progress, activePool, userName }: ActiveQuestHeroProps) {
     const router = useRouter();
     const [isUpdating, setIsUpdating] = useState(false);
     const [percentage, setPercentage] = useState(progress?.progress_percentage || 0);
     const [isLoading, setIsLoading] = useState(false);
 
-    if (!progress) {
+    const game = progress?.game || activePool?.winner_game;
+
+    if (!game) {
         return (
             <div
                 className="glass-card animate-fade-in-up overflow-hidden"
@@ -67,14 +78,14 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
     }
 
     const getThemeClasses = () => {
-        if (progress.status === "COMPLETED")
+        if (progress?.status === "COMPLETED")
             return {
                 border: "border-t-green-500 hover:border-green-500/50 shadow-[0_0_20px_rgba(34,197,94,0.15)]",
                 text: "text-green-500",
                 bg: "bg-green-500",
                 badge: "bg-green-500/20 border-green-500/50 text-green-500",
             };
-        if (progress.status === "DROPPED")
+        if (progress?.status === "DROPPED")
             return {
                 border: "border-t-red-500 hover:border-red-500/50 shadow-[0_0_20px_rgba(239,68,68,0.15)]",
                 text: "text-red-500",
@@ -97,19 +108,19 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
         >
             {/* Cover Image Side (Top Banner) */}
             <div className="relative flex h-48 w-full flex-shrink-0 items-center justify-center overflow-hidden bg-zinc-950/80 sm:h-64">
-                {progress.game.cover_url ? (
+                {game.cover_url ? (
                     <>
                         {/* Blurred backdrop */}
                         <div
                             className="absolute inset-0 scale-110 transform bg-cover bg-center opacity-40 blur-xl"
-                            style={{ backgroundImage: `url(${progress.game.cover_url})` }}
+                            style={{ backgroundImage: `url(${game.cover_url})` }}
                         />
                         {/* Crisp Box Art */}
                         <div className="relative z-10 mt-8 h-44 w-32 overflow-hidden rounded-lg border border-white/10 shadow-[0_0_40px_rgba(189,13,242,0.4)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
                             <img
-                                alt={progress.game.title}
+                                alt={game.title}
                                 className="h-full w-full object-cover"
-                                src={progress.game.cover_url}
+                                src={game.cover_url}
                             />
                         </div>
                     </>
@@ -133,16 +144,16 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                                 Main Quest
                             </span>
                         </div>
-                        <h2 className="text-3xl font-black text-white">{progress.game.title}</h2>
+                        <h2 className="text-3xl font-black text-white">{game.title}</h2>
                         <div className="mt-1 flex items-center gap-2 text-zinc-400">
                             <Info className="h-4 w-4" />
                             <p className="text-xs">
                                 Indicado por:{" "}
-                                {progress.game.nominator ? (
+                                {game.nominator ? (
                                     <UserLink
-                                        userId={progress.game.nominator.id}
-                                        name={progress.game.nominator.name}
-                                        username={progress.game.nominator.username}
+                                        userId={game.nominator.id}
+                                        name={game.nominator.name}
+                                        username={game.nominator.username}
                                     />
                                 ) : (
                                     "Anônimo"
@@ -152,35 +163,64 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                     </div>
 
                     {/* Progress Bar & HLTB */}
-                    <div className="space-y-3 pt-2">
-                        <div className="flex justify-between text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
-                            <span>
-                                Progresso{" "}
-                                {progress.status === "COMPLETED"
-                                    ? "Finalizado"
-                                    : progress.status === "DROPPED"
-                                      ? "Dropado"
-                                      : "Atual"}{" "}
-                                ({progress.progress_percentage}%)
-                            </span>
-                            {progress.game.hltb_time && (
-                                <span className={theme.text}>
-                                    HLTB: ~{progress.game.hltb_time}h
+                    {progress ? (
+                        <div className="space-y-3 pt-2">
+                            <div className="flex justify-between text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
+                                <span>
+                                    Progresso{" "}
+                                    {progress.status === "COMPLETED"
+                                        ? "Finalizado"
+                                        : progress.status === "DROPPED"
+                                          ? "Dropado"
+                                          : "Atual"}{" "}
+                                    ({progress.progress_percentage}%)
+                                </span>
+                                {game.hltb_time && (
+                                    <span className={theme.text}>
+                                        HLTB: ~{game.hltb_time}h
+                                    </span>
+                                )}
+                            </div>
+                            <div className="h-3 overflow-hidden rounded-full bg-zinc-900">
+                                <div
+                                    className={`h-full ${theme.bg} progress-glow rounded-full transition-all duration-1000`}
+                                    style={{ width: `${progress.progress_percentage}%` }}
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="pt-2">
+                            {game.hltb_time && (
+                                <span className={`text-[11px] font-bold tracking-wider uppercase ${theme.text}`}>
+                                    HLTB: ~{game.hltb_time}h
                                 </span>
                             )}
                         </div>
-                        <div className="h-3 overflow-hidden rounded-full bg-zinc-900">
-                            <div
-                                className={`h-full ${theme.bg} progress-glow rounded-full transition-all duration-1000`}
-                                style={{ width: `${progress.progress_percentage}%` }}
-                            />
-                        </div>
-                    </div>
+                    )}
                 </div>
 
                 {/* Actions Buttons */}
                 <div className="mt-8 flex flex-col gap-3">
-                    {!isUpdating && progress.status === "COMPLETED" ? (
+                    {!progress ? (
+                        <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-zinc-900/40 py-6">
+                            <p className="text-center text-sm font-medium text-zinc-400 px-4">
+                                Você não está participando desta quest com a comunidade.
+                            </p>
+                            <button
+                                disabled={isLoading}
+                                onClick={async () => {
+                                    setIsLoading(true);
+                                    const res = await joinQuest(game.id);
+                                    if (!res.success) alert(res.error);
+                                    else window.location.reload();
+                                    setIsLoading(false);
+                                }}
+                                className={`mt-2 ${theme.bg} rounded-xl px-8 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.3)] transition-all hover:scale-105 disabled:opacity-50`}
+                            >
+                                Entrar na Quest
+                            </button>
+                        </div>
+                    ) : !isUpdating && progress.status === "COMPLETED" ? (
                         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-green-500/20 bg-green-500/10 py-6">
                             <CheckCircle className="mb-2 h-10 w-10 text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" />
                             <p className="text-center text-xl font-black text-green-500 drop-shadow-[0_0_8px_rgba(34,197,94,0.3)]">
@@ -238,7 +278,7 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                                     onClick={async () => {
                                         setIsLoading(true);
                                         const res = await updateQuestProgress(
-                                            progress.game.id,
+                                            game.id,
                                             percentage,
                                         );
                                         if (!res.success) {
@@ -256,7 +296,7 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                                 <button
                                     onClick={() => {
                                         setIsUpdating(false);
-                                        setPercentage(progress.progress_percentage);
+                                        setPercentage(progress?.progress_percentage || 0);
                                     }}
                                     className="rounded-xl bg-zinc-800 px-5 py-3 text-sm font-bold text-white transition-all hover:bg-zinc-700"
                                 >
@@ -278,7 +318,7 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                                     disabled={isLoading}
                                     onClick={async () => {
                                         setIsLoading(true);
-                                        const res = await completeQuest(progress.game.id);
+                                        const res = await completeQuest(game.id);
                                         if (!res.success) {
                                             alert(res.error || "Erro ao completar a quest.");
                                         } else {
@@ -295,7 +335,7 @@ export function ActiveQuestHero({ progress, userName }: ActiveQuestHeroProps) {
                                     disabled={isLoading}
                                     onClick={async () => {
                                         setIsLoading(true);
-                                        const res = await dropQuest(progress.game.id);
+                                        const res = await dropQuest(game.id);
                                         if (!res.success) {
                                             alert(res.error || "Erro ao dropar a quest.");
                                         } else {
