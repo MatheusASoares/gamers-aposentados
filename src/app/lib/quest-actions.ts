@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
 export async function updateQuestProgress(gameId: string, percentage: number) {
     const session = await auth();
@@ -140,10 +141,16 @@ export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST"
         const activeGameId = lastPool.winner_game_id;
 
         // Verifica se algum usuário ainda está com esse jogo ACTIVE
+        // Agora filtra apenas pelos jogadores oficiais do Randomizer (Matheus e Lucas)
         const activeProgresses = await prisma.gameProgress.findMany({
             where: {
                 game_id: activeGameId,
                 status: "ACTIVE",
+                user: {
+                    email: {
+                        in: RANDOMIZER_PLAYER_EMAILS,
+                    },
+                },
             },
             include: { user: true },
         });
