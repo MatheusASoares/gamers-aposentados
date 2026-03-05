@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { ActiveQuestHero } from "@/components/dashboard/ActiveQuestHero";
 import { SideQuestBar } from "@/components/dashboard/SideQuestBar";
 import { StatsGrid } from "@/components/dashboard/StatsGrid";
-import { RecentGames } from "@/components/dashboard/RecentGames";
+import { RecentActivity, ActivityEvent } from "@/components/dashboard/RecentGames";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     ]);
 
     // Parallel data fetching for user progress based on current pools
-    const [mainQuestProgress, sideQuestProgress, recentGames, lastReview] = await Promise.all([
+    const [mainQuestProgress, sideQuestProgress, lastReview] = await Promise.all([
         latestMainPool?.winner_game_id
             ? prisma.gameProgress.findUnique({
                   where: {
@@ -42,17 +42,93 @@ export default async function DashboardPage() {
                   include: { game: { include: { nominator: true } } },
               })
             : null,
-        prisma.gameProgress.findMany({
-            where: { user_id: userId },
-            take: 4,
-            orderBy: { updated_at: "desc" },
-            include: { game: { include: { nominator: true } } },
-        }),
         prisma.review.findFirst({
             orderBy: { created_at: "desc" },
             include: { game: true, user: true },
         }),
     ]);
+
+    // ---- Recent Activity Feed (global — all players) ---------------------
+    const [recentPools, recentReviews, recentProgress] = await Promise.all([
+        // Raffle results only (pools that have a winner)
+        prisma.pool.findMany({
+            where: { winner_game_id: { not: null } },
+            orderBy: { created_at: "desc" },
+            take: 5,
+            include: { winner_game: true },
+        }),
+        // Latest reviews from all players
+        prisma.review.findMany({
+            orderBy: { created_at: "desc" },
+            take: 5,
+            include: { game: true, user: true },
+        }),
+        // Latest active/completed progress from all players
+        prisma.gameProgress.findMany({
+            where: { status: { in: ["ACTIVE", "COMPLETED"] } },
+            orderBy: { updated_at: "desc" },
+            take: 10,
+            include: { game: true, user: true },
+        }),
+    ]);
+
+    // Build unified sorted event feed
+    const rawEvents: ActivityEvent[] = [
+        ...recentPools
+            .filter((p) => p.winner_game !== null)
+            .map((p) => ({
+                kind: "RAFFLE" as const,
+                date: p.created_at,
+                game: {
+                    id: p.winner_game!.id,
+                    title: p.winner_game!.title,
+                    cover_url: p.winner_game!.cover_url,
+                    quest_type: p.type,
+                },
+                poolType: p.type,
+            })),
+        ...recentReviews.map((r) => ({
+            kind: "REVIEW" as const,
+            date: r.created_at,
+            game: {
+                id: r.game.id,
+                title: r.game.title,
+                cover_url: r.game.cover_url,
+                quest_type: r.game.quest_type,
+            },
+            user: { id: r.user.id, name: r.user.name, username: r.user.username },
+            rating: r.rating,
+        })),
+        ...recentProgress
+            .filter((p) => p.status === "COMPLETED")
+            .map((p) => ({
+                kind: "COMPLETED" as const,
+                date: p.updated_at,
+                game: {
+                    id: p.game.id,
+                    title: p.game.title,
+                    cover_url: p.game.cover_url,
+                    quest_type: p.game.quest_type,
+                },
+                user: { id: p.user.id, name: p.user.name, username: p.user.username },
+            })),
+        ...recentProgress
+            .filter((p) => p.status === "ACTIVE")
+            .map((p) => ({
+                kind: "PROGRESS" as const,
+                date: p.updated_at,
+                game: {
+                    id: p.game.id,
+                    title: p.game.title,
+                    cover_url: p.game.cover_url,
+                    quest_type: p.game.quest_type,
+                },
+                user: { id: p.user.id, name: p.user.name, username: p.user.username },
+                progress_percentage: p.progress_percentage,
+            })),
+    ]
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, 5);
 
     return (
         <div className="mx-auto w-full max-w-[1400px] space-y-8 p-2">
@@ -63,17 +139,14 @@ export default async function DashboardPage() {
                     progress={mainQuestProgress}
                     userName={session?.user?.name ?? "Comandante"}
                 />
-                <SideQuestBar 
-                    activePool={latestSidePool}
-                    progress={sideQuestProgress} 
-                />
+                <SideQuestBar activePool={latestSidePool} progress={sideQuestProgress} />
             </div>
 
             {/* Row 3: Stats Cards Grid */}
             <StatsGrid lastReview={lastReview} />
 
             {/* Row 4: Recent Activity */}
-            <RecentGames games={recentGames} />
+            <RecentActivity events={rawEvents} />
         </div>
     );
 }
