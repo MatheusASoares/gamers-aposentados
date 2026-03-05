@@ -22,7 +22,11 @@ async function getUser(email: string) {
 export const { auth, signIn, signOut, handlers } = NextAuth({
     ...authConfig,
     adapter: PrismaAdapter(prisma),
-    session: { strategy: "jwt" },
+    session: {
+        strategy: "jwt",
+        maxAge: 30 * 24 * 60 * 60, // 30 dias de inatividade
+        updateAge: 24 * 60 * 60, // renova o token 1x por dia
+    },
     providers: [
         Google({
             clientId: process.env.AUTH_GOOGLE_ID,
