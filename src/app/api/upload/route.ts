@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
         const blob = await put(filename, file, {
             access: "public",
-            allowOverwrite: true,
+            addRandomSuffix: true,
         });
 
         console.log("[/api/upload] Success, blob URL:", blob.url);
