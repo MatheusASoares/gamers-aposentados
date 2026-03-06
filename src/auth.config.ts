@@ -27,6 +27,7 @@ export const authConfig = {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
                 session.user.username = token.username as string;
+                session.user.image = (token.image as string) ?? session.user.image;
             }
             return session;
         },
@@ -34,9 +35,11 @@ export const authConfig = {
             if (user) {
                 token.sub = user.id;
                 token.username = user.username;
+                token.image = user.image;
             }
-            if (trigger === "update" && session?.username) {
-                token.username = session.username;
+            if (trigger === "update") {
+                if (session?.username) token.username = session.username;
+                if (session?.image) token.image = session.image;
             }
             return token;
         },

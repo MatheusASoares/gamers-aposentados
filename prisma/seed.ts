@@ -24,7 +24,7 @@ async function getTwitchToken(): Promise<string | null> {
 
     const response = await fetch(
         `https://id.twitch.tv/oauth2/token?client_id=${clientId}&client_secret=${clientSecret}&grant_type=client_credentials`,
-        { method: "POST" }
+        { method: "POST" },
     );
 
     if (!response.ok) {
@@ -90,7 +90,7 @@ async function fetchIGDBCover(title: string): Promise<string | null> {
                 (g.category === 0 || g.category === undefined) &&
                 !g.parent_game &&
                 !g.version_parent &&
-                g.cover?.image_id
+                g.cover?.image_id,
         );
 
         if (baseGame?.cover?.image_id) {
@@ -128,7 +128,7 @@ function parseGame(raw: string): { title: string; platform: string | null } {
 
     // Try pattern: "Title - PLATFORM" or "Title - PLATFORM or PLATFORM"
     const dashMatch = trimmed.match(
-        /^(.+?)\s*[-–]\s*(Steam|Epic|PS1|PS2|PS5|SNES|NES|GBA|3DS|PC|Arcade|Switch|Ps1|Ps2|Ps5|snes|STEAM).*$/i
+        /^(.+?)\s*[-–]\s*(Steam|Epic|PS1|PS2|PS5|SNES|NES|GBA|3DS|PC|Arcade|Switch|Ps1|Ps2|Ps5|snes|STEAM).*$/i,
     );
     if (dashMatch) {
         const title = dashMatch[1].trim();
@@ -141,7 +141,7 @@ function parseGame(raw: string): { title: string; platform: string | null } {
 
     // Try pattern: "Title PLATFORM" (platform at end, preceded by space)
     const suffixMatch = trimmed.match(
-        /^(.+?)\s+(Steam|Epic|PS1|PS2|PS5|SNES|NES|GBA|3DS|PC|Arcade|Switch|Ps1|Ps2|Ps5|snes|STEAM)$/i
+        /^(.+?)\s+(Steam|Epic|PS1|PS2|PS5|SNES|NES|GBA|3DS|PC|Arcade|Switch|Ps1|Ps2|Ps5|snes|STEAM)$/i,
     );
     if (suffixMatch) {
         const title = suffixMatch[1].trim();
@@ -175,7 +175,7 @@ interface PoolData {
     year: number;
     type: QuestType;
     nominations: {
-        player: "matheus" | "lucas" | "yan";
+        player: "matheus" | "lucas" | "ygnos";
         rawGames: string[];
     }[];
     winner: string | null; // raw winner string
@@ -212,7 +212,7 @@ const allPools: PoolData[] = [
                 ],
             },
             {
-                player: "yan",
+                player: "ygnos",
                 rawGames: [
                     "Illusion of Gaia",
                     "Demon's Crest",
@@ -242,12 +242,8 @@ const allPools: PoolData[] = [
                 ],
             },
             {
-                player: "yan",
-                rawGames: [
-                    "Titan Souls - Steam",
-                    "Hero Siege - Steam",
-                    "Besiege - Steam",
-                ],
+                player: "ygnos",
+                rawGames: ["Titan Souls - Steam", "Hero Siege - Steam", "Besiege - Steam"],
             },
         ],
         winner: "HiFi Rush",
@@ -269,13 +265,9 @@ const allPools: PoolData[] = [
             },
             {
                 player: "matheus",
-                rawGames: [
-                    "Chrono Trigger - SNES",
-                    "Sifu - Steam",
-                    "Donkey Kong (1981) - Arcade",
-                ],
+                rawGames: ["Chrono Trigger - SNES", "Sifu - Steam", "Donkey Kong (1981) - Arcade"],
             },
-            { player: "yan", rawGames: [] },
+            { player: "ygnos", rawGames: [] },
         ],
         winner: "Creatures Nightmare PS1",
     },
@@ -286,12 +278,7 @@ const allPools: PoolData[] = [
         nominations: [
             {
                 player: "lucas",
-                rawGames: [
-                    "Batman Arkham City",
-                    "Dead Cells",
-                    "Death Gambit",
-                    "Jack Chan - PS1",
-                ],
+                rawGames: ["Batman Arkham City", "Dead Cells", "Death Gambit", "Jack Chan - PS1"],
             },
             {
                 player: "matheus",
@@ -302,7 +289,7 @@ const allPools: PoolData[] = [
                     "Celeste - Epic",
                 ],
             },
-            { player: "yan", rawGames: [] },
+            { player: "ygnos", rawGames: [] },
         ],
         winner: "Dead Cells",
     },
@@ -329,7 +316,7 @@ const allPools: PoolData[] = [
                     "Detroit Become Human - Steam",
                 ],
             },
-            { player: "yan", rawGames: [] },
+            { player: "ygnos", rawGames: [] },
         ],
         winner: "Detroit Become Human",
     },
@@ -356,7 +343,7 @@ const allPools: PoolData[] = [
                     "The Legend of Zelda - 1987",
                 ],
             },
-            { player: "yan", rawGames: [] },
+            { player: "ygnos", rawGames: [] },
         ],
         winner: "Super Mario Bros. (1985)",
     },
@@ -403,12 +390,7 @@ const allPools: PoolData[] = [
             },
             {
                 player: "matheus",
-                rawGames: [
-                    "Steamworld Dig 2",
-                    "Limbo",
-                    "Celeste - Epic",
-                    "Bioshock",
-                ],
+                rawGames: ["Steamworld Dig 2", "Limbo", "Celeste - Epic", "Bioshock"],
             },
         ],
         winner: "Children of Morta",
@@ -544,11 +526,7 @@ const allPools: PoolData[] = [
             },
             {
                 player: "matheus",
-                rawGames: [
-                    "Celeste - Epic",
-                    "Jusant - Steam",
-                    "Ico - PS2",
-                ],
+                rawGames: ["Celeste - Epic", "Jusant - Steam", "Ico - PS2"],
             },
         ],
         winner: "Gauntlet Seven Sorrows",
@@ -642,17 +620,11 @@ const allPools: PoolData[] = [
         nominations: [
             {
                 player: "lucas",
-                rawGames: [
-                    "Yakuza: Like A Dragon - Steam",
-                    "Mad Max - Steam",
-                ],
+                rawGames: ["Yakuza: Like A Dragon - Steam", "Mad Max - Steam"],
             },
             {
                 player: "matheus",
-                rawGames: [
-                    "Chrono Trigger - Steam",
-                    "Kingdom Come Deliverance - Steam",
-                ],
+                rawGames: ["Chrono Trigger - Steam", "Kingdom Come Deliverance - Steam"],
             },
         ],
         winner: "Mad Max",
@@ -887,23 +859,30 @@ async function main() {
     });
     const lucas = await prisma.user.create({
         data: {
-            username: "lucas",
+            username: "oCobralJhonson",
             email: "lucasedu17gomes@gmail.com",
             name: "Lucas",
         },
     });
-    const yan = await prisma.user.create({
+    const leticia = await prisma.user.create({
         data: {
-            username: "yan",
-            name: "Yan",
-            // No email — inactive player, can't log in
+            username: "lele",
+            email: "lsoares.english@gmail.com",
+            name: "Letícia Soares",
+        },
+    });
+    const ygnos = await prisma.user.create({
+        data: {
+            username: "ygnos",
+            email: "yanhyuuga@gmail.com",
+            name: "Ygnos, The Mage",
         },
     });
 
     const playerMap: Record<string, string> = {
         matheus: matheus.id,
         lucas: lucas.id,
-        yan: yan.id,
+        ygnos: ygnos.id,
     };
 
     // ----------------------------------------------------------
@@ -985,10 +964,7 @@ async function main() {
             if (!winnerGameId) {
                 // Try fuzzy match
                 for (const [key, id] of dbGames) {
-                    if (
-                        key.includes(winnerKey) ||
-                        winnerKey.includes(key)
-                    ) {
+                    if (key.includes(winnerKey) || winnerKey.includes(key)) {
                         winnerGameId = id;
                         break;
                     }
@@ -1041,9 +1017,7 @@ async function main() {
                         });
                         entryCount++;
                     } else {
-                        console.warn(
-                            `   ⚠️ Could not find game: "${parsed.title}" (key: ${key})`
-                        );
+                        console.warn(`   ⚠️ Could not find game: "${parsed.title}" (key: ${key})`);
                     }
                 } else {
                     await prisma.poolEntry.create({
@@ -1059,9 +1033,7 @@ async function main() {
         }
     }
 
-    console.log(
-        `   Created ${poolCount} pools with ${entryCount} entries.`
-    );
+    console.log(`   Created ${poolCount} pools with ${entryCount} entries.`);
 
     // ----------------------------------------------------------
     // 4. CREATE GAME PROGRESS + REVIEWS
@@ -1087,37 +1059,29 @@ async function main() {
         }
 
         if (!gameId) {
-            console.warn(
-                `   ⚠️ Could not find game for review: "${review.gameTitle}"`
-            );
+            console.warn(`   ⚠️ Could not find game for review: "${review.gameTitle}"`);
             continue;
         }
 
         // Process Matheus
-        const matheusStatus: GameStatus =
-            review.matheus === "Yes" ? "COMPLETED" : "DROPPED";
+        const matheusStatus: GameStatus = review.matheus === "Yes" ? "COMPLETED" : "DROPPED";
         await prisma.gameProgress.create({
             data: {
                 user_id: matheus.id,
                 game_id: gameId,
                 status: matheusStatus,
-                progress_percentage:
-                    matheusStatus === "COMPLETED" ? 100 : 0,
+                progress_percentage: matheusStatus === "COMPLETED" ? 100 : 0,
                 start_date: new Date(
                     review.year,
-                    typeof review.month === "number"
-                        ? review.month - 1
-                        : 0,
-                    1
+                    typeof review.month === "number" ? review.month - 1 : 0,
+                    1,
                 ),
                 end_date:
                     matheusStatus === "COMPLETED"
                         ? new Date(
                               review.year,
-                              typeof review.month === "number"
-                                  ? review.month - 1
-                                  : 0,
-                              28
+                              typeof review.month === "number" ? review.month - 1 : 0,
+                              28,
                           )
                         : null,
             },
@@ -1137,30 +1101,24 @@ async function main() {
         }
 
         // Process Lucas
-        const lucasStatus: GameStatus =
-            review.lucas === "Yes" ? "COMPLETED" : "DROPPED";
+        const lucasStatus: GameStatus = review.lucas === "Yes" ? "COMPLETED" : "DROPPED";
         await prisma.gameProgress.create({
             data: {
                 user_id: lucas.id,
                 game_id: gameId,
                 status: lucasStatus,
-                progress_percentage:
-                    lucasStatus === "COMPLETED" ? 100 : 0,
+                progress_percentage: lucasStatus === "COMPLETED" ? 100 : 0,
                 start_date: new Date(
                     review.year,
-                    typeof review.month === "number"
-                        ? review.month - 1
-                        : 0,
-                    1
+                    typeof review.month === "number" ? review.month - 1 : 0,
+                    1,
                 ),
                 end_date:
                     lucasStatus === "COMPLETED"
                         ? new Date(
                               review.year,
-                              typeof review.month === "number"
-                                  ? review.month - 1
-                                  : 0,
-                              28
+                              typeof review.month === "number" ? review.month - 1 : 0,
+                              28,
                           )
                         : null,
             },
@@ -1180,15 +1138,13 @@ async function main() {
         }
     }
 
-    console.log(
-        `   Created ${progressCount} game progress records and ${reviewCount} reviews.`
-    );
+    console.log(`   Created ${progressCount} game progress records and ${reviewCount} reviews.`);
 
     // ----------------------------------------------------------
     // SUMMARY
     // ----------------------------------------------------------
     console.log("\n✅ Seeding complete!");
-    console.log(`   👤 3 users (Matheus, Lucas, Yan)`);
+    console.log(`   👤 4 users (Matheus, Lucas, Letícia, Ygnos)`);
     console.log(`   🎮 ${dbGames.size} unique games`);
     console.log(`   🎲 ${poolCount} pools with ${entryCount} entries`);
     console.log(`   📊 ${progressCount} progress records`);

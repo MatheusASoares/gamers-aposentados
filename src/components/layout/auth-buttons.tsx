@@ -16,6 +16,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSession } from "next-auth/react";
 
 interface AuthButtonsProps {
     user: any; // Using any for now to avoid dragging in session types, improving later
@@ -25,6 +26,10 @@ export function AuthButtons({ user }: AuthButtonsProps) {
     const [loginOpen, setLoginOpen] = useState(false);
     const [registerOpen, setRegisterOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
+
+    // Use the live session image so it updates instantly after Settings saves
+    const { data: session } = useSession();
+    const liveImage = session?.user?.image ?? user?.image;
 
     const openLogin = () => {
         setRegisterOpen(false);
@@ -51,9 +56,9 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                                 </p>
                             </div>
                             <div className="bg-secondary border-border flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border">
-                                {user.image ? (
+                                {liveImage ? (
                                     <img
-                                        src={user.image}
+                                        src={liveImage}
                                         alt={user.name || "User"}
                                         className="h-full w-full object-cover"
                                     />

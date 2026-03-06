@@ -11,6 +11,25 @@ const UpdateProfileSchema = z.object({
     username: z.string().min(3, "Username must be at least 3 characters."),
 });
 
+export async function updateProfileImage(imageUrl: string) {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+    if (!imageUrl.startsWith("https://")) return { success: false, error: "Invalid image URL" };
+
+    try {
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { image: imageUrl },
+        });
+        revalidatePath("/profile");
+        return { success: true };
+    } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        console.error("[updateProfileImage] Error:", msg);
+        return { success: false, error: `DB error: ${msg}` };
+    }
+}
+
 export async function updateProfile(data: z.infer<typeof UpdateProfileSchema>) {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
