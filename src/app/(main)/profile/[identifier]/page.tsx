@@ -1,10 +1,10 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Trophy, Gamepad2, Star, Calendar } from "lucide-react";
 import { FavoriteGamesModule } from "@/components/profile/favorite-games-module";
 import { Separator } from "@/components/ui/separator";
+import { AvatarUpload } from "@/components/profile/avatar-upload";
 
 // Em Next.js App Router (15+), `params` em Server Components costuma precisar de await ou desestruturação async
 // Como estamos usando RSC padrão, `params` é uma Promise.
@@ -25,10 +25,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     // Fetch user with favorite games
     const user = await prisma.user.findFirst({
         where: {
-            OR: [
-                { id: identifier },
-                { username: identifier }
-            ]
+            OR: [{ id: identifier }, { username: identifier }],
         },
         include: {
             favoriteGames: true,
@@ -60,16 +57,12 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
             <div className="relative flex flex-col items-center gap-6 overflow-hidden rounded-3xl border border-white/5 bg-zinc-900/40 p-8 md:flex-row md:items-start">
                 <div className="bg-primary/10 pointer-events-none absolute top-0 right-0 h-64 w-64 rounded-full blur-[100px]"></div>
 
-                <Avatar className="h-32 w-32 border-4 border-zinc-900 shadow-xl">
-                    <AvatarImage
-                        src={user.image || ""}
-                        alt={user.name || "User"}
-                        className="object-cover"
-                    />
-                    <AvatarFallback className="bg-zinc-800 text-4xl text-zinc-400">
-                        {user.name?.charAt(0) || "G"}
-                    </AvatarFallback>
-                </Avatar>
+                <AvatarUpload
+                    currentImage={user.image || null}
+                    name={user.name || null}
+                    isOwner={isOwner}
+                    className="h-32 w-32"
+                />
 
                 <div className="z-10 flex flex-1 flex-col items-center gap-2 md:items-start">
                     <h1 className="text-4xl font-black text-white">{user.name || "Gamer"}</h1>
