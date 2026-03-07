@@ -357,7 +357,9 @@ export function RandomizerClient({
                             </div>
 
                             {/* MY Choices */}
-                            <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10">
+                            <div
+                                className={`flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10 ${addingGame ? "relative z-50" : "relative z-10"}`}
+                            >
                                 <div className="mb-2 flex items-center justify-between">
                                     <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
                                         {currentUserName}&apos;s Choices
