@@ -66,7 +66,9 @@ export function FavoriteGamesModule({
     };
 
     return (
-        <div className="rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10">
+        <div
+            className={`rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10 ${isEditing ? "relative z-50" : "relative z-10"}`}
+        >
             <div className="mb-6 flex items-center justify-between">
                 <h2 className="flex items-center gap-2 text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
                     <Heart className="h-4 w-4 fill-[#bd0df2]/20" />
