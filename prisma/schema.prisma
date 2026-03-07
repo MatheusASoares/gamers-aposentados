@@ -145,6 +145,7 @@ model Review {
   game         Game     @relation(fields: [game_id], references: [id])
 
   created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt @default(now())
 
   @@map("reviews")
 }

@@ -25,7 +25,7 @@ export default async function DashboardPage() {
     ]);
 
     // Parallel data fetching for user progress based on current pools
-    const [mainQuestProgress, sideQuestProgress, lastReview] = await Promise.all([
+    const [mainQuestProgress, sideQuestProgress, recentReviewsForStats] = await Promise.all([
         latestMainPool?.winner_game_id
             ? prisma.gameProgress.findUnique({
                   where: {
@@ -42,8 +42,9 @@ export default async function DashboardPage() {
                   include: { game: { include: { nominator: true } } },
               })
             : null,
-        prisma.review.findFirst({
-            orderBy: { created_at: "desc" },
+        prisma.review.findMany({
+            orderBy: { updated_at: "desc" },
+            take: 5,
             include: { game: true, user: true },
         }),
     ]);
@@ -59,7 +60,7 @@ export default async function DashboardPage() {
         }),
         // Latest reviews from all players
         prisma.review.findMany({
-            orderBy: { created_at: "desc" },
+            orderBy: { updated_at: "desc" },
             take: 5,
             include: { game: true, user: true },
         }),
@@ -89,7 +90,7 @@ export default async function DashboardPage() {
             })),
         ...recentReviews.map((r) => ({
             kind: "REVIEW" as const,
-            date: r.created_at,
+            date: r.updated_at,
             game: {
                 id: r.game.id,
                 title: r.game.title,
@@ -143,7 +144,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Row 3: Stats Cards Grid */}
-            <StatsGrid lastReview={lastReview} />
+            <StatsGrid reviews={recentReviewsForStats} />
 
             {/* Row 4: Recent Activity */}
             <RecentActivity events={rawEvents} />

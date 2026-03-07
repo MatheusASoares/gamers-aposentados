@@ -44,18 +44,19 @@ export function Sidebar({ className }: SidebarProps) {
                         Aposentados
                     </h2>
                 </Link>
-                <div className="px-3 py-2">
-                    <nav className="space-y-1">
+                <div className="mt-4 px-3 py-2">
+                    <nav className="space-y-3">
                         <Link href="/" passHref>
                             <Button
-                                variant={isActive("/") ? "secondary" : "ghost"}
+                                variant="ghost"
                                 className={cn(
-                                    "w-full justify-start gap-2",
-                                    isActive("/") &&
-                                        "bg-primary/10 text-primary hover:bg-primary/20",
+                                    "h-12 w-full justify-start gap-3 rounded-xl text-base font-medium transition-all",
+                                    isActive("/")
+                                        ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                                 )}
                             >
-                                <LayoutDashboard className="h-4 w-4" />
+                                <LayoutDashboard className="h-5 w-5" />
                                 Dashboard
                             </Button>
                         </Link>
@@ -70,27 +71,29 @@ export function Sidebar({ className }: SidebarProps) {
                         </Link> */}
                         <Link href="/reviews" passHref>
                             <Button
-                                variant={isActive("/reviews") ? "secondary" : "ghost"}
+                                variant="ghost"
                                 className={cn(
-                                    "w-full justify-start gap-2",
-                                    isActive("/reviews") &&
-                                        "bg-primary/10 text-primary hover:bg-primary/20",
+                                    "h-12 w-full justify-start gap-3 rounded-xl text-base font-medium transition-all",
+                                    isActive("/reviews")
+                                        ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                                 )}
                             >
-                                <History className="h-4 w-4" />
+                                <History className="h-5 w-5" />
                                 Reviews
                             </Button>
                         </Link>
                         <Link href="/randomizer" passHref>
                             <Button
-                                variant={isActive("/randomizer") ? "secondary" : "ghost"}
+                                variant="ghost"
                                 className={cn(
-                                    "w-full justify-start gap-2",
-                                    isActive("/randomizer") &&
-                                        "bg-primary/10 text-primary hover:bg-primary/20",
+                                    "h-12 w-full justify-start gap-3 rounded-xl text-base font-medium transition-all",
+                                    isActive("/randomizer")
+                                        ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
                                 )}
                             >
-                                <Dices className="h-4 w-4" />
+                                <Dices className="h-5 w-5" />
                                 Randomizer
                             </Button>
                         </Link>
@@ -115,9 +118,9 @@ export function Sidebar({ className }: SidebarProps) {
                 <form action={handleSignOut}>
                     <Button
                         variant="ghost"
-                        className="w-full justify-start gap-2 text-red-500 hover:bg-red-500/10 hover:text-red-600"
+                        className="h-12 w-full justify-start gap-3 rounded-xl text-base font-medium text-red-500 transition-all hover:bg-red-500/10 hover:text-red-400"
                     >
-                        <LogOut className="h-4 w-4" />
+                        <LogOut className="h-5 w-5" />
                         Logout
                     </Button>
                 </form>

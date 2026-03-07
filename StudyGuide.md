@@ -357,3 +357,59 @@ Evitar redirecionar o usuário para outras páginas ("Ver Detalhes") mantém o f
 
 - [MDN: navigator.clipboard](https://developer.mozilla.org/en-US/docs/Web/API/Clipboard)
 - [Tailwind CSS Line Clamp](https://tailwindcss.com/docs/line-clamp)
+
+---
+
+## 14. Zod (Validação de Dados)
+
+### Por que usamos
+
+O TypeScript garante a tipagem em tempo de compilação, mas precisamos validar dados em tempo de execução (runtime), especialmente os que vêm de formulários e APIs externas. O Zod é perfeito para isso pois integra perfeitamente com TypeScript.
+
+### O que estudar
+
+- **Schemas**: Como definir schemas complexos (`z.object()`, `z.string()`, `z.enum()`).
+- **Inferência de Tipos**: Utilitário `z.infer<typeof schema>` para extrair tipos TS diretamente do schema.
+- **Parse vs Safe Parse**: `schema.parse()` lança erro se os dados forem inválidos; `schema.safeParse()` retorna um objeto indicando sucesso ou erro, sendo mais seguro para tratar validações sem estourar exceções de servidor.
+
+### 📖 Referência
+
+- [Zod Documentation](https://zod.dev/)
+
+---
+
+## 15. Vercel, Serverless & Edge
+
+### Por que usamos
+
+A aplicação é hospedada na Vercel, o que maximiza a integração com o Next.js, incluindo deploy automático, funções Serverless e armazenamento como o Vercel Blob.
+
+### O que estudar
+
+- **Serverless Functions (Node.js)**: Funções que escalam sob demanda. A maior parte das Server Actions e rotas roda aqui.
+- **Vercel Blob**: Usado para armazenar arquivos estáticos gerados por usuários.
+- **Bancos Serverless (Neon/Vercel Postgres)**: Nuances em como lidam com pools de conexões e cold starts comparados a um Postgres 24/7.
+- **Edge Middleware**: Como a proteção de rotas (do Auth.js) atua antes de bater no Node.js.
+
+### 📖 Referência
+
+- [Vercel Deployment Docs](https://vercel.com/docs)
+- [Vercel Blob](https://vercel.com/docs/storage/vercel-blob)
+
+---
+
+## 16. Playwright (Testes E2E)
+
+### Por que usamos
+
+Garantir que os fluxos mais críticos do app (criar jogos/quests, login, sistema de rolagens) continuem funcionando mesmo com refatorações. Ele simula interações de um usuário real no navegador.
+
+### O que estudar
+
+- **Locators**: Achar elementos nativamente (`page.getByRole('button', { name: "Submit" })`).
+- **Configuração de Ambiente (Setup)**: Organização do banco e dados fake antes do teste rodar para garantir um ambiente limpo.
+- **Trace Viewer**: Utilizar a interface do UI do Playwright (`npm run test:ui`) para debugar execuções falhas vendo tudo que o browser fez passo a passo.
+
+### 📖 Referência
+
+- [Playwright Docs](https://playwright.dev/docs/intro)

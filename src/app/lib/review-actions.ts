@@ -48,6 +48,7 @@ export async function createReview(params: CreateReviewParams) {
 
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
+        revalidatePath("/");
         return { success: true, review };
     } catch (error: any) {
         console.error("Erro ao salvar review:", error);
@@ -130,6 +131,7 @@ export async function updateReview(params: UpdateReviewParams) {
 
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
+        revalidatePath("/");
         return { success: true, review: updatedReview };
     } catch (error: any) {
         console.error("Erro ao atualizar review:", error);
