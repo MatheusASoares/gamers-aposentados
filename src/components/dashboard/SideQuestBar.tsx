@@ -90,65 +90,85 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
 
     return (
         <div
-            className={`glass-card animate-fade-in-up group flex h-full min-h-[400px] flex-col overflow-hidden border-t-4 transition-all duration-500 ${theme.border}`}
+            className={`glass-card animate-fade-in-up group flex h-full min-h-[400px] flex-col overflow-hidden rounded-[2rem] border border-t-0 border-white/5 bg-zinc-950/80 shadow-2xl transition-all duration-500 hover:border-[#bd0df2]/30 hover:shadow-[#bd0df2]/10`}
             style={{ animationDelay: "100ms" }}
         >
+            {/* Dark/Grain/Glow Background Effects */}
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#12001a]" />
+            <div
+                className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
+                style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
+            />
+
             {/* Cover Image Side (Top Banner) */}
-            <div className="relative flex h-48 w-full flex-shrink-0 items-center justify-center overflow-hidden bg-zinc-950/80 sm:h-64">
+            <div className="relative flex h-64 w-full flex-shrink-0 items-end overflow-hidden sm:h-80">
                 {game.cover_url ? (
                     <>
-                        <div
-                            className="absolute inset-0 scale-110 transform bg-cover bg-center opacity-40 blur-xl"
-                            style={{ backgroundImage: `url(${game.cover_url})` }}
-                        />
-                        <div className="relative z-10 mt-8 h-44 w-32 overflow-hidden rounded-lg border border-white/10 shadow-[0_0_40px_rgba(189,13,242,0.4)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
+                        {/* Enlarged Blurred Background Image */}
+                        <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
                             <img
                                 alt={game.title}
-                                className="h-full w-full object-cover"
-                                src={game.cover_url}
+                                className="h-full w-full scale-125 object-cover blur-3xl"
+                                src={game.cover_url.replace("t_cover_big", "t_1080p")}
                             />
+                        </div>
+                        {/* Gradient to darken the bottom of the banner so text pops */}
+                        <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
+
+                        {/* Content overlapping the banner */}
+                        <div className="relative z-10 flex w-full flex-row items-end gap-6 p-6 sm:p-8">
+                            {/* Crisp Box Art */}
+                            <div className="relative h-44 w-32 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
+                                <img
+                                    alt={game.title}
+                                    className="h-full w-full object-cover"
+                                    src={game.cover_url.replace("t_cover_big", "t_1080p")}
+                                />
+                            </div>
+
+                            {/* Title Block */}
+                            <div className="flex flex-col justify-end pb-2">
+                                <div className="mb-3 flex items-center gap-2">
+                                    <span
+                                        className={`px-4 py-1.5 ${theme.badge} rounded-full border border-[#bd0df2]/30 text-[10px] font-black tracking-[0.2em] uppercase backdrop-blur-md`}
+                                    >
+                                        Side Quest
+                                    </span>
+                                </div>
+                                <h3 className="text-3xl leading-[1.1] font-black tracking-tighter text-white drop-shadow-md sm:text-4xl">
+                                    {game.title}
+                                </h3>
+                                <p className="mt-3 text-sm font-medium text-zinc-400">
+                                    Indicado por:{" "}
+                                    {game.nominator ? (
+                                        <span className="font-bold text-white transition-colors hover:text-[#bd0df2]">
+                                            <UserLink
+                                                userId={game.nominator.id}
+                                                name={game.nominator.name}
+                                                username={game.nominator.username}
+                                            />
+                                        </span>
+                                    ) : (
+                                        <span className="font-bold text-white">Desconhecido</span>
+                                    )}
+                                </p>
+                            </div>
                         </div>
                     </>
                 ) : (
-                    <div className="absolute inset-0 flex items-center justify-center bg-zinc-900">
+                    <div className="absolute inset-0 flex items-center justify-center border-b border-zinc-800 bg-zinc-900">
                         <Flame className="h-24 w-24 text-[#bd0df2]/50" />
                     </div>
                 )}
-                <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#09090b] to-transparent" />
             </div>
 
             {/* Info Side (Bottom) */}
-            <div className="z-10 flex w-full flex-1 flex-col justify-between bg-[#09090b] p-6 sm:p-8">
+            <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-zinc-950/80 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
                 <div className="space-y-4">
-                    <div className="space-y-2">
-                        <div className="mb-3 flex items-center gap-2">
-                            <span
-                                className={`px-4 py-1.5 ${theme.badge} rounded-lg text-xs font-black tracking-widest uppercase`}
-                            >
-                                Side Quest
-                            </span>
-                        </div>
-                        <h3 className="text-3xl leading-tight font-black text-white">
-                            {game.title}
-                        </h3>
-                        <p className="text-sm font-medium text-zinc-400">
-                            Indicado por:{" "}
-                            {game.nominator ? (
-                                <UserLink
-                                    userId={game.nominator.id}
-                                    name={game.nominator.name}
-                                    username={game.nominator.username}
-                                />
-                            ) : (
-                                <span className="text-white">Desconhecido</span>
-                            )}
-                        </p>
-                    </div>
-
                     {/* Progress & HLTB Time */}
                     {progress ? (
                         <div className="space-y-3 pt-3">
-                            <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                            <div className="flex justify-between text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
                                 <span>
                                     Progresso{" "}
                                     {progress.status === "COMPLETED"
@@ -161,9 +181,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                     </span>
                                 </span>
                                 {game.hltb_time && (
-                                    <span className={theme.text}>
-                                        HLTB: ~{game.hltb_time}h
-                                    </span>
+                                    <span className={theme.text}>~{game.hltb_time}h</span>
                                 )}
                             </div>
                             <div className="h-4 overflow-hidden rounded-full border border-zinc-800/50 bg-zinc-900">
@@ -176,7 +194,9 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                     ) : (
                         <div className="pt-3">
                             {game.hltb_time && (
-                                <span className={`text-xs font-bold tracking-wider uppercase ${theme.text}`}>
+                                <span
+                                    className={`text-[11px] font-bold tracking-wider uppercase ${theme.text}`}
+                                >
                                     HLTB: ~{game.hltb_time}h
                                 </span>
                             )}
@@ -187,7 +207,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                 <div className="mt-6 flex flex-col gap-2">
                     {!progress ? (
                         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-zinc-900/40 py-6">
-                            <p className="text-center text-sm font-medium text-zinc-400 px-4">
+                            <p className="px-4 text-center text-sm font-medium text-zinc-400">
                                 Você não está participando desta quest com a comunidade.
                             </p>
                             <button
@@ -261,10 +281,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                     disabled={isLoading}
                                     onClick={async () => {
                                         setIsLoading(true);
-                                        const res = await updateQuestProgress(
-                                            game.id,
-                                            percentage,
-                                        );
+                                        const res = await updateQuestProgress(game.id, percentage);
                                         if (!res.success) {
                                             alert(res.error || "Erro ao atualizar progresso.");
                                         } else {

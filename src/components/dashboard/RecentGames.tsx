@@ -153,33 +153,39 @@ export function RecentActivity({ events }: RecentActivityProps) {
 
     return (
         <div
-            className="glass-card animate-fade-in-up overflow-hidden border border-zinc-800"
+            className="glass-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-950/80 shadow-2xl"
             style={{ animationDelay: "500ms" }}
             data-testid="recent-activity"
         >
-            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-5">
-                <h3 className="flex items-center gap-2 text-base font-bold tracking-widest text-white uppercase">
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#12001a]" />
+            <div
+                className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
+                style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
+            />
+
+            <div className="relative z-10 flex items-center justify-between border-b border-white/5 bg-zinc-950/40 px-6 py-6 backdrop-blur-sm">
+                <h3 className="flex items-center gap-2 text-base font-black tracking-widest text-white uppercase drop-shadow-sm">
                     <Clock className="h-5 w-5 text-[#bd0df2]" />
                     Atividade Recente
                 </h3>
                 <Link
                     href="/quests"
-                    className="flex items-center gap-1 text-sm font-bold tracking-wider text-[#bd0df2] uppercase hover:underline"
+                    className="group flex items-center gap-1 text-[11px] font-black tracking-widest text-[#bd0df2] uppercase transition-colors hover:text-[#d946ef]"
                 >
-                    Ver Quests
-                    <ChevronRight className="h-4 w-4" />
+                    Ver Tudo
+                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
             </div>
 
-            <div className="divide-y divide-zinc-800/60">
+            <div className="relative z-10 divide-y divide-white/5 bg-zinc-950/60 backdrop-blur-md">
                 {events.map((event, idx) => (
                     <div
                         key={idx}
-                        className="group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-zinc-800/30"
+                        className="group flex items-center gap-5 px-6 py-5 transition-all duration-300 hover:bg-zinc-800/40 hover:pl-7"
                         data-testid={`activity-event-${event.kind.toLowerCase()}`}
                     >
                         {/* Thumbnail */}
-                        <div className="relative flex h-12 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded border border-zinc-800 bg-zinc-900 transition-colors group-hover:border-[#bd0df2]/40">
+                        <div className="relative flex h-14 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-zinc-900 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110 group-hover:border-[#bd0df2]/50 group-hover:shadow-[0_0_20px_rgba(189,13,242,0.3)]">
                             {event.game.cover_url ? (
                                 <Image
                                     src={event.game.cover_url}
@@ -196,12 +202,12 @@ export function RecentActivity({ events }: RecentActivityProps) {
                         <EventIcon kind={event.kind} />
 
                         {/* Description */}
-                        <div className="min-w-0 flex-1">
+                        <div className="min-w-0 flex-1 pl-1">
                             <EventDescription event={event} />
                         </div>
 
                         {/* Date */}
-                        <span className="flex-shrink-0 text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                        <span className="flex-shrink-0 text-[10px] font-black tracking-widest text-zinc-500 uppercase transition-colors group-hover:text-zinc-400">
                             {formatDate(event.date)}
                         </span>
                     </div>

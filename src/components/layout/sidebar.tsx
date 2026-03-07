@@ -28,32 +28,46 @@ export function Sidebar({ className }: SidebarProps) {
     return (
         <div
             className={cn(
-                "bg-card border-border flex min-h-screen w-64 flex-col border-r pb-12",
+                "group relative flex min-h-screen w-64 flex-col border-r border-white/5 bg-zinc-950/80 pb-12 shadow-2xl transition-all duration-500",
                 className,
             )}
         >
-            <div className="space-y-4 py-4">
+            {/* Background effects */}
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div
+                className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
+                style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
+            />
+
+            <div className="relative z-10 space-y-4 py-8">
+                {/* NEW PREMIUM LOGO */}
                 <Link
                     href="/"
-                    className="flex items-center gap-2 px-6 py-2 transition-opacity hover:opacity-80"
+                    className="flex flex-col items-center justify-center gap-2 px-6 pb-6 transition-all hover:scale-105"
                 >
-                    <Gamepad2 className="text-primary h-8 w-8" />
-                    <h2 className="from-primary bg-gradient-to-r to-purple-400 bg-clip-text text-xl font-bold tracking-tight text-transparent">
-                        Gamers
-                        <br />
-                        Aposentados
-                    </h2>
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#bd0df2]/30 bg-[#bd0df2]/10 shadow-[0_0_20px_rgba(189,13,242,0.3)] backdrop-blur-md">
+                        <Gamepad2 className="h-6 w-6 text-[#bd0df2]" />
+                    </div>
+                    <div className="text-center">
+                        <h2 className="bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-xl font-black tracking-widest text-transparent uppercase">
+                            Gamers
+                        </h2>
+                        <span className="text-[10px] font-black tracking-[0.3em] text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.5)]">
+                            Aposentados
+                        </span>
+                    </div>
                 </Link>
-                <div className="mt-4 px-3 py-2">
+
+                <div className="mt-4 px-4 py-2">
                     <nav className="space-y-3">
                         <Link href="/" passHref>
                             <Button
                                 variant="ghost"
                                 className={cn(
-                                    "h-12 w-full justify-start gap-3 rounded-xl text-base font-medium transition-all",
+                                    "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/")
-                                        ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
-                                        : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
+                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
                                 <LayoutDashboard className="h-5 w-5" />
@@ -61,22 +75,16 @@ export function Sidebar({ className }: SidebarProps) {
                             </Button>
                         </Link>
                         {/* <Link href="/quests" passHref>
-                            <Button
-                                variant={isActive("/quests") ? "secondary" : "ghost"}
-                                className={cn("w-full justify-start gap-2", isActive("/quests") && "bg-primary/10 text-primary hover:bg-primary/20")}
-                            >
-                                <Swords className="h-4 w-4" />
-                                Quests
-                            </Button>
+                            ...
                         </Link> */}
                         <Link href="/reviews" passHref>
                             <Button
                                 variant="ghost"
                                 className={cn(
-                                    "h-12 w-full justify-start gap-3 rounded-xl text-base font-medium transition-all",
+                                    "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/reviews")
-                                        ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
-                                        : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
+                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
                                 <History className="h-5 w-5" />
@@ -87,38 +95,25 @@ export function Sidebar({ className }: SidebarProps) {
                             <Button
                                 variant="ghost"
                                 className={cn(
-                                    "h-12 w-full justify-start gap-3 rounded-xl text-base font-medium transition-all",
+                                    "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/randomizer")
-                                        ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
-                                        : "text-zinc-400 hover:bg-zinc-800/50 hover:text-white",
+                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
                                 <Dices className="h-5 w-5" />
                                 Randomizer
                             </Button>
                         </Link>
-                        {/* <div className="relative">
-                            <Button variant="ghost" className="w-full justify-start gap-2 text-muted-foreground" disabled>
-                                <Store className="h-4 w-4" />
-                                Shop
-                            </Button>
-                            <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] bg-muted px-1.5 py-0.5 rounded text-muted-foreground">SOON</span>
-                        </div> */}
                     </nav>
                 </div>
             </div>
 
-            <div className="mt-auto space-y-1 px-3 py-4">
-                {/* <Link href="/settings" passHref>
-                    <Button variant="ghost" className="w-full justify-start gap-2">
-                        <Settings className="h-4 w-4" />
-                        Settings
-                    </Button>
-                </Link> */}
+            <div className="relative z-10 mt-auto space-y-1 border-t border-white/5 bg-zinc-950/40 px-4 py-6 backdrop-blur-sm">
                 <form action={handleSignOut}>
                     <Button
                         variant="ghost"
-                        className="h-12 w-full justify-start gap-3 rounded-xl text-base font-medium text-red-500 transition-all hover:bg-red-500/10 hover:text-red-400"
+                        className="h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest text-red-500 uppercase transition-all duration-300 hover:border hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]"
                     >
                         <LogOut className="h-5 w-5" />
                         Logout

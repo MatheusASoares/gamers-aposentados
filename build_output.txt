@@ -1,0 +1,25 @@
+
+> gamers-aposentados@0.1.0 build
+> prisma generate && prisma migrate deploy && next build
+
+Prisma schema loaded from prisma\schema.prisma
+
+Γ£ö Generated Prisma Client (v6.19.2) to .\node_modules\@prisma\client in 76ms
+
+Start by importing your Prisma Client (See: https://pris.ly/d/importing-client)
+
+Tip: Want to turn off tips and other hints? https://pris.ly/tip-4-nohints
+
+Prisma schema loaded from prisma\schema.prisma
+Datasource "db": PostgreSQL database "gamers_aposentados", schema "public" at "127.0.0.1:5434"
+
+2 migrations found in prisma/migrations
+
+
+No pending migrations to apply.
+Γû▓ Next.js 16.1.6 (Turbopack)
+- Environments: .env.local, .env
+
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 5.3s
+  Running TypeScript ...

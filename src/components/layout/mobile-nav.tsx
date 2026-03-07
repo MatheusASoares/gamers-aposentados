@@ -29,19 +29,31 @@ export function MobileNav() {
             </Button>
 
             {open && (
-                <div className="animate-in fade-in-0 fixed inset-0 z-[100] flex bg-black/50 backdrop-blur-sm">
-                    <div className="bg-card border-border animate-in slide-in-from-left-full relative h-full w-[85%] max-w-xs border-r duration-300">
+                <div className="animate-in fade-in-0 fixed inset-0 z-[100] flex bg-black/80 backdrop-blur-sm">
+                    <div className="animate-in slide-in-from-left-full relative h-full w-[85%] max-w-xs border-r border-[#bd0df2]/20 duration-300">
+                        {/* Mobile Background mirror of Sidebar */}
+                        <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+                        <div
+                            className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
+                            style={{
+                                backgroundImage:
+                                    "url('https://grainy-gradients.vercel.app/noise.svg')",
+                            }}
+                        />
+
                         <Button
                             variant="ghost"
                             size="icon"
-                            className="absolute top-2 right-2 z-10"
+                            className="absolute top-4 right-4 z-50 text-zinc-400 hover:bg-zinc-800/50 hover:text-white"
                             onClick={() => setOpen(false)}
                         >
                             <X className="h-5 w-5" />
                             <span className="sr-only">Close Menu</span>
                         </Button>
 
-                        <Sidebar className="static flex h-full w-full border-none pt-12" />
+                        <div className="relative z-10 h-full w-full">
+                            <Sidebar className="static flex h-full w-full border-none bg-transparent pt-4 shadow-none" />
+                        </div>
                     </div>
                     <div className="flex-1" onClick={() => setOpen(false)} />
                 </div>

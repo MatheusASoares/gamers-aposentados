@@ -1,0 +1,4 @@
+src/app/(main)/profile/[identifier]/page.tsx(108,25): error TS2322: Type '(candidates: GameSearchResult[]) => Promise<{ success: boolean; error: string; } | undefined>' is not assignable to type '(candidates: GameSearchResult[]) => Promise<{ success: boolean; error?: string | undefined; }>'.
+  Type 'Promise<{ success: boolean; error: string; } | undefined>' is not assignable to type 'Promise<{ success: boolean; error?: string | undefined; }>'.
+    Type '{ success: boolean; error: string; } | undefined' is not assignable to type '{ success: boolean; error?: string | undefined; }'.
+      Type 'undefined' is not assignable to type '{ success: boolean; error?: string | undefined; }'.

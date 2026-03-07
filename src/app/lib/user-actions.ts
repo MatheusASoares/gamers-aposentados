@@ -148,3 +148,66 @@ export async function setFavoriteGames(candidates: GameSearchResult[]) {
         return { success: false, error: "Failed to set favorite games" };
     }
 }
+
+export async function setFavoriteGamesOfYear(candidates: GameSearchResult[]) {
+    const session = await auth();
+    console.log(
+        "[setFavoriteGamesOfYear] Received candidates:",
+        JSON.stringify(candidates, null, 2),
+    );
+
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+    if (!Array.isArray(candidates) || candidates.length > 3) {
+        console.error("[setFavoriteGamesOfYear] Invalid candidates array", candidates);
+        return {
+            success: false,
+            error: "You can select up to 3 favorite games maximum for the year.",
+        };
+    }
+
+    try {
+        const gameIds = [];
+        for (const candidate of candidates) {
+            let game = await prisma.game.findFirst({
+                where: { title: candidate.nome },
+            });
+
+            if (!game) {
+                game = await prisma.game.create({
+                    data: {
+                        title: candidate.nome,
+                        cover_url: candidate.imageUrl,
+                        quest_type: "SIDE_QUEST", // Default tier for generic imports
+                        nominated_by_id: session.user.id,
+                    },
+                });
+            } else if (!game.cover_url && candidate.imageUrl) {
+                // Update cover if it was missing
+                game = await prisma.game.update({
+                    where: { id: game.id },
+                    data: { cover_url: candidate.imageUrl },
+                });
+            }
+
+            gameIds.push({ id: game.id });
+        }
+
+        console.log("Saving yearly favorite games for user:", session.user.id, "Games:", gameIds);
+
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: {
+                favoriteGamesYear: {
+                    set: gameIds,
+                },
+            },
+        });
+
+        revalidatePath("/profile");
+        return { success: true };
+    } catch (error) {
+        console.error("Failed to set yearly favorite games", error);
+        return { success: false, error: "Failed to set yearly favorite games" };
+    }
+}

@@ -44,6 +44,7 @@ model User {
   poolEntries  PoolEntry[]                              // Entradas no sorteio
   gameProgress GameProgress[]                           // Progresso nos jogos
   favoriteGames Game[]           @relation("UserFavorites") // Jogos favoritos
+  favoriteGamesYear Game[]       @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
 
   @@map("users")
 }
@@ -103,6 +104,7 @@ model Game {
   wonPools       Pool[]      @relation("WinnerGame") // Potes que esse jogo venceu
   progress       GameProgress[]
   favoritedBy    User[]      @relation("UserFavorites") // Usuários que favoritararam
+  favoritedByYear User[]     @relation("UserFavoritesYear") // Usuários que favoritararam pro Ano Atual
 
   @@map("games")
 }

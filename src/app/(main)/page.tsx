@@ -24,8 +24,14 @@ export default async function DashboardPage() {
         }),
     ]);
 
-    // Parallel data fetching for user progress based on current pools
-    const [mainQuestProgress, sideQuestProgress, recentReviewsForStats] = await Promise.all([
+    // Parallel data fetching for user progress and random reviews
+    // Get up to 5 random review IDs
+    const randomReviewIds = await prisma.$queryRaw<{ id: string }[]>`
+        SELECT id FROM reviews ORDER BY RANDOM() LIMIT 5;
+    `;
+    const idsToFetch = randomReviewIds.map((r) => r.id);
+
+    const [mainQuestProgress, sideQuestProgress, randomReviewsForStats] = await Promise.all([
         latestMainPool?.winner_game_id
             ? prisma.gameProgress.findUnique({
                   where: {
@@ -42,11 +48,12 @@ export default async function DashboardPage() {
                   include: { game: { include: { nominator: true } } },
               })
             : null,
-        prisma.review.findMany({
-            orderBy: { updated_at: "desc" },
-            take: 5,
-            include: { game: true, user: true },
-        }),
+        idsToFetch.length > 0
+            ? prisma.review.findMany({
+                  where: { id: { in: idsToFetch } },
+                  include: { game: true, user: true },
+              })
+            : [],
     ]);
 
     // ---- Recent Activity Feed (global — all players) ---------------------
@@ -144,7 +151,7 @@ export default async function DashboardPage() {
             </div>
 
             {/* Row 3: Stats Cards Grid */}
-            <StatsGrid reviews={recentReviewsForStats} />
+            <StatsGrid reviews={randomReviewsForStats} />
 
             {/* Row 4: Recent Activity */}
             <RecentActivity events={rawEvents} />
