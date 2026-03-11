@@ -86,6 +86,7 @@ async function fetchIGDBCover(title: string): Promise<string | null> {
 
         // Filter to base games only
         const baseGame = games.find(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             (g: any) =>
                 (g.category === 0 || g.category === undefined) &&
                 !g.parent_game &&
@@ -864,6 +865,7 @@ async function main() {
             name: "Lucas",
         },
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const leticia = await prisma.user.create({
         data: {
             username: "lele",

@@ -167,6 +167,7 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
 
         revalidatePath("/randomizer");
         return { success: true, poolId: result };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Error saving selections:", error);
         return {
@@ -202,6 +203,7 @@ export async function removeEntry(entryId: string) {
 
         revalidatePath("/randomizer");
         return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Error removing entry:", error);
         return { success: false, error: "Erro ao remover: " + (error?.message || "Desconhecido") };
@@ -293,6 +295,7 @@ export async function executeRoll(poolId: string) {
         revalidatePath("/randomizer");
         revalidatePath("/");
         return { success: true, ...result };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Error executing roll:", error);
         return { success: false, error: "Erro no sorteio: " + (error?.message || "Desconhecido") };

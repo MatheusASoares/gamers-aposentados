@@ -141,10 +141,12 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
         });
 
         return { success: true, poolId: result };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Erro ao salvar Randomizer DB:", error);
 
         // Escreve do log p/ arquivo local para debugar
+        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const fs = require("fs");
         fs.writeFileSync(
             "prisma-error-dump.txt",

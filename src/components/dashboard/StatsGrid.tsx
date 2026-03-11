@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Star, BookOpen, ChevronLeft, ChevronRight, Gamepad2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";

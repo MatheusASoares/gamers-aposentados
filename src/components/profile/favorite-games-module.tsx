@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useTransition, useEffect } from "react";
+import { useState, useTransition } from "react";
 import { Game } from "@prisma/client";
-import { setFavoriteGames } from "@/app/lib/user-actions";
 import { GameAutocomplete, GameSearchResult } from "@/components/ui/game-autocomplete";
+import Image from "next/image";
 import { Heart, Edit2, Check, X, Loader2, Gamepad2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface FavoriteGamesModuleProps {
     title: string;
@@ -29,9 +28,11 @@ export function FavoriteGamesModule({
             imageUrl: g.cover_url || "",
         })),
     );
+    const [prevInitialFavorites, setPrevInitialFavorites] = useState(initialFavorites);
     const [isSearching, setIsSearching] = useState(false);
 
-    useEffect(() => {
+    if (initialFavorites !== prevInitialFavorites) {
+        setPrevInitialFavorites(initialFavorites);
         if (!isEditing) {
             setFavorites(
                 initialFavorites.map((g) => ({
@@ -41,7 +42,7 @@ export function FavoriteGamesModule({
                 })),
             );
         }
-    }, [initialFavorites, isEditing]);
+    }
 
     const handleSave = () => {
         startTransition(async () => {
@@ -123,10 +124,12 @@ export function FavoriteGamesModule({
                     >
                         <div className="relative h-20 w-14 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
                             {game.imageUrl ? (
-                                <img
+                                <Image
                                     src={game.imageUrl}
                                     alt={game.nome}
-                                    className="h-full w-full object-cover"
+                                    fill
+                                    className="object-cover"
+                                    unoptimized
                                 />
                             ) : (
                                 <div className="flex h-full w-full items-center justify-center p-2 opacity-30">

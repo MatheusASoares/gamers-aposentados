@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { Search, Loader2, Gamepad2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import Image from "next/image";
 
 export interface GameSearchResult {
     id: string;
@@ -94,12 +95,14 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
                                 onClick={() => onSelect(game)}
                                 className="group flex w-full items-center gap-4 rounded-lg p-2 text-left transition-colors hover:bg-white/5"
                             >
-                                <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded bg-zinc-800 md:size-12">
+                                <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded bg-zinc-800 md:size-12">
                                     {game.imageUrl ? (
-                                        <img
+                                        <Image
                                             src={game.imageUrl}
                                             alt={game.nome}
-                                            className="h-full w-full object-cover transition-transform group-hover:scale-110"
+                                            fill
+                                            unoptimized
+                                            className="object-cover transition-transform group-hover:scale-110"
                                         />
                                     ) : (
                                         <Gamepad2 className="h-5 w-5 text-zinc-600" />

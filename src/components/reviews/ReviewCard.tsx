@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowRight, Calendar, Edit, Share2, User, Trash2, Check } from "lucide-react";
+import { ArrowRight, Calendar, Share2, User, Trash2, Check } from "lucide-react";
 import { format } from "date-fns";
 import { deleteReview } from "@/app/lib/review-actions";
 import { EditReviewModal } from "./EditReviewModal";
@@ -33,7 +33,6 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
     const formattedDate = format(new Date(review.created_at), "MMM dd, yyyy");
-    const reviewerName = review.user.name || review.user.username || "Unknown Gamer";
 
     const handleDelete = async () => {
         setIsDeleting(true);
@@ -154,6 +153,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                     <div className="flex items-center gap-4 text-zinc-500">
                         {currentUserId === review.user_id && (
                             <>
+                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 <EditReviewModal review={review as any} />
                                 <button
                                     onClick={handleDelete}

@@ -50,6 +50,7 @@ export async function createReview(params: CreateReviewParams) {
         revalidatePath("/reviews");
         revalidatePath("/");
         return { success: true, review };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Erro ao salvar review:", error);
         return { success: false, error: "Erro interno: " + (error?.message || "Desconhecido") };
@@ -83,6 +84,7 @@ export async function deleteReview(reviewId: string) {
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
         return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Erro ao deletar review:", error);
         return { success: false, error: "Erro interno ao deletar a review" };
@@ -133,6 +135,7 @@ export async function updateReview(params: UpdateReviewParams) {
         revalidatePath("/reviews");
         revalidatePath("/");
         return { success: true, review: updatedReview };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Erro ao atualizar review:", error);
         return { success: false, error: "Erro interno ao atualizar a review" };

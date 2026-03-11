@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { register } from "@/app/lib/actions";
 import { useActionState } from "react";
 import { signIn } from "next-auth/react";
-import { User, Mail, Lock, CheckCircle, Zap } from "lucide-react";
+import { User, Mail, Lock, Zap } from "lucide-react";
 
 interface RegisterModalProps {
     open: boolean;

@@ -2,6 +2,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
 import { Trophy, Gamepad2, Star, Calendar } from "lucide-react";
+import Image from "next/image";
 import { FavoriteGamesModule } from "@/components/profile/favorite-games-module";
 import { Separator } from "@/components/ui/separator";
 import { AvatarUpload } from "@/components/profile/avatar-upload";
@@ -158,13 +159,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                                         <div className="flex gap-4">
                                             <div className="relative h-28 w-20 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-zinc-900 shadow-md">
                                                 {review.game.cover_url ? (
-                                                    <img
+                                                    <Image
                                                         src={review.game.cover_url.replace(
                                                             "t_cover_big",
                                                             "t_1080p",
                                                         )}
                                                         alt={review.game.title}
-                                                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                        fill
+                                                        unoptimized
+                                                        className="object-cover transition-transform duration-500 group-hover:scale-105"
                                                     />
                                                 ) : (
                                                     <div className="flex h-full w-full items-center justify-center p-2 opacity-30">

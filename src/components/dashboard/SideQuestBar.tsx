@@ -2,9 +2,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Flame, CheckCircle, XCircle, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
 import { UserLink } from "@/components/ui/user-link";
+import Image from "next/image";
 
 interface SideQuestBarProps {
     progress: {
@@ -30,7 +30,6 @@ interface SideQuestBarProps {
 }
 
 export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
-    const router = useRouter();
     const [isUpdating, setIsUpdating] = useState(false);
     const [percentage, setPercentage] = useState(progress?.progress_percentage || 0);
     const [isLoading, setIsLoading] = useState(false);
@@ -106,10 +105,12 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                     <>
                         {/* Enlarged Blurred Background Image */}
                         <div className="absolute inset-0 z-0 opacity-40 mix-blend-overlay">
-                            <img
+                            <Image
                                 alt={game.title}
-                                className="h-full w-full scale-125 object-cover blur-3xl"
+                                className="scale-125 object-cover blur-3xl"
                                 src={game.cover_url.replace("t_cover_big", "t_1080p")}
+                                fill
+                                unoptimized
                             />
                         </div>
                         {/* Gradient to darken the bottom of the banner so text pops */}
@@ -119,10 +120,12 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                         <div className="relative z-10 flex w-full flex-row items-end gap-6 p-6 sm:p-8">
                             {/* Crisp Box Art */}
                             <div className="relative h-44 w-32 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
-                                <img
+                                <Image
                                     alt={game.title}
-                                    className="h-full w-full object-cover"
+                                    className="object-cover"
                                     src={game.cover_url.replace("t_cover_big", "t_1080p")}
+                                    fill
+                                    unoptimized
                                 />
                             </div>
 

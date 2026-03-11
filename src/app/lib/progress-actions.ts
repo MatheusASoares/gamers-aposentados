@@ -26,6 +26,7 @@ export async function updateProgressPercentage(progressId: string, percentage: n
         }
 
         // Auto-complete if 100%, or revert to ACTIVE if less than 100%
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dataToUpdate: any = { progress_percentage: percentage };
         if (percentage === 100) {
             dataToUpdate.status = "COMPLETED";

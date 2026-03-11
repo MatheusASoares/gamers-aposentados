@@ -1,12 +1,11 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTrigger, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { authenticate } from "@/app/lib/actions";
 import { useActionState } from "react";
-import Image from "next/image";
 import { Rocket, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { signIn } from "next-auth/react"; // For Google Auth client-side

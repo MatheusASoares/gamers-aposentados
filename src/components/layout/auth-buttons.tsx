@@ -8,6 +8,7 @@ import { RegisterModal } from "@/components/auth/register-modal";
 import { SettingsModal } from "@/components/auth/settings-modal";
 import { handleSignOut } from "@/lib/actions";
 import Link from "next/link";
+import Image from "next/image";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,6 +20,7 @@ import {
 import { useSession } from "next-auth/react";
 
 interface AuthButtonsProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user: any; // Using any for now to avoid dragging in session types, improving later
 }
 
@@ -55,12 +57,14 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                                     @{user.username || "user"}
                                 </p>
                             </div>
-                            <div className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-zinc-900 shadow-inner">
+                            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-zinc-900 shadow-inner">
                                 {liveImage ? (
-                                    <img
+                                    <Image
                                         src={liveImage}
                                         alt={user.name || "User"}
-                                        className="h-full w-full object-cover"
+                                        fill
+                                        unoptimized
+                                        className="object-cover"
                                     />
                                 ) : (
                                     <User className="h-5 w-5 text-zinc-500" />

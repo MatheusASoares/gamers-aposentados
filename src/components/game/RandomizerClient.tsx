@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { PlusCircle, Loader2, Trophy, History, Save, Pencil, X, Check } from "lucide-react";
+import { Loader2, Trophy, History, Save, Pencil, X } from "lucide-react";
+import Image from "next/image";
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
 import { GameAutocomplete } from "@/components/ui/game-autocomplete";
 import { getRandomizerStatus } from "@/app/lib/quest-actions";
@@ -24,6 +25,7 @@ interface LocalCandidate extends GameSearchResult {
 export function RandomizerClient({
     currentUserId,
     currentUserName,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     currentUserEmail,
     canAddGames,
     otherPlayerName: defaultOtherName,
@@ -110,6 +112,7 @@ export function RandomizerClient({
 
         // Fetch lock status
         getRandomizerStatus(questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST").then((res) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             setLockStatus(res as any);
         });
 
@@ -247,6 +250,7 @@ export function RandomizerClient({
     const totalGames = mySelections.length + otherSelections.length;
     const requiredTotal = maxPerPerson * 2;
     const poolIsComplete = totalGames >= requiredTotal;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const mySelectionsAreSaved =
         !isEditing &&
         savedSnapshot.length === mySelections.length &&
@@ -399,14 +403,16 @@ export function RandomizerClient({
                                         key={c.id + "-" + index}
                                         className="group relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-950/50 p-3 shadow-inner transition-all duration-300 hover:border-[#bd0df2]/40 hover:bg-[#bd0df2]/5 hover:shadow-[0_0_20px_rgba(189,13,242,0.1)]"
                                     >
-                                        <div className="mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
-                                            {c.imageUrl && (
-                                                <img
-                                                    src={c.imageUrl}
-                                                    alt={c.nome}
-                                                    className="h-full w-full object-cover"
-                                                />
-                                            )}
+                                        <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
+                                                {c.imageUrl && (
+                                                    <Image
+                                                        src={c.imageUrl}
+                                                        alt={c.nome}
+                                                        fill
+                                                        unoptimized
+                                                        className="object-cover"
+                                                    />
+                                                )}
                                         </div>
                                         <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
                                             {c.nome}
@@ -500,12 +506,14 @@ export function RandomizerClient({
                                             key={entry.id}
                                             className="group relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-950/50 p-3 shadow-inner transition-all duration-300 hover:border-[#bd0df2]/40 hover:bg-[#bd0df2]/5 hover:shadow-[0_0_20px_rgba(189,13,242,0.1)]"
                                         >
-                                            <div className="mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
+                                            <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
                                                 {entry.gameImageUrl && (
-                                                    <img
+                                                    <Image
                                                         src={entry.gameImageUrl}
                                                         alt={entry.gameTitle}
-                                                        className="h-full w-full object-cover"
+                                                        fill
+                                                        unoptimized
+                                                        className="object-cover"
                                                     />
                                                 )}
                                             </div>
@@ -532,10 +540,12 @@ export function RandomizerClient({
 
                                             {winner && winner.imageUrl && (
                                                 <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay">
-                                                    <img
+                                                    <Image
                                                         src={winner.imageUrl}
                                                         alt="Winner background"
-                                                        className="h-full w-full scale-125 object-cover blur-3xl"
+                                                        fill
+                                                        unoptimized
+                                                        className="scale-125 object-cover blur-3xl"
                                                     />
                                                 </div>
                                             )}
@@ -555,10 +565,12 @@ export function RandomizerClient({
                                                         <div className="relative aspect-[3/4] w-48 overflow-hidden rounded-2xl border-2 border-[#bd0df2]/50 shadow-[0_0_40px_rgba(189,13,242,0.6)]">
                                                             <div className="absolute inset-0 bg-[#bd0df2]/20 blur-xl"></div>
                                                             {winner.imageUrl ? (
-                                                                <img
+                                                                <Image
                                                                     src={winner.imageUrl}
                                                                     alt={winner.title}
-                                                                    className="relative z-10 h-full w-full object-cover"
+                                                                    fill
+                                                                    unoptimized
+                                                                    className="relative z-10 object-cover"
                                                                 />
                                                             ) : (
                                                                 <div className="flex h-full w-full items-center justify-center bg-zinc-900">

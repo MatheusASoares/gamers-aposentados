@@ -1,8 +1,5 @@
 import { auth } from "@/auth";
 import { Breadcrumbs } from "./breadcrumbs";
-import { Separator } from "@/components/ui/separator";
-import { User, Coins } from "lucide-react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AuthButtons } from "./auth-buttons";
 
 import { MobileNav } from "./mobile-nav";

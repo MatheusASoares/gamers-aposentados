@@ -87,6 +87,7 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
         // A true base game has category 0 (or undefined) AND no parent game (DLC/Expansion) AND no version parent (GOTY/Remaster)
         // We also reject game_type 3 (Bundles) and category 3 (Bundles).
         const mainGames = games
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             .filter((g: any) => {
                 const isBaseCategory = g.category === 0 || g.category === undefined;
                 const isNotBundle = g.game_type !== 3 && g.category !== 3;
@@ -99,6 +100,7 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
             })
             .slice(0, 10);
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         return mainGames.map((game: any) => ({
             id: game.id.toString(),
             nome: game.name,

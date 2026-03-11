@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapPoolInput = (input: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
     if (input.type !== undefined) data.type = input.type;
     if (input.month !== undefined) data.month = input.month ?? null;
@@ -49,6 +51,7 @@ export async function POST(request: Request) {
                 ...data,
                 entries: entries
                     ? {
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
                           create: entries.map((e: any) => ({
                               game_id: e.gameId,
                               user_id: e.userId,

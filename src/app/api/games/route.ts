@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const mapInputToDb = (input: any) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const data: any = {};
     if (input.title !== undefined) data.title = input.title;
     if (input.platform !== undefined) data.platform = input.platform;

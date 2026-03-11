@@ -15,6 +15,7 @@ function BreadcrumbLabel({ segment }: { segment: string }) {
 
     useEffect(() => {
         if (UUID_REGEX.test(segment)) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsLoading(true);
             resolveBreadcrumbLabel(segment)
                 .then((resolvedLabel) => {

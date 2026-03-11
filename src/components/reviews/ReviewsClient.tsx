@@ -6,7 +6,9 @@ import { AddReviewModal } from "./AddReviewModal";
 import { Grid, List, Plus } from "lucide-react";
 
 export interface ReviewsClientProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reviews: any[]; // Adjust type based on Prisma include
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     games: any[];
     currentUserId?: string;
 }

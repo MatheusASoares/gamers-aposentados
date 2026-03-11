@@ -20,6 +20,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 interface SettingsModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user: any;
 }
 

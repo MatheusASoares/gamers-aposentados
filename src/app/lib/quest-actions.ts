@@ -19,6 +19,7 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
             },
         });
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const dataToUpdate: any = { progress_percentage: percentage };
         if (percentage === 100) {
             dataToUpdate.status = "COMPLETED";
@@ -51,6 +52,7 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
 
         revalidatePath("/");
         return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("Error updating progress:", e);
         return { success: false, error: e.message };
@@ -86,6 +88,7 @@ export async function completeQuest(gameId: string) {
 
         revalidatePath("/");
         return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("Error completing quest:", e);
         return { success: false, error: e.message };
@@ -119,6 +122,7 @@ export async function dropQuest(gameId: string) {
 
         revalidatePath("/");
         return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("Error dropping quest:", e);
         return { success: false, error: e.message };
@@ -190,6 +194,7 @@ export async function joinQuest(gameId: string) {
 
         revalidatePath("/");
         return { success: true };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (e: any) {
         console.error("Error joining quest:", e);
         return { success: false, error: "Este jogo já está na sua lista ou ocorreu um erro." };
