@@ -58,10 +58,10 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
 
     return (
         <div
-            className={`group relative flex overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/60 shadow-xl backdrop-blur-sm transition-all duration-500 hover:border-[#bd0df2]/30 hover:bg-zinc-900/80 hover:shadow-[0_0_30px_rgba(189,13,242,0.15)] ${layout === "list" ? "h-auto flex-col md:h-[300px] md:flex-row" : "min-h-[450px] flex-col"} ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
+            className={`group relative flex overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/60 shadow-xl backdrop-blur-sm transition-all duration-500 hover:border-[#bd0df2]/30 hover:bg-zinc-900/80 hover:shadow-[0_0_30px_rgba(189,13,242,0.15)] ${layout === "list" ? "h-auto flex-col md:h-75 md:flex-row" : "min-h-112.5 flex-col"} ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
         >
             <div
-                className={`relative flex items-center justify-center overflow-hidden bg-zinc-950 px-4 py-8 ${layout === "list" ? "aspect-video w-full shrink-0 md:aspect-[3/4] md:w-[280px]" : "min-h-[300px] w-full"}`}
+                className={`relative flex items-center justify-center overflow-hidden bg-zinc-950 px-4 py-8 ${layout === "list" ? "aspect-video w-full shrink-0 md:aspect-3/4 md:w-70" : "min-h-75 w-full"}`}
             >
                 {coverUrl ? (
                     <>
@@ -73,9 +73,9 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                                 className="scale-125 object-cover blur-3xl transition-transform duration-700 group-hover:scale-110"
                             />
                         </div>
-                        <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+                        <div className="absolute inset-0 z-0 bg-linear-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
 
-                        <div className="relative z-10 aspect-[3/4] h-full max-h-[320px] w-auto overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-all duration-500 group-hover:scale-105 group-hover:border-[#bd0df2]/40 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.3)]">
+                        <div className="relative z-10 aspect-3/4 h-full max-h-80 w-auto overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-all duration-500 group-hover:scale-105 group-hover:border-[#bd0df2]/40 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.3)]">
                             <Image
                                 src={coverUrl}
                                 alt={`Cover of ${review.game.title}`}
@@ -92,7 +92,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                     </div>
                 )}
                 {/* Dark overlay behind rating for readability */}
-                <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
+                <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
 
                 <div className="absolute top-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-xl border border-[#bd0df2]/30 bg-zinc-950/80 shadow-[0_0_20px_rgba(189,13,242,0.4)] backdrop-blur-xl transition-all duration-500 group-hover:scale-110 group-hover:border-[#bd0df2]/60">
                     <span className="text-xl font-black text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">

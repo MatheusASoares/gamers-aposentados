@@ -264,11 +264,8 @@ export function RandomizerClient({
     return (
         <div className="relative mx-auto min-h-screen w-full px-6 py-8">
             {/* Background effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
-            <div
-                className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
-                style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
-            />
+            <div className="absolute inset-0 z-0 bg-linear-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 flex w-full flex-col gap-8">
                 {/* Header Area */}
@@ -421,6 +418,8 @@ export function RandomizerClient({
                                             <button
                                                 onClick={() => handleRemoveGame(index)}
                                                 className="p-2 text-zinc-500 transition-colors hover:text-red-400"
+                                                title="Remover jogo"
+                                                aria-label="Remover jogo"
                                             >
                                                 <X className="h-5 w-5" />
                                             </button>
@@ -528,15 +527,15 @@ export function RandomizerClient({
 
                         {/* Right Column: Randomizer Tool Area */}
                         <div>
-                            <div className="group relative flex min-h-[500px] flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/30 p-8 lg:p-12">
+                            <div className="group relative flex min-h-125 flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/30 p-8 lg:p-12">
                                 {/* Glow effect */}
                                 <div className="absolute -top-24 -right-24 size-64 rounded-full bg-[#bd0df2]/20 blur-[100px]"></div>
 
                                 <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-8">
                                     {/* Display Box */}
                                     <div className="flex w-full flex-col items-center gap-4">
-                                        <div className="relative flex min-h-[400px] w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#bd0df2]/30 bg-zinc-950/80 px-4 py-8 shadow-[0_0_40px_rgba(189,13,242,0.15)] backdrop-blur-sm">
-                                            <div className="absolute inset-0 bg-gradient-to-t from-[#bd0df2]/10 to-transparent opacity-50"></div>
+                                        <div className="relative flex min-h-100 w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#bd0df2]/30 bg-zinc-950/80 px-4 py-8 shadow-[0_0_40px_rgba(189,13,242,0.15)] backdrop-blur-sm">
+                                            <div className="absolute inset-0 bg-linear-to-t from-[#bd0df2]/10 to-transparent opacity-50"></div>
 
                                             {winner && winner.imageUrl && (
                                                 <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay">
@@ -554,7 +553,7 @@ export function RandomizerClient({
                                                 {isRolling ? (
                                                     <div className="flex flex-col items-center gap-6">
                                                         <Loader2 className="h-12 w-12 animate-spin text-[#bd0df2]" />
-                                                        <div className="min-h-[80px]">
+                                                        <div className="min-h-20">
                                                             <span className="text-shadow-glow animate-pulse text-4xl font-black tracking-tighter text-white uppercase md:text-5xl">
                                                                 {cycleText || "ROLLING..."}
                                                             </span>
@@ -562,7 +561,7 @@ export function RandomizerClient({
                                                     </div>
                                                 ) : winner ? (
                                                     <div className="animate-in zoom-in spin-in-2 flex flex-col items-center gap-6 duration-700">
-                                                        <div className="relative aspect-[3/4] w-48 overflow-hidden rounded-2xl border-2 border-[#bd0df2]/50 shadow-[0_0_40px_rgba(189,13,242,0.6)]">
+                                                        <div className="relative aspect-3/4 w-48 overflow-hidden rounded-2xl border-2 border-[#bd0df2]/50 shadow-[0_0_40px_rgba(189,13,242,0.6)]">
                                                             <div className="absolute inset-0 bg-[#bd0df2]/20 blur-xl"></div>
                                                             {winner.imageUrl ? (
                                                                 <Image
