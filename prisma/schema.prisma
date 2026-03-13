@@ -84,6 +84,7 @@ model Game {
   title          String
   platform       String?     // PC, Switch, PS5...
   cover_url      String?     // Capa do jogo
+  artwork_url    String?     // Arte em landscape/ultrawide para banners
 
   // Regras de Negócio
   quest_type     QuestType   // Main ou Side? [Critico para as regras]

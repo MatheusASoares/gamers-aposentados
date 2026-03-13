@@ -121,7 +121,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                         </button>
                         <button
                             onClick={() => setFilterType("MAIN_QUEST")}
-                            className={`rounded-xl border-2 px-5 py-2.5 text-xs font-bold tracking-wider uppercase transition-all duration-300 ${filterType === "MAIN_QUEST" ? "border-[#bd0df2]/40 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)]" : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"}`}
+                            className={`rounded-xl border-2 px-5 py-2.5 text-xs font-bold tracking-wider uppercase transition-all duration-300 ${filterType === "MAIN_QUEST" ? "border-amber-400/50 bg-amber-400/10 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)]" : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"}`}
                         >
                             Main Quest
                         </button>

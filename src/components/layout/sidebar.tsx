@@ -8,6 +8,7 @@ import {
     Dices,
     LogOut,
     Gamepad2,
+    Map,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -71,9 +72,20 @@ export function Sidebar({ className }: SidebarProps) {
                                 Dashboard
                             </Button>
                         </Link>
-                        {/* <Link href="/quests" passHref>
-                            ...
-                        </Link> */}
+                        <Link href="/quests" passHref>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
+                                    isActive("/quests")
+                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
+                                )}
+                            >
+                                <Map className="h-5 w-5" />
+                                Quests
+                            </Button>
+                        </Link>
                         <Link href="/reviews" passHref>
                             <Button
                                 variant="ghost"

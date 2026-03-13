@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Gamepad2, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Gamepad2, CheckCircle, XCircle, RefreshCw, Swords } from "lucide-react";
 import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
 import { UserLink } from "@/components/ui/user-link";
 import Image from "next/image";
@@ -136,8 +136,9 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                             <div className="flex flex-col justify-end pb-2">
                                 <div className="mb-3 flex items-center gap-2">
                                     <span
-                                        className={`px-4 py-1.5 ${theme.badge} rounded-full border border-[#bd0df2]/30 text-[10px] font-black tracking-[0.2em] uppercase backdrop-blur-md`}
+                                        className="relative z-10 flex cursor-default select-none items-center gap-1.5 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 text-[10px] font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.15)] ring-1 ring-amber-400/20"
                                     >
+                                        <Swords className="size-3" />
                                         Main Quest
                                     </span>
                                 </div>

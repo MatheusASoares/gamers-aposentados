@@ -278,21 +278,37 @@ export function RandomizerClient({
                             May the RNG be in your favor, Commander.
                         </p>
                     </div>
-                    <div className="inline-flex rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md">
+                    <div className="relative flex w-full max-w-[380px] sm:inline-flex sm:w-[400px] flex-shrink-0 rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md">
+                        <div
+                            className={cn(
+                                "absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl transition-all duration-500 ease-spring",
+                                questType === "MAIN"
+                                    ? "translate-x-0 bg-amber-400/20 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
+                                    : "translate-x-full bg-[#bd0df2]/20 shadow-[0_0_20px_rgba(189,13,242,0.2)]",
+                            )}
+                        />
+                        <div
+                            className={cn(
+                                "absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl border border-white/10 transition-all duration-500 ease-spring",
+                                questType === "MAIN"
+                                    ? "translate-x-0 border-amber-400/50"
+                                    : "translate-x-full border-[#bd0df2]/50",
+                            )}
+                        />
                         <button
                             onClick={() => handleQuestTypeChange("MAIN")}
                             className={cn(
-                                "rounded-xl px-6 py-2.5 text-xs font-bold tracking-wider uppercase transition-all duration-300",
+                                "relative z-10 w-1/2 py-3 text-center text-xs sm:text-sm py-3 font-black tracking-wider sm:tracking-widest uppercase transition-all duration-500",
                                 questType === "MAIN"
-                                    ? "bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/30"
-                                    : "text-zinc-500 hover:text-white",
+                                    ? "text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]"
+                                    : "text-zinc-500 hover:text-zinc-300",
                             )}
                         >
                             Main Quest{" "}
                             <span
                                 className={cn(
-                                    "ml-1 font-normal",
-                                    questType === "MAIN" ? "text-[#bd0df2]/60" : "text-zinc-600",
+                                    "ml-0.5 sm:ml-1 font-normal",
+                                    questType === "MAIN" ? "text-amber-400/60" : "text-zinc-600",
                                 )}
                             >
                                 (3m)
@@ -301,10 +317,10 @@ export function RandomizerClient({
                         <button
                             onClick={() => handleQuestTypeChange("SIDE")}
                             className={cn(
-                                "rounded-xl px-6 py-2.5 text-xs font-bold tracking-wider uppercase transition-all duration-300",
+                                "relative z-10 w-1/2 py-3 text-center text-xs sm:text-sm py-3 font-black tracking-wider sm:tracking-widest uppercase transition-all duration-500",
                                 questType === "SIDE"
-                                    ? "bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/30"
-                                    : "text-zinc-500 hover:text-white",
+                                    ? "text-[#bd0df2] drop-shadow-[0_0_10px_rgba(189,13,242,0.5)]"
+                                    : "text-zinc-500 hover:text-zinc-300",
                             )}
                         >
                             Side Quest{" "}
