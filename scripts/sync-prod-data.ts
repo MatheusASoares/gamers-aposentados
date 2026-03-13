@@ -13,15 +13,15 @@ async function syncProductionData() {
             const gamesToTransfer = [
                 "Shadow of the Colossus",
                 "Guacamelee!",
-                "Brothers: A Tale of Two Sons"
+                "Brothers: A Tale of Two Sons",
             ];
-            
+
             for (const gameTitle of gamesToTransfer) {
                 const game = await prisma.game.findFirst({ where: { title: gameTitle } });
                 if (game) {
                     await prisma.game.update({
                         where: { id: game.id },
-                        data: { nominated_by_id: matheus.id }
+                        data: { nominated_by_id: matheus.id },
                     });
                 }
             }
@@ -33,9 +33,9 @@ async function syncProductionData() {
             await prisma.game.update({
                 where: { id: blasphemous.id },
                 data: {
-                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1qze.jpg",
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar4dtt.jpg"
-                }
+                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/cob0xj.jpg",
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar6zd.jpg",
+                },
             });
         }
 
@@ -45,9 +45,9 @@ async function syncProductionData() {
             await prisma.game.update({
                 where: { id: moonlighter.id },
                 data: {
-                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co2k0x.jpg",
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar56v.jpg"
-                }
+                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1vck.jpg",
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar4x39.jpg",
+                },
             });
         }
 
@@ -58,9 +58,10 @@ async function syncProductionData() {
             await prisma.game.update({
                 where: { id: ff7r.id },
                 data: {
-                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co1qyp.jpg",
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar3rhi.jpg"
-                }
+                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/cobcwt.jpg",
+                    artwork_url:
+                        "https://images.igdb.com/igdb/image/upload/t_1080p/rn8yyki9o0jh7ossq898.jpg",
+                },
             });
         }
 
@@ -71,8 +72,8 @@ async function syncProductionData() {
             await prisma.game.update({
                 where: { id: sor4.id },
                 data: {
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar42x4.jpg"
-                }
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar42x4.jpg",
+                },
             });
         }
 
@@ -83,8 +84,8 @@ async function syncProductionData() {
             await prisma.game.update({
                 where: { id: disco.id },
                 data: {
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar4pd7.png" // transparent logo
-                }
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar4pd7.png", // transparent logo
+                },
             });
         }
 
@@ -95,50 +96,56 @@ async function syncProductionData() {
             await prisma.game.update({
                 where: { id: ds1.id },
                 data: {
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar3s0u.jpg"
-                }
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar3s0u.jpg",
+                },
             });
         }
 
         // 6. Fix Ghostwire: Tokyo
         console.log("Updating Ghostwire: Tokyo...");
-        const ghostwire = await prisma.game.findFirst({ where: { id: "7d8aab68-2e3a-447e-9e19-09ec73a9d9d2" } }); // ID found earlier
+        const ghostwire = await prisma.game.findFirst({
+            where: { id: "7d8aab68-2e3a-447e-9e19-09ec73a9d9d2" },
+        }); // ID found earlier
         if (ghostwire) {
-             await prisma.game.update({
-                 where: { id: ghostwire.id },
-                 data: {
-                     title: "Ghostwire: Tokyo",
-                     cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co55xn.jpg",
-                     artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar5qk.jpg"
-                 }
-             });
+            await prisma.game.update({
+                where: { id: ghostwire.id },
+                data: {
+                    title: "Ghostwire: Tokyo",
+                    cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co55xn.jpg",
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar5qk.jpg",
+                },
+            });
         }
 
         // 7. Fix The Witcher 3: Wild Hunt
         console.log("Updating The Witcher 3: Wild Hunt...");
-        const witcher = await prisma.game.findFirst({ where: { id: "e38e0d1a-e4b2-4d0d-8ad0-8c53faa64a02" } }); // ID found earlier
+        const witcher = await prisma.game.findFirst({
+            where: { id: "e38e0d1a-e4b2-4d0d-8ad0-8c53faa64a02" },
+        }); // ID found earlier
         if (witcher) {
             await prisma.game.update({
                 where: { id: witcher.id },
                 data: {
                     title: "The Witcher 3: Wild Hunt",
                     cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/coaarl.jpg",
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar3lzh.jpg"
-                }
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar3lzh.jpg",
+                },
             });
         }
 
         // 8. Fix Batman: Arkham Knight
         console.log("Updating Batman: Arkham Knight...");
-        const batman = await prisma.game.findFirst({ where: { id: "8ee27090-8b41-44dd-ad77-787d38a945a8" } }); // ID found earlier
+        const batman = await prisma.game.findFirst({
+            where: { id: "8ee27090-8b41-44dd-ad77-787d38a945a8" },
+        }); // ID found earlier
         if (batman) {
             await prisma.game.update({
                 where: { id: batman.id },
                 data: {
                     title: "Batman: Arkham Knight",
                     cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/coagib.jpg",
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar5n3.jpg"
-                }
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar5n3.jpg",
+                },
             });
         }
 
@@ -147,18 +154,17 @@ async function syncProductionData() {
         const popId = "0f2a378f-a686-4741-a42b-d93439f2de9a"; // ID found earlier
         const pop = await prisma.game.findFirst({ where: { id: popId } });
         if (pop) {
-             await prisma.game.update({
+            await prisma.game.update({
                 where: { id: pop.id },
                 data: {
                     title: "Prince of Persia: The Sands of Time",
                     cover_url: "https://images.igdb.com/igdb/image/upload/t_cover_big/co4t8l.jpg",
-                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar8c5.jpg"
-                }
+                    artwork_url: "https://images.igdb.com/igdb/image/upload/t_1080p/ar8c5.jpg",
+                },
             });
         }
 
         console.log("🎉 Production Data Sync Completed Successfully!");
-
     } catch (error) {
         console.error("Error syncing production data:", error);
     }
