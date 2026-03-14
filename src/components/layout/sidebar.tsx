@@ -1,13 +1,14 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import logo from "../../../public/logo.jpg";
 import {
     LayoutDashboard,
     History,
     Dices,
     LogOut,
-    Gamepad2,
     Map,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -41,18 +42,26 @@ export function Sidebar({ className }: SidebarProps) {
                 {/* NEW PREMIUM LOGO */}
                 <Link
                     href="/"
-                    className="flex flex-col items-center justify-center gap-2 px-6 pb-6 transition-all hover:scale-105"
+                    className="relative flex flex-col items-center justify-center px-6 pb-6 transition-all duration-500 hover:scale-105"
                 >
-                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-[#bd0df2]/30 bg-[#bd0df2]/10 shadow-[0_0_20px_rgba(189,13,242,0.3)] backdrop-blur-md">
-                        <Gamepad2 className="h-6 w-6 text-[#bd0df2]" />
-                    </div>
-                    <div className="text-center">
-                        <h2 className="bg-gradient-to-r from-white via-zinc-200 to-zinc-500 bg-clip-text text-xl font-black tracking-widest text-transparent uppercase">
-                            Gamers
-                        </h2>
-                        <span className="text-[10px] font-black tracking-[0.3em] text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.5)]">
-                            Aposentados
-                        </span>
+                    {/* Premium Ambient Glow */}
+                    <div className="absolute -inset-1 z-0 animate-pulse rounded-[2.5rem] bg-[#bd0df2]/20 blur-2xl transition-all duration-500 group-hover:bg-[#bd0df2]/40" />
+                    
+                    {/* Logo Container with Refined Glass Effect */}
+                    <div className="relative z-10 overflow-hidden rounded-[2.5rem] border border-white/5 bg-transparent p-1 shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:border-[#bd0df2]/40 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.3)]">
+                        {/* Inner Decorative Gradient */}
+                        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#bd0df2]/10 via-transparent to-transparent opacity-30" />
+                        
+                        <Image
+                            src={logo}
+                            alt="Gamers Aposentados Logo"
+                            width={180}
+                            height={180}
+                            className="relative z-10 h-auto w-full mix-blend-screen transition-all duration-700 group-hover:brightness-110 group-hover:contrast-125"
+                        />
+                        
+                        {/* Shine Effect Overlay */}
+                        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 transition-opacity duration-1000 group-hover:opacity-100" />
                     </div>
                 </Link>
 
