@@ -19,7 +19,7 @@ export interface PoolEntryData {
 export interface PoolData {
     poolId: string;
     questType: "MAIN" | "SIDE";
-    status: string;
+    status: import("@prisma/client").$Enums.PoolStatus;
     entries: PoolEntryData[];
     winnerId?: string | null;
     winnerTitle?: string | null;
@@ -131,24 +131,30 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
 
             // 3. Create or find each game and create pool entries
             for (const game of games) {
-                // Check if game already exists by title
+                // Check if game already exists by title or igdb id
                 let dbGame = await tx.game.findFirst({
-                    where: { title: game.nome },
+                    where: {
+                        OR: [{ igdb_id: game.igdbId }, { title: game.nome }],
+                    },
                 });
 
                 if (!dbGame) {
                     dbGame = await tx.game.create({
                         data: {
+                            igdb_id: game.igdbId,
                             title: game.nome,
                             cover_url: game.imageUrl,
                             quest_type: typeEnum,
                             nominated_by_id: userId,
                         },
                     });
-                } else if (!dbGame.cover_url && game.imageUrl) {
+                } else if (!dbGame.igdb_id || (!dbGame.cover_url && game.imageUrl)) {
                     dbGame = await tx.game.update({
                         where: { id: dbGame.id },
-                        data: { cover_url: game.imageUrl },
+                        data: {
+                            igdb_id: dbGame.igdb_id ? undefined : game.igdbId,
+                            cover_url: !dbGame.cover_url ? game.imageUrl : undefined,
+                        },
                     });
                 }
 
@@ -259,21 +265,22 @@ export async function executeRoll(poolId: string) {
             const allUsers = await tx.user.findMany();
 
             // Ensure all pool games have GameProgress for all users
+            const progressData = [];
             for (const entry of pool.entries) {
                 for (const user of allUsers) {
-                    const existing = await tx.gameProgress.findUnique({
-                        where: { user_id_game_id: { user_id: user.id, game_id: entry.game_id } },
+                    progressData.push({
+                        user_id: user.id,
+                        game_id: entry.game_id,
+                        status: "SUGGESTED" as const,
                     });
-                    if (!existing) {
-                        await tx.gameProgress.create({
-                            data: {
-                                user_id: user.id,
-                                game_id: entry.game_id,
-                                status: "SUGGESTED",
-                            },
-                        });
-                    }
                 }
+            }
+
+            if (progressData.length > 0) {
+                await tx.gameProgress.createMany({
+                    data: progressData,
+                    skipDuplicates: true,
+                });
             }
 
             // Set winner game to ACTIVE for all users

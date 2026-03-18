@@ -1,20 +1,16 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { auth } from "@/auth";
+import { Prisma } from "@prisma/client";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapInputToDb = (input: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = {};
+const mapInputToDb = (input: Partial<Prisma.GameUncheckedCreateInput> & { coverUrl?: string; hltbTime?: number; questType?: any; nominatedById?: string }) => {
+    const data: Partial<Prisma.GameUncheckedCreateInput> = {};
     if (input.title !== undefined) data.title = input.title;
     if (input.platform !== undefined) data.platform = input.platform;
     if (input.coverUrl !== undefined) data.cover_url = input.coverUrl;
     if (input.hltbTime !== undefined) data.hltb_time = Number(input.hltbTime) || null;
-    if (input.status !== undefined) data.status = input.status;
     if (input.questType !== undefined) data.quest_type = input.questType;
     if (input.nominatedById !== undefined) data.nominated_by_id = input.nominatedById;
-    if (input.startDate !== undefined)
-        data.start_date = input.startDate ? new Date(input.startDate) : null;
-    if (input.endDate !== undefined) data.end_date = input.endDate ? new Date(input.endDate) : null;
     return data;
 };
 
@@ -39,6 +35,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { title, nominatedById } = body;
 
@@ -48,7 +49,7 @@ export async function POST(request: Request) {
 
         const data = mapInputToDb(body);
 
-        const game = await prisma.game.create({ data });
+        const game = await prisma.game.create({ data: data as Prisma.GameUncheckedCreateInput });
 
         return NextResponse.json(game, { status: 201 });
     } catch (error) {
@@ -59,6 +60,11 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { id, ...rest } = body;
 
@@ -76,6 +82,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { id } = body;
 

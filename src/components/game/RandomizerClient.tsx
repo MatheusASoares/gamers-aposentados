@@ -67,8 +67,8 @@ export function RandomizerClient({
         otherSelections.length > 0 ? otherSelections[0].userName : defaultOtherName;
 
     const loadPool = useCallback(
-        async (type: QuestType) => {
-            setIsLoading(true);
+        async (type: QuestType, silent: boolean = false) => {
+            if (!silent) setIsLoading(true);
             try {
                 const pool = await getOpenPool(type);
                 if (pool) {
@@ -98,7 +98,7 @@ export function RandomizerClient({
             } catch (err) {
                 console.error("Error loading pool:", err);
             } finally {
-                setIsLoading(false);
+                if (!silent) setIsLoading(false);
             }
         },
         [currentUserId, currentUserName],
@@ -118,6 +118,44 @@ export function RandomizerClient({
 
         loadPool(questType);
     }, [questType, loadPool]);
+
+    // --- Core Computed States (needed for polling dependencies) ---
+    const totalGames = mySelections.length + otherSelections.length;
+    const requiredTotal = maxPerPerson * 2;
+    const poolIsComplete = totalGames >= requiredTotal;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const mySelectionsAreSaved =
+        !isEditing &&
+        savedSnapshot.length === mySelections.length &&
+        savedSnapshot.every((s, i) => s.nome === mySelections[i]?.nome);
+    const hasUnsavedChanges =
+        isEditing ||
+        (mySelections.length > 0 &&
+            (savedSnapshot.length !== mySelections.length ||
+                !savedSnapshot.every((s, i) => s.nome === mySelections[i]?.nome)));
+
+    // --- Background Polling (Real-time Illusion) ---
+    useEffect(() => {
+        // Stop polling if the pool is full, someone is rolling, or user is tinkering with selections
+        if (poolIsComplete || isRolling || hasUnsavedChanges || addingGame || isSaving || winner) {
+            return;
+        }
+
+        const intervalId = setInterval(() => {
+            loadPool(questType, true); // True to keep the UI from completely refreshing into a Loading state
+        }, 15000); // 15 seconds
+
+        return () => clearInterval(intervalId);
+    }, [
+        questType,
+        loadPool,
+        poolIsComplete,
+        isRolling,
+        hasUnsavedChanges,
+        addingGame,
+        isSaving,
+        winner,
+    ]);
 
     // --- Handlers ---
 
@@ -246,20 +284,7 @@ export function RandomizerClient({
         await loadPool(questType);
     };
 
-    // --- Computed ---
-    const totalGames = mySelections.length + otherSelections.length;
-    const requiredTotal = maxPerPerson * 2;
-    const poolIsComplete = totalGames >= requiredTotal;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const mySelectionsAreSaved =
-        !isEditing &&
-        savedSnapshot.length === mySelections.length &&
-        savedSnapshot.every((s, i) => s.nome === mySelections[i]?.nome);
-    const hasUnsavedChanges =
-        isEditing ||
-        (mySelections.length > 0 &&
-            (savedSnapshot.length !== mySelections.length ||
-                !savedSnapshot.every((s, i) => s.nome === mySelections[i]?.nome)));
+    // --- Handlers ---
 
     return (
         <div className="relative mx-auto min-h-screen w-full px-6 py-8">

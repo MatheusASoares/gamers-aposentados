@@ -23,6 +23,11 @@ enum QuestType {
   SIDE_QUEST
 }
 
+enum PoolStatus {
+  OPEN
+  CLOSED
+}
+
 // --- MODELS (As Tabelas do seu Diagrama) ---
 
 model User {
@@ -81,6 +86,7 @@ model Session {
 
 model Game {
   id             String      @id @default(uuid())
+  igdb_id        String?     @unique
   title          String
   platform       String?     // PC, Switch, PS5...
   cover_url      String?     // Capa do jogo
@@ -162,7 +168,7 @@ model Pool {
   year         Int?
   type         QuestType 
   
-  status       String    @default("OPEN") // OPEN, CLOSED
+  status       PoolStatus @default(OPEN)
 
   // O Vencedor (Sorteado)
   winner_game_id String?

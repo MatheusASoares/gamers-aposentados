@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
@@ -19,8 +20,7 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
             },
         });
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const dataToUpdate: any = { progress_percentage: percentage };
+        const dataToUpdate: Prisma.GameProgressUpdateInput = { progress_percentage: percentage };
         if (percentage === 100) {
             dataToUpdate.status = "COMPLETED";
             dataToUpdate.end_date = new Date();
@@ -52,10 +52,9 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
 
         revalidatePath("/");
         return { success: true };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error("Error updating progress:", e);
-        return { success: false, error: e.message };
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
     }
 }
 
@@ -88,10 +87,9 @@ export async function completeQuest(gameId: string) {
 
         revalidatePath("/");
         return { success: true };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error("Error completing quest:", e);
-        return { success: false, error: e.message };
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
     }
 }
 
@@ -122,10 +120,9 @@ export async function dropQuest(gameId: string) {
 
         revalidatePath("/");
         return { success: true };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error("Error dropping quest:", e);
-        return { success: false, error: e.message };
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
     }
 }
 
@@ -194,8 +191,7 @@ export async function joinQuest(gameId: string) {
 
         revalidatePath("/");
         return { success: true };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (e: any) {
+    } catch (e: unknown) {
         console.error("Error joining quest:", e);
         return { success: false, error: "Este jogo já está na sua lista ou ocorreu um erro." };
     }

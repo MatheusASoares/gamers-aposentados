@@ -37,15 +37,20 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
             const savedGames = await Promise.all(
                 candidates.map(async (candidate) => {
                     const existingGame = await tx.game.findFirst({
-                        where: { title: candidate.nome },
+                        where: {
+                            OR: [{ igdb_id: candidate.id }, { title: candidate.nome }],
+                        },
                     });
 
                     if (existingGame) {
-                        // Atualizar capa se aplicável
-                        if (!existingGame.cover_url && candidate.imageUrl) {
+                        // Atualizar capa/igdb se aplicável
+                        if (!existingGame.igdb_id || (!existingGame.cover_url && candidate.imageUrl)) {
                             return tx.game.update({
                                 where: { id: existingGame.id },
-                                data: { cover_url: candidate.imageUrl },
+                                data: {
+                                    igdb_id: existingGame.igdb_id ? undefined : candidate.id,
+                                    cover_url: !existingGame.cover_url ? candidate.imageUrl : undefined,
+                                },
                             });
                         }
                         return existingGame;
@@ -68,6 +73,7 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
 
                     return tx.game.create({
                         data: {
+                            igdb_id: candidate.id,
                             title: candidate.nome,
                             cover_url: candidate.imageUrl,
                             quest_type: typeEnum,
@@ -78,21 +84,22 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
             );
 
             // 1.5. Garantir que todo jogo inserido/atualizado tem um GameProgress (SUGGESTED) para cada usuário
+            const progressData = [];
             for (const game of savedGames) {
                 for (const u of allUsers) {
-                    const existingProgress = await tx.gameProgress.findUnique({
-                        where: { user_id_game_id: { user_id: u.id, game_id: game.id } },
+                    progressData.push({
+                        user_id: u.id,
+                        game_id: game.id,
+                        status: "SUGGESTED" as const,
                     });
-                    if (!existingProgress) {
-                        await tx.gameProgress.create({
-                            data: {
-                                user_id: u.id,
-                                game_id: game.id,
-                                status: "SUGGESTED",
-                            },
-                        });
-                    }
                 }
+            }
+
+            if (progressData.length > 0) {
+                await tx.gameProgress.createMany({
+                    data: progressData,
+                    skipDuplicates: true,
+                });
             }
 
             // Identificar o vencedor recém-retornado ou criado do banco
@@ -144,18 +151,6 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
         console.error("Erro ao salvar Randomizer DB:", error);
-
-        // Escreve do log p/ arquivo local para debugar
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
-        const fs = require("fs");
-        fs.writeFileSync(
-            "prisma-error-dump.txt",
-            String(error) +
-                "\nStack:\n" +
-                (error?.stack || "") +
-                "\nMessage:\n" +
-                (error?.message || ""),
-        );
 
         return { success: false, error: "Erro interno: " + (error?.message || "Desconhecido") };
     }

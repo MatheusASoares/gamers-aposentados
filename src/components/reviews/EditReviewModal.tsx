@@ -54,6 +54,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
 
         if (res.success) {
             setOpen(false);
+            window.location.reload();
         } else {
             setError(res.error || "Ocorreu um erro ao atualizar a review.");
         }

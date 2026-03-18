@@ -10,25 +10,54 @@ export default async function DashboardPage() {
 
     const userId = session?.user?.id || "";
 
-    // Get the latest drawn pools
-    const [latestMainPool, latestSidePool] = await Promise.all([
+    // --- Block 1: Independent Data Fetching (Parallel) ---
+    const [
+        latestMainPool,
+        latestSidePool,
+        randomReviewIds,
+        recentPools,
+        recentReviews,
+        recentProgress,
+    ] = await Promise.all([
+        // Active Main Quest
         prisma.pool.findFirst({
             where: { type: "MAIN_QUEST", winner_game_id: { not: null } },
             orderBy: { created_at: "desc" },
             include: { winner_game: { include: { nominator: true } } },
         }),
+        // Active Side Quest
         prisma.pool.findFirst({
             where: { type: "SIDE_QUEST", winner_game_id: { not: null } },
             orderBy: { created_at: "desc" },
             include: { winner_game: { include: { nominator: true } } },
         }),
+        // Random Review IDs
+        prisma.$queryRaw<{ id: string }[]>`
+            SELECT id FROM reviews ORDER BY RANDOM() LIMIT 5;
+        `,
+        // Recent Pools (Global Activity)
+        prisma.pool.findMany({
+            where: { winner_game_id: { not: null } },
+            orderBy: { created_at: "desc" },
+            take: 5,
+            include: { winner_game: true },
+        }),
+        // Recent Reviews (Global Activity)
+        prisma.review.findMany({
+            orderBy: { updated_at: "desc" },
+            take: 5,
+            include: { game: true, user: true },
+        }),
+        // Recent Progress (Global Activity)
+        prisma.gameProgress.findMany({
+            where: { status: { in: ["ACTIVE", "COMPLETED"] } },
+            orderBy: { updated_at: "desc" },
+            take: 10,
+            include: { game: true, user: true },
+        }),
     ]);
 
-    // Parallel data fetching for user progress and random reviews
-    // Get up to 5 random review IDs
-    const randomReviewIds = await prisma.$queryRaw<{ id: string }[]>`
-        SELECT id FROM reviews ORDER BY RANDOM() LIMIT 5;
-    `;
+    // --- Block 2: Dependent Data Fetching (Parallel) ---
     const idsToFetch = randomReviewIds.map((r) => r.id);
 
     const [mainQuestProgress, sideQuestProgress, randomReviewsForStats] = await Promise.all([
@@ -54,30 +83,6 @@ export default async function DashboardPage() {
                   include: { game: true, user: true },
               })
             : [],
-    ]);
-
-    // ---- Recent Activity Feed (global — all players) ---------------------
-    const [recentPools, recentReviews, recentProgress] = await Promise.all([
-        // Raffle results only (pools that have a winner)
-        prisma.pool.findMany({
-            where: { winner_game_id: { not: null } },
-            orderBy: { created_at: "desc" },
-            take: 5,
-            include: { winner_game: true },
-        }),
-        // Latest reviews from all players
-        prisma.review.findMany({
-            orderBy: { updated_at: "desc" },
-            take: 5,
-            include: { game: true, user: true },
-        }),
-        // Latest active/completed progress from all players
-        prisma.gameProgress.findMany({
-            where: { status: { in: ["ACTIVE", "COMPLETED"] } },
-            orderBy: { updated_at: "desc" },
-            take: 10,
-            include: { game: true, user: true },
-        }),
     ]);
 
     // Build unified sorted event feed

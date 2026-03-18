@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
+import { auth } from "@/auth";
+import { Prisma } from "@prisma/client";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const mapPoolInput = (input: any) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const data: any = {};
+const mapPoolInput = (input: Partial<Prisma.PoolUncheckedCreateInput> & { type?: string }) => {
+    const data: Partial<Prisma.PoolUncheckedCreateInput> = {};
     if (input.type !== undefined) data.type = input.type;
     if (input.month !== undefined) data.month = input.month ?? null;
     if (input.year !== undefined) data.year = input.year ?? null;
@@ -39,6 +39,11 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { entries } = body; // optional
 
@@ -48,11 +53,10 @@ export async function POST(request: Request) {
 
         const pool = await prisma.pool.create({
             data: {
-                ...data,
+                ...(data as Prisma.PoolUncheckedCreateInput),
                 entries: entries
                     ? {
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          create: entries.map((e: any) => ({
+                          create: entries.map((e: { gameId: string; userId: string }) => ({
                               game_id: e.gameId,
                               user_id: e.userId,
                           })),
@@ -71,6 +75,11 @@ export async function POST(request: Request) {
 
 export async function PUT(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { id, action } = body;
 
@@ -118,6 +127,11 @@ export async function PUT(request: Request) {
 
 export async function DELETE(request: Request) {
     try {
+        const session = await auth();
+        if (!session?.user?.id) {
+            return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+
         const body = await request.json();
         const { id } = body;
 

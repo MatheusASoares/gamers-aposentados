@@ -2,21 +2,25 @@
 
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
 
-let cachedToken: string | null = null;
-let tokenExpirationTime: number = 0;
+import { unstable_cache } from "next/cache";
 
-export async function getTwitchToken(): Promise<string | null> {
+interface IGDBGame {
+    id: number;
+    name: string;
+    category?: number;
+    game_type?: number;
+    parent_game?: number;
+    version_parent?: number;
+    cover?: { image_id: string };
+}
+
+async function fetchNewTwitchToken(): Promise<string | null> {
     const clientId = process.env.IGDB_CLIENT_ID;
     const clientSecret = process.env.IGDB_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
         console.error("IGDB credentials are missing in environment variables.");
         return null;
-    }
-
-    // Check if we have a valid cached token
-    if (cachedToken && Date.now() < tokenExpirationTime) {
-        return cachedToken;
     }
 
     try {
@@ -30,17 +34,22 @@ export async function getTwitchToken(): Promise<string | null> {
         }
 
         const data = await response.json();
-
-        cachedToken = data.access_token;
-        // Set expiration time, subtracting 5 minutes as a safety buffer
-        tokenExpirationTime = Date.now() + data.expires_in * 1000 - 5 * 60 * 1000;
-
-        return cachedToken;
+        return data.access_token;
     } catch (error) {
         console.error("Error authenticating with Twitch:", error);
         return null;
     }
 }
+
+export const getTwitchToken = unstable_cache(
+    async () => {
+        return fetchNewTwitchToken();
+    },
+    ["igdb-twitch-token"], // Cache key
+    {
+        revalidate: 86400, // Revalidate every 24 hours (86400 seconds)
+    }
+);
 
 export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]> {
     if (!query || query.trim().length === 0) {
@@ -74,21 +83,11 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
         }
 
         const games = await response.json();
-        console.log(`[IGDB Search] Query: "${query}", Results count: ${games.length}`);
-        // The instruction's provided code snippet had a duplicated console.log and removed the following if block.
-        // Adhering to "make the change faithfully and without making any unrelated edits",
-        // and given the instruction "Update the category filtering to accept 0 or undefined",
-        // which the existing code already does, only the specific line for filtering is ensured.
-        // The original console.log and if block are retained as they are not part of the filtering update.
-        if (games.length > 0) {
-            console.log("[IGDB Search] First result category:", games[0].category);
-        }
 
         // A true base game has category 0 (or undefined) AND no parent game (DLC/Expansion) AND no version parent (GOTY/Remaster)
         // We also reject game_type 3 (Bundles) and category 3 (Bundles).
         const mainGames = games
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            .filter((g: any) => {
+            .filter((g: IGDBGame) => {
                 const isBaseCategory = g.category === 0 || g.category === undefined;
                 const isNotBundle = g.game_type !== 3 && g.category !== 3;
                 const noParents = !g.parent_game && !g.version_parent;
@@ -100,8 +99,7 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
             })
             .slice(0, 10);
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return mainGames.map((game: any) => ({
+        return mainGames.map((game: IGDBGame) => ({
             id: game.id.toString(),
             nome: game.name,
             imageUrl: game.cover?.image_id
