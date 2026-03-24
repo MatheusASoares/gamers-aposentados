@@ -5,6 +5,7 @@ import { Flame, CheckCircle, XCircle, RefreshCw } from "lucide-react";
 import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
 import { UserLink } from "@/components/ui/user-link";
 import Image from "next/image";
+import { HltbBadge } from "@/components/game/HltbBadge";
 
 interface SideQuestBarProps {
     progress: {
@@ -183,9 +184,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                         ({progress.progress_percentage}%)
                                     </span>
                                 </span>
-                                {game.hltb_time && (
-                                    <span className={theme.text}>~{game.hltb_time}h</span>
-                                )}
+                                <HltbBadge hours={game.hltb_time} className="h-5" />
                             </div>
                             <div className="h-4 overflow-hidden rounded-full border border-zinc-800/50 bg-zinc-900">
                                 <div
@@ -196,13 +195,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                         </div>
                     ) : (
                         <div className="pt-3">
-                            {game.hltb_time && (
-                                <span
-                                    className={`text-[11px] font-bold tracking-wider uppercase ${theme.text}`}
-                                >
-                                    HLTB: ~{game.hltb_time}h
-                                </span>
-                            )}
+                            <HltbBadge hours={game.hltb_time} className="h-5" />
                         </div>
                     )}
                 </div>

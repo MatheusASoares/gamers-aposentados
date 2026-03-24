@@ -15,6 +15,7 @@ export interface PlayerProgress {
     userId: string;
     userName: string;
     status: string; // "COMPLETED", "DROPPED", "SUGGESTED", "ACTIVE"
+    progress_percentage: number;
 }
 
 export interface QuestHistoryData {
@@ -80,6 +81,7 @@ export async function getQuestHistoryByYear(
                         userId: p.user.id,
                         userName: p.user.name || p.user.username || "Unknown",
                         status: p.status,
+                        progress_percentage: p.progress_percentage,
                     }));
             }
 

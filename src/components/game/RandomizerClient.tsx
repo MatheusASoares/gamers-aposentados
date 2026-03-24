@@ -5,6 +5,7 @@ import { Loader2, Trophy, History, Save, Pencil, X } from "lucide-react";
 import Image from "next/image";
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
 import { GameAutocomplete } from "@/components/ui/game-autocomplete";
+import { HltbBadge } from "@/components/game/HltbBadge";
 import { getRandomizerStatus } from "@/app/lib/quest-actions";
 import {
     getOpenPool,
@@ -59,6 +60,9 @@ export function RandomizerClient({
     const [saveStatus, setSaveStatus] = useState<{ success?: boolean; message?: string } | null>(
         null,
     );
+    const [hltbTimes, setHltbTimes] = useState<Record<string, number | null>>({});
+    const [isFetchingHltb, setIsFetchingHltb] = useState(false);
+    const [refreshingTitles, setRefreshingTitles] = useState<Set<string>>(new Set());
 
     const maxPerPerson = questType === "MAIN" ? 2 : 3;
 
@@ -86,6 +90,17 @@ export function RandomizerClient({
                         }));
                     const others = pool.entries.filter((e) => e.userId !== currentUserId);
 
+                    // Update HLTB times from pool data
+                    setHltbTimes((prev) => {
+                        const next = { ...prev };
+                        pool.entries.forEach((e) => {
+                            if (e.hltb_time !== undefined && e.hltb_time !== null) {
+                                next[e.gameTitle] = e.hltb_time;
+                            }
+                        });
+                        return next;
+                    });
+
                     setMySelections(mine);
                     setSavedSnapshot(mine);
                     setOtherSelections(others);
@@ -103,6 +118,44 @@ export function RandomizerClient({
         },
         [currentUserId, currentUserName],
     );
+
+    const handleRefreshHltb = async (title: string) => {
+        if (refreshingTitles.has(title)) return;
+        
+        setRefreshingTitles(prev => {
+            const next = new Set(prev);
+            next.add(title);
+            return next;
+        });
+
+        try {
+            const aiRes = await fetch("/api/ai/hltb", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ titles: [title] }),
+            });
+
+            if (aiRes.ok) {
+                const aiData = await aiRes.json();
+                setHltbTimes((prev) => {
+                    const next = { ...prev };
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    aiData.results.forEach((r: any) => {
+                        next[r.title] = r.mainStory || null;
+                    });
+                    return next;
+                });
+            }
+        } catch (err) {
+            console.error("Manual AI fetch failed", err);
+        } finally {
+            setRefreshingTitles(prev => {
+                const next = new Set(prev);
+                next.delete(title);
+                return next;
+            });
+        }
+    };
 
     useEffect(() => {
         setWinner(null);
@@ -185,10 +238,47 @@ export function RandomizerClient({
             const response = await saveSelections(questType, games);
 
             if (response.success) {
-                setSaveStatus({ success: true, message: "Seleções salvas!" });
+                setSaveStatus({ success: true, message: "Seleções salvas! Consultando AI Agent (HLTB)..." });
                 setIsEditing(false);
                 // Reload pool to get fresh entry IDs
                 await loadPool(questType);
+
+                // Fetch AI Times
+                setIsFetchingHltb(true);
+                try {
+                    const aiRes = await fetch("/api/ai/hltb", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ titles: games.map((g) => g.nome) }),
+                    });
+
+                    if (aiRes.ok) {
+                        const aiData = await aiRes.json();
+                        const newTimes = { ...hltbTimes };
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        aiData.results.forEach((r: any) => {
+                            newTimes[r.title] = r.mainStory || null;
+                        });
+                        setHltbTimes(newTimes);
+                        setSaveStatus({
+                            success: true,
+                            message: "Seleções salvas com sucesso!",
+                        });
+                    } else {
+                        setSaveStatus({
+                            success: true,
+                            message: "Seleções salvas (Falha no AI)",
+                        });
+                    }
+                } catch (err) {
+                    console.error("AI fetch failed", err);
+                    setSaveStatus({
+                        success: true,
+                        message: "Seleções salvas (Erro no AI)",
+                    });
+                } finally {
+                    setIsFetchingHltb(false);
+                }
             } else {
                 setSaveStatus({ success: false, message: response.error || "Erro ao salvar." });
             }
@@ -455,6 +545,12 @@ export function RandomizerClient({
                                         <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
                                             {c.nome}
                                         </h4>
+                                        <HltbBadge 
+                                            hours={hltbTimes[c.nome]} 
+                                            isLoading={(isFetchingHltb && mySelectionsAreSaved) || refreshingTitles.has(c.nome)}
+                                            onRefresh={() => handleRefreshHltb(c.nome)}
+                                            className="mr-2"
+                                        />
                                         {isEditing && (
                                             <button
                                                 onClick={() => handleRemoveGame(index)}
@@ -560,6 +656,12 @@ export function RandomizerClient({
                                             <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
                                                 {entry.gameTitle}
                                             </h4>
+                                            <HltbBadge 
+                                                hours={hltbTimes[entry.gameTitle]} 
+                                                isLoading={(isFetchingHltb && !isEditing) || refreshingTitles.has(entry.gameTitle)}
+                                                onRefresh={() => handleRefreshHltb(entry.gameTitle)}
+                                                className="mr-2"
+                                            />
                                         </div>
                                     ))
                                 )}

@@ -141,21 +141,43 @@ export function QuestHistoryCard({ data }: QuestHistoryCardProps) {
                                         <div 
                                             key={p.userId} 
                                             className={cn(
-                                                "relative flex items-center justify-between overflow-hidden rounded-xl border p-3 backdrop-blur-sm transition-all duration-300",
+                                                "relative flex flex-col overflow-hidden rounded-xl border p-3 backdrop-blur-sm transition-all duration-300",
                                                 statusObj.bg
                                             )}
                                         >
-                                            <div className="flex items-center gap-3">
-                                                <div className={cn("flex size-8 items-center justify-center rounded-full bg-zinc-950 shadow-inner", statusObj.colors)}>
-                                                    <StatusIcon className="size-4" />
+                                            <div className="flex items-center justify-between mb-2">
+                                                <div className="flex items-center gap-3">
+                                                    <div className={cn("flex size-8 items-center justify-center rounded-full bg-zinc-950 shadow-inner", statusObj.colors)}>
+                                                        <StatusIcon className="size-4" />
+                                                    </div>
+                                                    <span className="text-xs font-black tracking-wide text-white">
+                                                        {p.userName}
+                                                    </span>
                                                 </div>
-                                                <span className="text-xs font-black tracking-wide text-white">
-                                                    {p.userName}
+                                                <span className={cn("text-xs font-black tracking-widest uppercase", statusObj.colors)}>
+                                                    {statusObj.label}
                                                 </span>
                                             </div>
-                                            <span className={cn("text-[10px] font-black tracking-widest uppercase", statusObj.colors)}>
-                                                {statusObj.label}
-                                            </span>
+
+                                            {/* Progress Bar */}
+                                            <div className="mt-1">
+                                                <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-950/50 ring-1 ring-white/5">
+                                                    <div 
+                                                        className={cn(
+                                                            "h-full transition-all duration-1000", 
+                                                            p.status === "COMPLETED" ? "bg-amber-500" : 
+                                                            p.status === "DROPPED" ? "bg-red-500" : "bg-[#bd0df2]"
+                                                        )} 
+                                                        style={{ width: `${p.progress_percentage}%` }}
+                                                    />
+                                                </div>
+                                                <div className="mt-1 flex justify-between px-0.5">
+                                                    <span className="text-[10px] font-bold text-zinc-500/80 uppercase tracking-widest">Progresso</span>
+                                                    <span className={cn("text-xs font-black", statusObj.colors)}>
+                                                        {p.progress_percentage}%
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                     );
                                 })

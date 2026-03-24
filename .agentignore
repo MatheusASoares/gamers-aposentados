@@ -1,0 +1,75 @@
+# =============================================================================
+# .agentignore — Exclui arquivos desnecessários para agentes de IA
+# Reduz consumo de tokens ignorando binários, builds e arquivos gerados
+# =============================================================================
+
+# --- Dependências ---
+node_modules/
+.pnp
+.pnp.*
+.yarn/
+
+# --- Build / Output ---
+.next/
+out/
+build/
+dist/
+coverage/
+
+# --- Arquivos gerados / cache ---
+*.tsbuildinfo
+tsconfig.tsbuildinfo
+next-env.d.ts
+generated/
+.next/cache/
+
+# --- Lock files (muito grandes, irrelevantes para lógica) ---
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+skills-lock.json
+
+# --- Relatórios e logs ---
+eslint-report.json
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+*.log
+
+# --- Migrations do Prisma (histórico de SQL, não a schema) ---
+prisma/migrations/
+
+# --- Seed (arquivo grande de dados, raramente relevante) ---
+prisma/seed.ts
+
+# --- Dados históricos / pessoais ---
+data/
+
+# --- Assets estáticos (imagens, fontes, etc.) ---
+public/
+stitch-assets/
+
+# --- Playwright (testes e-2-e e relatórios) ---
+tests/playwright-report/
+tests/test-results/
+
+# --- Git internals ---
+.git/
+
+# --- Variáveis de ambiente (segurança) ---
+.env
+.env.*
+.env.local
+
+# --- Vercel ---
+.vercel/
+
+# --- Configurações de editor/OS ---
+.DS_Store
+*.pem
+
+# --- Documentos grandes de análise (não são código) ---
+eslint-report.json
+analise_completa_projeto.md
+StudyGuide.md
+implementation_plan.md

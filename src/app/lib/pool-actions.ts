@@ -14,6 +14,7 @@ export interface PoolEntryData {
     gameIgdbId: string; // ID from IGDB search
     userId: string;
     userName: string;
+    hltb_time?: number | null;
 }
 
 export interface PoolData {
@@ -58,6 +59,7 @@ export async function getOpenPool(questType: "MAIN" | "SIDE"): Promise<PoolData 
                 gameIgdbId: e.game_id,
                 userId: e.user_id,
                 userName: e.user.name || e.user.username || "Unknown",
+                hltb_time: e.game.hltb_time,
             })),
             winnerId: pool.winner_game_id,
             winnerTitle: pool.winner_game?.title,

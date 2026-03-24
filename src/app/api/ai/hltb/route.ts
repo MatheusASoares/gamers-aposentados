@@ -1,0 +1,176 @@
+import { NextResponse } from "next/server";
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+
+export async function POST(request: Request) {
+    // 1. Authentication check
+    const session = await auth();
+    if (!session?.user?.id) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // 2. Validate request body
+    try {
+        const body = await request.json();
+        const { titles } = body;
+
+        if (!titles || !Array.isArray(titles) || titles.length === 0) {
+            return NextResponse.json(
+                { error: "'titles' array is required in the request body" },
+                { status: 400 }
+            );
+        }
+
+        if (titles.length > 6) {
+             return NextResponse.json(
+                { error: "Maximum of 6 titles are allowed per request" },
+                { status: 400 }
+            );
+        }
+
+        // 3. Check Key
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.error("GEMINI_API_KEY is not configured.");
+            return NextResponse.json(
+                { error: "AI service is not configured" },
+                { status: 500 }
+            );
+        }
+
+        // 4. Query DB for existing HLTB times
+        const existingGames = await prisma.game.findMany({
+            where: {
+                title: { in: titles }
+            },
+            select: { title: true, hltb_time: true }
+        });
+
+        const results: { title: string; mainStory: number | null }[] = [];
+        const titlesToFetch: string[] = [];
+
+        for (const title of titles) {
+            const gameInDb = existingGames.find(g => g.title.toLowerCase() === title.toLowerCase());
+            if (gameInDb && gameInDb.hltb_time !== null) {
+                // Game already has time in DB, use it directly
+                results.push({ title, mainStory: gameInDb.hltb_time });
+            } else {
+                titlesToFetch.push(title);
+            }
+        }
+
+        // If all are already in DB, return immediately
+        if (titlesToFetch.length === 0) {
+            console.log(`[API /ai/hltb] Substituted all ${titles.length} games from DB cache.`);
+            return NextResponse.json({ results });
+        }
+
+        // 5. Construct prompt only for games we need
+        const promptText = `
+You are a helpful AI assistant specialized in video games.
+I need you to find the estimated completion times for the following video games using HowLongToBeat (HLTB) data.
+
+Here are the games I need data for:
+${titlesToFetch.map(t => `- ${t}`).join('\n')}
+
+For each game, extract the estimated hours for:
+1. mainStory (Main Story)
+
+Return a strictly valid JSON object adhering to this schema:
+{
+  "results": [
+    {
+      "title": "Game Name",
+      "mainStory": number | null
+    }
+  ]
+}
+
+Only include the integer number of hours. If a time is listed as "5½ Hours" or "5.5 Hours", round up to the nearest integer (ex: 6). If it's less than 1 hour, return 1. If missing, return null. 
+Ensure the 'title' matches the input title as closely as possible.
+Return strictly the JSON, nothing else. No markdown syntax.
+        `;
+
+        // 6. Execute via Native Fetch
+        console.log(`[API /ai/hltb] Fetching Gemini via REST for ${titlesToFetch.length} games (Cached: ${results.length})...`);
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+        
+        const response = await fetch(geminiUrl, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                contents: [{
+                    parts: [{ text: promptText }]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error("[API /ai/hltb] Gemini API error:", response.status, errorText);
+            if (response.status === 429) {
+                return NextResponse.json(
+                    { error: "Rate limit exceeded on AI service. Wait a minute and try again." },
+                    { status: 429 }
+                );
+            }
+            throw new Error(`Gemini API returned status ${response.status}`);
+        }
+
+        const data = await response.json();
+        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        
+        if (!text) {
+             throw new Error("Invalid response format from Gemini");
+        }
+
+        // 7. Parse and return results
+        try {
+            const parsedData = JSON.parse(text);
+            
+            // Add new fetched data to results and save to DB
+            if (parsedData && Array.isArray(parsedData.results)) {
+                for (const aiResult of parsedData.results) {
+                    if (aiResult.title && aiResult.mainStory !== undefined) {
+                        // Push to the API response array
+                        results.push({ title: aiResult.title, mainStory: aiResult.mainStory });
+                        
+                        // Async update DB
+                        if (aiResult.mainStory !== null) {
+                            try {
+                                await prisma.game.updateMany({
+                                    where: { 
+                                        title: { 
+                                            equals: aiResult.title,
+                                            mode: 'insensitive' 
+                                        } 
+                                    },
+                                    data: { hltb_time: aiResult.mainStory }
+                                });
+                            } catch (dbError) {
+                                console.error("[API /ai/hltb] Error updating DB for", aiResult.title, dbError);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return NextResponse.json({ results });
+        } catch (parseError) {
+             console.error("[API /ai/hltb] Failed to parse JSON:", text, parseError);
+             return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
+        }
+
+    } catch (error: any) {
+        console.error("[API /ai/hltb] Internal error:", error);
+         return NextResponse.json(
+             { error: "Internal server error connecting to AI service", details: error?.message },
+             { status: 500 }
+         );
+    }
+}
