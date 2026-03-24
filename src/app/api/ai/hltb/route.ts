@@ -67,35 +67,35 @@ export async function POST(request: Request) {
 
         // 5. Construct prompt only for games we need
         const promptText = `
-You are a helpful AI assistant specialized in video games.
-I need you to find the estimated completion times for the following video games using HowLongToBeat (HLTB) data.
+You are a specialized gaming expert with access to real-time search. 
+CRITICAL: You MUST search the internet/HowLongToBeat website to find the LATEST estimated completion times for the following video games. Do not rely solely on your training data if a search can provide more accurate/fresh numbers.
 
-Here are the games I need data for:
+Games to research:
 ${titlesToFetch.map(t => `- ${t}`).join('\n')}
 
-For each game, extract the estimated hours for:
-1. mainStory (Main Story)
-
-Return a strictly valid JSON object adhering to this schema:
+For each game, find the "Main Story" (or "Polled") average time.
+Return a strictly valid JSON object:
 {
   "results": [
     {
-      "title": "Game Name",
+      "title": "Exact Title Provided",
       "mainStory": number | null
     }
   ]
 }
 
-Only include the integer number of hours. If a time is listed as "5½ Hours" or "5.5 Hours", round up to the nearest integer (ex: 6). If it's less than 1 hour, return 1. If missing, return null. 
-Ensure the 'title' matches the input title as closely as possible.
-Return strictly the JSON, nothing else. No markdown syntax.
+Rules:
+- Round up half-hours (e.g. 5.5h -> 6h).
+- Use 1 for any game < 1h.
+- Return null only if the game absolutely cannot be found.
+- Return ONLY the JSON object.
         `;
 
         // 6. Execute via Native Fetch with Fallback Logic
         const models = [
-            "gemini-2.0-flash",           // Model principal (v2.0 Flash)
-            "gemini-2.5-flash",           // Test-out model (v2.5 Flash)
-            "gemini-2.5-pro",            // Test-out model (v2.5 Pro)
+            "gemini-2.5-flash",           // Model principal (Vanguarda/Newest)
+            "gemini-2.0-flash",           // Backup 1 (Fast & Reliable)
+            "gemini-2.5-pro",            // Backup 2 (Highly Intuitive/Powerful)
             "gemini-2-flash-lite"        // Backup lightweight
         ];
 
@@ -117,6 +117,12 @@ Return strictly the JSON, nothing else. No markdown syntax.
                     body: JSON.stringify({
                         contents: [{
                             parts: [{ text: promptText }]
+                        }],
+                        // Ativando Grounding de Busca se disponível no modelo (v2.x)
+                        tools: [{ 
+                            google_search_retrieval: { 
+                                dynamic_retrieval_config: { mode: "MODE_DYNAMIC", dynamic_threshold: 0.3 } 
+                            } 
                         }],
                         generationConfig: {
                             responseMimeType: "application/json"
