@@ -91,39 +91,70 @@ Ensure the 'title' matches the input title as closely as possible.
 Return strictly the JSON, nothing else. No markdown syntax.
         `;
 
-        // 6. Execute via Native Fetch
-        console.log(`[API /ai/hltb] Fetching Gemini via REST for ${titlesToFetch.length} games (Cached: ${results.length})...`);
-        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-        
-        const response = await fetch(geminiUrl, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                contents: [{
-                    parts: [{ text: promptText }]
-                }],
-                generationConfig: {
-                    responseMimeType: "application/json"
-                }
-            })
-        });
+        // 6. Execute via Native Fetch with Fallback Logic
+        const models = [
+            "gemini-1.5-flash",
+            "gemini-2.0-flash-exp",
+            "gemini-1.5-pro"
+        ];
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error("[API /ai/hltb] Gemini API error:", response.status, errorText);
-            if (response.status === 429) {
-                return NextResponse.json(
-                    { error: "Rate limit exceeded on AI service. Wait a minute and try again." },
-                    { status: 429 }
-                );
+        let finalResponse = null;
+        let lastError = null;
+        let usedModel = "";
+
+        for (const model of models) {
+            console.log(`[API /ai/hltb] Trying model ${model} for ${titlesToFetch.length} games...`);
+            
+            try {
+                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+                
+                const response = await fetch(geminiUrl, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [{ text: promptText }]
+                        }],
+                        generationConfig: {
+                            responseMimeType: "application/json"
+                        }
+                    })
+                });
+
+                if (response.ok) {
+                    finalResponse = await response.json();
+                    usedModel = model;
+                    break;
+                } else {
+                    const errorText = await response.text();
+                    lastError = { status: response.status, text: errorText };
+                    console.warn(`[API /ai/hltb] Model ${model} failed with ${response.status}: ${errorText}`);
+                    
+                    // If it's NOT a rate limit (429), we might want to stop early, 
+                    // but for safety, if it's 400 or 500, we try the next one anyway.
+                    if (response.status !== 429) {
+                        // Optional: break if it's a permanent error (like 400 bad request)
+                    }
+                }
+            } catch (err: any) {
+                console.error(`[API /ai/hltb] Fetch error with ${model}:`, err.message);
+                lastError = err;
             }
-            throw new Error(`Gemini API returned status ${response.status}`);
         }
 
-        const data = await response.json();
-        const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!finalResponse) {
+            console.error("[API /ai/hltb] All models failed.", lastError);
+            const status = lastError?.status || 500;
+            return NextResponse.json(
+                { error: "All AI models reached their quota or failed. Try again later.", details: lastError?.text },
+                { status }
+            );
+        }
+
+        console.log(`[API /ai/hltb] Success using ${usedModel}`);
+        const text = finalResponse.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (!text) {
              throw new Error("Invalid response format from Gemini");
