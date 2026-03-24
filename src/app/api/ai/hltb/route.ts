@@ -93,9 +93,10 @@ Return strictly the JSON, nothing else. No markdown syntax.
 
         // 6. Execute via Native Fetch with Fallback Logic
         const models = [
-            "gemini-1.5-flash",
-            "gemini-2.0-flash-exp",
-            "gemini-1.5-pro"
+            "gemini-2.0-flash",           // Model principal (v2.0 Flash)
+            "gemini-2.5-flash",           // Test-out model (v2.5 Flash)
+            "gemini-2.5-pro",            // Test-out model (v2.5 Pro)
+            "gemini-2-flash-lite"        // Backup lightweight
         ];
 
         let finalResponse = null;
