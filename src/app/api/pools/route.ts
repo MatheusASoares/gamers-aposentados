@@ -85,6 +85,10 @@ export async function PUT(request: Request) {
 
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
+        if (action !== "draw") {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         if (action === "draw") {
             // Run randomizer and close pool in a transaction
             const poolWithEntries = await prisma.pool.findUnique({
@@ -132,15 +136,8 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const body = await request.json();
-        const { id } = body;
-
-        if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
-
-        await prisma.poolEntry.deleteMany({ where: { pool_id: id } });
-        await prisma.pool.delete({ where: { id } });
-
-        return NextResponse.json({ success: true });
+        // Deletions via API are completely forbidden according to business rules
+        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     } catch (error) {
         console.error("DELETE /api/pools error:", error);
         return NextResponse.json({ error: "Internal server error" }, { status: 500 });

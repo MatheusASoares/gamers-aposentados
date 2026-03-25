@@ -70,6 +70,12 @@ export async function PUT(request: Request) {
 
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
+        const game = await prisma.game.findUnique({ where: { id } });
+        if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 });
+        if (game.nominated_by_id !== session.user.id) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         const data = mapInputToDb(rest);
 
         const updated = await prisma.game.update({ where: { id }, data });
@@ -91,6 +97,12 @@ export async function DELETE(request: Request) {
         const { id } = body;
 
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
+
+        const game = await prisma.game.findUnique({ where: { id } });
+        if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 });
+        if (game.nominated_by_id !== session.user.id) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         await prisma.game.delete({ where: { id } });
         return NextResponse.json({ success: true });
