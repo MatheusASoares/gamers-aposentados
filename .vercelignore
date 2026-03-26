@@ -1,0 +1,22 @@
+# Antigravity Kit & Development Tools
+.agent/
+.agents/
+.agentignore
+skills-lock.json
+
+# Design & Assets
+stitch-assets/
+
+# Testing
+tests/
+playwright.config.ts
+eslint-report.json
+
+# Local Environment
+.env*
+!.env.example
+
+# Docs & Guides
+StudyGuide.md
+analise_completa_projeto.md
+README.md

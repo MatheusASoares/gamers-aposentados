@@ -48,3 +48,10 @@ next-env.d.ts
 
 # Historical data (CSVs with personal info)
 /data/historical/
+
+# Antigravity Kit & Stitch
+/.agent/
+/.agents/
+/stitch-assets/
+skills-lock.json
+.agentignore

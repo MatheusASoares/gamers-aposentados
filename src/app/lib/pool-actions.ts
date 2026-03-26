@@ -123,7 +123,17 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                 });
             }
 
-            // 2. Remove existing entries from THIS user in THIS pool
+            // 2. LOCK PESSIMISTA: Previne que outros usuários modifiquem este pote simultaneamente
+            // e garante que o pote não seja sorteado (fechado) enquanto salvamos.
+            await tx.$executeRaw`SELECT * FROM pools WHERE id = ${pool.id} FOR UPDATE`;
+
+            // Double Check: O pote ainda está aberto após obtermos o lock?
+            const freshPool = await tx.pool.findUnique({ where: { id: pool.id } });
+            if (!freshPool || freshPool.status !== "OPEN") {
+                throw new Error("Este pote foi fechado por outro usuário enquanto você salvava.");
+            }
+
+            // 3. Remove existing entries from THIS user in THIS pool
             await tx.poolEntry.deleteMany({
                 where: {
                     pool_id: pool.id,
@@ -228,6 +238,9 @@ export async function executeRoll(poolId: string) {
 
     try {
         const result = await prisma.$transaction(async (tx) => {
+            // 1. LOCK PESSIMISTA: Trava o pote para evitar que novos jogos sejam adicionados durante o sorteio
+            await tx.$executeRaw`SELECT * FROM pools WHERE id = ${poolId} FOR UPDATE`;
+
             const pool = await tx.pool.findUnique({
                 where: { id: poolId },
                 include: {
@@ -238,7 +251,7 @@ export async function executeRoll(poolId: string) {
             });
 
             if (!pool) throw new Error("Pool não encontrada");
-            if (pool.status !== "OPEN") throw new Error("Pool já foi sorteada");
+            if (pool.status !== "OPEN") throw new Error("Pool já foi sorteada ou fechada");
             if (!pool.entries || pool.entries.length === 0) throw new Error("Pool vazia");
 
             // Verify pool is complete
