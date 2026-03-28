@@ -118,15 +118,10 @@ Rules:
                         contents: [{
                             parts: [{ text: promptText }]
                         }],
-                        // Ativando Grounding de Busca se disponível no modelo (v2.x)
-                        tools: [{ 
-                            google_search_retrieval: { 
-                                dynamic_retrieval_config: { mode: "MODE_DYNAMIC", dynamic_threshold: 0.3 } 
-                            } 
-                        }],
-                        generationConfig: {
-                            responseMimeType: "application/json"
-                        }
+                        // Ativando Grounding de Busca corretamente para os modelos novos (2.0+)
+                        tools: [{ googleSearch: {} }]
+                        // NOTA: O 'responseMimeType: "application/json"' foi removido pois 
+                        // é incompatível com ferramentas de busca ativadas na v1beta.
                     })
                 });
 
@@ -161,15 +156,18 @@ Rules:
         }
 
         console.log(`[API /ai/hltb] Success using ${usedModel}`);
-        const text = finalResponse.candidates?.[0]?.content?.parts?.[0]?.text;
+        const rawText = finalResponse.candidates?.[0]?.content?.parts?.[0]?.text;
         
-        if (!text) {
+        if (!rawText) {
              throw new Error("Invalid response format from Gemini");
         }
 
+        // Limpa possíveis marcações markdown geradas pelo LLM (já que não estamos em "strict json mode")
+        const cleanJsonText = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
+
         // 7. Parse and return results
         try {
-            const parsedData = JSON.parse(text);
+            const parsedData = JSON.parse(cleanJsonText);
             
             // Add new fetched data to results and save to DB
             if (parsedData && Array.isArray(parsedData.results)) {
@@ -200,7 +198,7 @@ Rules:
 
             return NextResponse.json({ results });
         } catch (parseError) {
-             console.error("[API /ai/hltb] Failed to parse JSON:", text, parseError);
+             console.error("[API /ai/hltb] Failed to parse JSON:", rawText, parseError);
              return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
         }
 

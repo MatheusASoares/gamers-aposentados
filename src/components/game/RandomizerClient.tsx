@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Loader2, Trophy, History, Save, Pencil, X } from "lucide-react";
 import Image from "next/image";
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
@@ -302,6 +302,15 @@ export function RandomizerClient({
     };
 
     const [cycleText, setCycleText] = useState<string>("");
+    const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (cycleIntervalRef.current) {
+                clearInterval(cycleIntervalRef.current);
+            }
+        };
+    }, []);
 
     const handleRoll = async () => {
         if (!poolId || isRolling || isSaving || lockStatus.locked || winner) return;
@@ -321,10 +330,9 @@ export function RandomizerClient({
                 ...otherSelections.map((c) => c.gameTitle),
             ];
 
-            let cycleInterval: NodeJS.Timeout;
             if (allCandidates.length > 0) {
                 let currentIndex = 0;
-                cycleInterval = setInterval(() => {
+                cycleIntervalRef.current = setInterval(() => {
                     setCycleText(allCandidates[currentIndex]);
                     currentIndex = (currentIndex + 1) % allCandidates.length;
                 }, 100); // changes every 100ms
@@ -333,7 +341,10 @@ export function RandomizerClient({
             // Wait for animation
             await new Promise((resolve) => setTimeout(resolve, 3000));
 
-            if (cycleInterval!) clearInterval(cycleInterval);
+            if (cycleIntervalRef.current) {
+                clearInterval(cycleIntervalRef.current);
+                cycleIntervalRef.current = null;
+            }
 
             const response = await executeRoll(poolId);
 
