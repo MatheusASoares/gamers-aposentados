@@ -93,12 +93,9 @@ Rules:
 - Return ONLY the JSON object.
         `;
 
-        // 6. Execute via Native Fetch with Fallback Logic
+        // 6. Execute via Native Fetch
         const models = [
-            "gemini-2.5-flash",          // Model principal (Mais Rápido e Recente)
-            "gemini-2.5-pro",            // Backup 1 (Poderoso)
-            "gemini-2.5-flash-lite",     // Backup 2 (Lightweight/Ágil)
-            "gemini-2.0-flash",          // Backup 3 (Old Reliable)
+            "gemini-2.5-flash",          // Único modelo permitido no plano free para não esgotar 15 RPM
         ];
 
         let finalResponse = null;
