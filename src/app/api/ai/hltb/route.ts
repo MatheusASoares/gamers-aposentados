@@ -93,10 +93,8 @@ Rules:
 
         // 6. Execute via Native Fetch with Fallback Logic
         const models = [
-            "gemini-2.5-flash",           // Model principal (Vanguarda/Newest)
-            "gemini-2.0-flash",           // Backup 1 (Fast & Reliable)
-            "gemini-2.5-pro",            // Backup 2 (Highly Intuitive/Powerful)
-            "gemini-2-flash-lite"        // Backup lightweight
+            "gemini-2.0-flash",           // Model principal (Vanguarda, Fast & Reliable)
+            "gemini-1.5-pro",            // Backup 1 (Heavy duty fallback)
         ];
 
         let finalResponse = null;
@@ -134,10 +132,11 @@ Rules:
                     lastError = { status: response.status, text: errorText };
                     console.warn(`[API /ai/hltb] Model ${model} failed with ${response.status}: ${errorText}`);
                     
-                    // If it's NOT a rate limit (429), we might want to stop early, 
-                    // but for safety, if it's 400 or 500, we try the next one anyway.
-                    if (response.status !== 429) {
-                        // Optional: break if it's a permanent error (like 400 bad request)
+                    // MITIGAÇÃO DE VAZAMENTO DE RATE LIMIT: 
+                    // Se a cota RPM ou Diária acabou, pare IMEDIATAMENTE.
+                    if (response.status === 429) {
+                        console.error("[API /ai/hltb] Rate Limit exaurido (429). Interrompendo fallback.");
+                        break;
                     }
                 }
             } catch (err: any) {
