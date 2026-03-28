@@ -4,13 +4,20 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
-export interface CreateReviewParams {
-    gameId: string;
-    rating: number; // 0-10
-    difficulty?: number; // 1-5
-    hoursPlayed?: number;
-    reviewText?: string;
-}
+import { z } from "zod";
+
+const baseReviewSchema = z.object({
+    rating: z.number().min(0, "A nota deve ser no mínimo 0").max(10, "A nota deve ser no máximo 10"),
+    difficulty: z.number().min(1, "A dificuldade deve ser no mínimo 1").max(5, "A dificuldade deve ser no máximo 5").optional(),
+    hoursPlayed: z.number().min(0, "Horas jogadas não podem ser negativas").optional(),
+    reviewText: z.string().optional(),
+});
+
+export const createReviewSchema = baseReviewSchema.extend({
+    gameId: z.string().min(1, "O ID do jogo é obrigatório"),
+});
+
+export type CreateReviewParams = z.infer<typeof createReviewSchema>;
 
 export async function createReview(params: CreateReviewParams) {
     const session = await auth();
@@ -19,8 +26,16 @@ export async function createReview(params: CreateReviewParams) {
         return { success: false, error: "Usuário não autenticado" };
     }
 
+    const validation = createReviewSchema.safeParse(params);
+    if (!validation.success) {
+        return {
+            success: false,
+            error: validation.error.issues[0]?.message || "Dados inválidos."
+        };
+    }
+
     const userId = session.user.id;
-    const { gameId, rating, difficulty, hoursPlayed, reviewText } = params;
+    const { gameId, rating, difficulty, hoursPlayed, reviewText } = validation.data;
 
     try {
         // Verifica se o usuário já fez review deste jogo (regra de negócio opcional, mas boa)
@@ -91,13 +106,12 @@ export async function deleteReview(reviewId: string) {
     }
 }
 
-export interface UpdateReviewParams {
-    reviewId: string;
-    rating: number;
-    difficulty?: number;
-    hoursPlayed?: number;
-    reviewText?: string;
-}
+export const updateReviewSchema = baseReviewSchema.extend({
+    reviewId: z.string().min(1, "O ID da review é obrigatório"),
+});
+
+export type UpdateReviewParams = z.infer<typeof updateReviewSchema>;
+
 
 export async function updateReview(params: UpdateReviewParams) {
     const session = await auth();
@@ -106,7 +120,15 @@ export async function updateReview(params: UpdateReviewParams) {
         return { success: false, error: "Usuário não autenticado" };
     }
 
-    const { reviewId, rating, difficulty, hoursPlayed, reviewText } = params;
+    const validation = updateReviewSchema.safeParse(params);
+    if (!validation.success) {
+        return {
+            success: false,
+            error: validation.error.issues[0]?.message || "Dados inválidos."
+        };
+    }
+
+    const { reviewId, rating, difficulty, hoursPlayed, reviewText } = validation.data;
 
     try {
         const review = await prisma.review.findUnique({
