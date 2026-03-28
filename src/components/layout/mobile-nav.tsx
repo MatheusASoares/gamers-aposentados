@@ -46,7 +46,7 @@ export function MobileNav() {
                                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
                                 style={{
                                     backgroundImage:
-                                        "url('https://grainy-gradients.vercel.app/noise.svg')",
+                                        "url('/noise.svg')",
                                 }}
                             />
 

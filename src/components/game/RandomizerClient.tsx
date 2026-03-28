@@ -391,7 +391,7 @@ export function RandomizerClient({
         <div className="relative mx-auto min-h-screen w-full px-6 py-8">
             {/* Background effects */}
             <div className="absolute inset-0 z-0 bg-linear-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
-            <div className="pointer-events-none absolute inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay" />
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 flex w-full flex-col gap-8">
                 {/* Header Area */}

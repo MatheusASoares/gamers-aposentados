@@ -35,7 +35,7 @@ export function Sidebar({ className }: SidebarProps) {
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
-                style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
+                style={{ backgroundImage: "url('/noise.svg')" }}
             />
 
             <div className="relative z-10 space-y-4 py-8">

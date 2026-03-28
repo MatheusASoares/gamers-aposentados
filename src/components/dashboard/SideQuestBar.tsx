@@ -97,7 +97,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#12001a]" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
-                style={{ backgroundImage: "url('https://grainy-gradients.vercel.app/noise.svg')" }}
+                style={{ backgroundImage: "url('/noise.svg')" }}
             />
 
             {/* Cover Image Side (Top Banner) */}

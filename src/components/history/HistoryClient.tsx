@@ -54,7 +54,7 @@ export function HistoryClient({ availableYears, initialYear, initialData }: Hist
             {/* Background effects */}
             <div className="absolute inset-0 z-0 bg-linear-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
             <div
-                className="pointer-events-none absolute inset-0 z-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.03] mix-blend-overlay"
+                className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay"
             />
 
             <div className="relative z-10 flex w-full flex-col gap-12">

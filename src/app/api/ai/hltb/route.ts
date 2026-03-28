@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
+export const maxDuration = 60;
+
 export async function POST(request: Request) {
     // 1. Authentication check
     const session = await auth();
@@ -114,6 +116,7 @@ Rules:
                     headers: {
                         "Content-Type": "application/json",
                     },
+                    signal: AbortSignal.timeout(14000), // Timeout de 14s por modelo
                     body: JSON.stringify({
                         contents: [{
                             parts: [{ text: promptText }]
@@ -151,8 +154,8 @@ Rules:
             console.error("[API /ai/hltb] All models failed.", lastError);
             const status = lastError?.status || 500;
             return NextResponse.json(
-                { error: "All AI models reached their quota or failed. Try again later.", details: lastError?.text },
-                { status }
+                { error: "Falha na comunicação com a IA ou limite excedido. Tente novamente mais tarde.", details: lastError?.message || lastError?.text || "Unknown error" },
+                { status: status === 429 ? 429 : (status >= 400 && status < 600 ? status : 500) }
             );
         }
 
@@ -160,7 +163,8 @@ Rules:
         const rawText = finalResponse.candidates?.[0]?.content?.parts?.[0]?.text;
         
         if (!rawText) {
-             throw new Error("Invalid response format from Gemini");
+             console.error("[API /ai/hltb] Blank or Blocked Response:", finalResponse);
+             return NextResponse.json({ error: "O modelo da IA se recusou a responder ou bloqueou a resposta." }, { status: 500 });
         }
 
         // Limpa possíveis marcações markdown geradas pelo LLM (já que não estamos em "strict json mode")
