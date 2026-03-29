@@ -51,6 +51,7 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
         });
 
         revalidatePath("/");
+        revalidatePath("/quests");
         return { success: true };
     } catch (e: unknown) {
         console.error("Error updating progress:", e);
@@ -86,6 +87,7 @@ export async function completeQuest(gameId: string) {
         });
 
         revalidatePath("/");
+        revalidatePath("/quests");
         return { success: true };
     } catch (e: unknown) {
         console.error("Error completing quest:", e);
@@ -119,6 +121,7 @@ export async function dropQuest(gameId: string) {
         });
 
         revalidatePath("/");
+        revalidatePath("/quests");
         return { success: true };
     } catch (e: unknown) {
         console.error("Error dropping quest:", e);

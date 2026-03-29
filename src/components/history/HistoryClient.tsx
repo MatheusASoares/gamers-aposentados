@@ -13,9 +13,15 @@ interface HistoryClientProps {
     availableYears: number[];
     initialYear: number;
     initialData: QuestHistoryData[];
+    currentUserId: string;
 }
 
-export function HistoryClient({ availableYears, initialYear, initialData }: HistoryClientProps) {
+export function HistoryClient({ 
+    availableYears, 
+    initialYear, 
+    initialData,
+    currentUserId 
+}: HistoryClientProps) {
     const [selectedYear, setSelectedYear] = useState<number>(initialYear);
     const [questType, setQuestType] = useState<QuestType>("MAIN");
     const [data, setData] = useState<QuestHistoryData[]>(initialData);
@@ -142,7 +148,7 @@ export function HistoryClient({ availableYears, initialYear, initialData }: Hist
                                 className="animate-in fade-in slide-in-from-bottom-8 fill-mode-both"
                                 style={{ animationDelay: `${index * 150}ms`, animationDuration: "700ms" }}
                             >
-                                <QuestHistoryCard data={item} />
+                                <QuestHistoryCard data={item} currentUserId={currentUserId} />
                             </div>
                         ))}
                     </div>

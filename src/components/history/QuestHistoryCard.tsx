@@ -1,10 +1,14 @@
+"use client";
+import { useState } from "react";
 import Image from "next/image";
-import { Trophy, Skull, Swords, Sword, Flag, Crown, History } from "lucide-react";
+import { Trophy, Skull, Swords, Sword, Flag, Crown, History, CheckCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { QuestHistoryData } from "@/app/lib/history-actions";
+import { completeQuest, updateQuestProgress } from "@/app/lib/quest-actions";
 
 interface QuestHistoryCardProps {
     data: QuestHistoryData;
+    currentUserId: string;
 }
 
 const MONTHS = [
@@ -45,7 +49,11 @@ function getStatusDisplay(status: string) {
     }
 }
 
-export function QuestHistoryCard({ data }: QuestHistoryCardProps) {
+export function QuestHistoryCard({ data, currentUserId }: QuestHistoryCardProps) {
+    const [isLoading, setIsLoading] = useState(false);
+    const [isUpdating, setIsUpdating] = useState(false);
+    const [percentage, setPercentage] = useState(0); // Temporary state for slider
+    
     const isMainQuest = data.questType === "MAIN";
     const monthName = data.month ? MONTHS[data.month - 1] : "";
     const title = isMainQuest 
@@ -178,6 +186,88 @@ export function QuestHistoryCard({ data }: QuestHistoryCardProps) {
                                                     </span>
                                                 </div>
                                             </div>
+
+                                            {/* Action Buttons for the Current User */}
+                                            {p.userId === currentUserId && (
+                                                <div className="mt-4 flex flex-col gap-2">
+                                                    {!isUpdating ? (
+                                                        <div className="flex gap-2">
+                                                            {p.status !== "COMPLETED" && (
+                                                                <button
+                                                                    disabled={isLoading}
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        setIsLoading(true);
+                                                                        const res = await completeQuest(data.winnerId || "");
+                                                                        if (!res.success) alert(res.error);
+                                                                        setIsLoading(false);
+                                                                    }}
+                                                                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-green-500/20 bg-green-500/10 py-2 text-[10px] font-black tracking-widest text-green-500 uppercase transition-all hover:bg-green-500/20 disabled:opacity-50"
+                                                                >
+                                                                    <CheckCircle className="size-3" />
+                                                                    Zerou?
+                                                                </button>
+                                                            )}
+                                                            <button
+                                                                disabled={isLoading}
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    setPercentage(p.progress_percentage);
+                                                                    setIsUpdating(true);
+                                                                }}
+                                                                className={cn(
+                                                                    "flex items-center justify-center gap-1.5 rounded-lg border transition-all disabled:opacity-50",
+                                                                    p.status === "COMPLETED" 
+                                                                        ? "flex-1 border-white/10 bg-zinc-900/50 py-2 text-[10px] font-black tracking-widest text-zinc-400 uppercase hover:bg-zinc-800"
+                                                                        : "bg-zinc-900/50 px-3 py-2 text-[10px] font-black tracking-widest text-zinc-400 uppercase border-white/10 hover:bg-zinc-800"
+                                                                )}
+                                                            >
+                                                                <RefreshCw className={cn("size-3", isLoading && "animate-spin")} />
+                                                                {p.status === "COMPLETED" && "Editar Progresso"}
+                                                            </button>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-col gap-2 rounded-lg bg-zinc-900/80 p-2 border border-white/5">
+                                                            <div className="flex items-center justify-between px-1">
+                                                                <span className="text-[9px] font-black text-zinc-500 uppercase">Ajustar: {percentage}%</span>
+                                                            </div>
+                                                            <input 
+                                                                type="range"
+                                                                min="0"
+                                                                max="100"
+                                                                value={percentage}
+                                                                onChange={(e) => setPercentage(parseInt(e.target.value))}
+                                                                className="h-1.5 w-full cursor-pointer accent-[#bd0df2] bg-zinc-950 rounded-lg appearance-none"
+                                                            />
+                                                            <div className="flex gap-1.5">
+                                                                <button
+                                                                    disabled={isLoading}
+                                                                    onClick={async (e) => {
+                                                                        e.stopPropagation();
+                                                                        setIsLoading(true);
+                                                                        const res = await updateQuestProgress(data.winnerId || "", percentage);
+                                                                        if (!res.success) alert(res.error);
+                                                                        else setIsUpdating(false);
+                                                                        setIsLoading(false);
+                                                                    }}
+                                                                    className="flex-1 rounded-md bg-[#bd0df2] py-1.5 text-[9px] font-black text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
+                                                                >
+                                                                    Salvar
+                                                                </button>
+                                                                <button
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setIsUpdating(false);
+                                                                    }}
+                                                                    className="rounded-md bg-zinc-800 py-1.5 px-3 text-[9px] font-black text-white uppercase transition-all hover:bg-zinc-700"
+                                                                >
+                                                                    X
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })

@@ -1,5 +1,6 @@
 import { getAvailableYears, getQuestHistoryByYear } from "@/app/lib/history-actions";
 import { HistoryClient } from "@/components/history/HistoryClient";
+import { auth } from "@/auth";
 
 export const metadata = {
     title: "Gamers Aposentados - Quests History",
@@ -7,6 +8,9 @@ export const metadata = {
 };
 
 export default async function QuestsHistoryPage() {
+    const session = await auth();
+    const currentUserId = session?.user?.id || "";
+
     let availableYears = await getAvailableYears();
     
     // Fallback if DB is empty
@@ -25,7 +29,8 @@ export default async function QuestsHistoryPage() {
             <HistoryClient 
                 availableYears={availableYears} 
                 initialYear={latestYear} 
-                initialData={initialData} 
+                initialData={initialData}
+                currentUserId={currentUserId}
             />
         </div>
     );
