@@ -46,6 +46,7 @@ export async function updateProgressPercentage(progressId: string, percentage: n
 
         revalidatePath("/");
         revalidatePath("/dashboard");
+        revalidatePath("/reviews");
         return { success: true };
     } catch (error) {
         console.error("Failed to update progress percentage:", error);
@@ -80,6 +81,7 @@ export async function completeQuest(progressId: string) {
 
         revalidatePath("/");
         revalidatePath("/dashboard");
+        revalidatePath("/reviews");
         return { success: true };
     } catch (error) {
         console.error("Failed to complete quest:", error);
@@ -113,6 +115,7 @@ export async function dropQuest(progressId: string) {
 
         revalidatePath("/");
         revalidatePath("/dashboard");
+        revalidatePath("/reviews");
         return { success: true };
     } catch (error) {
         console.error("Failed to drop quest:", error);

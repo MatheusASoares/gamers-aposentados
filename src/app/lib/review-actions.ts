@@ -13,31 +13,31 @@ const baseReviewSchema = z.object({
     reviewText: z.string().optional(),
 });
 
-export const createReviewSchema = baseReviewSchema.extend({
+const createReviewSchema = baseReviewSchema.extend({
     gameId: z.string().min(1, "O ID do jogo é obrigatório"),
 });
 
-export type CreateReviewParams = z.infer<typeof createReviewSchema>;
+type CreateReviewParams = z.infer<typeof createReviewSchema>;
 
 export async function createReview(params: CreateReviewParams) {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-        return { success: false, error: "Usuário não autenticado" };
-    }
-
-    const validation = createReviewSchema.safeParse(params);
-    if (!validation.success) {
-        return {
-            success: false,
-            error: validation.error.issues[0]?.message || "Dados inválidos."
-        };
-    }
-
-    const userId = session.user.id;
-    const { gameId, rating, difficulty, hoursPlayed, reviewText } = validation.data;
-
     try {
+        const session = await auth();
+
+        if (!session?.user?.id) {
+            return { success: false, error: "Usuário não autenticado" };
+        }
+
+        const validation = createReviewSchema.safeParse(params);
+        if (!validation.success) {
+            return {
+                success: false,
+                error: validation.error.issues[0]?.message || "Dados inválidos."
+            };
+        }
+
+        const userId = session.user.id;
+        const { gameId, rating, difficulty, hoursPlayed, reviewText } = validation.data;
+
         // Verifica se o usuário já fez review deste jogo (regra de negócio opcional, mas boa)
         const existingReview = await prisma.review.findFirst({
             where: {
@@ -64,13 +64,17 @@ export async function createReview(params: CreateReviewParams) {
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
         revalidatePath("/");
+        
         return { success: true, review };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
-        console.error("Erro ao salvar review:", error);
-        return { success: false, error: "Erro interno: " + (error?.message || "Desconhecido") };
+        console.error("[createReview] Erro catastrófico:", error);
+        return { 
+            success: false, 
+            error: "Erro inesperado ao salvar review: " + (error?.message || "Servidor indisponível") 
+        };
     }
 }
+
 
 export async function deleteReview(reviewId: string) {
     const session = await auth();
@@ -106,11 +110,11 @@ export async function deleteReview(reviewId: string) {
     }
 }
 
-export const updateReviewSchema = baseReviewSchema.extend({
+const updateReviewSchema = baseReviewSchema.extend({
     reviewId: z.string().min(1, "O ID da review é obrigatório"),
 });
 
-export type UpdateReviewParams = z.infer<typeof updateReviewSchema>;
+type UpdateReviewParams = z.infer<typeof updateReviewSchema>;
 
 
 export async function updateReview(params: UpdateReviewParams) {

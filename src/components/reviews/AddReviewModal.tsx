@@ -40,28 +40,34 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
             return;
         }
 
-        const res = await createReview({
-            gameId,
-            rating: parseInt(rating),
-            difficulty: parseInt(difficulty),
-            hoursPlayed: hoursPlayed ? parseInt(hoursPlayed) : undefined,
-            reviewText,
-        });
+        try {
+            const res = await createReview({
+                gameId,
+                rating: parseInt(rating),
+                difficulty: parseInt(difficulty),
+                hoursPlayed: hoursPlayed ? parseInt(hoursPlayed) : undefined,
+                reviewText,
+            });
 
-        setLoading(false);
-
-        if (res.success) {
-            setOpen(false);
-            // reset form
-            setGameId("");
-            setRating("10");
-            setDifficulty("3");
-            setHoursPlayed("");
-            setReviewText("");
-        } else {
-            setError(res.error || "Ocorreu um erro ao salvar a review.");
+            if (res.success) {
+                setOpen(false);
+                // reset form
+                setGameId("");
+                setRating("10");
+                setDifficulty("3");
+                setHoursPlayed("");
+                setReviewText("");
+            } else {
+                setError(res.error || "Ocorreu um erro ao salvar a review.");
+            }
+        } catch (err: any) {
+            console.error("[AddReviewModal] Erro ao submeter:", err);
+            setError("Erro de conexão ou falha no servidor. Tente novamente.");
+        } finally {
+            setLoading(false);
         }
     };
+
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
@@ -92,21 +98,27 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
                     <div className="space-y-2">
                         <label className="text-sm font-bold text-zinc-300 uppercase">Jogo</label>
-                        <select
-                            value={gameId}
-                            onChange={(e) => setGameId(e.target.value)}
-                            className="focus:border-primary w-full rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-white transition-colors focus:outline-none"
-                            required
-                        >
-                            <option value="" disabled>
-                                Selecione um jogo já jogado...
-                            </option>
-                            {games.map((game) => (
-                                <option key={game.id} value={game.id}>
-                                    {game.title}
+                        {games.length === 0 ? (
+                            <div className="w-full rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-red-500 text-sm text-center font-medium">
+                                Nenhuma quest completa disponível para review.
+                            </div>
+                        ) : (
+                            <select
+                                value={gameId}
+                                onChange={(e) => setGameId(e.target.value)}
+                                className="focus:border-primary w-full rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-white transition-colors focus:outline-none"
+                                required
+                            >
+                                <option value="" disabled>
+                                    Selecione um jogo já jogado...
                                 </option>
-                            ))}
-                        </select>
+                                {games.map((game) => (
+                                    <option key={game.id} value={game.id}>
+                                        {game.title}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
@@ -170,7 +182,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || games.length === 0}
                         className="bg-primary hover:bg-primary/90 mt-4 flex w-full items-center justify-center gap-2 rounded-lg p-3 font-bold tracking-wide text-white uppercase shadow-[0_0_15px_rgba(189,13,242,0.3)] transition-all disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Publicar Review"}

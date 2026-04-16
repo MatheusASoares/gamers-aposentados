@@ -43,11 +43,19 @@ export async function getGamesForReview() {
             where: {
                 user_id: session.user.id,
                 status: "COMPLETED",
+                game: {
+                    reviews: {
+                        none: {
+                            user_id: session.user.id
+                        }
+                    }
+                }
             },
             include: {
                 game: true,
             },
         });
+
 
         // Extrai apenas os jogos do progresso
         const games = progressRecords

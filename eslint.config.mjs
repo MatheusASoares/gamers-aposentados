@@ -22,6 +22,9 @@ const eslintConfig = defineConfig([
         "out/**",
         "build/**",
         "next-env.d.ts",
+        // Ignore Antigravity artifacts and skills
+        ".agents/**",
+        ".agent/**",
     ]),
 ]);
 
