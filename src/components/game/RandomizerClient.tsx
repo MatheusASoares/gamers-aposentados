@@ -548,6 +548,7 @@ export function RandomizerClient({
                                                         src={c.imageUrl}
                                                         alt={c.nome}
                                                         fill
+                                                        sizes="48px"
                                                         unoptimized
                                                         className="object-cover"
                                                     />
@@ -659,6 +660,7 @@ export function RandomizerClient({
                                                         src={entry.gameImageUrl}
                                                         alt={entry.gameTitle}
                                                         fill
+                                                        sizes="48px"
                                                         unoptimized
                                                         className="object-cover"
                                                     />
@@ -697,6 +699,7 @@ export function RandomizerClient({
                                                         src={winner.imageUrl}
                                                         alt="Winner background"
                                                         fill
+                                                        sizes="100vw"
                                                         unoptimized
                                                         className="scale-125 object-cover blur-3xl"
                                                     />
@@ -722,6 +725,7 @@ export function RandomizerClient({
                                                                     src={winner.imageUrl}
                                                                     alt={winner.title}
                                                                     fill
+                                                                    sizes="(max-width: 768px) 50vw, 33vw"
                                                                     unoptimized
                                                                     className="relative z-10 object-cover"
                                                                 />

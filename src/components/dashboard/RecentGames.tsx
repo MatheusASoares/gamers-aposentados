@@ -191,6 +191,7 @@ export function RecentActivity({ events }: RecentActivityProps) {
                                     src={event.game.cover_url}
                                     alt={event.game.title}
                                     fill
+                                    sizes="40px"
                                     className="object-cover"
                                 />
                             ) : (

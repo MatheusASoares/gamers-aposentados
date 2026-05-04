@@ -72,6 +72,7 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                         src={currentReview.game.cover_url.replace("t_cover_big", "t_1080p")}
                         alt={currentReview.game.title}
                         fill
+                        sizes="100vw"
                         className="scale-110 object-cover blur-2xl"
                         priority
                     />
@@ -89,6 +90,7 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                                 src={currentReview.game.cover_url.replace("t_cover_big", "t_1080p")}
                                 alt={currentReview.game.title}
                                 fill
+                                sizes="(max-width: 768px) 100vw, 50vw"
                                 className="object-cover"
                                 priority
                             />

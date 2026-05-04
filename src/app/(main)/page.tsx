@@ -31,10 +31,16 @@ export default async function DashboardPage() {
             orderBy: { created_at: "desc" },
             include: { winner_game: { include: { nominator: true } } },
         }),
-        // Random Review IDs
-        prisma.$queryRaw<{ id: string }[]>`
-            SELECT id FROM reviews ORDER BY RANDOM() LIMIT 5;
-        `,
+        // Random Review IDs (JS Shuffle - Ideal for low volume)
+        prisma.review.findMany({ select: { id: true } }).then((reviews) => {
+            const shuffled = [...reviews];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                // eslint-disable-next-line react-hooks/purity
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled.slice(0, 5);
+        }),
         // Recent Pools (Global Activity)
         prisma.pool.findMany({
             where: { winner_game_id: { not: null } },

@@ -111,6 +111,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                 className="scale-125 object-cover blur-3xl"
                                 src={game.cover_url.replace("t_cover_big", "t_1080p")}
                                 fill
+                                sizes="100vw"
                                 unoptimized
                             />
                         </div>
@@ -126,6 +127,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                     className="object-cover"
                                     src={game.cover_url.replace("t_cover_big", "t_1080p")}
                                     fill
+                                    sizes="(max-width: 768px) 100vw, 30vw"
                                     unoptimized
                                 />
                             </div>
