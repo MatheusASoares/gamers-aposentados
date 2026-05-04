@@ -16,11 +16,11 @@ interface HistoryClientProps {
     currentUserId: string;
 }
 
-export function HistoryClient({ 
-    availableYears, 
-    initialYear, 
+export function HistoryClient({
+    availableYears,
+    initialYear,
     initialData,
-    currentUserId 
+    currentUserId,
 }: HistoryClientProps) {
     const [selectedYear, setSelectedYear] = useState<number>(initialYear);
     const [questType, setQuestType] = useState<QuestType>("MAIN");
@@ -59,9 +59,7 @@ export function HistoryClient({
         <div className="relative mx-auto min-h-screen w-full px-6 py-8">
             {/* Background effects */}
             <div className="absolute inset-0 z-0 bg-linear-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
-            <div
-                className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay"
-            />
+            <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 flex w-full flex-col gap-12">
                 {/* Header Area */}
@@ -84,7 +82,7 @@ export function HistoryClient({
                                     "rounded-xl px-6 py-2.5 text-xs font-bold tracking-wider uppercase transition-all duration-300",
                                     questType === "MAIN"
                                         ? "bg-amber-500/10 text-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.15)] ring-1 ring-amber-500/30"
-                                        : "text-zinc-500 hover:text-white"
+                                        : "text-zinc-500 hover:text-white",
                                 )}
                             >
                                 Main Quest
@@ -95,7 +93,7 @@ export function HistoryClient({
                                     "rounded-xl px-6 py-2.5 text-xs font-bold tracking-wider uppercase transition-all duration-300",
                                     questType === "SIDE"
                                         ? "bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/30"
-                                        : "text-zinc-500 hover:text-white"
+                                        : "text-zinc-500 hover:text-white",
                                 )}
                             >
                                 Side Quest
@@ -112,7 +110,7 @@ export function HistoryClient({
                                         "rounded-xl px-4 py-2.5 text-xs font-bold tracking-widest transition-all duration-300",
                                         selectedYear === year
                                             ? "bg-white/10 text-white shadow-[0_0_10px_rgba(255,255,255,0.1)] ring-1 ring-white/20"
-                                            : "text-zinc-500 hover:text-zinc-300"
+                                            : "text-zinc-500 hover:text-zinc-300",
                                     )}
                                 >
                                     {year}
@@ -137,18 +135,23 @@ export function HistoryClient({
                             Nenhuma Quest Encontrada
                         </h3>
                         <p className="mt-2 text-sm text-zinc-600">
-                            Não há histórico registrado para {questType === "MAIN" ? "Main Quests" : "Side Quests"} no ano de {selectedYear}.
+                            Não há histórico registrado para{" "}
+                            {questType === "MAIN" ? "Main Quests" : "Side Quests"} no ano de{" "}
+                            {selectedYear}.
                         </p>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-12 lg:gap-16">
                         {data.map((item, index) => (
-                            <div 
-                                key={item.poolId} 
+                            <div
+                                key={item.poolId}
                                 className="animate-in fade-in slide-in-from-bottom-8 fill-mode-both"
-                                style={{ animationDelay: `${index * 150}ms`, animationDuration: "700ms" }}
+                                style={{
+                                    animationDelay: `${index * 150}ms`,
+                                    animationDuration: "700ms",
+                                }}
                             >
-                                <QuestHistoryCard data={item} currentUserId={currentUserId} />
+                                <QuestHistoryCard data={item} currentUserId={currentUserId} priority={index === 0} />
                             </div>
                         ))}
                     </div>
