@@ -107,43 +107,44 @@ async function setFavoriteGamesBase(
     }
 
     try {
-        const gameIds = [];
-        for (const candidate of candidates) {
-            let game = await prisma.game.findFirst({
-                where: {
-                    OR: [{ igdb_id: candidate.id }, { title: candidate.nome }],
-                },
-            });
-
-            if (!game) {
-                game = await prisma.game.create({
-                    data: {
-                        igdb_id: candidate.id,
-                        title: candidate.nome,
-                        cover_url: candidate.imageUrl,
-                        quest_type: "SIDE_QUEST", // Default tier for generic imports
-                        nominated_by_id: session.user.id,
+        const games = await Promise.all(
+            candidates.map(async (candidate) => {
+                let game = await prisma.game.findFirst({
+                    where: {
+                        OR: [{ igdb_id: candidate.id }, { title: candidate.nome }],
                     },
                 });
-            } else if (!game.igdb_id || (!game.cover_url && candidate.imageUrl)) {
-                // Update igdb_id and/or cover if missing
-                game = await prisma.game.update({
-                    where: { id: game.id },
-                    data: {
-                        igdb_id: game.igdb_id ? undefined : candidate.id,
-                        cover_url: !game.cover_url ? candidate.imageUrl : undefined,
-                    },
-                });
-            }
 
-            gameIds.push({ id: game.id });
-        }
+                if (!game) {
+                    game = await prisma.game.create({
+                        data: {
+                            igdb_id: candidate.id,
+                            title: candidate.nome,
+                            cover_url: candidate.imageUrl,
+                            quest_type: "SIDE_QUEST", // Default tier for generic imports
+                            nominated_by_id: session.user.id,
+                        },
+                    });
+                } else if (!game.igdb_id || (!game.cover_url && candidate.imageUrl)) {
+                    // Update igdb_id and/or cover if missing
+                    game = await prisma.game.update({
+                        where: { id: game.id },
+                        data: {
+                            igdb_id: game.igdb_id ? undefined : candidate.id,
+                            cover_url: !game.cover_url ? candidate.imageUrl : undefined,
+                        },
+                    });
+                }
+
+                return { id: game.id };
+            })
+        );
 
         await prisma.user.update({
             where: { id: session.user.id },
             data: {
                 [field]: {
-                    set: gameIds,
+                    set: games,
                 },
             },
         });
