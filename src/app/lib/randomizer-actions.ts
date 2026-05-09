@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
 export interface SaveRandomizerRollParams {
     questType: "MAIN" | "SIDE";
@@ -27,11 +28,14 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
     // Determinar o enum correto do Prisma
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
+    // Pré-busca os usuários do sorteio fora da transação para performance
+    const activeUsers = await prisma.user.findMany({
+        where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+    });
+
     try {
         // Usa uma transação para garantir que tudo salva junto
         const result = await prisma.$transaction(async (tx) => {
-            // Buscar todos os usuários para atrelar o progresso
-            const allUsers = await tx.user.findMany();
 
             // 1. Criar ou atualizar os Jogos na tabela Game
             const savedGames = await Promise.all(
@@ -59,7 +63,7 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
                     // Tentar descobrir quem indicou pelo texto "Lucas" ou "Matheus"
                     let nominatorId = userId;
                     if (candidate.nominator) {
-                        const matchedUser = allUsers.find(
+                        const matchedUser = activeUsers.find(
                             (u) =>
                                 u.name
                                     ?.toLowerCase()
@@ -83,10 +87,10 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
                 }),
             );
 
-            // 1.5. Garantir que todo jogo inserido/atualizado tem um GameProgress (SUGGESTED) para cada usuário
+            // 1.5. Garantir que todo jogo inserido/atualizado tem um GameProgress (SUGGESTED) para jogadores ativos
             const progressData = [];
             for (const game of savedGames) {
-                for (const u of allUsers) {
+                for (const u of activeUsers) {
                     progressData.push({
                         user_id: u.id,
                         game_id: game.id,

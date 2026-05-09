@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { isRandomizerPlayer } from "@/lib/randomizer-players";
+import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
 // ---------- Types ----------
 
@@ -237,6 +237,12 @@ export async function executeRoll(poolId: string) {
     }
 
     try {
+        // Pré-busca apenas os usuários ativos (Lucas e Matheus) fora da transação
+        // Isso evita segurar o lock do banco em operações de leitura lentas
+        const activeUsers = await prisma.user.findMany({
+            where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+        });
+
         const result = await prisma.$transaction(async (tx) => {
             // 1. LOCK PESSIMISTA: Trava o pote para evitar que novos jogos sejam adicionados durante o sorteio
             await tx.$executeRaw`SELECT * FROM pools WHERE id = ${poolId} FOR UPDATE`;
@@ -276,13 +282,10 @@ export async function executeRoll(poolId: string) {
                 },
             });
 
-            // Get all users to create GameProgress
-            const allUsers = await tx.user.findMany();
-
-            // Ensure all pool games have GameProgress for all users
+            // Ensure all pool games have GameProgress for active users
             const progressData = [];
             for (const entry of pool.entries) {
-                for (const user of allUsers) {
+                for (const user of activeUsers) {
                     progressData.push({
                         user_id: user.id,
                         game_id: entry.game_id,
