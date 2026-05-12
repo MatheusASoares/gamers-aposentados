@@ -98,7 +98,13 @@ Rules:
             "gemini-2.5-flash",          // Único modelo permitido no plano free para não esgotar 15 RPM
         ];
 
-        let finalResponse: any = null;
+        let finalResponse: {
+            candidates?: Array<{
+                content?: {
+                    parts?: Array<{ text?: string }>
+                }
+            }>
+        } | null = null;
         let lastError: { status?: number, text?: string, message?: string } | null = null;
         let usedModel = "";
 
