@@ -66,11 +66,12 @@ export async function createReview(params: CreateReviewParams) {
         revalidatePath("/");
         
         return { success: true, review };
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[createReview] Erro catastrófico:", error);
+        const errorMessage = error instanceof Error ? error.message : "Servidor indisponível";
         return { 
             success: false, 
-            error: "Erro inesperado ao salvar review: " + (error?.message || "Servidor indisponível") 
+            error: "Erro inesperado ao salvar review: " + errorMessage 
         };
     }
 }
@@ -103,8 +104,7 @@ export async function deleteReview(reviewId: string) {
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
         return { success: true };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Erro ao deletar review:", error);
         return { success: false, error: "Erro interno ao deletar a review" };
     }
@@ -161,8 +161,7 @@ export async function updateReview(params: UpdateReviewParams) {
         revalidatePath("/reviews");
         revalidatePath("/");
         return { success: true, review: updatedReview };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Erro ao atualizar review:", error);
         return { success: false, error: "Erro interno ao atualizar a review" };
     }

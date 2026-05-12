@@ -152,10 +152,9 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
         });
 
         return { success: true, poolId: result };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("Erro ao salvar Randomizer DB:", error);
-
-        return { success: false, error: "Erro interno: " + (error?.message || "Desconhecido") };
+        const errorMessage = error instanceof Error ? error.message : "Desconhecido";
+        return { success: false, error: "Erro interno: " + errorMessage };
     }
 }

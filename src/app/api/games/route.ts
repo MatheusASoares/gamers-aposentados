@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { auth } from "@/auth";
-import { Prisma } from "@prisma/client";
+import { Prisma, $Enums } from "@prisma/client";
 
-const mapInputToDb = (input: Partial<Prisma.GameUncheckedCreateInput> & { coverUrl?: string; hltbTime?: number; questType?: any; nominatedById?: string }) => {
+const mapInputToDb = (input: Partial<Prisma.GameUncheckedCreateInput> & { coverUrl?: string; hltbTime?: number; questType?: $Enums.QuestType; nominatedById?: string }) => {
     const data: Partial<Prisma.GameUncheckedCreateInput> = {};
     if (input.title !== undefined) data.title = input.title;
     if (input.platform !== undefined) data.platform = input.platform;
