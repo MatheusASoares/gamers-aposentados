@@ -176,7 +176,6 @@ export function RandomizerClient({
     const totalGames = mySelections.length + otherSelections.length;
     const requiredTotal = maxPerPerson * 2;
     const poolIsComplete = totalGames >= requiredTotal;
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const mySelectionsAreSaved =
         !isEditing &&
         savedSnapshot.length === mySelections.length &&

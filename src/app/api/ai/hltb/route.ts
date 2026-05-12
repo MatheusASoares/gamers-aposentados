@@ -98,8 +98,8 @@ Rules:
             "gemini-2.5-flash",          // Único modelo permitido no plano free para não esgotar 15 RPM
         ];
 
-        let finalResponse = null;
-        let lastError = null;
+        let finalResponse: any = null;
+        let lastError: { status?: number, text?: string, message?: string } | null = null;
         let usedModel = "";
 
         for (const model of models) {
@@ -141,9 +141,10 @@ Rules:
                         break;
                     }
                 }
-            } catch (err: any) {
-                console.error(`[API /ai/hltb] Fetch error with ${model}:`, err.message);
-                lastError = err;
+            } catch (err: unknown) {
+                const errMsg = err instanceof Error ? err.message : String(err);
+                console.error(`[API /ai/hltb] Fetch error with ${model}:`, errMsg);
+                lastError = { message: errMsg };
             }
         }
 
@@ -204,10 +205,10 @@ Rules:
              return NextResponse.json({ error: "Failed to parse AI response" }, { status: 500 });
         }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error("[API /ai/hltb] Internal error:", error);
          return NextResponse.json(
-             { error: "Internal server error connecting to AI service", details: error?.message },
+             { error: "Internal server error connecting to AI service", details: error instanceof Error ? error.message : "Unknown error" },
              { status: 500 }
          );
     }

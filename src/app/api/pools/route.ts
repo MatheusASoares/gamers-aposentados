@@ -129,7 +129,7 @@ export async function PUT(request: Request) {
     }
 }
 
-export async function DELETE(request: Request) {
+export async function DELETE() {
     try {
         const session = await auth();
         if (!session?.user?.id) {

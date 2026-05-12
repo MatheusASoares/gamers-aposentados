@@ -60,7 +60,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
             } else {
                 setError(res.error || "Ocorreu um erro ao salvar a review.");
             }
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("[AddReviewModal] Erro ao submeter:", err);
             setError("Erro de conexão ou falha no servidor. Tente novamente.");
         } finally {
