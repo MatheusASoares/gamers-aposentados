@@ -108,7 +108,7 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
 
             // Identificar o vencedor recém-retornado ou criado do banco
             const winnerCandidate = candidates.find((c) => c.id === winnerId);
-            const savedWinner = savedGames.find((g) => g.title === winnerCandidate?.nome);
+            const savedWinner = savedGames.find((g) => g.igdb_id === winnerId) || savedGames.find((g) => g.title === winnerCandidate?.nome);
 
             if (!savedWinner) {
                 throw new Error("Erro ao identificar o jogo vencedor.");
