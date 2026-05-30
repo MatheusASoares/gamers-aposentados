@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Loader2 } from "lucide-react";
 import { createReview } from "@/app/lib/review-actions";
 import {
@@ -18,6 +19,7 @@ export interface AddReviewModalProps {
 }
 
 export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -57,6 +59,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
                 setDifficulty("3");
                 setHoursPlayed("");
                 setReviewText("");
+                router.refresh();
             } else {
                 setError(res.error || "Ocorreu um erro ao salvar a review.");
             }
