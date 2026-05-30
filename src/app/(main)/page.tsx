@@ -4,6 +4,7 @@ import { ActiveQuestHero } from "@/components/dashboard/ActiveQuestHero";
 import { SideQuestBar } from "@/components/dashboard/SideQuestBar";
 import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { RecentActivity, ActivityEvent } from "@/components/dashboard/RecentGames";
+import { shuffleArray } from "@/lib/utils";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -33,12 +34,7 @@ export default async function DashboardPage() {
         }),
         // Random Review IDs (JS Shuffle - Ideal for low volume)
         prisma.review.findMany({ select: { id: true } }).then((reviews) => {
-            const shuffled = [...reviews];
-            for (let i = shuffled.length - 1; i > 0; i--) {
-                // eslint-disable-next-line react-hooks/purity
-                const j = Math.floor(Math.random() * (i + 1));
-                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-            }
+            const shuffled = shuffleArray(reviews);
             return shuffled.slice(0, 5);
         }),
         // Recent Pools (Global Activity)
