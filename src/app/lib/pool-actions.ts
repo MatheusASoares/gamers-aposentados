@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
@@ -326,3 +327,183 @@ export async function executeRoll(poolId: string) {
         return { success: false, error: "Erro no sorteio: " + errorMessage };
     }
 }
+
+// ---------- Fetch Past Incomplete Games ----------
+
+export async function getPastIncompleteGames() {
+    try {
+        const games = await prisma.game.findMany({
+            where: {
+                progress: {
+                    some: {
+                        status: { in: ["DROPPED", "SUGGESTED"] }
+                    },
+                    none: {
+                        status: "COMPLETED"
+                    }
+                }
+            },
+            select: {
+                id: true,
+                title: true,
+                cover_url: true,
+                igdb_id: true,
+            },
+            orderBy: {
+                title: "asc"
+            }
+        });
+        return { success: true, games };
+    } catch (error) {
+        console.error("Error fetching past incomplete games:", error);
+        return { success: false, error: "Erro ao buscar jogos incompletos" };
+    }
+}
+
+// ---------- Insert Special Game Override ----------
+
+export async function insertSpecialGame(
+    questType: "MAIN" | "SIDE",
+    game: { id?: string; igdbId?: string | null; nome: string; imageUrl?: string | null }
+) {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return { success: false, error: "Usuário não autenticado" };
+    }
+
+    const userId = session.user.id;
+    const userEmail = session.user.email;
+
+    if (!isRandomizerPlayer(userEmail)) {
+        return {
+            success: false,
+            error: "Você não tem permissão para realizar essa ação",
+        };
+    }
+
+    const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
+
+    try {
+        const activeUsers = await prisma.user.findMany({
+            where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+        });
+
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Find or create the game
+            let dbGame;
+            if (game.id) {
+                dbGame = await tx.game.findUnique({ where: { id: game.id } });
+            } else {
+                dbGame = await tx.game.findFirst({
+                    where: {
+                        OR: [
+                            game.igdbId ? { igdb_id: game.igdbId } : undefined,
+                            { title: game.nome }
+                        ].filter(Boolean) as Prisma.GameWhereInput[],
+                    },
+                });
+            }
+
+            if (!dbGame) {
+                dbGame = await tx.game.create({
+                    data: {
+                        igdb_id: game.igdbId || null,
+                        title: game.nome,
+                        cover_url: game.imageUrl || null,
+                        quest_type: typeEnum,
+                        nominated_by_id: userId,
+                    },
+                });
+            } else {
+                dbGame = await tx.game.update({
+                    where: { id: dbGame.id },
+                    data: {
+                        igdb_id: dbGame.igdb_id || game.igdbId || null,
+                        cover_url: dbGame.cover_url || game.imageUrl || null,
+                    },
+                });
+            }
+
+            // 2. Handle pool
+            let pool = await tx.pool.findFirst({
+                where: { type: typeEnum, status: "OPEN" },
+            });
+
+            if (pool) {
+                pool = await tx.pool.update({
+                    where: { id: pool.id },
+                    data: {
+                        status: "CLOSED",
+                        winner_game_id: dbGame.id,
+                    },
+                });
+            } else {
+                pool = await tx.pool.create({
+                    data: {
+                        type: typeEnum,
+                        status: "CLOSED",
+                        winner_game_id: dbGame.id,
+                        month: new Date().getMonth() + 1,
+                        year: new Date().getFullYear(),
+                    },
+                });
+            }
+
+            // 3. Ensure a PoolEntry exists
+            const entryExists = await tx.poolEntry.findFirst({
+                where: { pool_id: pool.id, game_id: dbGame.id },
+            });
+
+            if (!entryExists) {
+                await tx.poolEntry.create({
+                    data: {
+                        pool_id: pool.id,
+                        game_id: dbGame.id,
+                        user_id: userId,
+                    },
+                });
+            }
+
+            // 4. Update GameProgress to ACTIVE
+            for (const user of activeUsers) {
+                await tx.gameProgress.upsert({
+                    where: {
+                        user_id_game_id: {
+                            user_id: user.id,
+                            game_id: dbGame.id,
+                        },
+                    },
+                    update: {
+                        status: "ACTIVE",
+                        start_date: new Date(),
+                        end_date: null,
+                    },
+                    create: {
+                        user_id: user.id,
+                        game_id: dbGame.id,
+                        status: "ACTIVE",
+                        progress_percentage: 0,
+                        start_date: new Date(),
+                    },
+                });
+            }
+
+            return {
+                poolId: pool.id,
+                winnerId: dbGame.id,
+                winnerTitle: dbGame.title,
+                winnerImageUrl: dbGame.cover_url,
+            };
+        });
+
+        revalidatePath("/randomizer");
+        revalidatePath("/");
+        revalidatePath("/dashboard");
+        return { success: true, ...result };
+    } catch (error: unknown) {
+        console.error("Error inserting special game:", error);
+        const errorMessage = error instanceof Error ? error.message : "Desconhecido";
+        return { success: false, error: "Erro ao inserir jogo especial: " + errorMessage };
+    }
+}
+

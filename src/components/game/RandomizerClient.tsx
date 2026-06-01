@@ -13,6 +13,8 @@ import {
     executeRoll,
     GameSelection,
     PoolEntryData,
+    getPastIncompleteGames,
+    insertSpecialGame,
 } from "@/app/lib/pool-actions";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +54,15 @@ export function RandomizerClient({
     const [lockStatus, setLockStatus] = useState<{ locked: boolean; message?: string }>({
         locked: false,
     });
+
+    // Special break state
+    const [pastIncompleteGames, setPastIncompleteGames] = useState<
+        { id: string; title: string; cover_url: string | null; igdb_id: string | null }[]
+    >([]);
+    const [selectedPastGameId, setSelectedPastGameId] = useState<string>("");
+    const [isInsertingSpecial, setIsInsertingSpecial] = useState(false);
+    const [specialGameSearchOpen, setSpecialGameSearchOpen] = useState(false);
+    const [selectedSearchedGame, setSelectedSearchedGame] = useState<GameSearchResult | null>(null);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -121,8 +132,8 @@ export function RandomizerClient({
 
     const handleRefreshHltb = async (title: string) => {
         if (refreshingTitles.has(title)) return;
-        
-        setRefreshingTitles(prev => {
+
+        setRefreshingTitles((prev) => {
             const next = new Set(prev);
             next.add(title);
             return next;
@@ -149,7 +160,7 @@ export function RandomizerClient({
         } catch (err) {
             console.error("Manual AI fetch failed", err);
         } finally {
-            setRefreshingTitles(prev => {
+            setRefreshingTitles((prev) => {
                 const next = new Set(prev);
                 next.delete(title);
                 return next;
@@ -170,7 +181,50 @@ export function RandomizerClient({
         });
 
         loadPool(questType);
+
+        // Fetch past incomplete games on load
+        getPastIncompleteGames().then((res) => {
+            if (res.success && res.games) {
+                setPastIncompleteGames(res.games);
+            }
+        });
     }, [questType, loadPool]);
+
+    const handleInsertSpecialGame = async (gameToInsert: {
+        id?: string;
+        igdbId?: string | null;
+        nome: string;
+        imageUrl?: string | null;
+    }) => {
+        setIsInsertingSpecial(true);
+        setSaveStatus(null);
+        try {
+            const res = await insertSpecialGame(questType, gameToInsert);
+            if (res.success) {
+                setSaveStatus({
+                    success: true,
+                    message: `Pausa ativa! Jogo "${gameToInsert.nome}" inserido com sucesso.`,
+                });
+                setWinner({
+                    title: gameToInsert.nome,
+                    imageUrl: gameToInsert.imageUrl?.replace("t_cover_big", "t_1080p") || null,
+                });
+                await loadPool(questType);
+                setSelectedPastGameId("");
+                setSpecialGameSearchOpen(false);
+            } else {
+                setSaveStatus({
+                    success: false,
+                    message: res.error || "Erro ao inserir jogo especial.",
+                });
+            }
+        } catch (err) {
+            console.error("Error inserting special game:", err);
+            setSaveStatus({ success: false, message: "Erro de conexão ao servidor." });
+        } finally {
+            setIsInsertingSpecial(false);
+        }
+    };
 
     // --- Core Computed States (needed for polling dependencies) ---
     const totalGames = mySelections.length + otherSelections.length;
@@ -237,7 +291,10 @@ export function RandomizerClient({
             const response = await saveSelections(questType, games);
 
             if (response.success) {
-                setSaveStatus({ success: true, message: "Seleções salvas! Consultando AI Agent (HLTB)..." });
+                setSaveStatus({
+                    success: true,
+                    message: "Seleções salvas! Consultando AI Agent (HLTB)...",
+                });
                 setIsEditing(false);
                 // Reload pool to get fresh entry IDs
                 await loadPool(questType);
@@ -403,10 +460,10 @@ export function RandomizerClient({
                             May the RNG be in your favor, Commander.
                         </p>
                     </div>
-                    <div className="relative flex w-full max-w-[380px] sm:inline-flex sm:w-[400px] flex-shrink-0 rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md">
+                    <div className="relative flex w-full max-w-[380px] flex-shrink-0 rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md sm:inline-flex sm:w-[400px]">
                         <div
                             className={cn(
-                                "absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl transition-all duration-500 ease-spring",
+                                "ease-spring absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl transition-all duration-500",
                                 questType === "MAIN"
                                     ? "translate-x-0 bg-amber-400/20 shadow-[0_0_20px_rgba(251,191,36,0.2)]"
                                     : "translate-x-full bg-[#bd0df2]/20 shadow-[0_0_20px_rgba(189,13,242,0.2)]",
@@ -414,7 +471,7 @@ export function RandomizerClient({
                         />
                         <div
                             className={cn(
-                                "absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl border border-white/10 transition-all duration-500 ease-spring",
+                                "ease-spring absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl border border-white/10 transition-all duration-500",
                                 questType === "MAIN"
                                     ? "translate-x-0 border-amber-400/50"
                                     : "translate-x-full border-[#bd0df2]/50",
@@ -423,7 +480,7 @@ export function RandomizerClient({
                         <button
                             onClick={() => handleQuestTypeChange("MAIN")}
                             className={cn(
-                                "relative z-10 w-1/2 py-3 text-center text-xs sm:text-sm py-3 font-black tracking-wider sm:tracking-widest uppercase transition-all duration-500",
+                                "relative z-10 w-1/2 py-3 text-center text-xs font-black tracking-wider uppercase transition-all duration-500 sm:text-sm sm:tracking-widest",
                                 questType === "MAIN"
                                     ? "text-amber-400 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]"
                                     : "text-zinc-500 hover:text-zinc-300",
@@ -432,7 +489,7 @@ export function RandomizerClient({
                             Main Quest{" "}
                             <span
                                 className={cn(
-                                    "ml-0.5 sm:ml-1 font-normal",
+                                    "ml-0.5 font-normal sm:ml-1",
                                     questType === "MAIN" ? "text-amber-400/60" : "text-zinc-600",
                                 )}
                             >
@@ -442,7 +499,7 @@ export function RandomizerClient({
                         <button
                             onClick={() => handleQuestTypeChange("SIDE")}
                             className={cn(
-                                "relative z-10 w-1/2 py-3 text-center text-xs sm:text-sm py-3 font-black tracking-wider sm:tracking-widest uppercase transition-all duration-500",
+                                "relative z-10 w-1/2 py-3 text-center text-xs font-black tracking-wider uppercase transition-all duration-500 sm:text-sm sm:tracking-widest",
                                 questType === "SIDE"
                                     ? "text-[#bd0df2] drop-shadow-[0_0_10px_rgba(189,13,242,0.5)]"
                                     : "text-zinc-500 hover:text-zinc-300",
@@ -542,23 +599,26 @@ export function RandomizerClient({
                                         className="group relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-950/50 p-3 shadow-inner transition-all duration-300 hover:border-[#bd0df2]/40 hover:bg-[#bd0df2]/5 hover:shadow-[0_0_20px_rgba(189,13,242,0.1)]"
                                     >
                                         <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
-                                                {c.imageUrl && (
-                                                    <Image
-                                                        src={c.imageUrl}
-                                                        alt={c.nome}
-                                                        fill
-                                                        sizes="48px"
-                                                        unoptimized
-                                                        className="object-cover"
-                                                    />
-                                                )}
+                                            {c.imageUrl && (
+                                                <Image
+                                                    src={c.imageUrl}
+                                                    alt={c.nome}
+                                                    fill
+                                                    sizes="48px"
+                                                    unoptimized
+                                                    className="object-cover"
+                                                />
+                                            )}
                                         </div>
                                         <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
                                             {c.nome}
                                         </h4>
-                                        <HltbBadge 
-                                            hours={hltbTimes[c.nome]} 
-                                            isLoading={(isFetchingHltb && mySelectionsAreSaved) || refreshingTitles.has(c.nome)}
+                                        <HltbBadge
+                                            hours={hltbTimes[c.nome]}
+                                            isLoading={
+                                                (isFetchingHltb && mySelectionsAreSaved) ||
+                                                refreshingTitles.has(c.nome)
+                                            }
                                             onRefresh={() => handleRefreshHltb(c.nome)}
                                             className="mr-2"
                                         />
@@ -668,9 +728,12 @@ export function RandomizerClient({
                                             <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
                                                 {entry.gameTitle}
                                             </h4>
-                                            <HltbBadge 
-                                                hours={hltbTimes[entry.gameTitle]} 
-                                                isLoading={(isFetchingHltb && !isEditing) || refreshingTitles.has(entry.gameTitle)}
+                                            <HltbBadge
+                                                hours={hltbTimes[entry.gameTitle]}
+                                                isLoading={
+                                                    (isFetchingHltb && !isEditing) ||
+                                                    refreshingTitles.has(entry.gameTitle)
+                                                }
                                                 onRefresh={() => handleRefreshHltb(entry.gameTitle)}
                                                 className="mr-2"
                                             />
@@ -678,6 +741,192 @@ export function RandomizerClient({
                                     ))
                                 )}
                             </div>
+
+                            {/* Special Break Card (Month 6/12 Pause) */}
+                            {questType === "SIDE" && (
+                                <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10">
+                                    <div className="mb-2">
+                                        <span className="text-sm font-black tracking-widest text-amber-400 uppercase drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">
+                                            Pausa da Side Quest
+                                        </span>
+                                        <p className="mt-1 text-xs text-zinc-400">
+                                            Insira manualmente o jogo escolhido para o mês de pausa,
+                                            pulando a votação.
+                                        </p>
+                                    </div>
+
+                                    {/* Action Buttons */}
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <button
+                                            onClick={() => {
+                                                setSpecialGameSearchOpen(false);
+                                                // Load past games if empty
+                                                if (pastIncompleteGames.length === 0) {
+                                                    getPastIncompleteGames().then((res) => {
+                                                        if (res.success && res.games) {
+                                                            setPastIncompleteGames(res.games);
+                                                        }
+                                                    });
+                                                }
+                                            }}
+                                            className={cn(
+                                                "rounded-xl border py-3.5 text-xs font-black tracking-widest uppercase transition-all duration-300",
+                                                !specialGameSearchOpen
+                                                    ? "border-amber-400/40 bg-amber-400/20 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]"
+                                                    : "border-white/5 bg-zinc-950/30 text-zinc-400 hover:text-white",
+                                            )}
+                                        >
+                                            Jogos Incompletos
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setSpecialGameSearchOpen(true);
+                                                setSelectedPastGameId("");
+                                            }}
+                                            className={cn(
+                                                "rounded-xl border py-3.5 text-xs font-black tracking-widest uppercase transition-all duration-300",
+                                                specialGameSearchOpen
+                                                    ? "border-amber-400/40 bg-amber-400/20 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]"
+                                                    : "border-white/5 bg-zinc-950/30 text-zinc-400 hover:text-white",
+                                            )}
+                                        >
+                                            Buscar Novo (IGDB)
+                                        </button>
+                                    </div>
+
+                                    {/* Dynamic content */}
+                                    {specialGameSearchOpen ? (
+                                        <div className="mt-2 flex flex-col gap-3">
+                                            {!selectedSearchedGame ? (
+                                                <GameAutocomplete
+                                                    onSelect={(game) => {
+                                                        setSelectedSearchedGame(game);
+                                                    }}
+                                                    onCancel={() => {
+                                                        setSpecialGameSearchOpen(false);
+                                                        setSelectedSearchedGame(null);
+                                                    }}
+                                                />
+                                            ) : (
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex items-center rounded-xl border border-white/5 bg-zinc-950/50 p-3">
+                                                        <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
+                                                            {selectedSearchedGame.imageUrl && (
+                                                                <Image
+                                                                    src={selectedSearchedGame.imageUrl}
+                                                                    alt={selectedSearchedGame.nome}
+                                                                    fill
+                                                                    sizes="48px"
+                                                                    unoptimized
+                                                                    className="object-cover"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white">
+                                                            {selectedSearchedGame.nome}
+                                                        </h4>
+                                                        <button
+                                                            onClick={() => setSelectedSearchedGame(null)}
+                                                            className="p-1 text-zinc-500 hover:text-white"
+                                                        >
+                                                            <X className="h-5 w-5" />
+                                                        </button>
+                                                    </div>
+
+                                                    <button
+                                                        onClick={() => {
+                                                            handleInsertSpecialGame({
+                                                                igdbId: selectedSearchedGame.id,
+                                                                nome: selectedSearchedGame.nome,
+                                                                imageUrl: selectedSearchedGame.imageUrl,
+                                                            });
+                                                            setSelectedSearchedGame(null);
+                                                        }}
+                                                        disabled={isInsertingSpecial}
+                                                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/20 py-3.5 text-xs font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:bg-amber-400/30 disabled:opacity-50"
+                                                    >
+                                                        {isInsertingSpecial ? (
+                                                            <>
+                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                                Ativando...
+                                                            </>
+                                                        ) : (
+                                                            "Confirmar e Ativar Jogo do Mês"
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        <div className="mt-2 flex flex-col gap-3">
+                                            {pastIncompleteGames.length === 0 ? (
+                                                <button
+                                                    onClick={async () => {
+                                                        const res = await getPastIncompleteGames();
+                                                        if (res.success && res.games) {
+                                                            setPastIncompleteGames(res.games);
+                                                        }
+                                                    }}
+                                                    className="w-full rounded-xl border border-dashed border-white/10 py-3 text-xs font-bold text-zinc-500 hover:text-zinc-300"
+                                                >
+                                                    Carregar Jogos Passados Dropados/Incompletos
+                                                </button>
+                                            ) : (
+                                                <div className="flex flex-col gap-3">
+                                                    <select
+                                                        value={selectedPastGameId}
+                                                        onChange={(e) =>
+                                                            setSelectedPastGameId(e.target.value)
+                                                        }
+                                                        className="w-full rounded-xl border border-white/10 bg-zinc-950 p-3 text-sm font-bold text-white outline-hidden focus:border-amber-400"
+                                                    >
+                                                        <option value="">
+                                                            -- Selecione um Jogo --
+                                                        </option>
+                                                        {pastIncompleteGames.map((game) => (
+                                                            <option key={game.id} value={game.id}>
+                                                                {game.title}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+
+                                                    {selectedPastGameId && (
+                                                        <button
+                                                            onClick={() => {
+                                                                const game =
+                                                                    pastIncompleteGames.find(
+                                                                        (g) =>
+                                                                            g.id ===
+                                                                            selectedPastGameId,
+                                                                    );
+                                                                if (game) {
+                                                                    handleInsertSpecialGame({
+                                                                        id: game.id,
+                                                                        igdbId: game.igdb_id,
+                                                                        nome: game.title,
+                                                                        imageUrl: game.cover_url,
+                                                                    });
+                                                                }
+                                                            }}
+                                                            disabled={isInsertingSpecial}
+                                                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/20 py-3.5 text-xs font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:bg-amber-400/30 disabled:opacity-50"
+                                                        >
+                                                            {isInsertingSpecial ? (
+                                                                <>
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                    Ativando...
+                                                                </>
+                                                            ) : (
+                                                                "Ativar como Jogo do Mês"
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Right Column: Randomizer Tool Area */}
