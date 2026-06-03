@@ -274,12 +274,14 @@ export async function executeRoll(poolId: string) {
             const randomIndex = Math.floor(Math.random() * pool.entries.length);
             const winnerEntry = pool.entries[randomIndex];
 
-            // Close pool with winner
+            // Close pool with winner and update to the current month/year of the draw
             await tx.pool.update({
                 where: { id: poolId },
                 data: {
                     status: "CLOSED",
                     winner_game_id: winnerEntry.game_id,
+                    month: new Date().getMonth() + 1,
+                    year: new Date().getFullYear(),
                 },
             });
 
@@ -435,6 +437,8 @@ export async function insertSpecialGame(
                     data: {
                         status: "CLOSED",
                         winner_game_id: dbGame.id,
+                        month: new Date().getMonth() + 1,
+                        year: new Date().getFullYear(),
                     },
                 });
             } else {
