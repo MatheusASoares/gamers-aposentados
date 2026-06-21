@@ -111,3 +111,48 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
         return [];
     }
 }
+
+export async function getGameContextIGDB(title: string): Promise<{ summary?: string; storyline?: string } | null> {
+    if (!title || title.trim().length === 0) {
+        return null;
+    }
+
+    const clientId = process.env.IGDB_CLIENT_ID;
+    const token = await getTwitchToken();
+
+    if (!clientId || !token) {
+        console.warn("IGDB context search skipped due to missing credentials or token.");
+        return null;
+    }
+
+    try {
+        const response = await fetch("https://api.igdb.com/v4/games", {
+            method: "POST",
+            headers: {
+                "Client-ID": clientId,
+                Authorization: `Bearer ${token}`,
+                Accept: "application/json",
+                "Content-Type": "text/plain",
+            },
+            body: `search "${title}"; fields name, summary, storyline; limit 1;`,
+            cache: "no-store",
+        });
+
+        if (!response.ok) {
+            throw new Error(`IGDB API error: ${response.statusText}`);
+        }
+
+        const games = await response.json();
+        if (games && games.length > 0) {
+            return {
+                summary: games[0].summary || undefined,
+                storyline: games[0].storyline || undefined,
+            };
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching game context from IGDB:", error);
+        return null;
+    }
+}
+
