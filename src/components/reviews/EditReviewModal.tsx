@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Edit } from "lucide-react";
 import { updateReview } from "@/app/lib/review-actions";
+import { useRouter } from "next/navigation";
 import {
     Dialog,
     DialogContent,
@@ -27,6 +28,7 @@ export interface EditReviewModalProps {
 }
 
 export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
+    const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -54,7 +56,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
 
         if (res.success) {
             setOpen(false);
-            window.location.reload();
+            router.refresh();
         } else {
             setError(res.error || "Ocorreu um erro ao atualizar a review.");
         }

@@ -2,7 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
+import { RANDOMIZER_PLAYER_EMAILS, isRandomizerPlayer } from "@/lib/randomizer-players";
 
 export interface SaveRandomizerRollParams {
     questType: "MAIN" | "SIDE";
@@ -20,6 +20,10 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
 
     if (!session?.user?.id) {
         throw new Error("Usuário não autenticado");
+    }
+
+    if (!isRandomizerPlayer(session.user.email)) {
+        return { success: false, error: "Acesso negado" };
     }
 
     const userId = session.user.id;
@@ -116,7 +120,10 @@ export async function saveRandomizerRoll(params: SaveRandomizerRollParams) {
 
             // 2. Atualizar o GameProgress do vencedor para ACTIVE para todos os usuários
             await tx.gameProgress.updateMany({
-                where: { game_id: savedWinner.id },
+                where: {
+                    game_id: savedWinner.id,
+                    status: "SUGGESTED",
+                },
                 data: {
                     status: "ACTIVE",
                     start_date: new Date(),

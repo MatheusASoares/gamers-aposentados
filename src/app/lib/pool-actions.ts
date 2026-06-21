@@ -5,6 +5,7 @@ import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
+import { getRandomizerStatus } from "./quest-actions";
 
 // ---------- Types ----------
 
@@ -31,6 +32,11 @@ export interface PoolData {
 // ---------- Get or Create Open Pool ----------
 
 export async function getOpenPool(questType: "MAIN" | "SIDE"): Promise<PoolData | null> {
+    const session = await auth();
+    if (!session?.user?.id) {
+        return null;
+    }
+
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
     try {
@@ -237,6 +243,10 @@ export async function executeRoll(poolId: string) {
         return { success: false, error: "Usuário não autenticado" };
     }
 
+    if (!isRandomizerPlayer(session.user.email)) {
+        return { success: false, error: "Acesso negado" };
+    }
+
     try {
         // Pré-busca apenas os usuários ativos (Lucas e Matheus) fora da transação
         // Isso evita segurar o lock do banco em operações de leitura lentas
@@ -306,7 +316,10 @@ export async function executeRoll(poolId: string) {
 
             // Set winner game to ACTIVE for all users
             await tx.gameProgress.updateMany({
-                where: { game_id: winnerEntry.game_id },
+                where: {
+                    game_id: winnerEntry.game_id,
+                    status: "SUGGESTED",
+                },
                 data: {
                     status: "ACTIVE",
                     start_date: new Date(),
@@ -384,6 +397,15 @@ export async function insertSpecialGame(
     }
 
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
+
+    // Validar se já existe um jogo ativo (travado)
+    const status = await getRandomizerStatus(typeEnum);
+    if (status.locked) {
+        return {
+            success: false,
+            error: status.message || "Já existe um jogo ativo para esta quest.",
+        };
+    }
 
     try {
         const activeUsers = await prisma.user.findMany({

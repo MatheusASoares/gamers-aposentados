@@ -46,7 +46,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
 
 ## 🛡️ 2. Security & Authorization Vulnerabilities
 
-### 2.1 API Route Global Authentication Bypass
+### 2.1 API Route Global Authentication Bypass - DONE
 
 - **File:** [auth.config.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/auth.config.ts#L12)
 - **Impact:** **High (Security Risk)**
@@ -59,7 +59,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
     While some API endpoints manually check authentication, this design pattern defaults to "unsafe". Any new API endpoint added to `src/app/api/` that forgets to manually invoke `auth()` will be completely exposed to the public internet.
 - **Solution:** Restrict public route bypasses to specific auth endpoints (e.g. `/api/auth/*`) and secure `/api/*` by default in the middleware.
 
-### 2.2 Unauthenticated IGDB Proxy
+### 2.2 Unauthenticated IGDB Proxy - DONE
 
 - **File:** [route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/igdb/route.ts#L4)
 - **Impact:** **Medium (Abuse/Cost Risk)**
@@ -70,7 +70,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
     if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     ```
 
-### 2.3 Authorization Bypass in Server Actions
+### 2.3 Authorization Bypass in Server Actions - DONE
 
 - **File:** [randomizer-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/randomizer-actions.ts#L18)
 - **Impact:** **High (Authorization Bypass)**
@@ -85,7 +85,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
     This allows any registered member of the community to forge randomizer rolls and insert arbitrary closed pools.
 - **Solution:** Add a permission check for `isRandomizerPlayer(session.user.email)` before processing database updates.
 
-### 2.4 Bypasses in API Route `/api/pools` and `/api/games`
+### 2.4 Bypasses in API Route `/api/pools` and `/api/games` - DONE
 
 - **Files:** [/api/pools/route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/pools/route.ts#L40) and [/api/games/route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/games/route.ts#L36)
 - **Impact:** **High (Authorization Bypass & Forgery)**
@@ -99,7 +99,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
 
 ## ⚡ 3. Performance & Scaling Issues
 
-### 3.1 Potential Cache Serialization Failure in Twitch Token
+### 3.1 Potential Cache Serialization Failure in Twitch Token - DONE
 
 - **File:** [igdb.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/igdb.ts#L44)
 - **Impact:** **High (Service Downtime)**
@@ -111,7 +111,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
     }
     ```
 
-### 3.2 In-Memory Shuffling (N+1 Query & Scale Limit)
+### 3.2 In-Memory Shuffling (N+1 Query & Scale Limit) - DONE
 
 - **File:** [page.tsx](<file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/(main)/page.tsx#L35>)
 - **Impact:** **Medium (Database/Memory Load)**
@@ -131,7 +131,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
     `;
     ```
 
-### 3.3 Event Listener Leak in Autocomplete
+### 3.3 Event Listener Leak in Autocomplete - DONE
 
 - **File:** [game-autocomplete.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/ui/game-autocomplete.tsx#L55)
 - **Impact:** **Low (Memory Consumption)**
@@ -142,7 +142,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
 
 ## 🛠️ 4. Database & Transaction Integrity Gotchas
 
-### 4.1 Progress Data Corruption on Winner Roll
+### 4.1 Progress Data Corruption on Winner Roll - DONE
 
 - **Files:** [pool-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/pool-actions.ts#L305), [randomizer-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/randomizer-actions.ts#L118), and [/api/pools/route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/pools/route.ts#L113)
 - **Impact:** **High (Data Integrity Loss)**
@@ -162,7 +162,7 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
     }
     ```
 
-### 4.2 Missing Cascading Deletes (Foreign Key Crashes)
+### 4.2 Missing Cascading Deletes (Foreign Key Crashes) - DONE
 
 - **File:** [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma)
 - **Impact:** **High (Server Crash on Delete)**
@@ -179,14 +179,14 @@ This report presents a thorough analysis of the codebase for the **Gamers Aposen
 
 ## 🧑‍💻 5. Code Quality & Next.js Anti-patterns
 
-### 5.1 Full Browser Reloads (UX & Performance Defect)
+### 5.1 Full Browser Reloads (UX & Performance Defect) - DONE
 
 - **Files:** Multiple React Components
 - **Details:** `ActiveQuestHero.tsx`, `SideQuestBar.tsx`, `EditReviewModal.tsx`, and `ReviewCard.tsx` utilize `window.location.reload()` to refresh page data after completing, dropping, or editing reviews/quests.
 - **Impact:** This destroys React's virtual DOM state, forces a white flash/flicker, resets scroll positions, and negates the benefits of Next.js client-side navigation.
 - **Solution:** Import `useRouter` from `next/navigation` and invoke `router.refresh()` to fetch updated data from the server seamlessly without page reloads.
 
-### 5.2 Dead Code in API Route
+### 5.2 Dead Code in API Route - DONE
 
 - **File:** [route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/pools/route.ts#L122-L125)
 - **Details:** The generic update code in `PUT /api/pools` is unreachable:

@@ -48,7 +48,7 @@ export const getTwitchToken = unstable_cache(
     ["igdb-twitch-token"], // Cache key
     {
         revalidate: 86400, // Revalidate every 24 hours (86400 seconds)
-    }
+    },
 );
 
 export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]> {

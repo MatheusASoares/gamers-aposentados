@@ -55,7 +55,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     });
 
     return (
-        <div className="mx-auto flex w-full max-w-5xl flex-col gap-10 py-8">
+        <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-10 px-6 py-8 md:px-8 lg:px-12">
             {/* Header */}
             <div className="relative flex min-h-[220px] flex-col items-center justify-center gap-6 overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-950/80 p-8 shadow-2xl md:flex-row md:items-center md:justify-start">
                 {/* SVG Noise Overlay */}

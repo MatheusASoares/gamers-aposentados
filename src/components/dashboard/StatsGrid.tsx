@@ -5,6 +5,48 @@ import { Star, BookOpen, ChevronLeft, ChevronRight, Gamepad2 } from "lucide-reac
 import Image from "next/image";
 import Link from "next/link";
 import { UserLink } from "@/components/ui/user-link";
+import { cn } from "@/lib/utils";
+
+const getRatingBadgeStyle = (rating: number) => {
+    if (rating === 10) {
+        return {
+            container: "border-amber-400/50 shadow-[0_0_35px_rgba(251,191,36,0.3)] hover:border-amber-400 hover:shadow-[0_0_45px_rgba(251,191,36,0.5)]",
+            label: "text-amber-400",
+            score: "text-amber-300 drop-shadow-[0_0_10px_rgba(251,191,36,0.5)]",
+            showStar: true,
+        };
+    }
+    if (rating >= 8) {
+        return {
+            container: "border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.3)] hover:border-emerald-500 hover:shadow-[0_0_40px_rgba(16,185,129,0.5)]",
+            label: "text-emerald-400",
+            score: "text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.4)]",
+            showStar: false,
+        };
+    }
+    if (rating >= 6) {
+        return {
+            container: "border-sky-500/40 shadow-[0_0_30px_rgba(14,165,233,0.25)] hover:border-sky-500 hover:shadow-[0_0_40px_rgba(14,165,233,0.45)]",
+            label: "text-sky-400",
+            score: "text-sky-400 drop-shadow-[0_0_8px_rgba(56,189,248,0.4)]",
+            showStar: false,
+        };
+    }
+    if (rating >= 4) {
+        return {
+            container: "border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.2)] hover:border-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)]",
+            label: "text-amber-500/90",
+            score: "text-amber-500/90 drop-shadow-[0_0_8px_rgba(245,158,11,0.3)]",
+            showStar: false,
+        };
+    }
+    return {
+        container: "border-rose-500/40 shadow-[0_0_30px_rgba(244,63,94,0.3)] hover:border-rose-500 hover:shadow-[0_0_40px_rgba(244,63,94,0.5)]",
+        label: "text-rose-500",
+        score: "text-rose-500 drop-shadow-[0_0_8px_rgba(251,113,133,0.4)]",
+        showStar: false,
+    };
+};
 
 interface StatsGridProps {
     reviews: {
@@ -104,15 +146,26 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                     {/* Gradient overlay to seamlessly merge the image container with the right side */}
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-zinc-950/95 to-transparent md:inset-y-0 md:right-0 md:left-auto md:h-full md:w-32 md:bg-gradient-to-l" />
 
-                    {/* Neon Score Badge */}
-                    <div className="absolute bottom-10 left-10 z-20 flex h-24 w-24 flex-col items-center justify-center rounded-full border border-[#bd0df2]/40 bg-zinc-950/90 shadow-[0_0_30px_rgba(189,13,242,0.4)] backdrop-blur-xl transition-transform hover:scale-110 md:top-10 md:bottom-auto md:left-10">
-                        <span className="text-sm font-bold tracking-widest text-[#bd0df2] uppercase">
-                            Nota
-                        </span>
-                        <span className="text-4xl font-black tracking-tighter text-white">
-                            {currentReview.rating}
-                        </span>
-                    </div>
+                    {/* Dynamic Score Badge */}
+                    {(() => {
+                        const badgeStyle = getRatingBadgeStyle(currentReview.rating);
+                        return (
+                            <div className={cn(
+                                "absolute bottom-10 left-10 z-20 flex h-24 w-24 flex-col items-center justify-center rounded-full border bg-zinc-950/90 backdrop-blur-xl transition-all duration-500 hover:scale-110 md:top-10 md:bottom-auto md:left-10",
+                                badgeStyle.container
+                            )}>
+                                <span className={cn("text-xs font-bold tracking-widest uppercase leading-none", badgeStyle.label)}>
+                                    Nota
+                                </span>
+                                <span className={cn("text-4xl font-black tracking-tighter leading-none mt-1", badgeStyle.score)}>
+                                    {currentReview.rating}
+                                </span>
+                                {badgeStyle.showStar && (
+                                    <Star className="mt-0.5 h-3.5 w-3.5 fill-amber-400 text-amber-400 animate-pulse" />
+                                )}
+                            </div>
+                        );
+                    })()}
                 </div>
 
                 {/* Right: Review Content */}

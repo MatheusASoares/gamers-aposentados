@@ -21,7 +21,7 @@ export default async function RandomizerPage() {
 
     return (
         <main className="w-full">
-            <div className="mx-auto max-w-7xl py-8">
+            <div className="mx-auto max-w-[1920px] px-6 py-8 md:px-8 lg:px-12">
                 <RandomizerClient
                     currentUserId={session.user.id}
                     currentUserName={session.user.name || session.user.username || "Player"}

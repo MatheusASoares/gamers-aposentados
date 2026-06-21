@@ -51,16 +51,22 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
         return () => clearTimeout(timeoutId);
     }, [query]);
 
+    // Armazena a callback em um ref para evitar re-binding do listener de clique
+    const onCancelRef = useRef(onCancel);
+    useEffect(() => {
+        onCancelRef.current = onCancel;
+    }, [onCancel]);
+
     // Handle click outside to close (or cancel)
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
-                onCancel();
+                onCancelRef.current();
             }
         }
         document.addEventListener("mousedown", handleClickOutside);
         return () => document.removeEventListener("mousedown", handleClickOutside);
-    }, [onCancel]);
+    }, []);
 
     return (
         <div ref={wrapperRef} className="relative z-50 w-full">

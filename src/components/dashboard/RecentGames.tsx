@@ -1,6 +1,5 @@
-import Link from "next/link";
 import Image from "next/image";
-import { Clock, Star, TrendingUp, Trophy, Dices, Gamepad2, ChevronRight } from "lucide-react";
+import { Clock, Star, TrendingUp, Trophy, Dices, Gamepad2, Moon, PlusCircle } from "lucide-react";
 import { UserLink } from "@/components/ui/user-link";
 
 // ---- Tipos de evento -----------------------------------------------------
@@ -48,7 +47,21 @@ export interface CompletedEvent {
     user: UserInfo;
 }
 
-export type ActivityEvent = RaffleEvent | ReviewEvent | ProgressEvent | CompletedEvent;
+export interface DroppedEvent {
+    kind: "DROPPED";
+    date: Date;
+    game: GameInfo;
+    user: UserInfo;
+}
+
+export interface SuggestedEvent {
+    kind: "SUGGESTED";
+    date: Date;
+    game: GameInfo;
+    user: UserInfo;
+}
+
+export type ActivityEvent = RaffleEvent | ReviewEvent | ProgressEvent | CompletedEvent | DroppedEvent | SuggestedEvent;
 
 // ---- Helpers -------------------------------------------------------------
 
@@ -77,6 +90,14 @@ function EventIcon({ kind }: { kind: ActivityEvent["kind"] }) {
             icon: <Trophy className="h-4 w-4" />,
             className: "bg-emerald-500/20 text-emerald-400",
         },
+        DROPPED: {
+            icon: <Moon className="h-4 w-4" />,
+            className: "bg-rose-500/20 text-rose-400",
+        },
+        SUGGESTED: {
+            icon: <PlusCircle className="h-4 w-4" />,
+            className: "bg-sky-500/20 text-sky-400",
+        },
     };
     const { icon, className } = config[kind];
     return (
@@ -86,6 +107,14 @@ function EventIcon({ kind }: { kind: ActivityEvent["kind"] }) {
             {icon}
         </div>
     );
+}
+
+function getRatingColor(rating: number) {
+    if (rating === 10) return "text-amber-400 drop-shadow-[0_0_6px_rgba(251,191,36,0.3)]";
+    if (rating >= 8) return "text-emerald-400";
+    if (rating >= 6) return "text-sky-400";
+    if (rating >= 4) return "text-amber-500";
+    return "text-rose-500";
 }
 
 function EventDescription({ event }: { event: ActivityEvent }) {
@@ -110,7 +139,7 @@ function EventDescription({ event }: { event: ActivityEvent }) {
                     />{" "}
                     avaliou <span className="font-bold text-white">{event.game.title}</span>
                     {" — "}
-                    <span className="font-bold text-yellow-400">{event.rating}/10</span>
+                    <span className={`font-bold ${getRatingColor(event.rating)}`}>{event.rating}/10</span>
                 </p>
             );
         case "PROGRESS":
@@ -139,6 +168,29 @@ function EventDescription({ event }: { event: ActivityEvent }) {
                     {" 🏆"}
                 </p>
             );
+        case "DROPPED":
+            return (
+                <p className="text-sm text-zinc-300">
+                    <UserLink
+                        userId={event.user.id}
+                        name={event.user.name}
+                        username={event.user.username}
+                    />{" "}
+                    se aposentou de <span className="font-bold text-white">{event.game.title}</span>
+                    <span className="ml-1 text-xs text-zinc-500">(Dropado)</span> 💤
+                </p>
+            );
+        case "SUGGESTED":
+            return (
+                <p className="text-sm text-zinc-300">
+                    <UserLink
+                        userId={event.user.id}
+                        name={event.user.name}
+                        username={event.user.username}
+                    />{" "}
+                    indicou <span className="font-bold text-white">{event.game.title}</span> ao backlog! 🎮
+                </p>
+            );
     }
 }
 
@@ -153,7 +205,7 @@ export function RecentActivity({ events }: RecentActivityProps) {
 
     return (
         <div
-            className="glass-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-950/80 shadow-2xl"
+            className="glass-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl"
             style={{ animationDelay: "500ms" }}
             data-testid="recent-activity"
         >
@@ -163,35 +215,28 @@ export function RecentActivity({ events }: RecentActivityProps) {
                 style={{ backgroundImage: "url('/noise.svg')" }}
             />
 
-            <div className="relative z-10 flex items-center justify-between border-b border-white/5 bg-zinc-950/40 px-6 py-6 backdrop-blur-sm">
+            <div className="relative z-10 flex items-center justify-between border-b border-white/5 bg-zinc-950/40 px-5 py-4 backdrop-blur-sm">
                 <h3 className="flex items-center gap-2 text-base font-black tracking-widest text-white uppercase drop-shadow-sm">
                     <Clock className="h-5 w-5 text-[#bd0df2]" />
-                    Atividade Recente
+                    Histórico do Asilo
                 </h3>
-                <Link
-                    href="/quests"
-                    className="group flex items-center gap-1 text-[11px] font-black tracking-widest text-[#bd0df2] uppercase transition-colors hover:text-[#d946ef]"
-                >
-                    Ver Tudo
-                    <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
             </div>
 
-            <div className="relative z-10 divide-y divide-white/5 bg-zinc-950/60 backdrop-blur-md">
+            <div className="relative z-10 divide-y divide-white/5 bg-zinc-950/60 backdrop-blur-md flex-1">
                 {events.map((event, idx) => (
                     <div
                         key={idx}
-                        className="group flex items-center gap-5 px-6 py-5 transition-all duration-300 hover:bg-zinc-800/40 hover:pl-7"
+                        className="group flex items-center gap-5 px-5 py-3.5 transition-all duration-300 hover:bg-zinc-800/40 hover:pl-6"
                         data-testid={`activity-event-${event.kind.toLowerCase()}`}
                     >
                         {/* Thumbnail */}
-                        <div className="relative flex h-14 w-10 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-zinc-900 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110 group-hover:border-[#bd0df2]/50 group-hover:shadow-[0_0_20px_rgba(189,13,242,0.3)]">
+                        <div className="relative flex h-12 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-md border border-white/10 bg-zinc-900 shadow-[0_0_15px_rgba(0,0,0,0.5)] transition-transform duration-300 group-hover:scale-110 group-hover:border-[#bd0df2]/50 group-hover:shadow-[0_0_20px_rgba(189,13,242,0.3)]">
                             {event.game.cover_url ? (
                                 <Image
                                     src={event.game.cover_url}
                                     alt={event.game.title}
                                     fill
-                                    sizes="40px"
+                                    sizes="36px"
                                     className="object-cover"
                                 />
                             ) : (
@@ -213,6 +258,13 @@ export function RecentActivity({ events }: RecentActivityProps) {
                         </span>
                     </div>
                 ))}
+            </div>
+
+            {/* Footer Humorous Subtext */}
+            <div className="relative z-10 border-t border-white/5 bg-zinc-950/40 px-5 py-3 text-center backdrop-blur-sm">
+                <p className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">
+                    Nenhuma artrose foi prejudicada na atualização deste feed.
+                </p>
             </div>
         </div>
     );

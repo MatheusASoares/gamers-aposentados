@@ -125,3 +125,22 @@
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
 }
+
+/* Custom Scrollbars */
+.custom-scrollbar::-webkit-scrollbar {
+    height: 6px;
+    width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: rgba(24, 24, 27, 0.3);
+    border-radius: 9999px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background: #27272a;
+    border-radius: 9999px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background: #bd0df2;
+    box-shadow: 0 0 10px rgba(189, 13, 242, 0.5);
+}

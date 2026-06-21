@@ -50,6 +50,7 @@ model User {
   gameProgress GameProgress[]                           // Progresso nos jogos
   favoriteGames Game[]           @relation("UserFavorites") // Jogos favoritos
   favoriteGamesYear Game[]       @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
+  contractProgresses CampaignContractProgress[]
 
   @@map("users")
 }
@@ -99,8 +100,8 @@ model Game {
   hltb_time      Int?        // "How Long to Beat" (Regra < 10h)
   
   // Quem indicou? (FK para User)
-  nominated_by_id String
-  nominator       User      @relation("Nominator", fields: [nominated_by_id], references: [id])
+  nominated_by_id String?
+  nominator       User?     @relation("Nominator", fields: [nominated_by_id], references: [id], onDelete: SetNull)
 
   // Datas
   created_at     DateTime    @default(now())
@@ -112,6 +113,7 @@ model Game {
   progress       GameProgress[]
   favoritedBy    User[]      @relation("UserFavorites") // Usuários que favoritararam
   favoritedByYear User[]     @relation("UserFavoritesYear") // Usuários que favoritararam pro Ano Atual
+  contracts      CampaignContract[]
 
   @@map("games")
 }
@@ -151,7 +153,7 @@ model Review {
   user_id      String
   user         User     @relation(fields: [user_id], references: [id])
   game_id      String
-  game         Game     @relation(fields: [game_id], references: [id])
+  game         Game     @relation(fields: [game_id], references: [id], onDelete: Cascade)
 
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt @default(now())
@@ -172,7 +174,7 @@ model Pool {
 
   // O Vencedor (Sorteado)
   winner_game_id String?
-  winner_game    Game?     @relation("WinnerGame", fields: [winner_game_id], references: [id])
+  winner_game    Game?     @relation("WinnerGame", fields: [winner_game_id], references: [id], onDelete: SetNull)
 
   // Os jogos que estão concorrendo neste pote
   entries      PoolEntry[]
@@ -190,7 +192,7 @@ model PoolEntry {
   pool      Pool     @relation(fields: [pool_id], references: [id])
   
   game_id   String
-  game      Game     @relation(fields: [game_id], references: [id])
+  game      Game     @relation(fields: [game_id], references: [id], onDelete: Cascade)
   
   // Quem colocou esse jogo NESTE pote específico? 
   // (Importante: As regras dizem Input Voce vs Padrinho )
@@ -198,4 +200,47 @@ model PoolEntry {
   user      User     @relation(fields: [user_id], references: [id])
 
   @@map("pool_entries")
+}
+
+// --- Quadro de Avisos (Notice Board) ---
+
+enum ContractStatus {
+  LOCKED
+  AVAILABLE
+  COMPLETED
+  FAILED
+}
+
+model CampaignContract {
+  id                  String                     @id @default(uuid())
+  game_id             String
+  game                Game                       @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  sequence_order      Int                        // Ordem sequencial iniciando em 1
+  title               String
+  objective           String                     @db.Text
+  daily_atomic_quest  String                     @db.Text
+  progress_percentage Int                        // Porcentagem acumulada de progresso do jogo ao concluir este contrato (ex: 12, 25, 100)
+  
+  user_progresses     CampaignContractProgress[]
+
+  created_at          DateTime                   @default(now())
+  updated_at          DateTime                   @updatedAt
+
+  @@unique([game_id, sequence_order])
+  @@map("campaign_contracts")
+}
+
+model CampaignContractProgress {
+  id          String           @id @default(uuid())
+  user_id     String
+  user        User             @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  contract_id String
+  contract    CampaignContract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
+  status      ContractStatus   @default(LOCKED)
+
+  created_at  DateTime         @default(now())
+  updated_at  DateTime         @updatedAt
+
+  @@unique([user_id, contract_id])
+  @@map("campaign_contract_progress")
 }

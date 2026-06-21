@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { ReviewCard } from "./ReviewCard";
 import { AddReviewModal } from "./AddReviewModal";
 import { Grid, List, Plus } from "lucide-react";
@@ -14,10 +15,19 @@ export interface ReviewsClientProps {
 }
 
 export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientProps) {
+    const searchParams = useSearchParams();
+    const paramType = searchParams.get("type");
+    const paramUser = searchParams.get("user");
+
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [filterType, setFilterType] = useState<"ALL" | "MAIN_QUEST" | "SIDE_QUEST">("ALL");
+    const [filterType, setFilterType] = useState<"ALL" | "MAIN_QUEST" | "SIDE_QUEST">(() => {
+        if (paramType === "MAIN_QUEST" || paramType === "SIDE_QUEST") {
+            return paramType;
+        }
+        return "ALL";
+    });
     const [sortBy, setSortBy] = useState<"NEWEST" | "HIGHEST_RATED">("NEWEST");
-    const [filterUser, setFilterUser] = useState<string>("ALL");
+    const [filterUser, setFilterUser] = useState<string>(paramUser || "ALL");
 
     // Extrair usuários únicos que têm reviews
     const uniqueUsers = Array.from(
@@ -49,7 +59,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
         });
 
     return (
-        <div className="relative mx-auto min-h-screen w-full px-6 py-8">
+        <div className="relative min-h-screen w-full overflow-x-hidden">
             {/* Background effects */}
             <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
             <div
@@ -57,14 +67,14 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                 style={{ backgroundImage: "url('/noise.svg')" }}
             />
 
-            <div className="relative z-10">
+            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col px-6 py-8 md:px-8 lg:px-12 lg:py-12">
                 {/* Hero Section */}
                 <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
                     <div className="space-y-3">
-                        <h2 className="text-5xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-6xl">
+                        <h2 className="text-4xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-5xl">
                             Game Reviews
                         </h2>
-                        <p className="max-w-2xl text-xl font-medium break-keep text-zinc-400">
+                        <p className="max-w-2xl text-lg font-medium break-keep text-zinc-400">
                             Honest takes from the retired vanguard of the golden era.
                         </p>
                     </div>

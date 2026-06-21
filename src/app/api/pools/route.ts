@@ -85,10 +85,6 @@ export async function PUT(request: Request) {
 
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
-        if (action !== "draw") {
-            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-        }
-
         if (action === "draw") {
             // Run randomizer and close pool in a transaction
             const poolWithEntries = await prisma.pool.findUnique({
@@ -111,7 +107,10 @@ export async function PUT(request: Request) {
                     data: { winner_game_id: winnerEntry.game_id, status: "CLOSED" },
                 }),
                 prisma.gameProgress.updateMany({
-                    where: { game_id: winnerEntry.game_id },
+                    where: {
+                        game_id: winnerEntry.game_id,
+                        status: "SUGGESTED",
+                    },
                     data: { status: "ACTIVE", start_date: now },
                 }),
             ]);

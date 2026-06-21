@@ -1,10 +1,47 @@
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowRight, Calendar, Share2, User, Trash2, Check } from "lucide-react";
+import { ArrowRight, Calendar, Share2, User, Trash2, Check, Star } from "lucide-react";
 import { format } from "date-fns";
 import { deleteReview } from "@/app/lib/review-actions";
 import { EditReviewModal } from "./EditReviewModal";
 import { UserLink } from "@/components/ui/user-link";
+import { useRouter } from "next/navigation";
+
+const getRatingStyle = (rating: number) => {
+    if (rating === 10) {
+        return {
+            container: "border-amber-400/60 bg-zinc-950/95 shadow-[0_0_20px_rgba(251,191,36,0.5)] group-hover:border-amber-400 group-hover:shadow-[0_0_25px_rgba(251,191,36,0.7)] text-amber-400 flex-col",
+            text: "text-2xl font-black text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] leading-none",
+            showStar: true
+        };
+    }
+    if (rating >= 8) {
+        return {
+            container: "border-emerald-500/40 bg-zinc-950/85 shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:border-emerald-500 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] text-emerald-400",
+            text: "text-xl font-black text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.3)]",
+            showStar: false
+        };
+    }
+    if (rating >= 6) {
+        return {
+            container: "border-sky-500/40 bg-zinc-950/85 shadow-[0_0_15px_rgba(14,165,233,0.2)] group-hover:border-sky-500 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] text-sky-400",
+            text: "text-xl font-black text-sky-400 drop-shadow-[0_0_6px_rgba(56,189,248,0.3)]",
+            showStar: false
+        };
+    }
+    if (rating >= 4) {
+        return {
+            container: "border-amber-500/30 bg-zinc-950/85 shadow-[0_0_10px_rgba(245,158,11,0.15)] group-hover:border-amber-500 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] text-amber-500/90",
+            text: "text-xl font-black text-amber-500/90 drop-shadow-[0_0_6px_rgba(245,158,11,0.2)]",
+            showStar: false
+        };
+    }
+    return {
+        container: "border-rose-500/40 bg-zinc-950/85 shadow-[0_0_15px_rgba(244,63,94,0.3)] group-hover:border-rose-500 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.5)] text-rose-500",
+        text: "text-xl font-black text-rose-500 drop-shadow-[0_0_6px_rgba(251,113,133,0.3)]",
+        showStar: false
+    };
+};
 
 export interface ReviewCardProps {
     review: {
@@ -29,6 +66,7 @@ export interface ReviewCardProps {
 }
 
 export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCardProps) {
+    const router = useRouter();
     const [isDeleting, setIsDeleting] = useState(false);
     const [isExpanded, setIsExpanded] = useState(false);
     const [isCopied, setIsCopied] = useState(false);
@@ -41,7 +79,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
             console.error(res.error || "Failed to delete review");
             setIsDeleting(false);
         } else {
-            window.location.reload();
+            router.refresh();
         }
     };
 
@@ -94,13 +132,22 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                     </div>
                 )}
                 {/* Dark overlay behind rating for readability */}
-                <div className="pointer-events-none absolute inset-0 z-10 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
+                <div className="pointer-events-none absolute inset-0 z-0 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
 
-                <div className="absolute top-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-xl border border-[#bd0df2]/30 bg-zinc-950/80 shadow-[0_0_20px_rgba(189,13,242,0.4)] backdrop-blur-xl transition-all duration-500 group-hover:scale-110 group-hover:border-[#bd0df2]/60">
-                    <span className="text-xl font-black text-white drop-shadow-[0_0_5px_rgba(255,255,255,0.5)]">
-                        {review.rating}
-                    </span>
-                </div>
+                {/* Dynamic Styled Rating Badge */}
+                {(() => {
+                    const ratingStyle = getRatingStyle(review.rating);
+                    return (
+                        <div className={`absolute top-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-xl border backdrop-blur-xl transition-all duration-500 group-hover:scale-110 ${ratingStyle.container}`}>
+                            <span className={ratingStyle.text}>
+                                {review.rating}
+                            </span>
+                            {ratingStyle.showStar && (
+                                <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400 animate-pulse mt-0.5" />
+                            )}
+                        </div>
+                    );
+                })()}
             </div>
 
             <div className="z-10 flex flex-1 flex-col p-6">

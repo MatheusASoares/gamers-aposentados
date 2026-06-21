@@ -1,8 +1,9 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Flame, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Flame, CheckCircle, XCircle, RefreshCw, Compass } from "lucide-react";
 import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
+import { useRouter } from "next/navigation";
 import { UserLink } from "@/components/ui/user-link";
 import Image from "next/image";
 import { HltbBadge } from "@/components/game/HltbBadge";
@@ -31,6 +32,7 @@ interface SideQuestBarProps {
 }
 
 export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
+    const router = useRouter();
     const [isUpdating, setIsUpdating] = useState(false);
     const [percentage, setPercentage] = useState(progress?.progress_percentage || 0);
     const [isLoading, setIsLoading] = useState(false);
@@ -133,18 +135,19 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                             </div>
 
                             {/* Title Block */}
-                            <div className="flex flex-col justify-end pb-2">
+                            <div className="flex h-44 sm:h-56 flex-col justify-start pb-2">
                                 <div className="mb-3 flex items-center gap-2">
                                     <span
-                                        className={`px-4 py-1.5 ${theme.badge} rounded-full border border-[#bd0df2]/30 text-[10px] font-black tracking-[0.2em] uppercase backdrop-blur-md`}
+                                        className="relative z-10 flex cursor-default select-none items-center gap-2 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-4 py-1.5 text-sm font-black tracking-widest text-[#bd0df2] uppercase shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/20"
                                     >
+                                        <Compass className="h-4 w-4" />
                                         Side Quest
                                     </span>
                                 </div>
-                                <h3 className="text-3xl leading-[1.1] font-black tracking-tighter text-white drop-shadow-md sm:text-4xl">
+                                <h2 className="text-4xl leading-[1.1] font-black tracking-tighter text-white drop-shadow-md sm:text-5xl">
                                     {game.title}
-                                </h3>
-                                <p className="mt-3 text-sm font-medium text-zinc-400">
+                                </h2>
+                                <p className="mt-auto text-sm font-medium text-zinc-400 pb-1">
                                     Indicado por:{" "}
                                     {game.nominator ? (
                                         <span className="font-bold text-white transition-colors hover:text-[#bd0df2]">
@@ -155,7 +158,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                             />
                                         </span>
                                     ) : (
-                                        <span className="font-bold text-white">Desconhecido</span>
+                                        <span className="font-bold text-white">Anônimo</span>
                                     )}
                                 </p>
                             </div>
@@ -214,7 +217,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                     setIsLoading(true);
                                     const res = await joinQuest(game.id);
                                     if (!res.success) alert(res.error);
-                                    else window.location.reload();
+                                    else router.refresh();
                                     setIsLoading(false);
                                 }}
                                 className={`mt-2 ${theme.bg} rounded-xl px-8 py-3 text-sm font-bold text-white shadow-[0_0_15px_rgba(var(--tw-shadow-color),0.3)] transition-all hover:scale-105 disabled:opacity-50`}
@@ -284,7 +287,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                             alert(res.error || "Erro ao atualizar progresso.");
                                         } else {
                                             setIsUpdating(false);
-                                            window.location.reload();
+                                            router.refresh();
                                         }
                                         setIsLoading(false);
                                     }}
@@ -321,7 +324,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                         if (!res.success) {
                                             alert(res.error || "Erro ao completar a quest.");
                                         } else {
-                                            window.location.reload();
+                                            router.refresh();
                                         }
                                         setIsLoading(false);
                                     }}
@@ -338,7 +341,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                         if (!res.success) {
                                             alert(res.error || "Erro ao dropar a quest.");
                                         } else {
-                                            window.location.reload();
+                                            router.refresh();
                                         }
                                         setIsLoading(false);
                                     }}

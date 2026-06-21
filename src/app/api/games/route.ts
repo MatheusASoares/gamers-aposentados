@@ -3,7 +3,14 @@ import { prisma } from "../../../lib/prisma";
 import { auth } from "@/auth";
 import { Prisma, $Enums } from "@prisma/client";
 
-const mapInputToDb = (input: Partial<Prisma.GameUncheckedCreateInput> & { coverUrl?: string; hltbTime?: number; questType?: $Enums.QuestType; nominatedById?: string }) => {
+const mapInputToDb = (
+    input: Partial<Prisma.GameUncheckedCreateInput> & {
+        coverUrl?: string;
+        hltbTime?: number;
+        questType?: $Enums.QuestType;
+        nominatedById?: string;
+    },
+) => {
     const data: Partial<Prisma.GameUncheckedCreateInput> = {};
     if (input.title !== undefined) data.title = input.title;
     if (input.platform !== undefined) data.platform = input.platform;
@@ -104,7 +111,12 @@ export async function DELETE(request: Request) {
             return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
-        await prisma.game.delete({ where: { id } });
+        // Apenas desvincula o indicador para preservar as informações do jogo no banco
+        await prisma.game.update({
+            where: { id },
+            data: { nominated_by_id: null }
+        });
+
         return NextResponse.json({ success: true });
     } catch (error) {
         console.error("DELETE /api/games error:", error);
