@@ -91,6 +91,39 @@ export async function generateNoticeBoardAction(gameId: string) {
     }
 }
 
+export async function clearNoticeBoardAction(gameId: string) {
+    const session = await auth();
+
+    if (!session?.user?.id || !session.user.email) {
+        return { success: false, error: "Usuário não autenticado" };
+    }
+
+    if (!isRandomizerPlayer(session.user.email)) {
+        return { success: false, error: "Acesso negado: apenas jogadores autorizados podem limpar o Notice Board" };
+    }
+
+    try {
+        await prisma.campaignContract.deleteMany({
+            where: { game_id: gameId },
+        });
+
+        // Reset progress_percentage to 0 for this game
+        await prisma.gameProgress.updateMany({
+            where: { game_id: gameId },
+            data: { progress_percentage: 0 },
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath(`/games/${gameId}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Erro em clearNoticeBoardAction:", error);
+        const errorMessage = error instanceof Error ? error.message : "Desconhecido";
+        return { success: false, error: "Falha ao limpar contratos: " + errorMessage };
+    }
+}
+
+
 export async function completeContractAction(contractProgressId: string) {
     const session = await auth();
 

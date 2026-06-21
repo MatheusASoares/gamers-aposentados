@@ -4,7 +4,7 @@ import { useTransition, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CampaignContract, CampaignContractProgress, Game } from "@prisma/client";
 import { Scroll, Lock, CheckCircle2, Swords, Loader2, Compass } from "lucide-react";
-import { generateNoticeBoardAction, completeContractAction } from "@/app/lib/notice-board-actions";
+import { generateNoticeBoardAction, completeContractAction, clearNoticeBoardAction } from "@/app/lib/notice-board-actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -79,6 +79,7 @@ export function NoticeBoardMuralClient({
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+    const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
     const [targetGameId, setTargetGameId] = useState<string | null>(null);
 
     const mainLaneDrag = useDragScroll();
@@ -111,6 +112,25 @@ export function NoticeBoardMuralClient({
         });
     };
 
+    const handleClearBoard = (gameId: string) => {
+        setTargetGameId(gameId);
+        setIsClearConfirmOpen(true);
+    };
+
+    const confirmClearBoard = () => {
+        if (!targetGameId) return;
+        setIsClearConfirmOpen(false);
+        startTransition(async () => {
+            const res = await clearNoticeBoardAction(targetGameId);
+            if (res.success) {
+                router.refresh();
+            } else {
+                const errorMsg = "error" in res ? res.error : "Erro ao limpar contratos.";
+                alert(errorMsg);
+            }
+        });
+    };
+
     const handleCompleteContract = (progressId: string) => {
         startTransition(async () => {
             const res = await completeContractAction(progressId);
@@ -122,6 +142,7 @@ export function NoticeBoardMuralClient({
             }
         });
     };
+
 
     const renderLane = (
         title: string,
@@ -219,7 +240,7 @@ export function NoticeBoardMuralClient({
                         </div>
                     </div>
 
-                    {/* Admin Action: Generate Board */}
+                    {/* Admin Action: Generate / Clear Board */}
                     {!hasContracts && isPlayer && (
                         <Button
                             disabled={isPending}
@@ -232,6 +253,21 @@ export function NoticeBoardMuralClient({
                                 <Scroll className="mr-1.5 h-4 w-4" />
                             )}
                             Summon Contracts
+                        </Button>
+                    )}
+                    {hasContracts && isPlayer && (
+                        <Button
+                            disabled={isPending}
+                            onClick={() => handleClearBoard(game.id)}
+                            variant="destructive"
+                            className="h-9 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-2 text-xs font-black tracking-wider text-red-500 uppercase transition-all hover:scale-[1.03] hover:bg-red-950/60 active:scale-95 disabled:opacity-50"
+                        >
+                            {isPending ? (
+                                <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
+                            ) : (
+                                <Scroll className="mr-1.5 h-4 w-4 line-through decoration-2" />
+                            )}
+                            Clear Contracts
                         </Button>
                     )}
                 </div>
@@ -508,6 +544,36 @@ export function NoticeBoardMuralClient({
                                 className="h-12 rounded-xl bg-gradient-to-r from-[#bd0df2] to-[#d946ef] px-6 py-3 text-sm font-black tracking-wider text-white uppercase shadow-[0_0_15px_rgba(189,13,242,0.3)] transition-all hover:scale-[1.03] active:scale-95"
                             >
                                 Summon
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* Clear Confirmation Modal */}
+                <Dialog open={isClearConfirmOpen} onOpenChange={setIsClearConfirmOpen}>
+                    <DialogContent className="rounded-2xl border border-white/5 bg-zinc-950 p-6 sm:max-w-md">
+                        <DialogHeader className="space-y-1">
+                            <DialogTitle className="text-xl font-black tracking-tight text-white uppercase">
+                                Clear contracts for this campaign?
+                            </DialogTitle>
+                            <DialogDescription className="text-sm text-zinc-400">
+                                This will delete all campaign contracts and reset player progress to 0%. The game itself will not be deleted.
+                            </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="mt-6 flex flex-row justify-end gap-3">
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsClearConfirmOpen(false)}
+                                className="h-12 rounded-xl border border-white/5 bg-zinc-900 px-6 py-3 text-sm font-black tracking-wider text-zinc-400 uppercase hover:bg-zinc-800/80 hover:text-white"
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="destructive"
+                                onClick={confirmClearBoard}
+                                className="h-12 rounded-xl bg-red-600 px-6 py-3 text-sm font-black tracking-wider text-white uppercase shadow-[0_0_15px_rgba(220,38,38,0.3)] transition-all hover:scale-[1.03] active:scale-95"
+                            >
+                                Clear
                             </Button>
                         </DialogFooter>
                     </DialogContent>
