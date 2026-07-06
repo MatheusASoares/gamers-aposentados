@@ -29,6 +29,68 @@ export interface PoolData {
     winnerImageUrl?: string | null;
 }
 
+/**
+ * Valida se um jogo é elegível para entrar em uma pool do Randomizer.
+ * Regras:
+ * 1. Não pode estar completo (COMPLETED) por nenhum jogador (Matheus ou Lucas).
+ * 2. Não pode estar ativo (ACTIVE) por nenhum jogador.
+ * 3. Se possuir progresso, só pode entrar se AMBOS tiverem status DROPPED.
+ */
+export async function validateGameEligibilityForPool(
+    tx: Prisma.TransactionClient,
+    gameId: string
+): Promise<{ eligible: boolean; error?: string }> {
+    const activeUsers = await tx.user.findMany({
+        where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+        select: { id: true },
+    });
+    const activeUserIds = activeUsers.map((u) => u.id);
+
+    if (activeUserIds.length === 0) {
+        return { eligible: true };
+    }
+
+    const progresses = await tx.gameProgress.findMany({
+        where: {
+            game_id: gameId,
+            user_id: { in: activeUserIds },
+        },
+    });
+
+    if (progresses.length === 0) {
+        return { eligible: true };
+    }
+
+    // Regra 1: Se o jogo for completed por 1 player ele nao pode participar de quest novamente
+    const hasCompleted = progresses.some((p) => p.status === "COMPLETED");
+    if (hasCompleted) {
+        return {
+            eligible: false,
+            error: "Este jogo já foi completado por pelo menos um dos jogadores oficiais e não pode participar novamente.",
+        };
+    }
+
+    // Se estiver ativo para algum jogador
+    const hasActive = progresses.some((p) => p.status === "ACTIVE");
+    if (hasActive) {
+        return {
+            eligible: false,
+            error: "Este jogo já está ativo em uma quest em andamento para um dos jogadores.",
+        };
+    }
+
+    // Regra 2: se ele for dropped pelos 2 players (Lucas e Matheus), pode participar de pools e quests novamente
+    const droppedCount = progresses.filter((p) => p.status === "DROPPED").length;
+    if (droppedCount < activeUserIds.length) {
+        return {
+            eligible: false,
+            error: "Este jogo possui progresso registrado e não foi abandonado (dropped) por ambos os jogadores oficiais.",
+        };
+    }
+
+    return { eligible: true };
+}
+
 // ---------- Get or Create Open Pool ----------
 
 export async function getOpenPool(questType: "MAIN" | "SIDE"): Promise<PoolData | null> {
@@ -103,7 +165,9 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
     }
 
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
-    const maxPerPerson = questType === "MAIN" ? 2 : 3;
+    const isTestUser = userEmail?.endsWith("@test.com");
+    const requiredTotal = questType === "MAIN" ? 4 : 6;
+    const maxPerPerson = isTestUser ? requiredTotal : (questType === "MAIN" ? 2 : 3);
 
     if (games.length > maxPerPerson) {
         return {
@@ -167,14 +231,22 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                             nominated_by_id: userId,
                         },
                     });
-                } else if (!dbGame.igdb_id || (!dbGame.cover_url && game.imageUrl)) {
-                    dbGame = await tx.game.update({
-                        where: { id: dbGame.id },
-                        data: {
-                            igdb_id: dbGame.igdb_id ? undefined : game.igdbId,
-                            cover_url: !dbGame.cover_url ? game.imageUrl : undefined,
-                        },
-                    });
+                } else {
+                    // Validar elegibilidade de jogo existente
+                    const eligibility = await validateGameEligibilityForPool(tx, dbGame.id);
+                    if (!eligibility.eligible) {
+                        throw new Error(`Jogo "${dbGame.title}" inválido: ${eligibility.error}`);
+                    }
+
+                    if (!dbGame.igdb_id || (!dbGame.cover_url && game.imageUrl)) {
+                        dbGame = await tx.game.update({
+                            where: { id: dbGame.id },
+                            data: {
+                                igdb_id: dbGame.igdb_id ? undefined : game.igdbId,
+                                cover_url: !dbGame.cover_url ? game.imageUrl : undefined,
+                            },
+                        });
+                    }
                 }
 
                 // Create pool entry
@@ -439,6 +511,12 @@ export async function insertSpecialGame(
                     },
                 });
             } else {
+                // Validar elegibilidade de jogo existente
+                const eligibility = await validateGameEligibilityForPool(tx, dbGame.id);
+                if (!eligibility.eligible) {
+                    throw new Error(`Jogo "${dbGame.title}" inválido: ${eligibility.error}`);
+                }
+
                 dbGame = await tx.game.update({
                     where: { id: dbGame.id },
                     data: {

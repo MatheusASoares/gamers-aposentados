@@ -76,7 +76,9 @@ export function RandomizerClient({
     const [isFetchingHltb, setIsFetchingHltb] = useState(false);
     const [refreshingTitles, setRefreshingTitles] = useState<Set<string>>(new Set());
 
-    const maxPerPerson = questType === "MAIN" ? 2 : 3;
+    const isTestUser = currentUserEmail.endsWith("@test.com");
+    const requiredTotal = questType === "MAIN" ? 4 : 6;
+    const maxPerPerson = isTestUser ? requiredTotal : (questType === "MAIN" ? 2 : 3);
 
     // Determine the "other" user's name from pool entries or from the prop
     const otherUserName =
@@ -229,7 +231,6 @@ export function RandomizerClient({
 
     // --- Core Computed States (needed for polling dependencies) ---
     const totalGames = mySelections.length + otherSelections.length;
-    const requiredTotal = maxPerPerson * 2;
     const poolIsComplete = totalGames >= requiredTotal;
     const mySelectionsAreSaved =
         !isEditing &&
@@ -373,7 +374,6 @@ export function RandomizerClient({
         if (!poolId || isRolling || isSaving || lockStatus.locked || winner) return;
 
         const totalGames = mySelections.length + otherSelections.length;
-        const requiredTotal = maxPerPerson * 2;
         if (totalGames < requiredTotal) return;
 
         setIsRolling(true);

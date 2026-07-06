@@ -1,6 +1,27 @@
 import { test, expect } from "@playwright/test";
+import { prisma } from "../src/lib/prisma";
 
 test.describe("Randomizer Flow", () => {
+    test.beforeEach(async () => {
+        // Limpar progressos dos jogos de mock para que sejam 100% elegíveis
+        await prisma.gameProgress.deleteMany({
+            where: {
+                game: {
+                    title: { startsWith: "Mock" },
+                },
+            },
+        });
+        await prisma.game.deleteMany({
+            where: {
+                title: { startsWith: "Mock" },
+            },
+        });
+
+        // Limpar pools e entradas anteriores para isolar o teste
+        await prisma.poolEntry.deleteMany({});
+        await prisma.pool.deleteMany({});
+    });
+
     test("Adding games and rolling the dice", async ({ page }) => {
         test.setTimeout(60000);
 
@@ -66,6 +87,11 @@ test.describe("Randomizer Flow", () => {
             await suggestion.click();
             await page.waitForTimeout(500);
         }
+
+        console.log("--- Saving Selections ---");
+        const saveBtn = page.getByRole("button", { name: /Salvar Seleções/i });
+        await saveBtn.click();
+        await page.waitForTimeout(1500); // Wait for action to complete and UI state to update
 
         console.log("--- Rolling ---");
         const rollBtn = page.getByRole("button", { name: /Roll the Dice/i });

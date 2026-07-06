@@ -106,16 +106,30 @@ async function setFavoriteGamesBase(
         return { success: false, error: baseErrorMessage };
     }
 
-    try {
-        const games = await Promise.all(
-            candidates.map(async (candidate) => {
-                let game = await prisma.game.findFirst({
-                    where: {
-                        OR: [{ igdb_id: candidate.id }, { title: candidate.nome }],
-                    },
-                });
+    // Deduplicate candidates to avoid duplicates in the same request
+    const uniqueCandidates: GameSearchResult[] = [];
+    const seenIds = new Set<string>();
+    const seenNames = new Set<string>();
 
-                if (!game) {
+    for (const candidate of candidates) {
+        if (!candidate.id || !candidate.nome) continue;
+        if (seenIds.has(candidate.id) || seenNames.has(candidate.nome)) continue;
+        seenIds.add(candidate.id);
+        seenNames.add(candidate.nome);
+        uniqueCandidates.push(candidate);
+    }
+
+    try {
+        const games = [];
+        for (const candidate of uniqueCandidates) {
+            let game = await prisma.game.findFirst({
+                where: {
+                    OR: [{ igdb_id: candidate.id }, { title: candidate.nome }],
+                },
+            });
+
+            if (!game) {
+                try {
                     game = await prisma.game.create({
                         data: {
                             igdb_id: candidate.id,
@@ -125,20 +139,39 @@ async function setFavoriteGamesBase(
                             nominated_by_id: session.user.id,
                         },
                     });
-                } else if (!game.igdb_id || (!game.cover_url && candidate.imageUrl)) {
-                    // Update igdb_id and/or cover if missing
-                    game = await prisma.game.update({
-                        where: { id: game.id },
-                        data: {
-                            igdb_id: game.igdb_id ? undefined : candidate.id,
-                            cover_url: !game.cover_url ? candidate.imageUrl : undefined,
-                        },
-                    });
+                } catch (createError: unknown) {
+                    // Handle concurrent insert by another request (Unique constraint violation P2002)
+                    if (
+                        createError &&
+                        typeof createError === "object" &&
+                        "code" in createError &&
+                        createError.code === "P2002"
+                    ) {
+                        game = await prisma.game.findFirst({
+                            where: {
+                                OR: [{ igdb_id: candidate.id }, { title: candidate.nome }],
+                            },
+                        });
+                        if (!game) {
+                            throw createError; // Re-throw if it still doesn't exist
+                        }
+                    } else {
+                        throw createError;
+                    }
                 }
+            } else if (!game.igdb_id || (!game.cover_url && candidate.imageUrl)) {
+                // Update igdb_id and/or cover if missing
+                game = await prisma.game.update({
+                    where: { id: game.id },
+                    data: {
+                        igdb_id: game.igdb_id ? undefined : candidate.id,
+                        cover_url: !game.cover_url ? candidate.imageUrl : undefined,
+                    },
+                });
+            }
 
-                return { id: game.id };
-            })
-        );
+            games.push({ id: game.id });
+        }
 
         await prisma.user.update({
             where: { id: session.user.id },

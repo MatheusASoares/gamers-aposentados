@@ -1,0 +1,13 @@
+Vamos corrigir isso:
+1 - Faca um plano de implementacao md em portugues
+1.1 - No plano de implementacao precisa ter a explicacao do problema, a solucao sugerida contendo as implicacoes que a solucao leva, a estimativa de tokens para fazer a atualizacao.
+1.2 - Somente apos esse plano de implementacao pronto, e que eu aprovo ou mudo o plano para fazermos as alteracoes
+1.3 - Seguindo a diretriz do projeto, as alteracoes devem ser aplicadas no ambiente local primeiro para depois que eu fizer os testes necessarios, eu aprovo o upload para production.
+1.4 - Faca perguntas antes de fazer o plano de implementacao, caso seja necessario conhecer alguma regra de negocio que seja relacionada as alteracoes
+
+2 - Efetue as alteracoes solicitadas no plano de implementacao
+2.1 - Aplique as alteracoes no ambiente local
+2.2 - Faca os testes necessarios para validar que as alteracoes foram aplicadas corretamente
+2.3 - Me mostre o resultado dos testes
+2.4 - Se estiver tudo ok, me mostre o comando para que eu possa aplicar as alteracoes na production
+2.5 - Se nao estiver tudo ok, me mostre o que precisa ser feito para que as alteracoes sejam aplicadas corretamente

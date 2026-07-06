@@ -54,6 +54,10 @@ export async function POST(request: Request) {
         if (!nominatedById)
             return NextResponse.json({ error: "nominatedById is required" }, { status: 400 });
 
+        if (nominatedById !== session.user.id) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
+
         const data = mapInputToDb(body);
 
         const game = await prisma.game.create({ data: data as Prisma.GameUncheckedCreateInput });
@@ -74,6 +78,7 @@ export async function PUT(request: Request) {
 
         const body = await request.json();
         const { id, ...rest } = body;
+        delete rest.nominatedById;
 
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 

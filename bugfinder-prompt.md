@@ -27,10 +27,3 @@ Return a detailed report with:
 This is a gaming community app with: nominations, reviews, randomizer/pools, game progress tracking.
 
 IMPORTANT: Generate the report as a markdown file.
-
-Vamos corrigir isso:
-1 - Faca um plano de implementacao md em portugues
-1.1 - No plano de implementacao precisa ter a explicacao do problema, a solucao sugerida contendo as implicacoes que a solucao leva, a estimativa de tokens para fazer a atualizacao.
-1.2 - Somente apos esse plano de implementacao pronto, e que eu aprovo ou mudo o plano para fazermos as alteracoes
-1.3 - Seguindo a diretriz do projeto, as alteracoes devem ser aplicadas no ambiente local primeiro para depois que eu fizer os testes necessarios, eu aprovo o upload para production.
-1.4 - Faca perguntas antes de fazer o plano de implementacao, caso seja necessario conhecer alguma regra de negocio que seja relacionada as alteracoes

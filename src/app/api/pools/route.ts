@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { auth } from "@/auth";
 import { Prisma } from "@prisma/client";
+import { isRandomizerPlayer } from "@/lib/randomizer-players";
 
 const mapPoolInput = (input: Partial<Prisma.PoolUncheckedCreateInput> & { type?: string }) => {
     const data: Partial<Prisma.PoolUncheckedCreateInput> = {};
@@ -43,6 +44,9 @@ export async function POST(request: Request) {
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
+        if (!isRandomizerPlayer(session.user.email)) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+        }
 
         const body = await request.json();
         const { entries } = body; // optional
@@ -78,6 +82,9 @@ export async function PUT(request: Request) {
         const session = await auth();
         if (!session?.user?.id) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+        }
+        if (!isRandomizerPlayer(session.user.email)) {
+            return NextResponse.json({ error: "Forbidden" }, { status: 403 });
         }
 
         const body = await request.json();

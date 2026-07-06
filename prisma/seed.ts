@@ -532,6 +532,20 @@ const allPools: PoolData[] = [
         ],
         winner: "Gauntlet Seven Sorrows",
     },
+    {
+        month: 7,
+        year: 2026,
+        type: "SIDE_QUEST",
+        nominations: [
+            {
+                player: "matheus",
+                rawGames: [
+                    "Gauntlet - Steam",
+                ],
+            },
+        ],
+        winner: "Gauntlet",
+    },
 
     // ===================== MAIN QUEST 2025 =====================
     {
@@ -788,6 +802,16 @@ const allReviews: ReviewData[] = [
         matheus: "Yes",
         lucas: "Yes",
         matheusScore: 5,
+        lucasScore: null,
+    },
+    {
+        year: 2026,
+        month: 7,
+        gameTitle: "Gauntlet",
+        type: "SIDE_QUEST",
+        matheus: "No",
+        lucas: "No",
+        matheusScore: null,
         lucasScore: null,
     },
 

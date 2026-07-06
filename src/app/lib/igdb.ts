@@ -14,13 +14,12 @@ interface IGDBGame {
     cover?: { image_id: string };
 }
 
-async function fetchNewTwitchToken(): Promise<string | null> {
+async function fetchNewTwitchToken(): Promise<string> {
     const clientId = process.env.IGDB_CLIENT_ID;
     const clientSecret = process.env.IGDB_CLIENT_SECRET;
 
     if (!clientId || !clientSecret) {
-        console.error("IGDB credentials are missing in environment variables.");
-        return null;
+        throw new Error("IGDB credentials are missing in environment variables.");
     }
 
     try {
@@ -37,7 +36,7 @@ async function fetchNewTwitchToken(): Promise<string | null> {
         return data.access_token;
     } catch (error) {
         console.error("Error authenticating with Twitch:", error);
-        return null;
+        throw error;
     }
 }
 

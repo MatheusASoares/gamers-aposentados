@@ -1,220 +1,167 @@
-# Gamers Aposentados - Project Audit Report
+# Gamers Aposentados - Relatório de Auditoria de Projeto (Project Audit Report)
 
-This report presents a thorough analysis of the codebase for the **Gamers Aposentados** application. The audit focused on finding critical bugs, security vulnerabilities, performance bottlenecks, and code quality improvements in Server Actions, API routes, React components, and database configurations.
-
----
-
-## 🔍 Table of Contents
-
-1. [🚨 Critical Bugs & Compile Errors](#1-critical-bugs--compile-errors)
-2. [🛡️ Security & Authorization Vulnerabilities](#2-security--authorization-vulnerabilities)
-3. [⚡ Performance & Scaling Issues](#3-performance--scaling-issues)
-4. [🛠️ Database & Transaction Integrity Gotchas](#4-database--transaction-integrity-gotchas)
-5. [🧑‍💻 Code Quality & Next.js Anti-patterns](#5-code-quality--nextjs-anti-patterns)
-6. [📋 Actionable Recommendations Summary](#6-actionable-recommendations-summary)
+Este relatório apresenta uma análise detalhada do codebase da aplicação **Gamers Aposentados**. O documento foi atualizado para refletir o status dos problemas identificados anteriormente e documentar as novas falhas descobertas na revisão de Junho de 2026.
 
 ---
 
-## 🚨 1. Critical Bugs & Compile Errors - COMPLETED
+## 🔍 Sumário
 
-### 1.1 Impure Function in Render (Build Blocker)
-
-- **File:** [page.tsx](<file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/(main)/page.tsx#L38>)
-- **Impact:** **Critical (Build Failure)**
-- **Details:** Line 38 attempts to shuffle reviews directly inside the body of a Server Component render using `Math.random()`. This violates React's component purity rules (idempotency) and triggers a strict ESLint compilation error (`react-hooks/purity`), completely blocking production builds:
-    ```typescript
-    // C:\Users\mathe\Desktop\gamers-aposentados\src\app\(main)\page.tsx:38:38
-    const j = Math.floor(Math.random() * (i + 1)); // Cannot call impure function
-    ```
-- **Solution:** Shuffle the data in a dedicated data fetching utility function outside the render path, or use database-native shuffling (e.g. `ORDER BY random()`).
-
-### 1.2 Invalid AI Model Identifier (404 Error)
-
-- **File:** [route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/ai/hltb/route.ts#L98)
-- **Impact:** **High (Feature Defect)**
-- **Details:** The AI route specifies the model identifier `"gemini-2.5-flash"` inside the fallback array. This model identifier does not exist in the Google Generative Language API (available versions are `gemini-2.0-flash`, `gemini-1.5-flash`, etc.). Under execution, it causes a `404 Not Found` response from the API, causing all HLTB AI search requests to fail and fallback to an error state.
-- **Solution:** Change the model string to `"gemini-2.0-flash"`.
-
-### 1.3 State Desync on Review Creation
-
-- **File:** [AddReviewModal.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/AddReviewModal.tsx#L52)
-- **Impact:** **Medium (UX/State Defect)**
-- **Details:** Unlike `EditReviewModal.tsx` which calls `window.location.reload()`, `AddReviewModal.tsx` simply toggles `setOpen(false)` upon a successful review creation. The new review is not dynamically injected into the local state, nor is the router refreshed, meaning the user will not see their newly posted review in the list until they manually press F5 to reload the page.
-- **Solution:** Call `router.refresh()` from `next/navigation` or refresh via state management.
+1. [📊 Status dos Problemas Anteriores (Relatório de 29 de Maio)](#1-status-dos-problemas-anteriores-relatorio-de-29-de-maio)
+2. [🚨 Novos Bugs Críticos & Problemas de Concorrência](#2-novos-bugs-criticos--problemas-de-concorrencia)
+3. [🛡️ Novos Riscos de Segurança & Validação de API](#3-novos-riscos-de-seguranca--validacao-de-api)
+4. [⚡ Novos Gargalos de Performance & Escabilidade](#4-novos-gargalos-de-performance--escabilidade)
+5. [🛠️ Nova Integridade do Banco de Dados & Restrições (Constraints)](#5-nova-integridade-do-banco-de-dados--restricoes-constraints)
+6. [🧑‍💻 Novos Defeitos de Componentes React & UX](#6-novos-defeitos-de-componentes-react--ux)
+7. [📋 Resumo das Recomendações Acionáveis](#7-resumo-das-recomendacoes-acionaveis)
 
 ---
 
-## 🛡️ 2. Security & Authorization Vulnerabilities
+## 📊 1. Status dos Problemas Anteriores (Relatório de 29 de Maio)
 
-### 2.1 API Route Global Authentication Bypass - DONE
+Todos os problemas identificados no relatório anterior (29 de maio) foram corrigidos ou resolvidos. Veja o log de verificação:
 
-- **File:** [auth.config.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/auth.config.ts#L12)
-- **Impact:** **High (Security Risk)**
-- **Details:** The middleware authorized callback marks all paths starting with `/api` as public routes:
-    ```typescript
-    const isApiRoute = nextUrl.pathname.startsWith("/api");
-    const isPublicRoute = isAuthRoute || isApiRoute || isHomeRoute;
-    if (!isPublicRoute) { ... }
-    ```
-    While some API endpoints manually check authentication, this design pattern defaults to "unsafe". Any new API endpoint added to `src/app/api/` that forgets to manually invoke `auth()` will be completely exposed to the public internet.
-- **Solution:** Restrict public route bypasses to specific auth endpoints (e.g. `/api/auth/*`) and secure `/api/*` by default in the middleware.
+### 🚨 1.1 Função Impura no Render (Bloqueador de Build) — **RESOLVIDO**
+* **Correção:** O embaralhamento em memória utilizando `Math.random()` no arquivo [page.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/(main)/page.tsx) foi substituído por uma consulta nativa no banco (`ORDER BY RANDOM()`) via `prisma.$queryRaw`, eliminando falhas de compilação e garantindo escalabilidade.
 
-### 2.2 Unauthenticated IGDB Proxy - DONE
+### 🚨 1.2 Identificador de Modelo de IA Inválido (Erro 404) — **IGNORADO (BYPASSED)**
+* **Status:** Ignorado por design. O modelo `gemini-2.5-flash` é suportado e está em pleno funcionamento nos servidores da API.
 
-- **File:** [route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/igdb/route.ts#L4)
-- **Impact:** **Medium (Abuse/Cost Risk)**
-- **Details:** The `/api/igdb` proxy endpoint accepts query parameters and forwards them to the IGDB API. However, it does not perform _any_ session check or rate-limiting. A malicious client could flood this endpoint to deplete API search quotas or compromise Twitch Client credentials.
-- **Solution:** Add an authentication gate at the top of the route handler:
-    ```typescript
-    const session = await auth();
-    if (!session?.user?.id) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    ```
+### 🚨 1.3 Dessincronização de Estado na Criação de Review — **RESOLVIDO**
+* **Correção:** Adicionado `router.refresh()` ao componente [AddReviewModal.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/AddReviewModal.tsx) após a criação bem-sucedida, atualizando a listagem de avaliações sem necessitar de recarregamento manual da página.
 
-### 2.3 Authorization Bypass in Server Actions - DONE
+### 🛡️ 2.1 Bypass Global de Autenticação em Rotas de API — **RESOLVIDO**
+* **Correção:** Proteção aplicada no arquivo [auth.config.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/auth.config.ts) para rotear todas as APIs `/api/*` pelo gate de autenticação (exceto `/api/auth/*`), retornando payload JSON com status `401 Unauthorized` em vez de redirecionar para a página de login.
 
-- **File:** [randomizer-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/randomizer-actions.ts#L18)
-- **Impact:** **High (Authorization Bypass)**
-- **Details:** The `saveRandomizerRoll` server action only checks if the user is logged in. It does **not** check if the user is a verified player using the `isRandomizerPlayer` helper (unlike the `saveSelections` action in `pool-actions.ts`):
-    ```typescript
-    const session = await auth();
-    if (!session?.user?.id) {
-        throw new Error("Usuário não autenticado");
-    }
-    // Missing check for isRandomizerPlayer(session.user.email)
-    ```
-    This allows any registered member of the community to forge randomizer rolls and insert arbitrary closed pools.
-- **Solution:** Add a permission check for `isRandomizerPlayer(session.user.email)` before processing database updates.
+### 🛡️ 2.2 Proxy do IGDB Sem Autenticação — **RESOLVIDO**
+* **Correção:** Adicionada validação de sessão no endpoint de proxy, retornando status `401` para requisições de usuários não autenticados.
 
-### 2.4 Bypasses in API Route `/api/pools` and `/api/games` - DONE
+### 🛡️ 2.3 Bypass de Autorização em Server Actions — **RESOLVIDO**
+* **Correção:** Validação da permissão `isRandomizerPlayer` integrada com sucesso na ação `saveRandomizerRoll`.
 
-- **Files:** [/api/pools/route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/pools/route.ts#L40) and [/api/games/route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/games/route.ts#L36)
-- **Impact:** **High (Authorization Bypass & Forgery)**
-- **Details:**
-    1. The `POST` and `PUT` endpoints in `/api/pools` check for logged-in status but fail to check `isRandomizerPlayer`, allowing unauthorized users to manipulate pools.
-    2. The `POST` endpoint in `/api/games` allows the client to pass _any_ arbitrary `nominatedById` string in the request body. It does not validate that `nominatedById` matches `session.user.id`, allowing players to create nominations on behalf of other users.
-    3. The `PUT` endpoint in `/api/games` maps `nominatedById` to the database schema update payload, letting a user reassign ownership/nominator rights of a game after creation.
-- **Solution:** Always validate user ownership on inputs and assert user scopes on write operations.
+### 🛡️ 2.4 Bypasses nas Rotas `/api/pools` e `/api/games` — **RESOLVIDO**
+* **Correção:** Inserida checagem de escopo `isRandomizerPlayer` no CRUD de pools, validação forçando o `nominatedById` a coincidir com o `session.user.id` na criação de jogos, e remoção da reatribuição de propriedade/indicação no PUT de jogos.
+
+### ⚡ 3.1 Falha de Serialização de Cache no Token do Twitch — **RESOLVIDO**
+* **Correção:** O tratamento de erros em `fetchNewTwitchToken` em [igdb.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/igdb.ts) agora lança a exceção (`throw`), impedindo que o `unstable_cache` armazene em cache retornos nulos (`null`) por 24 horas.
+
+### ⚡ 3.2 Shuffling em Memória (N+1 Query) — **RESOLVIDO**
+* **Correção:** Resolvido usando ordenação nativa do PostgreSQL.
+
+### ⚡ 3.3 Vazamento de Event Listener no Autocomplete — **RESOLVIDO**
+* **Correção:** Envelopado o callback `onCancel` em uma `useRef` estável dentro de [game-autocomplete.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/ui/game-autocomplete.tsx).
+
+### 🛠️ 4.1 Corrupção de Progresso ao Sortear Jogo — **RESOLVIDO**
+* **Correção:** A query de atualização de progresso foi modificada para atingir exclusivamente jogos no estado `SUGGESTED`.
+
+### 🛠️ 4.2 Falta de Cascade Deletes (Falha de FK ao Deletar Jogo) — **RESOLVIDO**
+* **Correção:** Configurada a regra `onDelete: Cascade` nas relações de `Review` e `PoolEntry` no [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma).
+
+### 🧑‍💻 5.1 Recarregamentos Completos de Página (Full Reloads) — **RESOLVIDO**
+* **Correção:** Substituídas todas as instâncias de `window.location.reload()` por `router.refresh()` nos componentes da dashboard.
+
+### 🧑‍💻 5.2 Código Morto na Rota de API — **RESOLVIDO**
+* **Correção:** Trecho redundante e inacessível excluído do método `PUT /api/pools/route.ts`.
 
 ---
 
-## ⚡ 3. Performance & Scaling Issues
+## 🚨 2. Novos Bugs Críticos & Problemas de Concorrência
 
-### 3.1 Potential Cache Serialization Failure in Twitch Token - DONE
+### 2.1 Condição de Corrida (Race Condition) na Seleção de Favoritos
+- **Arquivo:** [user-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/user-actions.ts#L110)
+- **Impacto:** **Alto (Falha de Restrição no Banco de Dados)**
+- **Detalhes:** A função `setFavoriteGamesBase` utiliza `Promise.all` para processar a busca e criação de jogos em paralelo:
+  1. O comando `prisma.game.findFirst` executa concorrentemente para todos os itens do array.
+  2. Se o usuário mandar o mesmo jogo duplicado no array, ou clicar rapidamente duas vezes no botão de salvar, as promessas em paralelo verificarão simultaneamente que o jogo não existe, e ambas tentarão rodar `prisma.game.create` com o mesmo `igdb_id`.
+  3. Isso estoura um erro de constraint única no banco de dados, abortando e falhando a requisição.
+- **Solução:** Filtrar/deduplicar o array antes de iniciar as operações e executar o mapeamento do loop de criação sequencialmente (ex: usando loop `for...of`), ou envolver a gravação em tratamento amigável de erro de concorrência.
 
-- **File:** [igdb.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/igdb.ts#L44)
-- **Impact:** **High (Service Downtime)**
-- **Details:** `getTwitchToken` caches the authentication token using `unstable_cache`. However, if the inner function `fetchNewTwitchToken()` encounters a network timeout or error, it returns `null` and prints a warning. Next.js will cache this `null` return value for 24 hours (86400s), completely disabling the IGDB search capability for a whole day.
-- **Solution:** Do not swallow errors inside functions wrapped with `unstable_cache`. Throwing an exception prevents Next.js from caching the result, ensuring that a retry is attempted on the next request:
-    ```typescript
-    async function fetchNewTwitchToken(): Promise<string> {
-        // If error, throw new Error("...") instead of returning null
-    }
-    ```
-
-### 3.2 In-Memory Shuffling (N+1 Query & Scale Limit) - DONE
-
-- **File:** [page.tsx](<file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/(main)/page.tsx#L35>)
-- **Impact:** **Medium (Database/Memory Load)**
-- **Details:** To display 5 random reviews on the dashboard, the application queries all review IDs from the database, shuffles them in JavaScript memory, and then makes another query to fetch the full records for those 5 IDs:
-    ```typescript
-    prisma.review.findMany({ select: { id: true } }); // Selects thousands of rows in production!
-    ```
-    This creates an unnecessary bandwidth burden as the volume of reviews increases.
-- **Solution:** Execute a raw random selection query directly in Postgres:
-    ```typescript
-    const randomReviews = await prisma.$queryRaw`
-        SELECT r.*, g.title as "game_title", u.name as "user_name" 
-        FROM reviews r
-        JOIN games g ON r.game_id = g.id
-        JOIN users u ON r.user_id = u.id
-        ORDER BY RANDOM() LIMIT 5
-    `;
-    ```
-
-### 3.3 Event Listener Leak in Autocomplete - DONE
-
-- **File:** [game-autocomplete.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/ui/game-autocomplete.tsx#L55)
-- **Impact:** **Low (Memory Consumption)**
-- **Details:** The click-outside handling hook depends on `onCancel`. If the parent component passes an inline arrow function (e.g. `onCancel={() => setIsSearching(false)}`), the reference changes on every single render. This forces `useEffect` to unbind and rebind the event listener on the `document` repeatedly, adding CPU overhead.
-- **Solution:** Memoize the parent callback using `useCallback` or capture `onCancel` in a ref inside `GameAutocomplete`.
+### 2.2 Ausência de Transações nas Ações de Progresso
+- **Arquivo:** [quest-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/quest-actions.ts#L10)
+- **Impacto:** **Médio (Integridade de Dados)**
+- **Detalhes:** Funções como `joinQuest`, `completeQuest` e `dropQuest` realizam checagens seguidas de gravações na tabela `GameProgress` em comandos separados sem envelopamento de transação. Cliques duplos velozes do usuário podem desencadear inserções duplicadas concorrentes de progresso para o mesmo jogo.
+- **Solution:** Envelopar as operações de escrita em `prisma.$transaction` ou utilizar queries atômicas (`upsert`).
 
 ---
 
-## 🛠️ 4. Database & Transaction Integrity Gotchas
+## 🛡️ 3. Novos Riscos de Segurança & Validação de API
 
-### 4.1 Progress Data Corruption on Winner Roll - DONE
-
-- **Files:** [pool-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/pool-actions.ts#L305), [randomizer-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/randomizer-actions.ts#L118), and [/api/pools/route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/pools/route.ts#L113)
-- **Impact:** **High (Data Integrity Loss)**
-- **Details:** When a game is drawn as a winner, the transaction calls `updateMany` to mark its status as `ACTIVE` and reset the `start_date` for all users:
-    ```typescript
-    await tx.gameProgress.updateMany({
-        where: { game_id: winnerEntry.game_id },
-        data: { status: "ACTIVE", start_date: new Date() },
-    });
-    ```
-    If user A has already completed this game (`COMPLETED`) or dropped it (`DROPPED`) in the past (perhaps from a different year or personal play), this query will overwrite their completion status and force it back to `ACTIVE`, corrupting user data.
-- **Solution:** Restrict status changes to users who currently have a `SUGGESTED` status for that game:
-    ```typescript
-    where: {
-        game_id: winnerEntry.game_id,
-        status: "SUGGESTED"
-    }
-    ```
-
-### 4.2 Missing Cascading Deletes (Foreign Key Crashes) - DONE
-
-- **File:** [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma)
-- **Impact:** **High (Server Crash on Delete)**
-- **Details:** The game endpoint allows users to delete nominations (`DELETE /api/games`). However, the `Review` and `PoolEntry` models do not define cascading deletes on the `game` relationship. If a user deletes a game that has associated reviews or was featured in a pool entry, the database will throw a foreign key constraint violation (`PRISMA_P2003`), crashing the operation.
-- **Solution:** Update `prisma/schema.prisma` to cascade deletes for reviews and pool entries:
-    ```prisma
-    model Review {
-       game_id String
-       game    Game   @relation(fields: [game_id], references: [id], onDelete: Cascade)
-    }
-    ```
+### 3.1 Spoofing de Tipo MIME no Upload de Arquivos
+- **Arquivo:** [route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/upload/route.ts#L21)
+- **Impacto:** **Médio (Risco de Segurança)**
+- **Detalhes:** A rota de upload valida o arquivo usando apenas `file.type.startsWith("image/")`, que confia na propriedade `Content-Type` enviada no request HTTP do cliente. Um usuário poderia renomear um script malicioso (como PHP ou HTML contendo scripts) para `.png` e passá-lo com cabeçalho de imagem. Embora o Vercel Blob apenas hospede arquivos estáticos, permitir o upload de payloads arbitrários é inseguro.
+- **Solução:** Implementar validação de cabeçalhos de arquivo reais (Magic Bytes / File Signatures) no backend para verificar se os arquivos enviados são de fato imagens verdadeiras (PNG, JPEG, WEBP, GIF).
 
 ---
 
-## 🧑‍💻 5. Code Quality & Next.js Anti-patterns
+## ⚡ 4. Novos Gargalos de Performance & Escabilidade
 
-### 5.1 Full Browser Reloads (UX & Performance Defect) - DONE
+### 4.1 Queries N+1 Dentro de Loops de Transação no Mural de Avisos
+- **Arquivo:** [notice-board-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/notice-board-actions.ts#L20)
+- **Impacto:** **Alto (Latência e Consumo de Conexões)**
+- **Detalhes:** A função `generateNoticeBoardAction` executa queries assíncronas em loop para inserir contratos e depois itera por todos os jogadores em loop para inserir registros de progresso individual de contratos. Isso gera dezenas de conexões individuais dentro de uma transação aberta, causando extrema latência e risco de timeout na conexão de banco.
+- **Solução:** Refatorar a criação para usar `prisma.campaignContract.createMany` e `prisma.campaignContractProgress.createMany`, realizando batching das inserções em poucas queries otimizadas em vez de loops.
 
-- **Files:** Multiple React Components
-- **Details:** `ActiveQuestHero.tsx`, `SideQuestBar.tsx`, `EditReviewModal.tsx`, and `ReviewCard.tsx` utilize `window.location.reload()` to refresh page data after completing, dropping, or editing reviews/quests.
-- **Impact:** This destroys React's virtual DOM state, forces a white flash/flicker, resets scroll positions, and negates the benefits of Next.js client-side navigation.
-- **Solution:** Import `useRouter` from `next/navigation` and invoke `router.refresh()` to fetch updated data from the server seamlessly without page reloads.
-
-### 5.2 Dead Code in API Route - DONE
-
-- **File:** [route.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/api/pools/route.ts#L122-L125)
-- **Details:** The generic update code in `PUT /api/pools` is unreachable:
-    ```typescript
-    if (action !== "draw") {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-    if (action === "draw") { ... }
-    // Below code is unreachable because action is guaranteed to be "draw" at this point
-    const data = mapPoolInput(body);
-    const updated = await prisma.pool.update({ where: { id }, data });
-    ```
-- **Solution:** Remove the dead code.
+### 4.2 Arquivo de Server Actions Morto (Dead Code)
+- **Arquivo:** [progress-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/progress-actions.ts)
+- **Impacto:** **Baixo (Poluição de Código)**
+- **Detalhes:** O arquivo `progress-actions.ts` contém código idêntico ao de `quest-actions.ts` para controle de quests, mas nunca é importado ou utilizado por nenhum arquivo ou componente no projeto.
+- **Solução:** Deletar permanentemente o arquivo morto do workspace.
 
 ---
 
-## 📋 6. Actionable Recommendations Summary
+## 🛠️ 5. Nova Integridade do Banco de Dados & Restrições (Constraints)
 
-| Issue Area         | File / Location                | Severity    | Recommended Code Fix                                                                                                               |
-| :----------------- | :----------------------------- | :---------- | :--------------------------------------------------------------------------------------------------------------------------------- |
-| **React/Purity**   | `src/app/(main)/page.tsx`      | 🚨 Critical | Shuffling logic should be isolated outside render, or query using `$queryRaw` to select 5 random reviews.                          |
-| **AI Integration** | `src/app/api/ai/hltb/route.ts` | 🟡 High     | Update the fallback model list to contain `"gemini-2.0-flash"` instead of `"gemini-2.5-flash"`.                                    |
-| **Data Integrity** | `src/app/lib/pool-actions.ts`  | 🟡 High     | Adjust `updateMany` for active games to target only users in the `SUGGESTED` state to prevent progress corruption.                 |
-| **Security**       | `src/auth.config.ts`           | 🟡 High     | Exclude API routes from global middleware bypasses. Restrict anonymous access.                                                     |
-| **UX & Perf**      | Multiple Components            | 🟢 Medium   | Replace `window.location.reload()` with `router.refresh()` to leverage Next.js router transitions.                                 |
-| **DB Validation**  | `src/app/api/games/route.ts`   | 🟡 High     | Add validations verifying that `nominatedById` matches the authenticated `session.user.id`. Block body modifications to owner IDs. |
-| **Type Safety**    | Various Files                  | 🟢 Low      | Replace `any` variables with appropriate interface typing or utility types.                                                        |
+### 5.1 Ausência de Chave Única Composta em Reviews
+- **Arquivo:** [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma#L145)
+- **Impacto:** **Médio (Duplicação de Dados)**
+- **Detalhes:** A tabela `Review` não possui restrição única composta no banco para `[user_id, game_id]`. Isso permite a inserção concorrente de mais de uma review do mesmo usuário para o mesmo jogo caso o fluxo de validação no backend sofra condição de corrida.
+- **Solução:** Adicionar um índice `@@unique([user_id, game_id])` ao modelo `Review` no esquema do Prisma.
+
+### 5.2 Ausência de Chave Única Composta em Entradas de Sorteio (PoolEntry)
+- **Arquivo:** [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma#L188)
+- **Impacto:** **Médio (Inconsistência de Regra)**
+- **Detalhes:** `PoolEntry` não possui índice único para os campos de jogo, pote e usuário. Um comandante poderia burlar a regra do Randomizer e adicionar mais indicações do mesmo jogo em um único pote de sorteio.
+- **Solução:** Adicionar o índice composto `@@unique([pool_id, game_id, user_id])` ao modelo `PoolEntry`.
 
 ---
 
-_Report compiled on: 2026-05-29_
+## 🧑‍💻 6. Novos Defeitos de Componentes React & UX
+
+### 6.1 Atualização de Estado na Fase de Renderização (FavoriteGamesModule)
+- **Arquivo:** [favorite-games-module.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/profile/favorite-games-module.tsx#L34)
+- **Impacto:** **Médio (Loop de Renderização do React)**
+- **Detalhes:** O componente atualiza o estado local `setFavorites` na fase de renderização se a referência `initialFavorites` mudar. Se o componente pai recriar a lista em cada render do Server Component, o React entrará em loop de render contínuo.
+- **Solução:** Comparar o conteúdo profundo dos arrays favoritos (por exemplo, concatenando os IDs `initialFavorites.map(g => g.id).join(",")`) em vez de comparar a referência bruta.
+
+### 6.2 Bloqueio de Sincronização de Inputs no Modal de Configurações
+- **Arquivo:** [settings-modal.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/auth/settings-modal.tsx#L34)
+- **Impacto:** **Médio (Defeito de UX)**
+- **Detalhes:** Os campos `name` e `username` usam estados que inicializam somente no mount. Se os dados da sessão mudarem com o modal fechado, o componente exibirá informações desatualizadas ao ser reaberto.
+- **Solução:** Implementar um `useEffect` ouvindo a propriedade `open` e o estado da sessão `user` para sincronizar os inputs com dados atualizados.
+
+### 6.3 Saltos de Tela Inesperados (Scroll Jumping) no Mural de Contratos
+- **Arquivo:** [NoticeBoardMuralClient.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/contracts/NoticeBoardMuralClient.tsx#L88)
+- **Impacto:** **Baixo (Salto de UX)**
+- **Detalhes:** O efeito executa a query global `document.querySelectorAll('[data-active="true"]')` no DOM para dar scroll automático, podendo selecionar elementos de outras seções e fazer a tela pular de forma indesejada.
+- **Solução:** Usar uma referência React `useRef` atrelada ao container interno das raias para limitar a busca e controle de rolagem.
+
+---
+
+## 📋 7. Resumo das Recomendações Acionáveis
+
+| Seção | Área do Problema | Gravidade | Arquivo / Localização | Correção Sugerida |
+| :--- | :--- | :--- | :--- | :--- |
+| **2.1** | Condição de Corrida | 🔴 Alto | `src/app/lib/user-actions.ts` | Deduplicar array e rodar inserções no banco sequencialmente. |
+| **2.2** | Integridade Concorrente | 🟡 Médio | `src/app/lib/quest-actions.ts` | Envelopar queries de progresso em `prisma.$transaction`. |
+| **3.1** | Segurança no Upload | 🟡 Médio | `src/app/api/upload/route.ts` | Validar a assinatura de bytes (Magic Bytes) dos uploads. |
+| **4.1** | Loop N+1 de Banco | 🔴 Alto | `src/app/lib/notice-board-actions.ts` | Inserir em lote usando `createMany` para contratos/progressos. |
+| **4.2** | Código Morto | 🟢 Baixo | `src/app/lib/progress-actions.ts` | Excluir o arquivo Server Actions não utilizado. |
+| **5.1** | Unicidade no Banco | 🟡 Médio | `prisma/schema.prisma` | Incluir `@@unique([user_id, game_id])` em `Review`. |
+| **5.2** | Unicidade no Banco | 🟡 Médio | `prisma/schema.prisma` | Incluir `@@unique([pool_id, game_id, user_id])` em `PoolEntry`. |
+| **6.1** | Loop de Render React | 🟡 Médio | `favorite-games-module.tsx` | Sincronizar estado local por meio de comparação profunda de IDs. |
+| **6.2** | Dados de Modal Travados | 🟡 Médio | `settings-modal.tsx` | Usar `useEffect` para sincronizar inputs com a sessão ativa. |
+| **6.3** | Seleção de Scroll Global | 🟢 Baixo | `NoticeBoardMuralClient.tsx` | Restringir consultas do mural usando referências locais via `useRef`. |
+
+---
+
+_Relatório gerado em: 2026-06-27_
