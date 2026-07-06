@@ -6,7 +6,10 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
-export async function updateQuestProgress(gameId: string, percentage: number) {
+export async function updateQuestProgress(
+    gameId: string,
+    percentage: number,
+): Promise<{ success: boolean; error?: string }> {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -64,7 +67,7 @@ export async function updateQuestProgress(gameId: string, percentage: number) {
     }
 }
 
-export async function completeQuest(gameId: string) {
+export async function completeQuest(gameId: string): Promise<{ success: boolean; error?: string }> {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -117,7 +120,7 @@ export async function completeQuest(gameId: string) {
     }
 }
 
-export async function dropQuest(gameId: string) {
+export async function dropQuest(gameId: string): Promise<{ success: boolean; error?: string }> {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -216,7 +219,7 @@ export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST"
     }
 }
 
-export async function joinQuest(gameId: string) {
+export async function joinQuest(gameId: string): Promise<{ success: boolean; error?: string }> {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
