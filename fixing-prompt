@@ -4,6 +4,7 @@ Vamos corrigir isso:
 1.2 - Somente apos esse plano de implementacao pronto, e que eu aprovo ou mudo o plano para fazermos as alteracoes
 1.3 - Seguindo a diretriz do projeto, as alteracoes devem ser aplicadas no ambiente local primeiro para depois que eu fizer os testes necessarios, eu aprovo o upload para production.
 1.4 - Faca perguntas antes de fazer o plano de implementacao, caso seja necessario conhecer alguma regra de negocio que seja relacionada as alteracoes
+1.5 - Inclua no plano de implementacao o gasto de tokens para realizar as alteracoes.
 
 2 - Efetue as alteracoes solicitadas no plano de implementacao
 2.1 - Aplique as alteracoes no ambiente local

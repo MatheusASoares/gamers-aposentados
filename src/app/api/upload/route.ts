@@ -1,6 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
+import { validateImageMagicBytes } from "@/lib/file-validation";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
 
@@ -18,7 +19,7 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: "No file provided" }, { status: 400 });
         }
 
-        if (!file.type.startsWith("image/")) {
+        if (!file.type.startsWith("image/") || !(await validateImageMagicBytes(file))) {
             return NextResponse.json({ error: "Only image files are allowed" }, { status: 400 });
         }
 

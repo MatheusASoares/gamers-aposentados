@@ -45,21 +45,17 @@ export async function generateNoticeBoardAction(gameId: string) {
                 where: { game_id: gameId },
             });
 
-            // 2. Criar os registros de definições dos contratos do jogo
-            const dbContracts = [];
-            for (const contract of generatedContracts) {
-                const created = await tx.campaignContract.create({
-                    data: {
-                        game_id: gameId,
-                        sequence_order: contract.sequence_order,
-                        title: contract.title,
-                        objective: contract.objective,
-                        daily_atomic_quest: "",
-                        progress_percentage: contract.progress_percentage,
-                    },
-                });
-                dbContracts.push(created);
-            }
+            // 2. Criar os registros de definições dos contratos do jogo em lote (batching)
+            const dbContracts = await tx.campaignContract.createManyAndReturn({
+                data: generatedContracts.map((contract) => ({
+                    game_id: gameId,
+                    sequence_order: contract.sequence_order,
+                    title: contract.title,
+                    objective: contract.objective,
+                    daily_atomic_quest: "",
+                    progress_percentage: contract.progress_percentage,
+                })),
+            });
 
             // 3. Inicializar o progresso de contratos para cada usuário ativo
             const progressData = [];
