@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 
@@ -67,6 +68,9 @@ export async function createReview(params: CreateReviewParams) {
         
         return { success: true, review };
     } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            return { success: false, error: "Você já avaliou este jogo." };
+        }
         console.error("[createReview] Erro catastrófico:", error);
         const errorMessage = error instanceof Error ? error.message : "Servidor indisponível";
         return { 

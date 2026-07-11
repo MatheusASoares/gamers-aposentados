@@ -249,6 +249,18 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                     }
                 }
 
+                // Verificar se o jogo já está no pote (indicado por qualquer pessoa)
+                const existingEntry = await tx.poolEntry.findFirst({
+                    where: {
+                        pool_id: pool.id,
+                        game_id: dbGame.id,
+                    },
+                });
+
+                if (existingEntry) {
+                    throw new Error(`O jogo "${dbGame.title}" já foi indicado neste sorteio.`);
+                }
+
                 // Create pool entry
                 await tx.poolEntry.create({
                     data: {
@@ -265,6 +277,12 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
         revalidatePath("/randomizer");
         return { success: true, poolId: result };
     } catch (error: unknown) {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+            return {
+                success: false,
+                error: "Este jogo já foi indicado neste sorteio.",
+            };
+        }
         console.error("Error saving selections:", error);
         const errorMessage = error instanceof Error ? error.message : "Desconhecido";
         return {

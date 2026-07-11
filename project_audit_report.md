@@ -119,7 +119,7 @@ Todos os problemas identificados no relatório anterior (29 de maio) foram corri
 - **Detalhes:** A função `generateNoticeBoardAction` executa queries assíncronas em loop para inserir contratos e depois itera por todos os jogadores em loop para inserir registros de progresso individual de contratos. Isso gera dezenas de conexões individuais dentro de uma transação aberta, causando extrema latência e risco de timeout na conexão de banco.
 - **Solução:** Refatorar a criação para usar `prisma.campaignContract.createMany` e `prisma.campaignContractProgress.createMany`, realizando batching das inserções em poucas queries otimizadas em vez de loops.
 
-### 4.2 Arquivo de Server Actions Morto (Dead Code)
+### 4.2 Arquivo de Server Actions Morto (Dead Code)-DONE
 
 - **Arquivo:** [progress-actions.ts](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/progress-actions.ts)
 - **Impacto:** **Baixo (Poluição de Código)**
@@ -130,14 +130,14 @@ Todos os problemas identificados no relatório anterior (29 de maio) foram corri
 
 ## 🛠️ 5. Nova Integridade do Banco de Dados & Restrições (Constraints)
 
-### 5.1 Ausência de Chave Única Composta em Reviews
+### 5.1 Ausência de Chave Única Composta em Reviews-DONE
 
 - **Arquivo:** [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma#L145)
 - **Impacto:** **Médio (Duplicação de Dados)**
 - **Detalhes:** A tabela `Review` não possui restrição única composta no banco para `[user_id, game_id]`. Isso permite a inserção concorrente de mais de uma review do mesmo usuário para o mesmo jogo caso o fluxo de validação no backend sofra condição de corrida.
 - **Solução:** Adicionar um índice `@@unique([user_id, game_id])` ao modelo `Review` no esquema do Prisma.
 
-### 5.2 Ausência de Chave Única Composta em Entradas de Sorteio (PoolEntry)
+### 5.2 Ausência de Chave Única Composta em Entradas de Sorteio (PoolEntry)-DONE
 
 - **Arquivo:** [schema.prisma](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma#L188)
 - **Impacto:** **Médio (Inconsistência de Regra)**

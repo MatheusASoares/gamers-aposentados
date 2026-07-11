@@ -158,6 +158,7 @@ model Review {
   created_at   DateTime @default(now())
   updated_at   DateTime @updatedAt @default(now())
 
+  @@unique([user_id, game_id])
   @@map("reviews")
 }
 
@@ -199,6 +200,7 @@ model PoolEntry {
   user_id   String
   user      User     @relation(fields: [user_id], references: [id])
 
+  @@unique([pool_id, game_id])
   @@map("pool_entries")
 }
 
