@@ -1034,26 +1034,46 @@ async function main() {
                         }
                     }
                     if (foundId) {
-                        await prisma.poolEntry.create({
-                            data: {
-                                pool_id: pool.id,
-                                game_id: foundId,
-                                user_id: playerMap[nom.player],
-                            },
+                        const existingEntry = await prisma.poolEntry.findUnique({
+                            where: {
+                                pool_id_game_id: {
+                                    pool_id: pool.id,
+                                    game_id: foundId,
+                                }
+                            }
                         });
-                        entryCount++;
+                        if (!existingEntry) {
+                            await prisma.poolEntry.create({
+                                data: {
+                                    pool_id: pool.id,
+                                    game_id: foundId,
+                                    user_id: playerMap[nom.player],
+                                },
+                            });
+                            entryCount++;
+                        }
                     } else {
                         console.warn(`   ⚠️ Could not find game: "${parsed.title}" (key: ${key})`);
                     }
                 } else {
-                    await prisma.poolEntry.create({
-                        data: {
-                            pool_id: pool.id,
-                            game_id: gameId,
-                            user_id: playerMap[nom.player],
-                        },
+                    const existingEntry = await prisma.poolEntry.findUnique({
+                        where: {
+                            pool_id_game_id: {
+                                pool_id: pool.id,
+                                game_id: gameId,
+                            }
+                        }
                     });
-                    entryCount++;
+                    if (!existingEntry) {
+                        await prisma.poolEntry.create({
+                            data: {
+                                pool_id: pool.id,
+                                game_id: gameId,
+                                user_id: playerMap[nom.player],
+                            },
+                        });
+                        entryCount++;
+                    }
                 }
             }
         }
