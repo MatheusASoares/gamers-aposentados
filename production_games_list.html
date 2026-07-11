@@ -1,0 +1,2587 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Jogos - Banco de Produção</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-color: #3b82f6;
+            --accent-hover: #2563eb;
+            --danger-color: #ef4444;
+            --success-color: #22c55e;
+            --warning-color: #f59e0b;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            align-items: center;
+        }
+
+        .search-box {
+            flex: 1;
+            min-width: 250px;
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            font-size: 1rem;
+        }
+
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .filter-btn {
+            padding: 0.75rem 1.25rem;
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-color);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background-color: #273549;
+        }
+
+        .stats {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 2rem;
+            display: flex;
+            gap: 2rem;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .stat-val {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .stat-lbl {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: var(--card-bg);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: #17253b;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:hover td {
+            background-color: #243147;
+        }
+
+        .cover-img {
+            width: 60px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 0.25rem;
+            background-color: #0f172a;
+            border: 1px solid var(--border-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: var(--success-color);
+        }
+
+        .badge-danger {
+            background-color: rgba(239, 68, 68, 0.15);
+            color: var(--danger-color);
+        }
+
+        .btn-link {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            text-decoration: none;
+            color: white;
+            background-color: var(--accent-color);
+            transition: background-color 0.2s;
+            font-weight: 500;
+        }
+
+        .btn-link:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-search {
+            background-color: var(--warning-color);
+        }
+
+        .btn-search:hover {
+            background-color: #d97706;
+        }
+
+        .copy-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding: 0.25rem;
+            margin-left: 0.5rem;
+            border-radius: 0.25rem;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .game-title {
+            font-weight: bold;
+            font-size: 1.05rem;
+        }
+
+        .db-id {
+            font-family: monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎮 Lista de Jogos - Banco de Produção</h1>
+        <div class="subtitle">Use esta página interativa para visualizar as capas, conferir os IDs do IGDB e encontrar os jogos corretos.</div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <span class="stat-val" id="stat-total">0</span>
+                <span class="stat-lbl">Total de Jogos</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="stat-missing" style="color: var(--warning-color);">0</span>
+                <span class="stat-lbl">Sem ID do IGDB</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-val" id="stat-ok" style="color: var(--success-color);">0</span>
+                <span class="stat-lbl">Com ID do IGDB</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <input type="text" id="search-input" class="search-box" placeholder="Buscar por título, ID ou padrinho...">
+            <button class="filter-btn active" onclick="filterList('all', this)">Todos</button>
+            <button class="filter-btn" onclick="filterList('missing', this)">Sem ID IGDB</button>
+            <button class="filter-btn" onclick="filterList('ok', this)">Com ID IGDB</button>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Capa</th>
+                    <th>Jogo & ID do Banco</th>
+                    <th>ID IGDB</th>
+                    <th>Ações IGDB</th>
+                    <th>Indicado Por</th>
+                </tr>
+            </thead>
+            <tbody id="games-table-body">
+
+                <tr data-has-igdb="true" data-title="a plague tale innocence" data-nominator="lucas" data-dbid="bfaeac77-cca6-4724-9232-34075aa024c6">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1lat.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">A Plague Tale Innocence</div>
+                        <div class="db-id">
+                            <span>ID: bfaeac77-cca6-4724-9232-34075aa024c6</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('bfaeac77-cca6-4724-9232-34075aa024c6'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">27316</span></td>
+                    <td><a href="https://www.igdb.com/games/27316" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="absolum" data-nominator="matheus" data-dbid="2e97c172-2fbb-46fd-b83d-75625fd118ca">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/coatin.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Absolum</div>
+                        <div class="db-id">
+                            <span>ID: 2e97c172-2fbb-46fd-b83d-75625fd118ca</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('2e97c172-2fbb-46fd-b83d-75625fd118ca'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">334239</span></td>
+                    <td><a href="https://www.igdb.com/games/334239" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="alundra" data-nominator="lucas" data-dbid="04882423-76be-4b7d-b6b3-3fe13277c736">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3tlr.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Alundra</div>
+                        <div class="db-id">
+                            <span>ID: 04882423-76be-4b7d-b6b3-3fe13277c736</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('04882423-76be-4b7d-b6b3-3fe13277c736'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1175</span></td>
+                    <td><a href="https://www.igdb.com/games/1175" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="as aventuras de batman e robin" data-nominator="lucas" data-dbid="a2a622b5-8b65-4a40-8c27-a3970521a810">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6379.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">As Aventuras de Batman e Robin</div>
+                        <div class="db-id">
+                            <span>ID: a2a622b5-8b65-4a40-8c27-a3970521a810</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a2a622b5-8b65-4a40-8c27-a3970521a810'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">5346</span></td>
+                    <td><a href="https://www.igdb.com/games/5346" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="astral ascent" data-nominator="lucas" data-dbid="99f8b05f-eb09-48af-8dc1-d232c8cac88b">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co4o04.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Astral Ascent</div>
+                        <div class="db-id">
+                            <span>ID: 99f8b05f-eb09-48af-8dc1-d232c8cac88b</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('99f8b05f-eb09-48af-8dc1-d232c8cac88b'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">180876</span></td>
+                    <td><a href="https://www.igdb.com/games/180876" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="baldur's gate 3" data-nominator="matheus" data-dbid="701ae159-47e2-40b2-a6fc-517fcae2f740">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co670h.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Baldur's Gate 3</div>
+                        <div class="db-id">
+                            <span>ID: 701ae159-47e2-40b2-a6fc-517fcae2f740</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('701ae159-47e2-40b2-a6fc-517fcae2f740'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">119171</span></td>
+                    <td><a href="https://www.igdb.com/games/119171" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="baldur's gate dark alliance" data-nominator="lucas" data-dbid="c1082d5b-cb3e-420e-94a6-aa3a26b10150">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1tay.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Baldur's Gate Dark Alliance</div>
+                        <div class="db-id">
+                            <span>ID: c1082d5b-cb3e-420e-94a6-aa3a26b10150</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('c1082d5b-cb3e-420e-94a6-aa3a26b10150'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">83</span></td>
+                    <td><a href="https://www.igdb.com/games/83" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="batman arkham city" data-nominator="lucas" data-dbid="3b7f1ff6-33e1-4056-bc9f-f3e45c6f3701">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1voh.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Batman Arkham City</div>
+                        <div class="db-id">
+                            <span>ID: 3b7f1ff6-33e1-4056-bc9f-f3e45c6f3701</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('3b7f1ff6-33e1-4056-bc9f-f3e45c6f3701'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">501</span></td>
+                    <td><a href="https://www.igdb.com/games/501" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="batman arkham origins" data-nominator="lucas" data-dbid="3a40c28e-2d52-4dc5-aa16-43d1b4ff0fe6">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1nmd.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Batman Arkham Origins</div>
+                        <div class="db-id">
+                            <span>ID: 3a40c28e-2d52-4dc5-aa16-43d1b4ff0fe6</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('3a40c28e-2d52-4dc5-aa16-43d1b4ff0fe6'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2003</span></td>
+                    <td><a href="https://www.igdb.com/games/2003" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="batman: arkham knight" data-nominator="lucas" data-dbid="8ee27090-8b41-44dd-ad77-787d38a945a8">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coagib.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Batman: Arkham Knight</div>
+                        <div class="db-id">
+                            <span>ID: 8ee27090-8b41-44dd-ad77-787d38a945a8</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('8ee27090-8b41-44dd-ad77-787d38a945a8'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">5503</span></td>
+                    <td><a href="https://www.igdb.com/games/5503" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="besiege" data-nominator="yan" data-dbid="5ab720e9-0215-4e2a-abd9-48be5efa6ec3">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co9cnc.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Besiege</div>
+                        <div class="db-id">
+                            <span>ID: 5ab720e9-0215-4e2a-abd9-48be5efa6ec3</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('5ab720e9-0215-4e2a-abd9-48be5efa6ec3'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">9047</span></td>
+                    <td><a href="https://www.igdb.com/games/9047" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="bioshock" data-nominator="lucas" data-dbid="4836d380-6281-45b8-8a27-bc185ad3b816">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2n12.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Bioshock</div>
+                        <div class="db-id">
+                            <span>ID: 4836d380-6281-45b8-8a27-bc185ad3b816</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('4836d380-6281-45b8-8a27-bc185ad3b816'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">20</span></td>
+                    <td><a href="https://www.igdb.com/games/20" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="blasphemous" data-nominator="lucas" data-dbid="bba5217d-f317-4f25-ba12-b225dec2ade4">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cob0xj.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Blasphemous</div>
+                        <div class="db-id">
+                            <span>ID: bba5217d-f317-4f25-ba12-b225dec2ade4</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('bba5217d-f317-4f25-ba12-b225dec2ade4'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">26820</span></td>
+                    <td><a href="https://www.igdb.com/games/26820" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="blasphemous ii" data-nominator="matheus" data-dbid="abb364be-e798-40a5-98db-0c7702eff35c">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6ej3.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Blasphemous II</div>
+                        <div class="db-id">
+                            <span>ID: abb364be-e798-40a5-98db-0c7702eff35c</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('abb364be-e798-40a5-98db-0c7702eff35c'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">165390</span></td>
+                    <td><a href="https://www.igdb.com/games/165390" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="bomberman 4" data-nominator="lucas" data-dbid="ac78c8fd-15c3-457d-b861-4a4f6836a577">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2rh0.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Bomberman 4</div>
+                        <div class="db-id">
+                            <span>ID: ac78c8fd-15c3-457d-b861-4a4f6836a577</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('ac78c8fd-15c3-457d-b861-4a4f6836a577'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">80539</span></td>
+                    <td><a href="https://www.igdb.com/games/80539" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="brothers: a tale of two sons" data-nominator="matheus" data-dbid="24c2b172-cee2-4308-a3ad-e7c658b69468">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1rro.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Brothers: A Tale of Two Sons</div>
+                        <div class="db-id">
+                            <span>ID: 24c2b172-cee2-4308-a3ad-e7c658b69468</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('24c2b172-cee2-4308-a3ad-e7c658b69468'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1334</span></td>
+                    <td><a href="https://www.igdb.com/games/1334" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="caravan sandwitch" data-nominator="lucas" data-dbid="fe70ab70-277e-4b1e-9c04-931c3e843b10">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co8bmd.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Caravan SandWitch</div>
+                        <div class="db-id">
+                            <span>ID: fe70ab70-277e-4b1e-9c04-931c3e843b10</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('fe70ab70-277e-4b1e-9c04-931c3e843b10'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">145029</span></td>
+                    <td><a href="https://www.igdb.com/games/145029" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="castlevania: aria of sorrow" data-nominator="matheus" data-dbid="8a1e0a86-4b7d-4819-af60-07ac0a46aa2a">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cob947.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Castlevania: Aria of Sorrow</div>
+                        <div class="db-id">
+                            <span>ID: 8a1e0a86-4b7d-4819-af60-07ac0a46aa2a</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('8a1e0a86-4b7d-4819-af60-07ac0a46aa2a'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1134</span></td>
+                    <td><a href="https://www.igdb.com/games/1134" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="castlevania: symphony of the night" data-nominator="matheus" data-dbid="c8bbff0e-d2e8-4c15-8699-9f9cf9d586ef">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co53m8.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Castlevania: Symphony of the Night</div>
+                        <div class="db-id">
+                            <span>ID: c8bbff0e-d2e8-4c15-8699-9f9cf9d586ef</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('c8bbff0e-d2e8-4c15-8699-9f9cf9d586ef'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1128</span></td>
+                    <td><a href="https://www.igdb.com/games/1128" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="cat quest" data-nominator="lucas" data-dbid="1c281860-1c63-41d3-87f4-49bc812bcb45">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co8cp4.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Cat Quest</div>
+                        <div class="db-id">
+                            <span>ID: 1c281860-1c63-41d3-87f4-49bc812bcb45</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('1c281860-1c63-41d3-87f4-49bc812bcb45'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">36597</span></td>
+                    <td><a href="https://www.igdb.com/games/36597" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="celeste" data-nominator="lucas" data-dbid="24e7d389-3d3b-4074-a61f-208a0a6e1732">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cob9dh.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Celeste</div>
+                        <div class="db-id">
+                            <span>ID: 24e7d389-3d3b-4074-a61f-208a0a6e1732</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('24e7d389-3d3b-4074-a61f-208a0a6e1732'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">26226</span></td>
+                    <td><a href="https://www.igdb.com/games/26226" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="champions of norrath: realms of everquest" data-nominator="lucas" data-dbid="40f0ab7e-b6db-4d3a-a04c-15e7b1a56590">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6e7d.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Champions of Norrath: Realms of EverQuest</div>
+                        <div class="db-id">
+                            <span>ID: 40f0ab7e-b6db-4d3a-a04c-15e7b1a56590</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('40f0ab7e-b6db-4d3a-a04c-15e7b1a56590'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">9813</span></td>
+                    <td><a href="https://www.igdb.com/games/9813" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="chaos legion" data-nominator="yan" data-dbid="81451474-2861-452e-832a-bce4fa1b53f7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co4psj.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Chaos Legion</div>
+                        <div class="db-id">
+                            <span>ID: 81451474-2861-452e-832a-bce4fa1b53f7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('81451474-2861-452e-832a-bce4fa1b53f7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2917</span></td>
+                    <td><a href="https://www.igdb.com/games/2917" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="child of light" data-nominator="matheus" data-dbid="b00a0ba6-f3ea-433f-ba5b-59bb31be7e35">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co21q2.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Child of Light</div>
+                        <div class="db-id">
+                            <span>ID: b00a0ba6-f3ea-433f-ba5b-59bb31be7e35</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('b00a0ba6-f3ea-433f-ba5b-59bb31be7e35'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">4756</span></td>
+                    <td><a href="https://www.igdb.com/games/4756" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="children of morta" data-nominator="lucas" data-dbid="fe72df2f-6e7f-4c71-9031-22a4e0cfa8ff">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2iw2.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Children of Morta</div>
+                        <div class="db-id">
+                            <span>ID: fe72df2f-6e7f-4c71-9031-22a4e0cfa8ff</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('fe72df2f-6e7f-4c71-9031-22a4e0cfa8ff'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">36198</span></td>
+                    <td><a href="https://www.igdb.com/games/36198" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="chrono cross" data-nominator="lucas" data-dbid="de9a6c82-1e2b-47a9-b7b3-3347fbe9e351">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1oj7.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Chrono Cross</div>
+                        <div class="db-id">
+                            <span>ID: de9a6c82-1e2b-47a9-b7b3-3347fbe9e351</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('de9a6c82-1e2b-47a9-b7b3-3347fbe9e351'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1804</span></td>
+                    <td><a href="https://www.igdb.com/games/1804" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="chrono trigger" data-nominator="matheus" data-dbid="cd482c2f-4a70-4a4e-99f0-84e6fd7666d7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3plw.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Chrono Trigger</div>
+                        <div class="db-id">
+                            <span>ID: cd482c2f-4a70-4a4e-99f0-84e6fd7666d7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('cd482c2f-4a70-4a4e-99f0-84e6fd7666d7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1802</span></td>
+                    <td><a href="https://www.igdb.com/games/1802" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="clair obscur: expedition 33" data-nominator="matheus" data-dbid="60beff6c-8e29-46b9-b711-b3758b28aa5f">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co9gam.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Clair Obscur: Expedition 33</div>
+                        <div class="db-id">
+                            <span>ID: 60beff6c-8e29-46b9-b711-b3758b28aa5f</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('60beff6c-8e29-46b9-b711-b3758b28aa5f'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">305152</span></td>
+                    <td><a href="https://www.igdb.com/games/305152" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="control" data-nominator="matheus" data-dbid="e4240be1-357e-49bb-a3a1-cc4853ae9c9c">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cob5pu.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Control</div>
+                        <div class="db-id">
+                            <span>ID: e4240be1-357e-49bb-a3a1-cc4853ae9c9c</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e4240be1-357e-49bb-a3a1-cc4853ae9c9c'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">103329</span></td>
+                    <td><a href="https://www.igdb.com/games/103329" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="crash bandicoot" data-nominator="lucas" data-dbid="e6e4bf7d-4977-4a93-8d10-8e1a3a389dec">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co555l.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Crash Bandicoot</div>
+                        <div class="db-id">
+                            <span>ID: e6e4bf7d-4977-4a93-8d10-8e1a3a389dec</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e6e4bf7d-4977-4a93-8d10-8e1a3a389dec'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1185</span></td>
+                    <td><a href="https://www.igdb.com/games/1185" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="cyberpunk 2077" data-nominator="matheus" data-dbid="f9788bca-a813-49c6-8cbd-1b5fcc2c99f7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coaih8.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Cyberpunk 2077</div>
+                        <div class="db-id">
+                            <span>ID: f9788bca-a813-49c6-8cbd-1b5fcc2c99f7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('f9788bca-a813-49c6-8cbd-1b5fcc2c99f7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1877</span></td>
+                    <td><a href="https://www.igdb.com/games/1877" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dark souls" data-nominator="ygnos, the mage" data-dbid="76af515a-e217-4ff8-b6c4-42646df15d93">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1x78.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dark Souls</div>
+                        <div class="db-id">
+                            <span>ID: 76af515a-e217-4ff8-b6c4-42646df15d93</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('76af515a-e217-4ff8-b6c4-42646df15d93'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2155</span></td>
+                    <td><a href="https://www.igdb.com/games/2155" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Ygnos, The Mage</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dead cells" data-nominator="lucas" data-dbid="9b09278e-b3d4-4980-a468-72651318048e">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coa3hi.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dead Cells</div>
+                        <div class="db-id">
+                            <span>ID: 9b09278e-b3d4-4980-a468-72651318048e</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('9b09278e-b3d4-4980-a468-72651318048e'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">26855</span></td>
+                    <td><a href="https://www.igdb.com/games/26855" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="death stranding" data-nominator="lucas" data-dbid="6ee73f78-5cca-4a9e-9339-944c06951d90">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cobksf.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Death Stranding</div>
+                        <div class="db-id">
+                            <span>ID: 6ee73f78-5cca-4a9e-9339-944c06951d90</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('6ee73f78-5cca-4a9e-9339-944c06951d90'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">19564</span></td>
+                    <td><a href="https://www.igdb.com/games/19564" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="death's gambit" data-nominator="lucas" data-dbid="9fe884cb-0ebf-4a98-9928-72af4e29f904">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co28qr.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Death's Gambit</div>
+                        <div class="db-id">
+                            <span>ID: 9fe884cb-0ebf-4a98-9928-72af4e29f904</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('9fe884cb-0ebf-4a98-9928-72af4e29f904'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">14760</span></td>
+                    <td><a href="https://www.igdb.com/games/14760" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="demon's crest" data-nominator="yan" data-dbid="433ea7af-3a15-4b42-bba8-8b216f5cbec2">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co69t5.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Demon's Crest</div>
+                        <div class="db-id">
+                            <span>ID: 433ea7af-3a15-4b42-bba8-8b216f5cbec2</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('433ea7af-3a15-4b42-bba8-8b216f5cbec2'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">18067</span></td>
+                    <td><a href="https://www.igdb.com/games/18067" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="detroit become human" data-nominator="matheus" data-dbid="da2ea212-1c46-4cf6-8682-9b432fdaace4">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6mzf.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Detroit Become Human</div>
+                        <div class="db-id">
+                            <span>ID: da2ea212-1c46-4cf6-8682-9b432fdaace4</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('da2ea212-1c46-4cf6-8682-9b432fdaace4'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">14362</span></td>
+                    <td><a href="https://www.igdb.com/games/14362" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="disco elysium" data-nominator="matheus" data-dbid="10c8ec6a-2124-4617-a63d-039759f0d9ae">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2ip6.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Disco Elysium</div>
+                        <div class="db-id">
+                            <span>ID: 10c8ec6a-2124-4617-a63d-039759f0d9ae</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('10c8ec6a-2124-4617-a63d-039759f0d9ae'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">26472</span></td>
+                    <td><a href="https://www.igdb.com/games/26472" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dishonored definitive edition" data-nominator="matheus" data-dbid="015560b7-65dd-432a-8144-ce92ea855a7a">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coabgu.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dishonored Definitive Edition</div>
+                        <div class="db-id">
+                            <span>ID: 015560b7-65dd-432a-8144-ce92ea855a7a</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('015560b7-65dd-432a-8144-ce92ea855a7a'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">41590</span></td>
+                    <td><a href="https://www.igdb.com/games/41590" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="donkey kong" data-nominator="matheus" data-dbid="aca58e55-e203-4511-b056-4c68fbb50506">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co217n.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Donkey Kong</div>
+                        <div class="db-id">
+                            <span>ID: aca58e55-e203-4511-b056-4c68fbb50506</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('aca58e55-e203-4511-b056-4c68fbb50506'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1086</span></td>
+                    <td><a href="https://www.igdb.com/games/1086" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="donkey kong country" data-nominator="matheus" data-dbid="e112c8c1-9ad4-4584-adaa-101524ba2897">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co70qn.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Donkey Kong Country</div>
+                        <div class="db-id">
+                            <span>ID: e112c8c1-9ad4-4584-adaa-101524ba2897</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e112c8c1-9ad4-4584-adaa-101524ba2897'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1090</span></td>
+                    <td><a href="https://www.igdb.com/games/1090" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dragon age inquisition" data-nominator="lucas" data-dbid="2967a7e1-097e-4d43-9747-6d3110182454">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2mvy.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dragon Age Inquisition</div>
+                        <div class="db-id">
+                            <span>ID: 2967a7e1-097e-4d43-9747-6d3110182454</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('2967a7e1-097e-4d43-9747-6d3110182454'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1887</span></td>
+                    <td><a href="https://www.igdb.com/games/1887" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dragon quest" data-nominator="matheus" data-dbid="ec81a225-808c-4710-9973-4cacaf389a31">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co7wt9.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dragon Quest</div>
+                        <div class="db-id">
+                            <span>ID: ec81a225-808c-4710-9973-4cacaf389a31</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('ec81a225-808c-4710-9973-4cacaf389a31'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">239185</span></td>
+                    <td><a href="https://www.igdb.com/games/239185" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dragon's dogma" data-nominator="matheus" data-dbid="d0a75228-9e0f-498f-b325-106b2ae9df83">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co833w.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dragon's Dogma</div>
+                        <div class="db-id">
+                            <span>ID: d0a75228-9e0f-498f-b325-106b2ae9df83</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('d0a75228-9e0f-498f-b325-106b2ae9df83'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">3968</span></td>
+                    <td><a href="https://www.igdb.com/games/3968" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="dungeons of hinterberg" data-nominator="lucas" data-dbid="15cbf5f8-2bb3-41bd-889c-596dc00453ce">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co8oq4.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Dungeons of Hinterberg</div>
+                        <div class="db-id">
+                            <span>ID: 15cbf5f8-2bb3-41bd-889c-596dc00453ce</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('15cbf5f8-2bb3-41bd-889c-596dc00453ce'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">146917</span></td>
+                    <td><a href="https://www.igdb.com/games/146917" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="elden ring" data-nominator="matheus" data-dbid="83a058d8-4f70-4279-a4e2-a9cc63ba0739">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co4jni.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Elden Ring</div>
+                        <div class="db-id">
+                            <span>ID: 83a058d8-4f70-4279-a4e2-a9cc63ba0739</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('83a058d8-4f70-4279-a4e2-a9cc63ba0739'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">119133</span></td>
+                    <td><a href="https://www.igdb.com/games/119133" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="enshrouded" data-nominator="ygnos, the mage" data-dbid="2cc8abe8-1406-44e9-8627-0b606be51ed5">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cob9vp.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Enshrouded</div>
+                        <div class="db-id">
+                            <span>ID: 2cc8abe8-1406-44e9-8627-0b606be51ed5</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('2cc8abe8-1406-44e9-8627-0b606be51ed5'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">248643</span></td>
+                    <td><a href="https://www.igdb.com/games/248643" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Ygnos, The Mage</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="fallout new vegas" data-nominator="matheus" data-dbid="54642b02-e0f9-486a-b6c5-5dd2ed68b92a">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1u60.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Fallout New Vegas</div>
+                        <div class="db-id">
+                            <span>ID: 54642b02-e0f9-486a-b6c5-5dd2ed68b92a</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('54642b02-e0f9-486a-b6c5-5dd2ed68b92a'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">16</span></td>
+                    <td><a href="https://www.igdb.com/games/16" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="figment" data-nominator="matheus" data-dbid="ba7d6a32-88f3-4c8d-a646-62bbda713416">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co691d.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Figment</div>
+                        <div class="db-id">
+                            <span>ID: ba7d6a32-88f3-4c8d-a646-62bbda713416</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('ba7d6a32-88f3-4c8d-a646-62bbda713416'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">20329</span></td>
+                    <td><a href="https://www.igdb.com/games/20329" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="final fantasy vii remake" data-nominator="lucas" data-dbid="95b9d312-7e0d-4d67-a866-3b0b2a13c085">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cobcwt.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Final Fantasy VII Remake</div>
+                        <div class="db-id">
+                            <span>ID: 95b9d312-7e0d-4d67-a866-3b0b2a13c085</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('95b9d312-7e0d-4d67-a866-3b0b2a13c085'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">11169</span></td>
+                    <td><a href="https://www.igdb.com/games/11169" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="final fantasy x" data-nominator="lucas" data-dbid="5c36fcf9-8a6e-46c4-9ec2-8c566c194c34">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1tr1.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Final Fantasy X</div>
+                        <div class="db-id">
+                            <span>ID: 5c36fcf9-8a6e-46c4-9ec2-8c566c194c34</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('5c36fcf9-8a6e-46c4-9ec2-8c566c194c34'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">418</span></td>
+                    <td><a href="https://www.igdb.com/games/418" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="forza horizon 6" data-nominator="matheus" data-dbid="78286006-60a1-4385-9bff-328abcc1dbcb">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/cobc5n.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Forza Horizon 6</div>
+                        <div class="db-id">
+                            <span>ID: 78286006-60a1-4385-9bff-328abcc1dbcb</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('78286006-60a1-4385-9bff-328abcc1dbcb'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">348330</span></td>
+                    <td><a href="https://www.igdb.com/games/348330" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="gauntlet" data-nominator="yan" data-dbid="d28fbf26-1c09-4752-8d73-bd05b04c4b5b">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co2fon.webp" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Gauntlet</div>
+                        <div class="db-id">
+                            <span>ID: d28fbf26-1c09-4752-8d73-bd05b04c4b5b</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('d28fbf26-1c09-4752-8d73-bd05b04c4b5b'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">7293</span></td>
+                    <td><a href="https://www.igdb.com/games/7293" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="gauntlet seven sorrows" data-nominator="lucas" data-dbid="db980838-5e20-4740-aea4-c4ddfda15009">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co5j83.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Gauntlet Seven Sorrows</div>
+                        <div class="db-id">
+                            <span>ID: db980838-5e20-4740-aea4-c4ddfda15009</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('db980838-5e20-4740-aea4-c4ddfda15009'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">5844</span></td>
+                    <td><a href="https://www.igdb.com/games/5844" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="ghostwire: tokyo" data-nominator="lucas" data-dbid="7d8aab68-2e3a-447e-9e19-09ec73a9d9d2">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co55xn.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Ghostwire: Tokyo</div>
+                        <div class="db-id">
+                            <span>ID: 7d8aab68-2e3a-447e-9e19-09ec73a9d9d2</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('7d8aab68-2e3a-447e-9e19-09ec73a9d9d2'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">119308</span></td>
+                    <td><a href="https://www.igdb.com/games/119308" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="god of war" data-nominator="lucas" data-dbid="c263e492-c1d6-44b5-9539-1a0678f1a587">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co3ddc.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">God of War</div>
+                        <div class="db-id">
+                            <span>ID: c263e492-c1d6-44b5-9539-1a0678f1a587</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('c263e492-c1d6-44b5-9539-1a0678f1a587'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">549</span></td>
+                    <td><a href="https://www.igdb.com/games/549" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="grim dawn" data-nominator="matheus" data-dbid="62f05656-04cc-4e97-b7d5-59507efb14ed">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co41h4.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Grim Dawn</div>
+                        <div class="db-id">
+                            <span>ID: 62f05656-04cc-4e97-b7d5-59507efb14ed</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('62f05656-04cc-4e97-b7d5-59507efb14ed'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1907</span></td>
+                    <td><a href="https://www.igdb.com/games/1907" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="guacamelee!" data-nominator="matheus" data-dbid="1682566d-b758-463b-9d3d-9e0571d36118">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2g6i.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Guacamelee!</div>
+                        <div class="db-id">
+                            <span>ID: 1682566d-b758-463b-9d3d-9e0571d36118</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('1682566d-b758-463b-9d3d-9e0571d36118'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">4838</span></td>
+                    <td><a href="https://www.igdb.com/games/4838" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="guitar hero iii: legends of rock" data-nominator="lucas" data-dbid="de3b0a59-2995-4b9f-b389-0eed9c02efc3">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co1wqm.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Guitar Hero III: Legends of Rock</div>
+                        <div class="db-id">
+                            <span>ID: de3b0a59-2995-4b9f-b389-0eed9c02efc3</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('de3b0a59-2995-4b9f-b389-0eed9c02efc3'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2671</span></td>
+                    <td><a href="https://www.igdb.com/games/2671" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hades" data-nominator="matheus" data-dbid="102fc52e-6e33-4b23-9463-d6f8ebc7da41">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cob9kr.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hades</div>
+                        <div class="db-id">
+                            <span>ID: 102fc52e-6e33-4b23-9463-d6f8ebc7da41</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('102fc52e-6e33-4b23-9463-d6f8ebc7da41'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">113112</span></td>
+                    <td><a href="https://www.igdb.com/games/113112" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hades 2" data-nominator="lucas" data-dbid="cb915c6a-649c-4f89-bf24-90bf374277b5">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coaknx.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hades 2</div>
+                        <div class="db-id">
+                            <span>ID: cb915c6a-649c-4f89-bf24-90bf374277b5</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('cb915c6a-649c-4f89-bf24-90bf374277b5'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">228525</span></td>
+                    <td><a href="https://www.igdb.com/games/228525" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hell clock" data-nominator="matheus" data-dbid="e905f4cb-bcc2-43a0-858b-16432e99e697">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co946e.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hell Clock</div>
+                        <div class="db-id">
+                            <span>ID: e905f4cb-bcc2-43a0-858b-16432e99e697</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e905f4cb-bcc2-43a0-858b-16432e99e697'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">324256</span></td>
+                    <td><a href="https://www.igdb.com/games/324256" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hero siege" data-nominator="yan" data-dbid="d487ffaa-7e89-4174-b222-48f1aadd5d12">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3jtb.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hero Siege</div>
+                        <div class="db-id">
+                            <span>ID: d487ffaa-7e89-4174-b222-48f1aadd5d12</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('d487ffaa-7e89-4174-b222-48f1aadd5d12'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">11708</span></td>
+                    <td><a href="https://www.igdb.com/games/11708" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hifi rush" data-nominator="matheus" data-dbid="a1e00d43-122b-4705-9b78-45b6de118fda">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6219.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">HiFi Rush</div>
+                        <div class="db-id">
+                            <span>ID: a1e00d43-122b-4705-9b78-45b6de118fda</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a1e00d43-122b-4705-9b78-45b6de118fda'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">233585</span></td>
+                    <td><a href="https://www.igdb.com/games/233585" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hitman 2" data-nominator="lucas" data-dbid="110ba80c-ce83-4ee5-a917-eeb3ae270b32">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2qcq.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hitman 2</div>
+                        <div class="db-id">
+                            <span>ID: 110ba80c-ce83-4ee5-a917-eeb3ae270b32</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('110ba80c-ce83-4ee5-a917-eeb3ae270b32'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">103210</span></td>
+                    <td><a href="https://www.igdb.com/games/103210" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hogwarts legacy" data-nominator="matheus" data-dbid="57c52158-1792-465a-be6e-5471ae2783d9">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coaav6.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hogwarts Legacy</div>
+                        <div class="db-id">
+                            <span>ID: 57c52158-1792-465a-be6e-5471ae2783d9</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('57c52158-1792-465a-be6e-5471ae2783d9'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">136625</span></td>
+                    <td><a href="https://www.igdb.com/games/136625" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="hollow knight" data-nominator="matheus" data-dbid="9073d3bf-e440-4c5e-b50a-3c79c83d09b7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/cobfzp.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Hollow Knight</div>
+                        <div class="db-id">
+                            <span>ID: 9073d3bf-e440-4c5e-b50a-3c79c83d09b7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('9073d3bf-e440-4c5e-b50a-3c79c83d09b7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">14593</span></td>
+                    <td><a href="https://www.igdb.com/games/14593" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="ico" data-nominator="lucas" data-dbid="33ee8d79-7d27-435f-837a-6a569abee848">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3r78.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Ico</div>
+                        <div class="db-id">
+                            <span>ID: 33ee8d79-7d27-435f-837a-6a569abee848</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('33ee8d79-7d27-435f-837a-6a569abee848'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">7170</span></td>
+                    <td><a href="https://www.igdb.com/games/7170" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="illusion of gaia" data-nominator="yan" data-dbid="0821fe01-6774-4f13-ae4a-5261b821a9b9">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co8kyi.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Illusion of Gaia</div>
+                        <div class="db-id">
+                            <span>ID: 0821fe01-6774-4f13-ae4a-5261b821a9b9</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('0821fe01-6774-4f13-ae4a-5261b821a9b9'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">3016</span></td>
+                    <td><a href="https://www.igdb.com/games/3016" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="jackie chan adventures" data-nominator="lucas" data-dbid="49baf3bf-1319-470c-923d-c127889d3749">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co9e0t.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Jackie Chan Adventures</div>
+                        <div class="db-id">
+                            <span>ID: 49baf3bf-1319-470c-923d-c127889d3749</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('49baf3bf-1319-470c-923d-c127889d3749'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">8154</span></td>
+                    <td><a href="https://www.igdb.com/games/8154" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="jusant" data-nominator="matheus" data-dbid="cd45c88e-4e1a-4598-9280-71498b8c9712">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coa2kv.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Jusant</div>
+                        <div class="db-id">
+                            <span>ID: cd45c88e-4e1a-4598-9280-71498b8c9712</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('cd45c88e-4e1a-4598-9280-71498b8c9712'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">252836</span></td>
+                    <td><a href="https://www.igdb.com/games/252836" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="kingdom come deliverance" data-nominator="matheus" data-dbid="58d6dd66-70ea-4b1c-a203-ca5f3c89288f">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co8qmv.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Kingdom Come Deliverance</div>
+                        <div class="db-id">
+                            <span>ID: 58d6dd66-70ea-4b1c-a203-ca5f3c89288f</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('58d6dd66-70ea-4b1c-a203-ca5f3c89288f'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">4843</span></td>
+                    <td><a href="https://www.igdb.com/games/4843" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="kingdom hearts" data-nominator="lucas" data-dbid="f19b3c47-6416-44f2-8874-686d27e261d4">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co30zf.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Kingdom Hearts</div>
+                        <div class="db-id">
+                            <span>ID: f19b3c47-6416-44f2-8874-686d27e261d4</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('f19b3c47-6416-44f2-8874-686d27e261d4'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1219</span></td>
+                    <td><a href="https://www.igdb.com/games/1219" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="last epoch" data-nominator="matheus" data-dbid="be69b8e7-0ef8-406f-8e66-4e9c8df56677">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co7p46.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Last Epoch</div>
+                        <div class="db-id">
+                            <span>ID: be69b8e7-0ef8-406f-8e66-4e9c8df56677</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('be69b8e7-0ef8-406f-8e66-4e9c8df56677'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">95118</span></td>
+                    <td><a href="https://www.igdb.com/games/95118" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="legacy of kain soul reaver" data-nominator="lucas" data-dbid="bf3d5bdc-ab8f-4f59-ba34-915b84aec58b">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1yal.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Legacy of Kain Soul Reaver</div>
+                        <div class="db-id">
+                            <span>ID: bf3d5bdc-ab8f-4f59-ba34-915b84aec58b</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('bf3d5bdc-ab8f-4f59-ba34-915b84aec58b'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">4122</span></td>
+                    <td><a href="https://www.igdb.com/games/4122" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="legacy of kain: soul reaver remastered" data-nominator="lucas" data-dbid="1b346941-d0bc-42d3-af13-93f7fd151d77">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co8urj.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Legacy of Kain: Soul Reaver Remastered</div>
+                        <div class="db-id">
+                            <span>ID: 1b346941-d0bc-42d3-af13-93f7fd151d77</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('1b346941-d0bc-42d3-af13-93f7fd151d77'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">324083</span></td>
+                    <td><a href="https://www.igdb.com/games/324083" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="limbo" data-nominator="matheus" data-dbid="222340e5-d600-416d-a516-f01c19f7aed5">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1qrs.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Limbo</div>
+                        <div class="db-id">
+                            <span>ID: 222340e5-d600-416d-a516-f01c19f7aed5</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('222340e5-d600-416d-a516-f01c19f7aed5'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1331</span></td>
+                    <td><a href="https://www.igdb.com/games/1331" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="little nightmares" data-nominator="lucas" data-dbid="e48053e1-c4fc-409f-a899-1bdd442d6006">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1rdi.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Little Nightmares</div>
+                        <div class="db-id">
+                            <span>ID: e48053e1-c4fc-409f-a899-1bdd442d6006</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e48053e1-c4fc-409f-a899-1bdd442d6006'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">9174</span></td>
+                    <td><a href="https://www.igdb.com/games/9174" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="mad max" data-nominator="lucas" data-dbid="1d47b63d-dd78-4388-83f2-8a46a9ad5670">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1uuh.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Mad Max</div>
+                        <div class="db-id">
+                            <span>ID: 1d47b63d-dd78-4388-83f2-8a46a9ad5670</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('1d47b63d-dd78-4388-83f2-8a46a9ad5670'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2552</span></td>
+                    <td><a href="https://www.igdb.com/games/2552" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="marvel: ultimate alliance" data-nominator="matheus" data-dbid="3105b34a-7530-483f-8b36-4fc63b87eb88">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co2idz.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Marvel: Ultimate Alliance</div>
+                        <div class="db-id">
+                            <span>ID: 3105b34a-7530-483f-8b36-4fc63b87eb88</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('3105b34a-7530-483f-8b36-4fc63b87eb88'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">4999</span></td>
+                    <td><a href="https://www.igdb.com/games/4999" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="metal gear solid" data-nominator="matheus" data-dbid="77f9b131-492f-4a09-86a4-561d6c06d6f9">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6jaw.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Metal Gear Solid</div>
+                        <div class="db-id">
+                            <span>ID: 77f9b131-492f-4a09-86a4-561d6c06d6f9</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('77f9b131-492f-4a09-86a4-561d6c06d6f9'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">375</span></td>
+                    <td><a href="https://www.igdb.com/games/375" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="midnight club: street racing" data-nominator="matheus" data-dbid="a0202020-a08d-483b-bd15-4f0a790d4464">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2k1y.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Midnight Club: Street Racing</div>
+                        <div class="db-id">
+                            <span>ID: a0202020-a08d-483b-bd15-4f0a790d4464</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a0202020-a08d-483b-bd15-4f0a790d4464'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">6509</span></td>
+                    <td><a href="https://www.igdb.com/games/6509" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="moonlighter" data-nominator="matheus" data-dbid="a9a87d54-5d02-4bc1-8442-a8273d6d810d">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1vck.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Moonlighter</div>
+                        <div class="db-id">
+                            <span>ID: a9a87d54-5d02-4bc1-8442-a8273d6d810d</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a9a87d54-5d02-4bc1-8442-a8273d6d810d'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">27771</span></td>
+                    <td><a href="https://www.igdb.com/games/27771" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="nfs underground 1" data-nominator="lucas" data-dbid="874a4343-0c0d-4288-9023-63a50329a68d">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co209g.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">NFS Underground 1</div>
+                        <div class="db-id">
+                            <span>ID: 874a4343-0c0d-4288-9023-63a50329a68d</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('874a4343-0c0d-4288-9023-63a50329a68d'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">96</span></td>
+                    <td><a href="https://www.igdb.com/games/96" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="nightmare creatures" data-nominator="lucas" data-dbid="a2d332ca-9a03-4d2a-b4a3-aea37714fca5">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co5j7q.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Nightmare Creatures</div>
+                        <div class="db-id">
+                            <span>ID: a2d332ca-9a03-4d2a-b4a3-aea37714fca5</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a2d332ca-9a03-4d2a-b4a3-aea37714fca5'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">3414</span></td>
+                    <td><a href="https://www.igdb.com/games/3414" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="no rest for the wicked" data-nominator="lucas" data-dbid="a3f68b0a-99d8-466c-8a34-7bd9d13677ce">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co7h9r.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">No Rest for the Wicked</div>
+                        <div class="db-id">
+                            <span>ID: a3f68b0a-99d8-466c-8a34-7bd9d13677ce</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a3f68b0a-99d8-466c-8a34-7bd9d13677ce'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">279627</span></td>
+                    <td><a href="https://www.igdb.com/games/279627" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="pepsi man" data-nominator="lucas" data-dbid="3ae0ded5-b2eb-488a-a016-ab04d89c5c54">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co31ar.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Pepsi Man</div>
+                        <div class="db-id">
+                            <span>ID: 3ae0ded5-b2eb-488a-a016-ab04d89c5c54</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('3ae0ded5-b2eb-488a-a016-ab04d89c5c54'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">79500</span></td>
+                    <td><a href="https://www.igdb.com/games/79500" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="planet of lana" data-nominator="matheus" data-dbid="e4773fed-bcef-4d06-9cdf-d9043eedbf5b">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co3910.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Planet of Lana</div>
+                        <div class="db-id">
+                            <span>ID: e4773fed-bcef-4d06-9cdf-d9043eedbf5b</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e4773fed-bcef-4d06-9cdf-d9043eedbf5b'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">152071</span></td>
+                    <td><a href="https://www.igdb.com/games/152071" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="pluto" data-nominator="matheus" data-dbid="a8facab2-69c6-47b3-891e-cac7c0b35e6b">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/coakgp.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Pluto</div>
+                        <div class="db-id">
+                            <span>ID: a8facab2-69c6-47b3-891e-cac7c0b35e6b</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('a8facab2-69c6-47b3-891e-cac7c0b35e6b'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">343101</span></td>
+                    <td><a href="https://www.igdb.com/games/343101" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="portal" data-nominator="matheus" data-dbid="dc5e73da-0df0-43de-9164-74bf787ef976">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coaanx.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Portal</div>
+                        <div class="db-id">
+                            <span>ID: dc5e73da-0df0-43de-9164-74bf787ef976</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('dc5e73da-0df0-43de-9164-74bf787ef976'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">71</span></td>
+                    <td><a href="https://www.igdb.com/games/71" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="prince of persia" data-nominator="lucas" data-dbid="072ac109-f9cd-4ca5-a859-3de699dec1be">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3gts.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Prince Of Persia</div>
+                        <div class="db-id">
+                            <span>ID: 072ac109-f9cd-4ca5-a859-3de699dec1be</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('072ac109-f9cd-4ca5-a859-3de699dec1be'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2472</span></td>
+                    <td><a href="https://www.igdb.com/games/2472" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="prince of persia: the sands of time" data-nominator="lucas" data-dbid="7d1fd50a-af17-4042-ad79-1d247350f335">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co4t8l.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Prince of Persia: The Sands of Time</div>
+                        <div class="db-id">
+                            <span>ID: 7d1fd50a-af17-4042-ad79-1d247350f335</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('7d1fd50a-af17-4042-ad79-1d247350f335'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">836</span></td>
+                    <td><a href="https://www.igdb.com/games/836" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="ratchet & clank" data-nominator="lucas" data-dbid="31bfcd17-1b05-44c2-b8d9-713a142b528f">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co1oym.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Ratchet & Clank</div>
+                        <div class="db-id">
+                            <span>ID: 31bfcd17-1b05-44c2-b8d9-713a142b528f</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('31bfcd17-1b05-44c2-b8d9-713a142b528f'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1289</span></td>
+                    <td><a href="https://www.igdb.com/games/1289" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="shadow gambit: the cursed crew" data-nominator="matheus" data-dbid="25247b1e-60ad-4029-8932-24e9c9620086">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co67is.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Shadow Gambit: The Cursed Crew</div>
+                        <div class="db-id">
+                            <span>ID: 25247b1e-60ad-4029-8932-24e9c9620086</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('25247b1e-60ad-4029-8932-24e9c9620086'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">233307</span></td>
+                    <td><a href="https://www.igdb.com/games/233307" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="shadow hearts" data-nominator="lucas" data-dbid="375edac9-4dba-45cf-8102-a1fe76adbbfd">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co7nmo.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Shadow Hearts</div>
+                        <div class="db-id">
+                            <span>ID: 375edac9-4dba-45cf-8102-a1fe76adbbfd</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('375edac9-4dba-45cf-8102-a1fe76adbbfd'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">4170</span></td>
+                    <td><a href="https://www.igdb.com/games/4170" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="shadow of the colossus" data-nominator="lucas" data-dbid="b7009cb6-63e5-4363-bc18-bee0374a2138">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1ozz.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Shadow of The Colossus</div>
+                        <div class="db-id">
+                            <span>ID: b7009cb6-63e5-4363-bc18-bee0374a2138</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('b7009cb6-63e5-4363-bc18-bee0374a2138'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2207</span></td>
+                    <td><a href="https://www.igdb.com/games/2207" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="shadow of the tomb raider" data-nominator="lucas" data-dbid="cb0e10e4-c71b-4dd8-bad6-831a92b73fdc">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1vcn.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Shadow of The Tomb Raider</div>
+                        <div class="db-id">
+                            <span>ID: cb0e10e4-c71b-4dd8-bad6-831a92b73fdc</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('cb0e10e4-c71b-4dd8-bad6-831a92b73fdc'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">37777</span></td>
+                    <td><a href="https://www.igdb.com/games/37777" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="sifu" data-nominator="matheus" data-dbid="00e081cb-2899-4e07-a36f-7076e3298022">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co4h5s.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Sifu</div>
+                        <div class="db-id">
+                            <span>ID: 00e081cb-2899-4e07-a36f-7076e3298022</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('00e081cb-2899-4e07-a36f-7076e3298022'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">144022</span></td>
+                    <td><a href="https://www.igdb.com/games/144022" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="simpsons hit and run" data-nominator="lucas" data-dbid="540b420f-52f1-461d-b436-c36fb46cdc20">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2uk7.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Simpsons Hit and Run</div>
+                        <div class="db-id">
+                            <span>ID: 540b420f-52f1-461d-b436-c36fb46cdc20</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('540b420f-52f1-461d-b436-c36fb46cdc20'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">2844</span></td>
+                    <td><a href="https://www.igdb.com/games/2844" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="slay the spire" data-nominator="matheus" data-dbid="d5775408-de71-4b2a-9ac1-c8393adb9ddb">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co82c5.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Slay the Spire</div>
+                        <div class="db-id">
+                            <span>ID: d5775408-de71-4b2a-9ac1-c8393adb9ddb</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('d5775408-de71-4b2a-9ac1-c8393adb9ddb'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">40477</span></td>
+                    <td><a href="https://www.igdb.com/games/40477" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="steamworld dig 2" data-nominator="matheus" data-dbid="1d243ddc-ba89-4d95-8519-c74249500aa3">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co5byf.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Steamworld Dig 2</div>
+                        <div class="db-id">
+                            <span>ID: 1d243ddc-ba89-4d95-8519-c74249500aa3</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('1d243ddc-ba89-4d95-8519-c74249500aa3'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">27433</span></td>
+                    <td><a href="https://www.igdb.com/games/27433" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="streets of rage 4" data-nominator="matheus" data-dbid="2be11b2d-fe9c-4ca6-959a-02af05f1e82b">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2dru.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Streets of Rage 4</div>
+                        <div class="db-id">
+                            <span>ID: 2be11b2d-fe9c-4ca6-959a-02af05f1e82b</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('2be11b2d-fe9c-4ca6-959a-02af05f1e82b'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">107262</span></td>
+                    <td><a href="https://www.igdb.com/games/107262" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="super mario bros. (1985)" data-nominator="matheus" data-dbid="376c2a81-f50b-4500-b56a-8e5272252979">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co23bj.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Super Mario Bros. (1985)</div>
+                        <div class="db-id">
+                            <span>ID: 376c2a81-f50b-4500-b56a-8e5272252979</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('376c2a81-f50b-4500-b56a-8e5272252979'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">358</span></td>
+                    <td><a href="https://www.igdb.com/games/358" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="super metroid" data-nominator="lucas" data-dbid="05aaf245-b47f-4264-a106-56f7e94303bc">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co5osy.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Super Metroid</div>
+                        <div class="db-id">
+                            <span>ID: 05aaf245-b47f-4264-a106-56f7e94303bc</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('05aaf245-b47f-4264-a106-56f7e94303bc'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1103</span></td>
+                    <td><a href="https://www.igdb.com/games/1103" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the elder scrolls v: skyrim" data-nominator="matheus" data-dbid="775f38ab-95e6-4a08-b72b-d80a1efc7faa">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1tnw.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Elder Scrolls V: Skyrim</div>
+                        <div class="db-id">
+                            <span>ID: 775f38ab-95e6-4a08-b72b-d80a1efc7faa</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('775f38ab-95e6-4a08-b72b-d80a1efc7faa'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">472</span></td>
+                    <td><a href="https://www.igdb.com/games/472" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the incredible adventures of van helsing final cut" data-nominator="matheus" data-dbid="1cf162de-eeab-4189-a3ed-801e4d5255fd">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2h0s.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Incredible Adventures of Van Helsing Final Cut</div>
+                        <div class="db-id">
+                            <span>ID: 1cf162de-eeab-4189-a3ed-801e4d5255fd</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('1cf162de-eeab-4189-a3ed-801e4d5255fd'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">26129</span></td>
+                    <td><a href="https://www.igdb.com/games/26129" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the legend of zelda" data-nominator="matheus" data-dbid="8f775c6c-8da0-4b5f-9ea4-aff7093e3dcd">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6ovg.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Legend of Zelda</div>
+                        <div class="db-id">
+                            <span>ID: 8f775c6c-8da0-4b5f-9ea4-aff7093e3dcd</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('8f775c6c-8da0-4b5f-9ea4-aff7093e3dcd'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1022</span></td>
+                    <td><a href="https://www.igdb.com/games/1022" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the legend of zelda: a link to the past" data-nominator="matheus" data-dbid="3b9c1beb-3eb8-425c-ad95-23a7863eaea1">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3nsh.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Legend of Zelda: A Link to the Past</div>
+                        <div class="db-id">
+                            <span>ID: 3b9c1beb-3eb8-425c-ad95-23a7863eaea1</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('3b9c1beb-3eb8-425c-ad95-23a7863eaea1'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1026</span></td>
+                    <td><a href="https://www.igdb.com/games/1026" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the legend of zelda: link's awakening (1993)" data-nominator="matheus" data-dbid="69d1559c-91f9-470c-9185-644df8dbce02">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co7j1h.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Legend of Zelda: Link's Awakening (1993)</div>
+                        <div class="db-id">
+                            <span>ID: 69d1559c-91f9-470c-9185-644df8dbce02</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('69d1559c-91f9-470c-9185-644df8dbce02'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1028</span></td>
+                    <td><a href="https://www.igdb.com/games/1028" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the mask" data-nominator="lucas" data-dbid="295aa096-7deb-473a-b696-efbc5f152374">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co31ff.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Mask</div>
+                        <div class="db-id">
+                            <span>ID: 295aa096-7deb-473a-b696-efbc5f152374</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('295aa096-7deb-473a-b696-efbc5f152374'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">42730</span></td>
+                    <td><a href="https://www.igdb.com/games/42730" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the outer worlds" data-nominator="matheus" data-dbid="188ee446-78f5-4130-9be2-ac5a7a7a3fc9">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2eew.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Outer Worlds</div>
+                        <div class="db-id">
+                            <span>ID: 188ee446-78f5-4130-9be2-ac5a7a7a3fc9</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('188ee446-78f5-4130-9be2-ac5a7a7a3fc9'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">113114</span></td>
+                    <td><a href="https://www.igdb.com/games/113114" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the outer worlds: spacer's choice edition" data-nominator="matheus" data-dbid="b0837439-1d01-4a5a-9de5-e2ee613ae6f7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2eew.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Outer Worlds: Spacer's Choice Edition</div>
+                        <div class="db-id">
+                            <span>ID: b0837439-1d01-4a5a-9de5-e2ee613ae6f7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('b0837439-1d01-4a5a-9de5-e2ee613ae6f7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">239999</span></td>
+                    <td><a href="https://www.igdb.com/games/239999" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the rogue prince of persia" data-nominator="lucas" data-dbid="731838da-4072-4fce-854d-5f2a6fed3728">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/coab8v.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Rogue Prince of Persia</div>
+                        <div class="db-id">
+                            <span>ID: 731838da-4072-4fce-854d-5f2a6fed3728</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('731838da-4072-4fce-854d-5f2a6fed3728'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">296843</span></td>
+                    <td><a href="https://www.igdb.com/games/296843" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="the witcher 3: wild hunt" data-nominator="lucas" data-dbid="e38e0d1a-e4b2-4d0d-8ad0-8c53faa64a02">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/coaarl.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">The Witcher 3: Wild Hunt</div>
+                        <div class="db-id">
+                            <span>ID: e38e0d1a-e4b2-4d0d-8ad0-8c53faa64a02</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('e38e0d1a-e4b2-4d0d-8ad0-8c53faa64a02'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1942</span></td>
+                    <td><a href="https://www.igdb.com/games/1942" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="titan quest" data-nominator="matheus" data-dbid="9edd83f5-4d19-4e70-9b47-506eb5a5814c">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co6x9v.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Titan Quest</div>
+                        <div class="db-id">
+                            <span>ID: 9edd83f5-4d19-4e70-9b47-506eb5a5814c</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('9edd83f5-4d19-4e70-9b47-506eb5a5814c'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">8311</span></td>
+                    <td><a href="https://www.igdb.com/games/8311" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="titan quest ii" data-nominator="lucas" data-dbid="d359b68b-01b4-45bc-a761-fdedcabc8d3a">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co6x9v.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Titan Quest II</div>
+                        <div class="db-id">
+                            <span>ID: d359b68b-01b4-45bc-a761-fdedcabc8d3a</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('d359b68b-01b4-45bc-a761-fdedcabc8d3a'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">261146</span></td>
+                    <td><a href="https://www.igdb.com/games/261146" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="titan souls" data-nominator="yan" data-dbid="cfceace9-3ed0-48f6-a593-41e6130bdeb6">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2xo0.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Titan Souls</div>
+                        <div class="db-id">
+                            <span>ID: cfceace9-3ed0-48f6-a593-41e6130bdeb6</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('cfceace9-3ed0-48f6-a593-41e6130bdeb6'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">9559</span></td>
+                    <td><a href="https://www.igdb.com/games/9559" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Yan</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="titanfall 2" data-nominator="matheus" data-dbid="b590e133-5e4e-49c0-a6c8-6029da01e7ce">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/fhbeilnghyhhmjqhinqa.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Titanfall 2</div>
+                        <div class="db-id">
+                            <span>ID: b590e133-5e4e-49c0-a6c8-6029da01e7ce</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('b590e133-5e4e-49c0-a6c8-6029da01e7ce'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">17447</span></td>
+                    <td><a href="https://www.igdb.com/games/17447" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="tomb raider" data-nominator="matheus" data-dbid="092ef60f-8617-4df2-a843-8c2b3b1e9e3f">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co3lq1.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Tomb Raider</div>
+                        <div class="db-id">
+                            <span>ID: 092ef60f-8617-4df2-a843-8c2b3b1e9e3f</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('092ef60f-8617-4df2-a843-8c2b3b1e9e3f'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">912</span></td>
+                    <td><a href="https://www.igdb.com/games/912" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="tomb raider underworld" data-nominator="lucas" data-dbid="62c7224e-9a59-4ed4-a731-4e3111fc9140">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co1voc.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Tomb Raider Underworld</div>
+                        <div class="db-id">
+                            <span>ID: 62c7224e-9a59-4ed4-a731-4e3111fc9140</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('62c7224e-9a59-4ed4-a731-4e3111fc9140'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1163</span></td>
+                    <td><a href="https://www.igdb.com/games/1163" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="tomb raider: curse of the sword" data-nominator="matheus" data-dbid="d1774a06-308c-4b50-8fb0-9996cebea053">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co21sp.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Tomb Raider: Curse of the Sword</div>
+                        <div class="db-id">
+                            <span>ID: d1774a06-308c-4b50-8fb0-9996cebea053</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('d1774a06-308c-4b50-8fb0-9996cebea053'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">49993</span></td>
+                    <td><a href="https://www.igdb.com/games/49993" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="tomb raider: legend" data-nominator="matheus" data-dbid="f1a394ef-018e-4f9c-9582-d8fc2741aab7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co1nnv.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Tomb Raider: Legend</div>
+                        <div class="db-id">
+                            <span>ID: f1a394ef-018e-4f9c-9582-d8fc2741aab7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('f1a394ef-018e-4f9c-9582-d8fc2741aab7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1161</span></td>
+                    <td><a href="https://www.igdb.com/games/1161" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="torchlight ii" data-nominator="matheus" data-dbid="ec913e36-956a-4d21-8fde-cd8ec35e35ea">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co25z8.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Torchlight II</div>
+                        <div class="db-id">
+                            <span>ID: ec913e36-956a-4d21-8fde-cd8ec35e35ea</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('ec913e36-956a-4d21-8fde-cd8ec35e35ea'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">1337</span></td>
+                    <td><a href="https://www.igdb.com/games/1337" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="x-men origins: wolverine" data-nominator="lucas" data-dbid="4386e922-ff5b-4e9b-afd8-f4c332961839">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2426.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">X-Men Origins: Wolverine</div>
+                        <div class="db-id">
+                            <span>ID: 4386e922-ff5b-4e9b-afd8-f4c332961839</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('4386e922-ff5b-4e9b-afd8-f4c332961839'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">573</span></td>
+                    <td><a href="https://www.igdb.com/games/573" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Lucas</td>
+                </tr>
+            
+                <tr data-has-igdb="false" data-title="yakuza like a dragon" data-nominator="matheus" data-dbid="906186e8-5e16-4faf-b2fb-bff3ca1f43f2">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_1080p/co2em9.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Yakuza Like a Dragon</div>
+                        <div class="db-id">
+                            <span>ID: 906186e8-5e16-4faf-b2fb-bff3ca1f43f2</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('906186e8-5e16-4faf-b2fb-bff3ca1f43f2'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-danger">FALTANDO</span></td>
+                    <td><a href="https://www.igdb.com/search?q=Yakuza%20Like%20a%20Dragon" target="_blank" class="btn-link btn-search">Buscar no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+                <tr data-has-igdb="true" data-title="yakuza: like a dragon" data-nominator="matheus" data-dbid="0646524c-5d25-4ab5-a0ba-b690fdfe8de7">
+                    <td>
+                        <img src="https://images.igdb.com/igdb/image/upload/t_cover_big/co2em9.jpg" alt="capa" class="cover-img" onerror="this.src='https://placehold.co/60x80/0f172a/f1f5f9?text=Sem+Capa'" />
+                    </td>
+                    <td>
+                        <div class="game-title">Yakuza: Like a Dragon</div>
+                        <div class="db-id">
+                            <span>ID: 0646524c-5d25-4ab5-a0ba-b690fdfe8de7</span>
+                            <button class="copy-btn" onclick="navigator.clipboard.writeText('0646524c-5d25-4ab5-a0ba-b690fdfe8de7'); alert('ID copiado!')" title="Copiar ID do Banco">
+                                📋
+                            </button>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-success">36550</span></td>
+                    <td><a href="https://www.igdb.com/games/36550" target="_blank" class="btn-link">Ver no IGDB</a></td>
+                    <td>Matheus</td>
+                </tr>
+            
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.getElementById('stat-total').innerText = '126';
+        document.getElementById('stat-missing').innerText = '1';
+        document.getElementById('stat-ok').innerText = '125';
+
+        const searchInput = document.getElementById('search-input');
+        let currentFilter = 'all';
+
+        searchInput.addEventListener('input', () => {
+            applyFilter();
+        });
+
+        function filterList(filter, btn) {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = filter;
+            applyFilter();
+        }
+
+        function applyFilter() {
+            const query = searchInput.value.toLowerCase();
+            const rows = document.querySelectorAll('#games-table-body tr');
+
+            rows.forEach(row => {
+                const title = row.getAttribute('data-title');
+                const nominator = row.getAttribute('data-nominator');
+                const dbid = row.getAttribute('data-dbid');
+                const hasIgdb = row.getAttribute('data-has-igdb') === 'true';
+
+                const matchesSearch = title.includes(query) || nominator.includes(query) || dbid.includes(query);
+                
+                let matchesFilter = true;
+                if (currentFilter === 'missing') {
+                    matchesFilter = !hasIgdb;
+                } else if (currentFilter === 'ok') {
+                    matchesFilter = hasIgdb;
+                }
+
+                if (matchesSearch && matchesFilter) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</body>
+</html>
