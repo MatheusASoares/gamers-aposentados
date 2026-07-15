@@ -31,7 +31,10 @@ export function FavoriteGamesModule({
     const [prevInitialFavorites, setPrevInitialFavorites] = useState(initialFavorites);
     const [isSearching, setIsSearching] = useState(false);
 
-    if (initialFavorites !== prevInitialFavorites) {
+    const initialHash = initialFavorites.map((g) => `${g.id}-${g.title}-${g.cover_url || ""}`).join("|");
+    const prevHash = prevInitialFavorites.map((g) => `${g.id}-${g.title}-${g.cover_url || ""}`).join("|");
+
+    if (initialHash !== prevHash) {
         setPrevInitialFavorites(initialFavorites);
         if (!isEditing) {
             setFavorites(

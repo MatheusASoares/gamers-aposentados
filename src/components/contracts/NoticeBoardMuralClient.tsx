@@ -86,12 +86,35 @@ export function NoticeBoardMuralClient({
     const sideLaneDrag = useDragScroll();
 
     useEffect(() => {
-        // Find all active contracts (AVAILABLE) and scroll them into view
-        const activeContracts = document.querySelectorAll('[data-active="true"]');
-        activeContracts.forEach((el) => {
-            el.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
-        });
-    }, [mainContracts, sideContracts]);
+        // Função auxiliar para rolar horizontalmente de forma segura e centrada
+        const scrollActiveContractIntoView = (container: HTMLDivElement | null) => {
+            if (!container) return;
+
+            const activeChild = container.querySelector('[data-active="true"]') as HTMLElement;
+            if (activeChild) {
+                const containerRect = container.getBoundingClientRect();
+                const childRect = activeChild.getBoundingClientRect();
+
+                // Calcula a posição do filho relativa ao container
+                const relativeLeft = childRect.left - containerRect.left;
+
+                // Centraliza o card de contrato ativo na raia
+                const targetScrollLeft =
+                    container.scrollLeft +
+                    relativeLeft -
+                    containerRect.width / 2 +
+                    childRect.width / 2;
+
+                container.scrollTo({
+                    left: targetScrollLeft,
+                    behavior: "smooth",
+                });
+            }
+        };
+
+        scrollActiveContractIntoView(mainLaneDrag.ref.current);
+        scrollActiveContractIntoView(sideLaneDrag.ref.current);
+    }, [mainContracts, sideContracts, mainLaneDrag.ref, sideLaneDrag.ref]);
 
     const handleGenerateBoard = (gameId: string) => {
         setTargetGameId(gameId);

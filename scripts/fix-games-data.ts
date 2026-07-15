@@ -77,12 +77,9 @@ async function main() {
             csvTitle,
             igdbTitle,
             titleMatch,
-            csvCoverUrl,
+            , // csvCoverUrl
             igdbCoverUrl,
-            coverMatch,
-            nominator,
-            comment,
-            auditStatus
+            coverMatch
         ] = row;
 
         let dbGame = dbGamesMap.get(gameId);

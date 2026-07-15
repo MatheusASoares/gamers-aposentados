@@ -84,7 +84,7 @@ async function main() {
         const igdbId = getGameIgdbId(game);
 
         // Check if there is an existing group that matches this game
-        let foundGroup = groups.find(g => 
+        const foundGroup = groups.find(g => 
             g.some(existing => {
                 const existingIgdbId = getGameIgdbId(existing);
 

@@ -148,14 +148,14 @@ Todos os problemas identificados no relatório anterior (29 de maio) foram corri
 
 ## 🧑‍💻 6. Novos Defeitos de Componentes React & UX
 
-### 6.1 Atualização de Estado na Fase de Renderização (FavoriteGamesModule)
+### 6.1 Atualização de Estado na Fase de Renderização (FavoriteGamesModule)-DONE
 
 - **Arquivo:** [favorite-games-module.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/profile/favorite-games-module.tsx#L34)
 - **Impacto:** **Médio (Loop de Renderização do React)**
 - **Detalhes:** O componente atualiza o estado local `setFavorites` na fase de renderização se a referência `initialFavorites` mudar. Se o componente pai recriar a lista em cada render do Server Component, o React entrará em loop de render contínuo.
 - **Solução:** Comparar o conteúdo profundo dos arrays favoritos (por exemplo, concatenando os IDs `initialFavorites.map(g => g.id).join(",")`) em vez de comparar a referência bruta.
 
-### 6.2 Bloqueio de Sincronização de Inputs no Modal de Configurações
+### 6.2 Bloqueio de Sincronização de Inputs no Modal de Configurações-DONE
 
 - **Arquivo:** [settings-modal.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/auth/settings-modal.tsx#L34)
 - **Impacto:** **Médio (Defeito de UX)**

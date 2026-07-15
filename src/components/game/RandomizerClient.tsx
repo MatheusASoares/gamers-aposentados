@@ -28,7 +28,6 @@ interface LocalCandidate extends GameSearchResult {
 export function RandomizerClient({
     currentUserId,
     currentUserName,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     currentUserEmail,
     canAddGames,
     otherPlayerName: defaultOtherName,

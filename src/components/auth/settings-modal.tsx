@@ -40,6 +40,21 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
 
+    const [prevOpen, setPrevOpen] = useState(open);
+
+    if (open !== prevOpen) {
+        setPrevOpen(open);
+        if (open) {
+            setName(user?.name || "");
+            setUsername(user?.username || "");
+            setNewPassword("");
+            setPreviewUrl(null);
+            setPendingFile(null);
+            setProfileMessage(null);
+            setPasswordMessage(null);
+        }
+    }
+
     const handleAvatarClick = () => fileInputRef.current?.click();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
