@@ -60,7 +60,7 @@ export function AppLogo({ theme, className, variant = "sidebar" }: AppLogoProps)
           <span className="text-xs font-black tracking-tight text-white">
             GAMERS <span className={currentConfig.accentText}>APOSENTADOS</span>
           </span>
-          <span className="text-[9px] font-black uppercase text-zinc-400 tracking-wider">
+          <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">
             {currentConfig.badgeText}
           </span>
         </div>
@@ -108,7 +108,7 @@ export function AppLogo({ theme, className, variant = "sidebar" }: AppLogoProps)
       {/* Dynamic Theme Sub-Badge */}
       <div
         className={cn(
-          "mt-3 z-10 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-sm transition-all",
+          "mt-3 z-10 inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-black uppercase tracking-widest backdrop-blur-md shadow-sm transition-all",
           currentConfig.badgeBg
         )}
       >
