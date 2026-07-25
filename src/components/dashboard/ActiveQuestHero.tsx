@@ -95,7 +95,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
 
     return (
         <div
-            className={`glass-card animate-fade-in-up group flex h-full min-h-[400px] flex-col overflow-hidden rounded-[2rem] border border-t-0 border-white/5 bg-zinc-950/80 shadow-2xl transition-all duration-500 hover:border-[#bd0df2]/30 hover:shadow-[#bd0df2]/10`}
+            className={`glass-card border border-theme bg-theme-card animate-fade-in-up group flex h-full min-h-[400px] flex-col overflow-hidden rounded-[2rem] shadow-2xl transition-all duration-500 hover:border-theme-primary/40 hover:shadow-[0_0_30px_var(--theme-glow)]`}
             style={{ animationDelay: "0ms" }}
         >
             {/* Dark/Grain/Glow Background Effects */}
@@ -180,7 +180,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                     {/* Progress Bar & HLTB */}
                     {progress ? (
                         <div className="space-y-3 pt-2">
-                            <div className="flex justify-between text-[11px] font-bold tracking-wider text-zinc-500 uppercase">
+                            <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
                                 <span>
                                     Progresso{" "}
                                     {progress.status === "COMPLETED"

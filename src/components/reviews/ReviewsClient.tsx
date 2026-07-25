@@ -61,7 +61,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
     return (
         <div className="relative min-h-screen w-full overflow-x-hidden">
             {/* Background effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
                 style={{ backgroundImage: "url('/noise.svg')" }}
@@ -83,7 +83,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                 </div>
 
                 {/* Filters Bar */}
-                <div className="mb-8 flex flex-wrap items-center gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-5 shadow-2xl backdrop-blur-md">
+                <div className="glass-card border border-theme bg-theme-card mb-8 flex flex-wrap items-center gap-4 rounded-2xl p-5 shadow-2xl backdrop-blur-md">
                     <div className="flex flex-wrap items-center gap-3">
                         <div className="flex items-center gap-2">
                             <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">

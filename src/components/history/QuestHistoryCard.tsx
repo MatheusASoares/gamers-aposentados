@@ -92,7 +92,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
     const posterUrl = data.winnerImageUrl?.replace("t_cover_big", "t_1080p") || null;
 
     return (
-        <div className="group relative z-10 mx-auto w-full overflow-hidden rounded-[2.5rem] border border-white/5 bg-zinc-950 shadow-2xl transition-all duration-700 hover:border-[#bd0df2]/20 hover:shadow-[0_0_50px_rgba(189,13,242,0.1)]">
+        <div className="group relative z-10 mx-auto w-full overflow-hidden rounded-[2.5rem] glass-card border border-theme shadow-2xl transition-all duration-700 hover:border-theme-primary/30 hover:shadow-[0_0_50px_var(--theme-glow)]">
             {/* Background Blur Overlay for intense contrast */}
             {bgUrl && (
                 <div className="pointer-events-none absolute inset-0 z-0 opacity-15 mix-blend-screen transition-opacity duration-700 group-hover:opacity-30">
@@ -118,7 +118,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                             <div className="mb-4 flex items-center justify-center gap-2">
                                 <span
                                     className={cn(
-                                        "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-[11px] font-black tracking-[0.2em] uppercase shadow-lg backdrop-blur-md",
+                                        "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-black tracking-[0.2em] uppercase shadow-lg backdrop-blur-md",
                                         isMainQuest
                                             ? "border-amber-500/30 bg-amber-500/10 text-amber-500"
                                             : "border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2]",
@@ -177,7 +177,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                             <div className="mb-5 flex flex-wrap items-center gap-4">
                                 <span
                                     className={cn(
-                                        "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-[11px] font-black tracking-[0.2em] uppercase shadow-lg backdrop-blur-md",
+                                        "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-black tracking-[0.2em] uppercase shadow-lg backdrop-blur-md",
                                         isMainQuest
                                             ? "border-amber-500/30 bg-amber-500/10 text-amber-500"
                                             : "border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2]",
@@ -412,7 +412,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                 <div className="mt-2 w-full border-t border-white/5 pt-8">
                     <div className="mb-6 flex items-center gap-2">
                         <History className="size-4 text-zinc-500" />
-                        <h3 className="text-[11px] font-black tracking-widest text-zinc-500 uppercase">
+                        <h3 className="text-xs font-black tracking-widest text-zinc-500 uppercase">
                             Mesa de Indicações
                         </h3>
                     </div>
@@ -446,7 +446,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                             />
                                         ) : (
                                             <div className="flex h-full w-full items-center justify-center">
-                                                <span className="text-[10px] font-bold tracking-widest text-zinc-700 uppercase">
+                                                <span className="text-xs font-bold tracking-widest text-zinc-700 uppercase">
                                                     Sem Capa
                                                 </span>
                                             </div>
@@ -458,7 +458,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                         <span className="truncate text-xs font-black text-white">
                                             {cand.gameTitle}
                                         </span>
-                                        <span className="mt-0.5 truncate text-[9px] font-bold tracking-wider text-red-400 uppercase">
+                                        <span className="mt-0.5 truncate text-xs font-bold tracking-wider text-red-400 uppercase">
                                             por {cand.nominatorName}
                                         </span>
                                     </div>

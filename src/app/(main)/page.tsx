@@ -4,6 +4,7 @@ import { ActiveQuestHero } from "@/components/dashboard/ActiveQuestHero";
 import { SideQuestBar } from "@/components/dashboard/SideQuestBar";
 import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { RecentActivity, ActivityEvent } from "@/components/dashboard/RecentGames";
+import { UserProfileWidget } from "@/components/dashboard/UserProfileWidget";
 import { Leaderboard, PlayerStats } from "@/components/dashboard/Leaderboard";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
@@ -247,8 +248,63 @@ export default async function DashboardPage() {
         };
     });
 
+    // Fetch logged in user profile with gamification stats and last completed game
+    const currentUserProfile = userId
+        ? await prisma.user.findUnique({
+              where: { id: userId },
+              select: {
+                  id: true,
+                  name: true,
+                  image: true,
+                  level: true,
+                  xp_points: true,
+                  equipped_title: true,
+                  gameProgress: {
+                      where: { status: "COMPLETED" },
+                      orderBy: { updated_at: "desc" },
+                      include: { game: true },
+                  },
+              },
+          })
+        : null;
+
+    const dbUserExtra: any[] = userId
+        ? await prisma.$queryRaw`SELECT equipped_frame, equipped_banner FROM users WHERE id = ${userId}`
+        : [];
+    const equippedFrame = dbUserExtra?.[0]?.equipped_frame || null;
+    const equippedBanner = dbUserExtra?.[0]?.equipped_banner || null;
+
+    const lastCompleted = currentUserProfile?.gameProgress[0]?.game;
+
+    const userWidgetData = currentUserProfile
+        ? {
+              name: currentUserProfile.name,
+              image: currentUserProfile.image,
+              level: currentUserProfile.level || 1,
+              xpPoints: currentUserProfile.xp_points || 0,
+              equippedTitle: currentUserProfile.equipped_title,
+              equippedFrame: equippedFrame,
+              equippedBanner: equippedBanner,
+              completedGamesCount: currentUserProfile.gameProgress.length,
+              platinumCount: currentUserProfile.gameProgress.filter((p) => p.is_platinum).length,
+              lastCompletedGame: lastCompleted
+                  ? {
+                        title: lastCompleted.title,
+                        coverUrl: lastCompleted.cover_url,
+                    }
+                  : null,
+          }
+        : null;
+
     return (
         <div className="mx-auto w-full max-w-[1920px] space-y-8 px-6 py-8 md:px-8 lg:px-12 lg:py-12">
+            {/* Gamification Profile Banner */}
+            {userWidgetData && (
+                <div className="w-full">
+                    <UserProfileWidget user={userWidgetData} />
+                </div>
+            )}
+
             {/* Row 1: Active Quests */}
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <ActiveQuestHero

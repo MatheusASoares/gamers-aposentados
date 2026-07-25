@@ -58,7 +58,7 @@ export function HistoryClient({
     return (
         <div className="relative min-h-screen w-full overflow-x-hidden">
             {/* Background effects */}
-            <div className="absolute inset-0 z-0 bg-linear-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col gap-12 px-6 py-8 md:px-8 lg:px-12 lg:py-12">

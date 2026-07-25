@@ -54,7 +54,7 @@ function SilverMedalIcon({ className = "h-5.5 w-5.5" }: { className?: string }) 
 export function Leaderboard({ players }: LeaderboardProps) {
     return (
         <div
-            className="glass-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl"
+            className="glass-card border border-theme bg-theme-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[1.5rem] shadow-2xl"
             style={{ animationDelay: "500ms" }}
             data-testid="leaderboard"
         >
@@ -73,7 +73,7 @@ export function Leaderboard({ players }: LeaderboardProps) {
                 </h3>
                 <div className="flex items-center gap-1.5 rounded-full border border-white/5 bg-white/5 px-3 py-1 backdrop-blur-md">
                     <GoldMedalIcon className="h-3.5 w-3.5" />
-                    <span className="text-[10px] font-black tracking-wider text-zinc-400 uppercase">
+                    <span className="text-xs font-black tracking-wider text-zinc-400 uppercase">
                         Placar Geral
                     </span>
                 </div>
@@ -152,7 +152,7 @@ export function Leaderboard({ players }: LeaderboardProps) {
 
             {/* Footer Humorous Subtext */}
             <div className="relative z-10 border-t border-white/5 bg-zinc-950/40 px-5 py-3 text-center backdrop-blur-sm">
-                <p className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">
+                <p className="text-xs font-black tracking-widest text-zinc-600 uppercase">
                     O primeiro a conseguir a aposentadoria integral ganha.
                 </p>
             </div>

@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Loader2, Trophy, History, Save, Pencil, X } from "lucide-react";
+import { useSession } from "next-auth/react";
+import { Loader2, Trophy, History, Save, Pencil, X, Shield, Swords, Compass, Sparkles, Gamepad2, Flame } from "lucide-react";
+import { GiSwordsEmblem, GiDragonHead, GiSpaceship, GiPortal, GiRetroController, GiCyberEye } from "react-icons/gi";
 import Image from "next/image";
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
 import { GameAutocomplete } from "@/components/ui/game-autocomplete";
@@ -25,6 +27,41 @@ interface LocalCandidate extends GameSearchResult {
     entryId?: string; // From DB if already saved
 }
 
+function ThemedEmblemIcon({ theme }: { theme: string }) {
+    if (theme === "theme-medieval") {
+        return (
+            <div className="relative flex items-center justify-center">
+                <GiSwordsEmblem className="h-24 w-24 text-amber-400 drop-shadow-[0_0_30px_rgba(245,158,11,0.95)] animate-pulse" />
+                <GiDragonHead className="absolute -top-4 h-12 w-12 text-amber-200 drop-shadow-[0_0_15px_rgba(251,191,36,0.9)] animate-bounce" />
+            </div>
+        );
+    }
+
+    if (theme === "theme-space") {
+        return (
+            <div className="relative flex items-center justify-center">
+                <GiPortal className="h-24 w-24 text-sky-400 drop-shadow-[0_0_35px_rgba(56,189,248,0.95)] animate-spin-slow" />
+                <GiSpaceship className="absolute h-12 w-12 text-amber-300 drop-shadow-[0_0_20px_rgba(251,191,36,0.9)] animate-pulse" />
+            </div>
+        );
+    }
+
+    if (theme === "theme-pixel") {
+        return (
+            <div className="relative flex items-center justify-center">
+                <GiRetroController className="h-24 w-24 text-emerald-400 drop-shadow-[4px_4px_0px_#000] animate-bounce" />
+            </div>
+        );
+    }
+
+    return (
+        <div className="relative flex items-center justify-center">
+            <GiCyberEye className="h-24 w-24 text-[#bd0df2] drop-shadow-[0_0_35px_rgba(189,13,242,0.95)] animate-pulse" />
+            <Sparkles className="absolute h-12 w-12 text-cyan-400 drop-shadow-[0_0_15px_rgba(6,182,212,0.9)] animate-spin-slow" />
+        </div>
+    );
+}
+
 export function RandomizerClient({
     currentUserId,
     currentUserName,
@@ -38,6 +75,9 @@ export function RandomizerClient({
     canAddGames: boolean;
     otherPlayerName: string;
 }) {
+    const { data: session } = useSession();
+    const equippedTheme = (session?.user as any)?.equipped_theme || "cyberpunk";
+
     const [questType, setQuestType] = useState<QuestType>("SIDE");
 
     // Pool state
@@ -435,6 +475,34 @@ export function RandomizerClient({
         setQuestType(type);
     };
 
+    const handleTestRoll = () => {
+        if (isRolling) return;
+        setIsRolling(true);
+        const sampleGames = [
+            "Dead Cells",
+            "Elden Ring",
+            "Hollow Knight",
+            "Chrono Trigger",
+            "The Witcher 3: Wild Hunt",
+            "Starfield",
+            "Final Fantasy VII",
+        ];
+        let idx = 0;
+        cycleIntervalRef.current = setInterval(() => {
+            setCycleText(sampleGames[idx]);
+            idx = (idx + 1) % sampleGames.length;
+        }, 120);
+
+        setTimeout(() => {
+            if (cycleIntervalRef.current) {
+                clearInterval(cycleIntervalRef.current);
+                cycleIntervalRef.current = null;
+            }
+            setIsRolling(false);
+            setCycleText("");
+        }, 4000);
+    };
+
     const handleClearBoard = async () => {
         setWinner(null);
         setSaveStatus(null);
@@ -446,7 +514,7 @@ export function RandomizerClient({
     return (
         <div className="relative mx-auto min-h-screen w-full px-6 py-8">
             {/* Background effects */}
-            <div className="absolute inset-0 z-0 bg-linear-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 flex w-full flex-col gap-8">
@@ -1071,36 +1139,46 @@ export function RandomizerClient({
                                             </span>
                                         </button>
                                     ) : (
-                                        <button
-                                            onClick={handleRoll}
-                                            disabled={
-                                                !poolIsComplete ||
-                                                hasUnsavedChanges ||
-                                                isRolling ||
-                                                isSaving ||
-                                                !poolId
-                                            }
-                                            className={cn(
-                                                "mx-auto flex w-full max-w-sm items-center justify-center gap-4 rounded-2xl border px-12 py-5 transition-all duration-300",
-                                                poolIsComplete &&
-                                                    !hasUnsavedChanges &&
-                                                    !isRolling &&
-                                                    !isSaving &&
-                                                    poolId
-                                                    ? "border-[#bd0df2]/50 bg-[#bd0df2]/20 text-[#bd0df2] shadow-[0_10px_40px_rgba(189,13,242,0.3)] hover:scale-[1.03] hover:bg-[#bd0df2]/30 active:scale-[0.97]"
-                                                    : "cursor-not-allowed border-white/5 bg-zinc-900 text-zinc-600",
-                                            )}
-                                        >
-                                            <Trophy
+                                        <div className="mx-auto flex flex-col items-center justify-center gap-4 w-full max-w-xl sm:flex-row">
+                                            <button
+                                                onClick={handleRoll}
+                                                disabled={
+                                                    !poolIsComplete ||
+                                                    hasUnsavedChanges ||
+                                                    isRolling ||
+                                                    isSaving ||
+                                                    !poolId
+                                                }
                                                 className={cn(
-                                                    "h-10 w-10",
-                                                    isRolling && "animate-spin",
+                                                    "flex-1 flex items-center justify-center gap-3 rounded-2xl border px-8 py-4 transition-all duration-300 w-full",
+                                                    poolIsComplete &&
+                                                        !hasUnsavedChanges &&
+                                                        !isRolling &&
+                                                        !isSaving &&
+                                                        poolId
+                                                        ? "border-theme-primary/50 bg-theme-primary/20 text-theme-primary shadow-[0_10px_40px_var(--theme-glow)] hover:scale-[1.03] hover:bg-theme-primary/30 active:scale-[0.97]"
+                                                        : "cursor-not-allowed border-white/5 bg-zinc-900 text-zinc-600",
                                                 )}
-                                            />
-                                            <span className="text-2xl font-black tracking-tighter whitespace-nowrap uppercase lg:text-3xl">
-                                                {isRolling ? "Rolling..." : "Roll the Dice"}
-                                            </span>
-                                        </button>
+                                            >
+                                                <Trophy
+                                                    className={cn(
+                                                        "h-8 w-8",
+                                                        isRolling && "animate-spin",
+                                                    )}
+                                                />
+                                                <span className="text-xl font-black tracking-tighter whitespace-nowrap uppercase lg:text-2xl">
+                                                    {isRolling ? "Rolling..." : "Roll the Dice"}
+                                                </span>
+                                            </button>
+                                            <button
+                                                onClick={handleTestRoll}
+                                                disabled={isRolling}
+                                                className="flex items-center justify-center gap-2 rounded-2xl border border-theme-primary/30 bg-theme-primary/10 px-6 py-4 text-xs font-black tracking-widest text-theme-primary uppercase transition-all duration-300 hover:border-theme-primary/60 hover:bg-theme-primary/20 hover:scale-[1.03] active:scale-95 w-full sm:w-auto"
+                                            >
+                                                <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
+                                                <span>Testar Animação 🎲</span>
+                                            </button>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -1108,6 +1186,105 @@ export function RandomizerClient({
                     </div>
                 )}
             </div>
+
+            {/* FULL-SCREEN THEMED ROLL ANIMATION OVERLAY */}
+            {isRolling && (
+                <div className="fixed inset-0 z-[150] flex flex-col items-center justify-center bg-black/95 p-6 backdrop-blur-2xl">
+                    {/* Ambient Particle & Sound Wave Backdrops */}
+                    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+                        <div className="absolute inset-0 bg-radial-gradient from-transparent via-black/80 to-black" />
+                        
+                        {/* Theme Specific Ambient Motion Background */}
+                        {equippedTheme === "theme-medieval" ? (
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(245,158,11,0.25)_0%,transparent_70%)] animate-pulse" />
+                        ) : equippedTheme === "theme-space" ? (
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.25)_0%,transparent_70%)] animate-pulse" />
+                        ) : equippedTheme === "theme-pixel" ? (
+                            <div className="absolute inset-0 bg-[linear-gradient(rgba(18,16,16,0)_50%,rgba(0,0,0,0.5)_50%)] bg-[length:100%_6px] opacity-60" />
+                        ) : (
+                            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(189,13,242,0.25)_0%,transparent_70%)] animate-pulse" />
+                        )}
+                    </div>
+
+                    <div className="relative z-10 flex max-w-2xl flex-col items-center justify-center gap-8 text-center">
+                        {/* THEMED EMBLEM CONTAINER */}
+                        <div className="relative flex h-52 w-52 items-center justify-center perspective-[1000px]">
+                            {equippedTheme === "theme-medieval" ? (
+                                /* MEDIEVAL FLAMING RUNE EMBLEM */
+                                <div className="relative flex h-44 w-44 items-center justify-center rounded-3xl border-4 border-amber-500 bg-gradient-to-br from-amber-950 via-stone-900 to-black p-4 shadow-[0_0_90px_rgba(245,158,11,0.9),inset_0_0_35px_rgba(245,158,11,0.5)] animate-bounce">
+                                    <div className="absolute inset-0 rounded-3xl border-2 border-dashed border-amber-400/50 animate-spin" />
+                                    <ThemedEmblemIcon theme="theme-medieval" />
+                                    <Flame className="absolute -bottom-3 -left-3 h-10 w-10 text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-pulse" />
+                                </div>
+                            ) : equippedTheme === "theme-space" ? (
+                                /* SPACE QUANTUM GYROSCOPE EMBLEM */
+                                <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-4 border-sky-400 bg-gradient-to-br from-slate-950 via-sky-950 to-black p-4 shadow-[0_0_90px_rgba(56,189,248,0.9),inset_0_0_35px_rgba(56,189,248,0.5)] animate-pulse">
+                                    <div className="absolute inset-0 rounded-full border-2 border-cyan-300/70 animate-spin" />
+                                    <div className="absolute inset-2 rounded-full border border-dashed border-amber-400/60 animate-spin" />
+                                    <ThemedEmblemIcon theme="theme-space" />
+                                </div>
+                            ) : equippedTheme === "theme-pixel" ? (
+                                /* PIXEL ART 16-BIT RETRO EMBLEM */
+                                <div className="relative flex h-44 w-44 items-center justify-center rounded-2xl border-4 border-amber-400 bg-indigo-950 p-4 shadow-[0_0_90px_rgba(34,197,94,0.9),inset_0_0_0_3px_#06b6d4] animate-bounce">
+                                    <ThemedEmblemIcon theme="theme-pixel" />
+                                </div>
+                            ) : (
+                                /* CYBERPUNK NEON HOLO EMBLEM */
+                                <div className="relative flex h-44 w-44 items-center justify-center rounded-3xl border-4 border-[#bd0df2] border-l-4 border-l-[#06b6d4] bg-gradient-to-br from-purple-950 via-zinc-950 to-black p-4 shadow-[0_0_90px_rgba(189,13,242,0.9),0_0_40px_rgba(6,182,212,0.6)] animate-pulse">
+                                    <div className="absolute inset-0 rounded-3xl border-2 border-cyan-400/50 animate-spin" />
+                                    <ThemedEmblemIcon theme="cyberpunk" />
+                                </div>
+                            )}
+                        </div>
+
+                        {/* STATUS BANNER & SLOT-MACHINE CYCLING TEXT */}
+                        <div className="flex w-full flex-col items-center gap-4">
+                            <span
+                                className={cn(
+                                    "text-xs font-black tracking-widest uppercase",
+                                    equippedTheme === "theme-medieval"
+                                        ? "font-serif text-amber-400"
+                                        : equippedTheme === "theme-space"
+                                        ? "font-mono text-sky-400"
+                                        : equippedTheme === "theme-pixel"
+                                        ? "font-mono text-emerald-400"
+                                        : "font-mono text-[#bd0df2]",
+                                )}
+                            >
+                                {equippedTheme === "theme-medieval"
+                                    ? "⚔️ O Oráculo das Runas está invocando o Destino..."
+                                    : equippedTheme === "theme-space"
+                                    ? "🛰️ Calculando Trajetória Quântica Estelar..."
+                                    : equippedTheme === "theme-pixel"
+                                    ? "🕹️ 16-BIT RETRO ROULETTE SPINNING..."
+                                    : "👾 NETRUNNER PROTOCOL: EXECUTING HOLO-ROULETTE..."}
+                            </span>
+
+                            <div className="glass-card border border-theme bg-theme-card relative w-full overflow-hidden rounded-2xl px-8 py-6 shadow-2xl backdrop-blur-xl">
+                                <span
+                                    className={cn(
+                                        "block truncate text-3xl font-black tracking-wide drop-shadow-lg md:text-4xl lg:text-5xl",
+                                        equippedTheme === "theme-medieval"
+                                            ? "font-serif text-amber-300"
+                                            : equippedTheme === "theme-space"
+                                            ? "font-mono text-sky-300 uppercase"
+                                            : equippedTheme === "theme-pixel"
+                                            ? "font-mono text-emerald-400 uppercase"
+                                            : "text-cyan-300 uppercase",
+                                    )}
+                                >
+                                    {cycleText || "SORTEANDO NOME..."}
+                                </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 text-xs font-bold text-zinc-500 tracking-widest uppercase">
+                                <Loader2 className="text-theme-primary h-4 w-4 animate-spin" />
+                                <span>Aguarde o veredito do RNG...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

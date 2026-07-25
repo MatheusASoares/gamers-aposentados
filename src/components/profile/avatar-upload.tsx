@@ -6,14 +6,17 @@ import { Camera } from "lucide-react";
 import { updateProfileImage } from "@/app/lib/user-actions";
 import { useSession } from "next-auth/react";
 
+import { UserAvatar } from "@/components/ui/user-avatar";
+
 interface AvatarUploadProps {
     currentImage: string | null;
     name: string | null;
     isOwner: boolean;
+    frameUrl?: string | null;
     className?: string;
 }
 
-export function AvatarUpload({ currentImage, name, isOwner, className }: AvatarUploadProps) {
+export function AvatarUpload({ currentImage, name, isOwner, frameUrl, className }: AvatarUploadProps) {
     const { update } = useSession();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [preview, setPreview] = useState<string | null>(null);
@@ -21,7 +24,6 @@ export function AvatarUpload({ currentImage, name, isOwner, className }: AvatarU
     const [isPending, startTransition] = useTransition();
 
     const src = preview || currentImage || "";
-    const initials = name?.charAt(0) || "G";
 
     const handleClick = () => {
         if (isOwner) fileInputRef.current?.click();
@@ -75,17 +77,18 @@ export function AvatarUpload({ currentImage, name, isOwner, className }: AvatarU
                 className={`group relative ${isOwner ? "cursor-pointer" : "cursor-default"}`}
                 aria-label={isOwner ? "Alterar foto de perfil" : undefined}
             >
-                <Avatar
-                    className={`border-4 border-zinc-900 shadow-xl transition-opacity ${isPending ? "opacity-50" : isOwner ? "group-hover:opacity-70" : ""} ${className}`}
-                >
-                    <AvatarImage src={src} alt={name || "User"} className="object-cover" />
-                    <AvatarFallback className="bg-zinc-800 text-4xl text-zinc-400">
-                        {initials}
-                    </AvatarFallback>
-                </Avatar>
+                <div className={`transition-opacity ${isPending ? "opacity-50" : isOwner ? "group-hover:opacity-70" : ""}`}>
+                    <UserAvatar
+                        src={src}
+                        name={name}
+                        frameUrl={frameUrl}
+                        size="xl"
+                        className={className}
+                    />
+                </div>
 
                 {isOwner && !isPending && (
-                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
+                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
                         <div className="rounded-full bg-black/60 p-3">
                             <Camera className="h-6 w-6 text-white" />
                         </div>

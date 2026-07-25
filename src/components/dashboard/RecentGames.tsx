@@ -205,7 +205,7 @@ export function RecentActivity({ events }: RecentActivityProps) {
 
     return (
         <div
-            className="glass-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl"
+            className="glass-card border border-theme bg-theme-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[1.5rem] shadow-2xl"
             style={{ animationDelay: "500ms" }}
             data-testid="recent-activity"
         >
@@ -253,7 +253,7 @@ export function RecentActivity({ events }: RecentActivityProps) {
                         </div>
 
                         {/* Date */}
-                        <span className="flex-shrink-0 text-[10px] font-black tracking-widest text-zinc-500 uppercase transition-colors group-hover:text-zinc-400">
+                        <span className="flex-shrink-0 text-xs font-black tracking-widest text-zinc-500 uppercase transition-colors group-hover:text-zinc-400">
                             {formatDate(event.date)}
                         </span>
                     </div>
@@ -262,7 +262,7 @@ export function RecentActivity({ events }: RecentActivityProps) {
 
             {/* Footer Humorous Subtext */}
             <div className="relative z-10 border-t border-white/5 bg-zinc-950/40 px-5 py-3 text-center backdrop-blur-sm">
-                <p className="text-[10px] font-black tracking-widest text-zinc-600 uppercase">
+                <p className="text-xs font-black tracking-widest text-zinc-600 uppercase">
                     Nenhuma artrose foi prejudicada na atualização deste feed.
                 </p>
             </div>

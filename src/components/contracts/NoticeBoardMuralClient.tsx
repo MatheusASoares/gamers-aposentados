@@ -3,8 +3,8 @@
 import { useTransition, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CampaignContract, CampaignContractProgress, Game } from "@prisma/client";
-import { Scroll, Lock, CheckCircle2, Swords, Loader2, Compass } from "lucide-react";
-import { generateNoticeBoardAction, completeContractAction, clearNoticeBoardAction } from "@/app/lib/notice-board-actions";
+import { Scroll, Lock, CheckCircle2, Swords, Loader2, Compass, RotateCcw } from "lucide-react";
+import { generateNoticeBoardAction, completeContractAction, uncompleteContractAction, clearNoticeBoardAction } from "@/app/lib/notice-board-actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -166,6 +166,18 @@ export function NoticeBoardMuralClient({
         });
     };
 
+    const handleUncompleteContract = (progressId: string) => {
+        startTransition(async () => {
+            const res = await uncompleteContractAction(progressId);
+            if (res.success) {
+                router.refresh();
+            } else {
+                const errorMsg = "error" in res ? res.error : "Erro ao desfazer compleção do contrato.";
+                alert(errorMsg);
+            }
+        });
+    };
+
 
     const renderLane = (
         title: string,
@@ -199,7 +211,7 @@ export function NoticeBoardMuralClient({
         return (
             <div className="space-y-4">
                 {/* Lane Header */}
-                <div className="relative flex min-h-[180px] flex-col justify-between gap-4 overflow-hidden rounded-2xl border border-white/5 bg-zinc-950/60 px-6 py-6 sm:min-h-[200px] sm:flex-row sm:items-center">
+                <div className="glass-card border border-theme bg-theme-card relative flex min-h-[180px] flex-col justify-between gap-4 overflow-hidden rounded-2xl px-6 py-6 sm:min-h-[200px] sm:flex-row sm:items-center">
                     {/* Ambient Dual-Layer Artwork Background */}
                     {(game.artwork_url || game.cover_url) && (
                         <div className="pointer-events-none absolute inset-0 hidden sm:block">
@@ -241,7 +253,7 @@ export function NoticeBoardMuralClient({
                             <div className="flex flex-col items-start gap-1.5">
                                 <span
                                     className={cn(
-                                        "rounded-full border px-2.5 py-0.5 text-[10px] font-black tracking-wider uppercase",
+                                        "rounded-full border px-2.5 py-0.5 text-xs font-black tracking-wider uppercase",
                                         badgeText === "Main Quest"
                                             ? "border-amber-400/20 bg-amber-400/10 text-amber-400"
                                             : "border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2]",
@@ -268,7 +280,7 @@ export function NoticeBoardMuralClient({
                         <Button
                             disabled={isPending}
                             onClick={() => handleGenerateBoard(game.id)}
-                            className="h-9 rounded-xl bg-gradient-to-r from-[#bd0df2] to-[#d946ef] px-4 py-2 text-xs font-black tracking-wider text-white uppercase shadow-[0_0_15px_rgba(189,13,242,0.3)] transition-all hover:scale-[1.03] active:scale-95 disabled:opacity-50"
+                            className="relative z-20 shrink-0 h-10 rounded-xl bg-gradient-to-r from-[#bd0df2] to-[#d946ef] px-5 py-2.5 text-xs font-black tracking-wider text-white uppercase shadow-[0_0_20px_rgba(189,13,242,0.4)] transition-all hover:scale-[1.05] active:scale-95 disabled:opacity-50"
                         >
                             {isPending ? (
                                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -283,7 +295,7 @@ export function NoticeBoardMuralClient({
                             disabled={isPending}
                             onClick={() => handleClearBoard(game.id)}
                             variant="destructive"
-                            className="h-9 rounded-xl border border-red-500/20 bg-red-950/30 px-4 py-2 text-xs font-black tracking-wider text-red-500 uppercase transition-all hover:scale-[1.03] hover:bg-red-950/60 active:scale-95 disabled:opacity-50"
+                            className="relative z-20 shrink-0 h-10 rounded-xl border border-red-500/30 bg-red-950/80 px-5 py-2.5 text-xs font-black tracking-wider text-red-300 uppercase transition-all hover:scale-[1.05] hover:bg-red-900 active:scale-95 disabled:opacity-50"
                         >
                             {isPending ? (
                                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -379,7 +391,7 @@ export function NoticeBoardMuralClient({
                                         {/* Card Header Info */}
                                         <div className="flex items-center justify-between">
                                             <span
-                                                className={`rounded-md px-2 py-0.5 text-[10px] font-black ${
+                                                className={`rounded-md px-2 py-0.5 text-xs font-black ${
                                                     isCompleted
                                                         ? "border border-green-500/20 bg-green-500/10 text-green-500"
                                                         : isAvailable
@@ -410,7 +422,7 @@ export function NoticeBoardMuralClient({
                                             className={`space-y-2.5 transition-all duration-500 ${isLocked ? "pointer-events-none blur-[4.5px] select-none" : ""}`}
                                         >
                                             <div>
-                                                <p className="text-[10px] font-bold tracking-wider text-zinc-500 uppercase">
+                                                <p className="text-xs font-bold tracking-wider text-zinc-500 uppercase">
                                                     Quest Milestone
                                                 </p>
                                                 <p className="mt-0.5 text-xs leading-relaxed font-medium text-zinc-300">
@@ -425,19 +437,34 @@ export function NoticeBoardMuralClient({
                                         {isLocked && (
                                             <div className="absolute inset-0 -top-24 flex flex-col items-center justify-center bg-transparent text-center">
                                                 <Lock className="h-8 w-8 animate-pulse text-zinc-700" />
-                                                <p className="mt-2 text-[10px] font-bold tracking-widest text-zinc-500 uppercase">
+                                                <p className="mt-2 text-xs font-bold tracking-widest text-zinc-500 uppercase">
                                                     Contract Locked
                                                 </p>
-                                                <p className="mt-0.5 text-[9px] text-zinc-600">
+                                                <p className="mt-0.5 text-xs font-bold text-zinc-600">
                                                     Complete the previous contract to unlock
                                                 </p>
                                             </div>
                                         )}
 
                                         {isCompleted && (
-                                            <div className="flex items-center justify-center gap-2 py-2 text-xs font-bold tracking-wider text-green-500/80 uppercase">
-                                                <CheckCircle2 className="h-4 w-4" />
-                                                Contract Completed!
+                                            <div className="flex flex-col gap-2">
+                                                <div className="flex items-center justify-center gap-2 py-1.5 text-xs font-black tracking-wider text-green-400 uppercase">
+                                                    <CheckCircle2 className="h-4 w-4" />
+                                                    Contract Completed!
+                                                </div>
+                                                <Button
+                                                    disabled={isPending}
+                                                    onClick={() => handleUncompleteContract(progressId)}
+                                                    variant="outline"
+                                                    className="h-10 w-full rounded-xl border-amber-500/30 bg-amber-500/10 text-xs font-black tracking-wider text-amber-300 uppercase hover:border-amber-500/60 hover:bg-amber-500/20 hover:text-amber-200 transition-all"
+                                                >
+                                                    {isPending ? (
+                                                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin text-amber-400" />
+                                                    ) : (
+                                                        <RotateCcw className="mr-1.5 h-3.5 w-3.5 text-amber-400" />
+                                                    )}
+                                                    Desfazer Compleção
+                                                </Button>
                                             </div>
                                         )}
 
@@ -506,7 +533,7 @@ export function NoticeBoardMuralClient({
             />
 
             {/* Background effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col gap-12 px-6 py-8 md:px-8 lg:px-12 lg:py-12">

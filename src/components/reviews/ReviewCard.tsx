@@ -96,7 +96,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
 
     return (
         <div
-            className={`group relative flex overflow-hidden rounded-2xl border border-white/5 bg-zinc-900/60 shadow-xl backdrop-blur-sm transition-all duration-500 hover:border-[#bd0df2]/30 hover:bg-zinc-900/80 hover:shadow-[0_0_30px_rgba(189,13,242,0.15)] ${layout === "list" ? "h-auto flex-col md:h-75 md:flex-row" : "min-h-112.5 flex-col"} ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
+            className={`glass-card border border-theme bg-theme-card group relative flex overflow-hidden rounded-2xl shadow-xl backdrop-blur-sm transition-all duration-500 hover:border-theme-primary/40 hover:shadow-[0_0_30px_var(--theme-glow)] ${layout === "list" ? "h-auto flex-col md:h-75 md:flex-row" : "min-h-112.5 flex-col"} ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
         >
             <div
                 className={`relative flex items-center justify-center overflow-hidden bg-zinc-950 px-4 py-8 ${layout === "list" ? "aspect-video w-full shrink-0 md:aspect-3/4 md:w-70" : "min-h-75 w-full"}`}
@@ -152,11 +152,11 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
 
             <div className="z-10 flex flex-1 flex-col p-6">
                 <div className="mb-4 flex flex-wrap items-center gap-3">
-                    <span className="rounded-md border border-[#bd0df2]/20 bg-[#bd0df2]/10 px-3 py-1 text-[10px] font-black tracking-[0.2em] text-[#bd0df2] uppercase shadow-[0_0_10px_rgba(189,13,242,0.1)]">
+                    <span className="rounded-md border border-[#bd0df2]/20 bg-[#bd0df2]/10 px-3 py-1 text-xs font-black tracking-[0.2em] text-[#bd0df2] uppercase shadow-[0_0_10px_rgba(189,13,242,0.1)]">
                         {review.game.quest_type === "MAIN_QUEST" ? "Main Quest" : "Side Quest"}
                     </span>
                     {review.game.platform && (
-                        <span className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-1 text-[10px] font-black tracking-[0.2em] text-zinc-300 uppercase">
+                        <span className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-1 text-xs font-black tracking-[0.2em] text-zinc-300 uppercase">
                             {review.game.platform}
                         </span>
                     )}
@@ -192,7 +192,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                 <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-5">
                     <button
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="group/btn flex items-center gap-2 text-[10px] font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_5px_rgba(189,13,242,0.3)] transition-colors hover:text-white"
+                        className="group/btn flex items-center gap-2 text-xs font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_5px_rgba(189,13,242,0.3)] transition-colors hover:text-white"
                     >
                         {isExpanded ? "Mostrar Menos" : "Review Completa"}{" "}
                         <ArrowRight

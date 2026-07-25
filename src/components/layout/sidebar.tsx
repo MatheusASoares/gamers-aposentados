@@ -11,10 +11,14 @@ import {
     LogOut,
     Map,
     Scroll,
+    Trophy,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { handleSignOut } from "@/lib/actions";
+
+import { useSession } from "next-auth/react";
+import { AppLogo } from "@/components/layout/app-logo";
 
 interface SidebarProps {
     className?: string;
@@ -22,49 +26,31 @@ interface SidebarProps {
 
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname();
+    const { data: session } = useSession();
+    const equippedTheme = (session?.user as any)?.equipped_theme || "cyberpunk";
 
-    const isActive = (path: string) => pathname === path;
+    const isActive = (path: string) => {
+        if (path === "/") return pathname === "/";
+        return pathname.startsWith(path);
+    };
 
     return (
         <div
             className={cn(
-                "group relative flex min-h-screen w-64 flex-col border-r border-white/5 bg-zinc-950/80 pb-12 shadow-2xl transition-all duration-500",
+                "group relative flex min-h-screen w-64 flex-col border-r border-theme bg-zinc-950/90 pb-12 shadow-2xl transition-all duration-500",
                 className,
             )}
         >
             {/* Background effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900/50 to-zinc-950" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/60" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
                 style={{ backgroundImage: "url('/noise.svg')" }}
             />
 
             <div className="relative z-10 space-y-4 py-8">
-                {/* NEW PREMIUM LOGO */}
-                <Link
-                    href="/"
-                    className="relative flex flex-col items-center justify-center px-6 pb-6 transition-all duration-500 hover:scale-105"
-                >
-                    {/* Premium Ambient Glow */}
-                    <div className="absolute -inset-1 z-0 animate-pulse rounded-[2.5rem] bg-[#bd0df2]/20 blur-2xl transition-all duration-500 group-hover:bg-[#bd0df2]/40" />
-                    
-                    {/* Logo Container with Refined Glass Effect */}
-                    <div className="relative z-10 overflow-hidden rounded-[2.5rem] border border-white/5 bg-transparent p-1 shadow-2xl backdrop-blur-xl transition-all duration-500 group-hover:border-[#bd0df2]/40 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.3)]">
-                        {/* Inner Decorative Gradient */}
-                        <div className="absolute inset-0 z-0 bg-gradient-to-br from-[#bd0df2]/10 via-transparent to-transparent opacity-30" />
-                        
-                        <Image
-                            src={logo}
-                            alt="Gamers Aposentados Logo"
-                            width={180}
-                            height={180}
-                            className="relative z-10 h-auto w-full mix-blend-screen transition-all duration-700 group-hover:brightness-110 group-hover:contrast-125"
-                        />
-                        
-                        {/* Shine Effect Overlay */}
-                        <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-tr from-transparent via-white/5 to-transparent opacity-0 transition-opacity duration-1000 group-hover:opacity-100" />
-                    </div>
-                </Link>
+                {/* DYNAMIC THEMED LOGO */}
+                <AppLogo theme={equippedTheme} variant="sidebar" />
 
                 <div className="mt-4 px-4 py-2">
                     <nav className="space-y-3">
@@ -74,12 +60,26 @@ export function Sidebar({ className }: SidebarProps) {
                                 className={cn(
                                     "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/")
-                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
                                         : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
-                                <LayoutDashboard className="h-5 w-5" />
+                                <LayoutDashboard className={cn("h-5 w-5 transition-colors", isActive("/") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-cyan-400")} />
                                 Dashboard
+                            </Button>
+                        </Link>
+                        <Link href="/profile" passHref>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
+                                    isActive("/profile")
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
+                                )}
+                            >
+                                <Trophy className={cn("h-5 w-5 transition-colors", isActive("/profile") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-amber-400")} />
+                                Hall of Fame
                             </Button>
                         </Link>
                         <Link href="/quests" passHref>
@@ -88,11 +88,11 @@ export function Sidebar({ className }: SidebarProps) {
                                 className={cn(
                                     "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/quests")
-                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
                                         : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
-                                <Map className="h-5 w-5" />
+                                <Map className={cn("h-5 w-5 transition-colors", isActive("/quests") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-emerald-400")} />
                                 Quests
                             </Button>
                         </Link>
@@ -102,11 +102,11 @@ export function Sidebar({ className }: SidebarProps) {
                                 className={cn(
                                     "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/board")
-                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
                                         : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
-                                <Scroll className="h-5 w-5" />
+                                <Scroll className={cn("h-5 w-5 transition-colors", isActive("/board") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-rose-400")} />
                                 Board
                             </Button>
                         </Link>
@@ -116,11 +116,11 @@ export function Sidebar({ className }: SidebarProps) {
                                 className={cn(
                                     "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/reviews")
-                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
                                         : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
-                                <History className="h-5 w-5" />
+                                <History className={cn("h-5 w-5 transition-colors", isActive("/reviews") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-indigo-400")} />
                                 Reviews
                             </Button>
                         </Link>
@@ -130,11 +130,11 @@ export function Sidebar({ className }: SidebarProps) {
                                 className={cn(
                                     "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
                                     isActive("/randomizer")
-                                        ? "border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] hover:bg-[#bd0df2]/20"
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
                                         : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
                                 )}
                             >
-                                <Dices className="h-5 w-5" />
+                                <Dices className={cn("h-5 w-5 transition-colors", isActive("/randomizer") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-fuchsia-400")} />
                                 Randomizer
                             </Button>
                         </Link>
@@ -142,7 +142,7 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
             </div>
 
-            <div className="relative z-10 mt-auto space-y-1 border-t border-white/5 bg-zinc-950/40 px-4 py-6 backdrop-blur-sm">
+            <div className="relative z-10 mt-auto space-y-1 border-t border-theme bg-black/40 px-4 py-6 backdrop-blur-sm">
                 <form action={handleSignOut}>
                     <Button
                         variant="ghost"

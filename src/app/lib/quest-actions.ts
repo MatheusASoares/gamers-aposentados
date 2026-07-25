@@ -6,6 +6,8 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
+import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
+
 export async function updateQuestProgress(
     gameId: string,
     percentage: number,
@@ -55,6 +57,8 @@ export async function updateQuestProgress(
             }
             return { success: true };
         });
+
+        await recalculateUserXPAndLevel(session.user.id);
 
         revalidatePath("/");
         revalidatePath("/quests");
@@ -108,6 +112,8 @@ export async function completeQuest(gameId: string): Promise<{ success: boolean;
             }
             return { success: true };
         });
+
+        await recalculateUserXPAndLevel(session.user.id);
 
         revalidatePath("/");
         revalidatePath("/quests");

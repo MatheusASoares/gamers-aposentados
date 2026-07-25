@@ -95,11 +95,11 @@ export function StatsGrid({ reviews }: StatsGridProps) {
 
     return (
         <div
-            className="group relative w-full overflow-hidden rounded-[2rem] border border-white/5 bg-zinc-950/80 shadow-2xl transition-all duration-700 hover:border-[#bd0df2]/30 hover:shadow-[#bd0df2]/10"
+            className="glass-card border border-theme bg-theme-card group relative w-full overflow-hidden rounded-[2rem] shadow-2xl transition-all duration-700 hover:border-theme-primary/40 hover:shadow-[0_0_30px_var(--theme-glow)]"
             style={{ animationDelay: "300ms" }}
         >
             {/* Dark/Grain/Glow Background Effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#12001a]" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/20 to-black/40" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
                 style={{ backgroundImage: "url('/noise.svg')" }}
@@ -172,9 +172,9 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                 <div className="relative flex flex-1 flex-col justify-center bg-zinc-950/80 p-8 backdrop-blur-sm md:p-12 lg:p-16">
                     {/* Header Tag */}
                     <div className="mb-6 flex items-center gap-3">
-                        <div className="flex items-center gap-2 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-4 py-1.5 backdrop-blur-md">
-                            <Star className="h-4 w-4 text-[#bd0df2]" />
-                            <span className="text-xs font-black tracking-[0.2em] text-[#bd0df2] uppercase">
+                        <div className="flex items-center gap-2 rounded-full border border-theme-primary/40 bg-theme-primary/10 px-4 py-1.5 backdrop-blur-md">
+                            <Star className="h-4 w-4 text-theme-primary" />
+                            <span className="text-xs font-black tracking-[0.2em] text-theme-primary uppercase">
                                 Review da Vez
                             </span>
                         </div>
@@ -195,7 +195,7 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                     </h3>
 
                     {/* Review Text */}
-                    <div className="relative mb-10 border-l-2 border-[#bd0df2]/40 pl-6">
+                    <div className="relative mb-10 border-l-2 border-theme-primary/50 pl-6">
                         <p className="text-lg leading-relaxed font-medium text-zinc-300 md:text-xl">
                             {currentReview.review_text
                                 ? `"${currentReview.review_text}"`

@@ -10,51 +10,202 @@
         "Liberation Mono", "Courier New", monospace;
 }
 
-@layer base {
-    :root {
-        --background: 0 0% 100%;
-        --foreground: 240 10% 3.9%;
-        --card: 0 0% 100%;
-        --card-foreground: 240 10% 3.9%;
-        --popover: 0 0% 100%;
-        --popover-foreground: 240 10% 3.9%;
-        --primary: 283 92% 50%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 240 4.8% 95.9%;
-        --secondary-foreground: 240 5.9% 10%;
-        --muted: 240 4.8% 95.9%;
-        --muted-foreground: 240 3.8% 46.1%;
-        --accent: 240 4.8% 95.9%;
-        --accent-foreground: 240 5.9% 10%;
-        --destructive: 0 84.2% 60.2%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 240 5.9% 90%;
-        --input: 240 5.9% 90%;
-        --ring: 283 92% 50%;
-        --radius: 0.5rem;
-    }
+/* ==========================================================================
+   THEME ENGINE: Semantic Color Tokens & Overrides
+   ========================================================================== */
 
-    .dark {
-        --background: 240 10% 3.9%;
-        --foreground: 0 0% 98%;
-        --card: 240 6% 10%;
-        --card-foreground: 0 0% 98%;
-        --popover: 240 6% 10%;
-        --popover-foreground: 0 0% 98%;
-        --primary: 283 92% 50%;
-        --primary-foreground: 0 0% 98%;
-        --secondary: 240 3.7% 15.9%;
-        --secondary-foreground: 0 0% 98%;
-        --muted: 240 3.7% 15.9%;
-        --muted-foreground: 240 5% 64.9%;
-        --accent: 240 3.7% 15.9%;
-        --accent-foreground: 0 0% 98%;
-        --destructive: 0 62.8% 30.6%;
-        --destructive-foreground: 0 0% 98%;
-        --border: 240 3.7% 15.9%;
-        --input: 240 3.7% 15.9%;
-        --ring: 283 92% 50%;
-    }
+:root,
+[data-theme="cyberpunk"] {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 6% 10%;
+    --card-foreground: 0 0% 98%;
+    --primary: 283 92% 50%;
+    --border: 240 3.7% 15.9%;
+    --ring: 283 92% 50%;
+    --radius: 0.5rem;
+
+    --theme-primary: #bd0df2;
+    --theme-primary-rgb: 189, 13, 242;
+    --theme-secondary: #06b6d4;
+    --theme-secondary-rgb: 6, 182, 212;
+    --theme-bg: #09090b;
+    --theme-card-bg: rgba(24, 24, 27, 0.85);
+    --theme-border: rgba(255, 255, 255, 0.08);
+    --theme-glow: rgba(189, 13, 242, 0.5);
+    --theme-title-accent: #bd0df2;
+}
+
+/* Tema 2: RPG Fantasy Medieval (The Witcher 3 & Skyrim) */
+[data-theme="theme-medieval"] {
+    --background: 24 25% 4%;
+    --foreground: 40 30% 95%;
+    --card: 24 20% 8%;
+    --primary: 38 92% 50%;
+    --border: 38 92% 35%;
+    --ring: 38 92% 50%;
+
+    --theme-primary: #f59e0b;
+    --theme-primary-rgb: 245, 158, 11;
+    --theme-secondary: #dc2626;
+    --theme-secondary-rgb: 220, 38, 38;
+    --theme-bg: #0d0a07;
+    --theme-card-bg: rgba(26, 19, 13, 0.95);
+    --theme-border: rgba(245, 158, 11, 0.6);
+    --theme-glow: rgba(245, 158, 11, 0.6);
+    --theme-title-accent: #fbbf24;
+}
+
+/* Atmospheric Campfire Embers & Parchment Frame for Medieval Theme */
+[data-theme="theme-medieval"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 50% 100%, rgba(217, 119, 6, 0.15) 0%, transparent 60%),
+        radial-gradient(circle at 20% 20%, rgba(220, 38, 38, 0.1) 0%, transparent 40%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+[data-theme="theme-medieval"] .glass-card {
+    background: linear-gradient(145deg, rgba(32, 23, 14, 0.96), rgba(16, 12, 8, 0.96)) !important;
+    border: 2px solid #d97706 !important;
+    box-shadow: inset 0 0 15px rgba(217, 119, 6, 0.15), 0 0 25px rgba(217, 119, 6, 0.35) !important;
+}
+
+[data-theme="theme-medieval"] h1,
+[data-theme="theme-medieval"] h2,
+[data-theme="theme-medieval"] h3 {
+    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
+    letter-spacing: 0.05em !important;
+}
+
+/* Tema 3: RPG Espacial Sci-Fi (Starfield & No Man's Sky) */
+[data-theme="theme-space"] {
+    --background: 220 60% 3%;
+    --foreground: 210 40% 98%;
+    --card: 220 50% 8%;
+    --primary: 199 89% 60%;
+    --border: 199 89% 40%;
+    --ring: 199 89% 60%;
+
+    --theme-primary: #38bdf8;
+    --theme-primary-rgb: 56, 189, 248;
+    --theme-secondary: #fbbf24;
+    --theme-secondary-rgb: 251, 191, 36;
+    --theme-bg: #010410;
+    --theme-card-bg: rgba(6, 18, 44, 0.95);
+    --theme-border: rgba(56, 189, 248, 0.7);
+    --theme-glow: rgba(56, 189, 248, 0.75);
+    --theme-title-accent: #38bdf8;
+}
+
+/* Sci-Fi Holographic Telemetry Grid & Starfield Dust for Space Theme */
+[data-theme="theme-space"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 15% 85%, rgba(251, 191, 36, 0.12) 0%, transparent 45%),
+        linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+[data-theme="theme-space"] .glass-card {
+    background: linear-gradient(135deg, rgba(6, 22, 54, 0.96), rgba(2, 9, 28, 0.96)) !important;
+    border: 2px solid #38bdf8 !important;
+    box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.2), 0 0 30px rgba(56, 189, 248, 0.45) !important;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+
+[data-theme="theme-space"] h1,
+[data-theme="theme-space"] h2,
+[data-theme="theme-space"] h3 {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
+    letter-spacing: 0.12em !important;
+}
+
+/* Tema 4: Pixel Art Retrogaming (Chrono Trigger & Final Fantasy 16-Bit) */
+[data-theme="theme-pixel"] {
+    --background: 240 60% 5%;
+    --foreground: 120 100% 95%;
+    --card: 240 60% 10%;
+    --primary: 142 76% 50%;
+    --border: 45 93% 47%;
+    --ring: 142 76% 50%;
+
+    --theme-primary: #22c55e;
+    --theme-primary-rgb: 34, 197, 94;
+    --theme-secondary: #f59e0b;
+    --theme-secondary-rgb: 245, 158, 11;
+    --theme-bg: #050716;
+    --theme-card-bg: rgba(6, 16, 48, 0.95);
+    --theme-border: rgba(245, 158, 11, 0.65);
+    --theme-glow: rgba(34, 197, 94, 0.65);
+    --theme-title-accent: #4ade80;
+}
+
+/* CRT Scanlines & 16-Bit Retro Window Box Styling for Pixel Theme */
+[data-theme="theme-pixel"] body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+    background-size: 100% 4px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.45;
+}
+
+[data-theme="theme-pixel"] .glass-card {
+    background: linear-gradient(145deg, rgba(8, 22, 60, 0.95), rgba(3, 10, 32, 0.95)) !important;
+    border: 2px solid #f59e0b !important;
+    box-shadow: inset 0 0 0 1px #06b6d4, 0 0 20px rgba(34, 197, 94, 0.35) !important;
+}
+
+/* Holo Cyber Matrix Grid & Neon Plasma for Cyberpunk Theme */
+html:not([data-theme]) body::before,
+[data-theme="cyberpunk"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 90% 10%, rgba(189, 13, 242, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.15) 0%, transparent 45%),
+        linear-gradient(rgba(189, 13, 242, 0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
+    z-index: 0;
+    pointer-events: none;
+}
+
+html:not([data-theme]) .glass-card,
+[data-theme="cyberpunk"] .glass-card {
+    background: linear-gradient(135deg, rgba(28, 10, 42, 0.96), rgba(8, 6, 18, 0.96)) !important;
+    border: 2px solid #bd0df2 !important;
+    border-left: 4px solid #06b6d4 !important;
+    box-shadow: inset 0 0 20px rgba(189, 13, 242, 0.2), 0 0 30px rgba(189, 13, 242, 0.45), 0 0 10px rgba(6, 182, 212, 0.3) !important;
 }
 
 @layer base {
@@ -63,30 +214,48 @@
     }
 
     body {
-        @apply bg-background text-foreground;
+        background-color: var(--theme-bg);
+        color: var(--foreground);
+        transition: background-color 0.4s ease, color 0.4s ease;
     }
 }
 
+/* Dynamic Helper Utilities */
+.text-theme-primary { color: var(--theme-primary) !important; }
+.bg-theme-primary { background-color: var(--theme-primary) !important; }
+.border-theme-primary { border-color: var(--theme-primary) !important; }
+
+.text-theme-secondary { color: var(--theme-secondary) !important; }
+.bg-theme-secondary { background-color: var(--theme-secondary) !important; }
+.border-theme-secondary { border-color: var(--theme-secondary) !important; }
+
+.bg-theme-card { background-color: var(--theme-card-bg) !important; }
+.border-theme { border-color: var(--theme-border) !important; }
+
+.theme-glow { box-shadow: 0 0 20px -3px var(--theme-glow) !important; }
+.theme-glow-strong { box-shadow: 0 0 30px -2px var(--theme-glow) !important; }
+
 /* Glass Card Effect */
 .glass-card {
-    background: rgba(24, 24, 27, 0.8);
+    background: var(--theme-card-bg);
     backdrop-filter: blur(12px);
-    border: 1px solid hsl(240 3.7% 15.9%);
+    border: 1px solid var(--theme-border);
     border-radius: 0.75rem;
+    transition: background-color 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease;
 }
 
 /* Neon Glow Effect */
 .neon-glow {
-    box-shadow: 0 0 15px -3px rgba(189, 13, 242, 0.4);
+    box-shadow: 0 0 15px -3px var(--theme-glow);
 }
 
 .neon-glow-strong {
-    box-shadow: 0 0 25px -3px rgba(189, 13, 242, 0.6);
+    box-shadow: 0 0 25px -3px var(--theme-glow);
 }
 
 /* Progress Bar Glow */
 .progress-glow {
-    box-shadow: 0 0 15px rgba(189, 13, 242, 0.6);
+    box-shadow: 0 0 15px var(--theme-glow);
 }
 
 /* Staggered entrance animations */
@@ -119,7 +288,7 @@
     background: linear-gradient(
         90deg,
         transparent 0%,
-        rgba(189, 13, 242, 0.1) 50%,
+        rgba(var(--theme-primary-rgb), 0.15) 50%,
         transparent 100%
     );
     background-size: 200% 100%;
@@ -141,6 +310,6 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: #bd0df2;
-    box-shadow: 0 0 10px rgba(189, 13, 242, 0.5);
+    background: var(--theme-primary);
+    box-shadow: 0 0 10px var(--theme-glow);
 }

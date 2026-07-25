@@ -213,3 +213,129 @@ export async function completeContractAction(contractProgressId: string) {
         return { success: false, error: "Falha ao completar contrato: " + errorMessage };
     }
 }
+
+export async function uncompleteContractAction(contractProgressId: string) {
+    const session = await auth();
+
+    if (!session?.user?.id) {
+        return { success: false, error: "Usuário não autenticado" };
+    }
+
+    const userId = session.user.id;
+
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            // 1. Localizar o progresso do contrato do usuário
+            const currentProgress = await tx.campaignContractProgress.findUnique({
+                where: { id: contractProgressId },
+                include: {
+                    contract: true,
+                },
+            });
+
+            if (!currentProgress) {
+                throw new Error("Contrato não encontrado");
+            }
+
+            if (currentProgress.user_id !== userId) {
+                throw new Error("Acesso negado: progresso de contrato pertence a outro usuário");
+            }
+
+            if (currentProgress.status !== "COMPLETED") {
+                throw new Error("Este contrato não está concluído para ser desfeito");
+            }
+
+            const gameId = currentProgress.contract.game_id;
+            const currentOrder = currentProgress.contract.sequence_order;
+
+            // 2. Colocar o contrato atual de volta como "AVAILABLE"
+            await tx.campaignContractProgress.update({
+                where: { id: contractProgressId },
+                data: { status: "AVAILABLE" },
+            });
+
+            // 3. Buscar outros contratos COMPLETED deste jogo para este usuário
+            const otherCompletedProgresses = await tx.campaignContractProgress.findMany({
+                where: {
+                    user_id: userId,
+                    status: "COMPLETED",
+                    contract: {
+                        game_id: gameId,
+                    },
+                },
+                include: {
+                    contract: true,
+                },
+                orderBy: {
+                    contract: {
+                        sequence_order: "desc",
+                    },
+                },
+            });
+
+            // Calcular nova porcentagem baseada no maior contrato ainda concluído
+            const newPercentage = otherCompletedProgresses.length > 0
+                ? otherCompletedProgresses[0].contract.progress_percentage
+                : 0;
+
+            // 4. Atualizar o progresso do jogo (GameProgress)
+            const gameProgress = await tx.gameProgress.findUnique({
+                where: {
+                    user_id_game_id: {
+                        user_id: userId,
+                        game_id: gameId,
+                    },
+                },
+            });
+
+            if (gameProgress) {
+                const isStillFinished = newPercentage === 100;
+                await tx.gameProgress.update({
+                    where: { id: gameProgress.id },
+                    data: {
+                        progress_percentage: newPercentage,
+                        status: isStillFinished ? "COMPLETED" : "ACTIVE",
+                        end_date: isStillFinished ? gameProgress.end_date : null,
+                    },
+                });
+            }
+
+            // 5. Bloquear (LOCKED) o próximo contrato se ele estiver como "AVAILABLE" e não concluído
+            const nextContract = await tx.campaignContract.findFirst({
+                where: {
+                    game_id: gameId,
+                    sequence_order: currentOrder + 1,
+                },
+            });
+
+            if (nextContract) {
+                const nextProgress = await tx.campaignContractProgress.findUnique({
+                    where: {
+                        user_id_contract_id: {
+                            user_id: userId,
+                            contract_id: nextContract.id,
+                        },
+                    },
+                });
+
+                if (nextProgress && nextProgress.status === "AVAILABLE") {
+                    await tx.campaignContractProgress.update({
+                        where: { id: nextProgress.id },
+                        data: { status: "LOCKED" },
+                    });
+                }
+            }
+
+            return { success: true };
+        });
+
+        revalidatePath("/dashboard");
+        revalidatePath(`/games/${result ? "" : ""}`);
+        return { success: true };
+    } catch (error) {
+        console.error("Erro em uncompleteContractAction:", error);
+        const errorMessage = error instanceof Error ? error.message : "Desconhecido";
+        return { success: false, error: "Falha ao desfazer compleção: " + errorMessage };
+    }
+}
+

@@ -13,7 +13,7 @@ export function HltbBadge({ hours, isLoading, onRefresh, className }: HltbBadgeP
         return (
             <div className={cn("flex items-center gap-1.5 rounded-full border border-[#bd0df2]/20 bg-[#bd0df2]/10 px-2.5 py-1", className)}>
                 <div className="h-3 w-3 animate-spin rounded-full border-2 border-[#bd0df2]/40 border-t-[#bd0df2]"></div>
-                <span className="text-[10px] font-bold text-[#bd0df2]/70 uppercase tracking-widest animate-pulse">AI Agent...</span>
+                <span className="text-xs font-bold text-[#bd0df2]/70 uppercase tracking-widest animate-pulse">AI Agent...</span>
             </div>
         );
     }
@@ -35,7 +35,7 @@ export function HltbBadge({ hours, isLoading, onRefresh, className }: HltbBadgeP
                 title="Tentar buscar tempo HLTB"
             >
                 <RefreshCw className="h-3 w-3 text-zinc-500 transition-colors group-hover:text-[#bd0df2]" />
-                <span className="text-[9px] font-bold text-zinc-500 group-hover:text-[#bd0df2]">HLTB?</span>
+                <span className="text-xs font-bold text-zinc-500 group-hover:text-[#bd0df2]">HLTB?</span>
             </button>
         );
     }
@@ -43,7 +43,7 @@ export function HltbBadge({ hours, isLoading, onRefresh, className }: HltbBadgeP
     return (
         <div className={cn("flex items-center gap-1.5 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/20 px-2.5 py-1 shadow-[0_0_10px_rgba(189,13,242,0.15)]", className)}>
             <Clock className="h-3 w-3 text-[#bd0df2]" />
-            <span className="text-[11px] font-black text-[#bd0df2] drop-shadow-[0_0_5px_rgba(189,13,242,0.5)] tracking-wider">
+            <span className="text-xs font-black text-[#bd0df2] drop-shadow-[0_0_5px_rgba(189,13,242,0.5)] tracking-wider">
                 {hours}H
             </span>
         </div>

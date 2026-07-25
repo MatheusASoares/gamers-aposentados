@@ -52,6 +52,13 @@ model User {
   favoriteGamesYear Game[]       @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
   contractProgresses CampaignContractProgress[]
 
+  xp_points     Int       @default(0)
+  level         Int       @default(1)
+  equipped_title String?
+  equipped_frame String?
+  equipped_banner String?
+  equipped_theme String?   @default("cyberpunk")
+
   @@map("users")
 }
 
@@ -132,6 +139,9 @@ model GameProgress {
 
   start_date          DateTime?  // Quando este usuário começou
   end_date            DateTime?  // Quando completou ou dropou
+
+  is_platinum         Boolean    @default(false)
+  platinum_at         DateTime?
 
   created_at          DateTime   @default(now())
   updated_at          DateTime   @updatedAt

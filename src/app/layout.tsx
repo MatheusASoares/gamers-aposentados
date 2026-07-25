@@ -1,11 +1,24 @@
+import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { Providers } from "@/components/providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import "./globals.css";
 
-export const metadata = {
+export const metadata: Metadata = {
     title: "Gamers Aposentados",
     description: "A comunidade de gamers aposentados",
+    icons: {
+        icon: [
+            { url: "/favicon.ico" },
+            { url: "/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+        ],
+        shortcut: "/favicon.ico",
+        apple: "/apple-touch-icon.png",
+    },
+    manifest: "/site.webmanifest",
+    appleWebApp: {
+        title: "Gamers Aposentados",
+    },
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

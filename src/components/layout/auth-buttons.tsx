@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, Trophy } from "lucide-react";
 import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { SettingsModal } from "@/components/auth/settings-modal";
@@ -19,6 +19,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "next-auth/react";
 
+import { UserAvatar } from "@/components/ui/user-avatar";
+
 interface AuthButtonsProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     user: any; // Using any for now to avoid dragging in session types, improving later
@@ -29,9 +31,10 @@ export function AuthButtons({ user }: AuthButtonsProps) {
     const [registerOpen, setRegisterOpen] = useState(false);
     const [settingsOpen, setSettingsOpen] = useState(false);
 
-    // Use the live session image so it updates instantly after Settings saves
+    // Use the live session image & frame so it updates instantly after equipping
     const { data: session } = useSession();
     const liveImage = session?.user?.image ?? user?.image;
+    const equippedFrame = (session?.user as any)?.equipped_frame ?? user?.equipped_frame ?? null;
 
     const openLogin = () => {
         setRegisterOpen(false);
@@ -57,26 +60,19 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                                     @{user.username || "user"}
                                 </p>
                             </div>
-                            <div className="relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border border-white/10 bg-zinc-900 shadow-inner">
-                                {liveImage ? (
-                                    <Image
-                                        src={liveImage}
-                                        alt={user.name || "User"}
-                                        fill
-                                        unoptimized
-                                        className="object-cover"
-                                    />
-                                ) : (
-                                    <User className="h-5 w-5 text-zinc-500" />
-                                )}
-                            </div>
+                            <UserAvatar
+                                src={liveImage}
+                                name={user.name || "User"}
+                                frameUrl={equippedFrame}
+                                size="md"
+                            />
                         </div>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align="end"
                         className="w-56 border-white/10 bg-zinc-950/95 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl"
                     >
-                        <DropdownMenuLabel className="text-[10px] font-bold tracking-widest text-zinc-400 uppercase">
+                        <DropdownMenuLabel className="text-xs font-bold tracking-widest text-zinc-400 uppercase">
                             Minha Conta
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-white/5" />
@@ -85,8 +81,8 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                             asChild
                         >
                             <Link href="/profile">
-                                <User className="mr-2 h-4 w-4 text-[#bd0df2]" />
-                                <span className="font-medium">Perfil</span>
+                                <Trophy className="mr-2 h-4 w-4 text-amber-400" />
+                                <span className="font-medium text-amber-300">Hall of Fame</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
