@@ -34,6 +34,16 @@ async function main() {
       console.log(`  - Game: "${progress.game.title}" (${progress.game.quest_type}) -> +${xp} XP`);
     }
 
+    const userReviews = await prisma.review.findMany({
+      where: { user_id: user.id },
+    });
+
+    for (const review of userReviews) {
+      const reviewXP = review.review_text && review.review_text.trim().length >= 50 ? 200 : 100;
+      totalXP += reviewXP;
+      console.log(`  - Review ID ${review.id} -> +${reviewXP} XP`);
+    }
+
     const { level } = calculateLevelFromXP(totalXP);
     const title = getRankTierTitle(level);
 

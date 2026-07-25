@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 
 import { z } from "zod";
 
+import { calculateLevelFromXP } from "./xp-engine";
+
 const baseReviewSchema = z.object({
     rating: z.number().min(0, "A nota deve ser no mínimo 0").max(10, "A nota deve ser no máximo 10"),
     difficulty: z.number().min(1, "A dificuldade deve ser no mínimo 1").max(5, "A dificuldade deve ser no máximo 5").optional(),
@@ -62,11 +64,29 @@ export async function createReview(params: CreateReviewParams) {
             },
         });
 
+        // Concede XP por escrever a review (+100 XP rápida, +200 XP se tiver análise detalhada com >= 50 caracteres)
+        const xpBonus = reviewText && reviewText.trim().length >= 50 ? 200 : 100;
+        const updatedUser = await prisma.user.update({
+            where: { id: userId },
+            data: {
+                xp_points: { increment: xpBonus },
+            },
+            select: { xp_points: true },
+        });
+
+        // Recalcula o Nível do usuário
+        const { level: newLevel } = calculateLevelFromXP(updatedUser.xp_points);
+        await prisma.user.update({
+            where: { id: userId },
+            data: { level: newLevel },
+        });
+
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
+        revalidatePath("/profile");
         revalidatePath("/");
         
-        return { success: true, review };
+        return { success: true, review, xpEarned: xpBonus };
     } catch (error: unknown) {
         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
             return { success: false, error: "Você já avaliou este jogo." };
@@ -101,12 +121,31 @@ export async function deleteReview(reviewId: string) {
             return { success: false, error: "Você não tem permissão para deletar esta review." };
         }
 
+        const xpDeduct = review.review_text && review.review_text.trim().length >= 50 ? 200 : 100;
+
         await prisma.review.delete({
             where: { id: reviewId },
         });
 
+        // Deduz o XP e recalcula o Nível do usuário
+        const updatedUser = await prisma.user.update({
+            where: { id: session.user.id },
+            data: {
+                xp_points: { decrement: xpDeduct },
+            },
+            select: { xp_points: true },
+        });
+
+        const { level: newLevel } = calculateLevelFromXP(Math.max(0, updatedUser.xp_points));
+        await prisma.user.update({
+            where: { id: session.user.id },
+            data: { level: newLevel },
+        });
+
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
+        revalidatePath("/profile");
+        revalidatePath("/");
         return { success: true };
     } catch (error: unknown) {
         console.error("Erro ao deletar review:", error);
