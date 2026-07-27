@@ -6,8 +6,7 @@ import { revalidatePath } from "next/cache";
 import {
   calculateGameXP,
   calculateLevelFromXP,
-  getRankTierTitle,
-  getUnlockedTitles
+  getRankTierTitle
 } from "@/app/lib/xp-engine";
 
 /**
@@ -103,7 +102,7 @@ export async function claimPlatinumBonus(progressId: string): Promise<{ success:
   }
 }
 
-import { REWARDS_CATALOG } from "@/lib/constants/rewards";
+import { REWARDS_CATALOG, isRewardUnlocked } from "@/lib/constants/rewards";
 
 /**
  * Action to equip an unlocked rank title.
@@ -121,7 +120,7 @@ export async function equipTitle(title: string): Promise<{ success: boolean; err
     if (!user) return { success: false, error: "User not found" };
 
     const rewardItem = REWARDS_CATALOG.find((r) => r.type === "TITLE" && r.name === title);
-    if (!rewardItem || user.level < rewardItem.level) {
+    if (!rewardItem || !isRewardUnlocked(rewardItem.level, user.level)) {
       return { success: false, error: `Título trancado. Requer Nível ${rewardItem?.level || 1}` };
     }
 
@@ -150,7 +149,7 @@ export async function equipFrame(frameUrl: string | null): Promise<{ success: bo
     if (frameUrl) {
       const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { level: true } });
       const frameItem = REWARDS_CATALOG.find((r) => r.type === "FRAME" && r.assetUrl === frameUrl);
-      if (frameItem && user && user.level < frameItem.level) {
+      if (frameItem && user && !isRewardUnlocked(frameItem.level, user.level)) {
         return { success: false, error: `Moldura trancada. Requer Nível ${frameItem.level}` };
       }
     }
@@ -178,7 +177,7 @@ export async function equipBanner(bannerId: string | null): Promise<{ success: b
     if (bannerId) {
       const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { level: true } });
       const bannerItem = REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === bannerId);
-      if (bannerItem && user && user.level < bannerItem.level) {
+      if (bannerItem && user && !isRewardUnlocked(bannerItem.level, user.level)) {
         return { success: false, error: `Banner trancado. Requer Nível ${bannerItem.level}` };
       }
     }
@@ -205,7 +204,7 @@ export async function equipTheme(themeId: string): Promise<{ success: boolean; e
     if (themeId && themeId !== "cyberpunk") {
       const user = await prisma.user.findUnique({ where: { id: session.user.id }, select: { level: true } });
       const themeItem = REWARDS_CATALOG.find((r) => r.type === "THEME" && r.id === themeId);
-      if (themeItem && user && user.level < themeItem.level) {
+      if (themeItem && user && !isRewardUnlocked(themeItem.level, user.level)) {
         return { success: false, error: `Tema trancado. Requer Nível ${themeItem.level}` };
       }
     }

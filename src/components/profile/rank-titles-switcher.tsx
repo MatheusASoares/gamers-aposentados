@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Trophy, Shield, Lock, Compass, Swords, Crown, Flame } from "lucide-react";
 import { equipTitle } from "@/app/lib/gamification-actions";
 import { RANK_TIERS, RankTier } from "@/app/lib/xp-engine";
+import { isRewardUnlocked } from "@/lib/constants/rewards";
 
 interface RankTitlesSwitcherProps {
     userLevel: number;
@@ -67,7 +68,7 @@ export function RankTitlesSwitcher({
             {/* Render ALL Rank Tiers (Unlocked & Locked) */}
             <div className="flex flex-wrap gap-3">
                 {RANK_TIERS.map((tier: RankTier) => {
-                    const isUnlocked = userLevel >= tier.minLevel;
+                    const isUnlocked = isRewardUnlocked(tier.minLevel, userLevel);
                     const isSelected = tier.name === currentEquippedTitle;
 
                     if (isUnlocked) {

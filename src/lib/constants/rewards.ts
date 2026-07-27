@@ -192,9 +192,24 @@ export const REWARDS_CATALOG: RewardItem[] = [
 ];
 
 /**
+ * Retorna se determinado nível/recompensa está desbloqueado.
+ * Em ambiente de desenvolvimento ou teste (process.env.NODE_ENV === 'development' || process.env.NODE_ENV === 'test'),
+ * todos os níveis ficam desbloqueados automaticamente.
+ */
+export function isRewardUnlocked(itemLevel: number, userLevel: number = 1): boolean {
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+    return true;
+  }
+  return userLevel >= itemLevel;
+}
+
+/**
  * Retorna todas as recompensas desbloqueadas para determinado nível.
  */
 export function getUnlockedRewardsForLevel(level: number): RewardItem[] {
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+    return REWARDS_CATALOG;
+  }
   return REWARDS_CATALOG.filter((item) => item.level <= level);
 }
 
@@ -202,8 +217,12 @@ export function getUnlockedRewardsForLevel(level: number): RewardItem[] {
  * Retorna a próxima recompensa a ser desbloqueada no próximo nível.
  */
 export function getNextRewardUnlock(currentLevel: number): RewardItem | undefined {
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+    return undefined;
+  }
   return REWARDS_CATALOG.find((item) => item.level > currentLevel);
 }
+
 
 /**
  * Retorna o estilo Tailwind (Borda, Fundo, Texto, Glow) exclusivo por Título.

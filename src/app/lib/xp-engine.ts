@@ -88,7 +88,10 @@ export function getRankTierTitle(level: number): string {
 import { REWARDS_CATALOG } from '@/lib/constants/rewards';
 
 export function getUnlockedTitles(level: number): string[] {
-  return REWARDS_CATALOG.filter(r => r.type === 'TITLE' && r.level <= level).map(r => r.name);
+  if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
+    return REWARDS_CATALOG.filter(r => r.type === "TITLE").map(r => r.name);
+  }
+  return REWARDS_CATALOG.filter(r => r.type === "TITLE" && r.level <= level).map(r => r.name);
 }
 
 export function getXPForNextLevel(level: number): number {

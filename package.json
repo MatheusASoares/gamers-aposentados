@@ -15,7 +15,11 @@
         "db:migrate": "prisma migrate dev",
         "db:seed": "tsx prisma/seed.ts",
         "db:deploy": "prisma migrate deploy",
-        "db:studio": "prisma studio"
+        "db:studio": "prisma studio",
+        "db:agent:up": "docker compose up -d postgres_agent",
+        "db:agent:push": "npx dotenv-cli -e .env.agent -- npx prisma db push",
+        "db:agent:seed": "npx dotenv-cli -e .env.agent -- npx tsx prisma/seed.ts",
+        "db:agent:studio": "npx dotenv-cli -e .env.agent -- npx prisma studio --port 5556"
     },
     "dependencies": {
         "@auth/prisma-adapter": "^2.11.1",

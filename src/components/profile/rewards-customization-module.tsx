@@ -4,9 +4,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Image from "next/image";
-import { Trophy, Shield, Lock, Award, Image as ImageIcon, Sparkles, Check, Palette } from "lucide-react";
+import { Trophy, Shield, Lock, Award, Image as ImageIcon, Check, Palette } from "lucide-react";
 import { equipTitle, equipFrame, equipBanner, equipTheme } from "@/app/lib/gamification-actions";
-import { REWARDS_CATALOG, RewardItem, getTitleBadgeStyle } from "@/lib/constants/rewards";
+import { REWARDS_CATALOG, RewardItem, getTitleBadgeStyle, isRewardUnlocked } from "@/lib/constants/rewards";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { renderTitleIcon } from "@/components/ui/title-badge";
 
@@ -250,7 +250,7 @@ export function RewardsCustomizationModule({
 
           {/* Molduras do Catálogo */}
           {framesList.map((item) => {
-            const isUnlocked = userLevel >= item.level;
+            const isUnlocked = isRewardUnlocked(item.level, userLevel);
             const isEquipped = currentFrame === item.assetUrl;
 
             return (
@@ -318,7 +318,7 @@ export function RewardsCustomizationModule({
       {activeTab === "titles" && (
         <div className="flex flex-wrap gap-4">
           {titlesList.map((item) => {
-            const isUnlocked = userLevel >= item.level;
+            const isUnlocked = isRewardUnlocked(item.level, userLevel);
             const isEquipped = currentTitle === item.name;
 
             if (isUnlocked) {
@@ -357,7 +357,7 @@ export function RewardsCustomizationModule({
       {activeTab === "banners" && (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           {bannersList.map((item) => {
-            const isUnlocked = userLevel >= item.level;
+            const isUnlocked = isRewardUnlocked(item.level, userLevel);
             const isEquipped = currentBanner === item.id;
 
             return (
@@ -427,7 +427,7 @@ export function RewardsCustomizationModule({
       {activeTab === "themes" && (
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {themesList.map((item) => {
-            const isUnlocked = userLevel >= item.level;
+            const isUnlocked = isRewardUnlocked(item.level, userLevel);
             const isEquipped = currentTheme === item.id;
 
             return (

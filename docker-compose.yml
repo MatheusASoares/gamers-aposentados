@@ -13,5 +13,19 @@ services:
         volumes:
             - postgres_data_new:/var/lib/postgresql/data
 
+    postgres_agent:
+        image: postgres:15-alpine
+        container_name: gamers_postgres_agent
+        environment:
+            POSTGRES_USER: agent_user
+            POSTGRES_PASSWORD: agent_password
+            POSTGRES_DB: gamers_agent_db
+        ports:
+            - "5435:5432"
+        volumes:
+            - postgres_agent_data:/var/lib/postgresql/data
+
 volumes:
     postgres_data_new:
+    postgres_agent_data:
+
