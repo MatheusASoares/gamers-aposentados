@@ -14,6 +14,7 @@ const baseReviewSchema = z.object({
     difficulty: z.number().min(1, "A dificuldade deve ser no mínimo 1").max(5, "A dificuldade deve ser no máximo 5").optional(),
     hoursPlayed: z.number().min(0, "Horas jogadas não podem ser negativas").optional(),
     reviewText: z.string().optional(),
+    screenshots: z.array(z.string().url("URL de screenshot inválida")).optional(),
 });
 
 const createReviewSchema = baseReviewSchema.extend({
@@ -39,7 +40,7 @@ export async function createReview(params: CreateReviewParams) {
         }
 
         const userId = session.user.id;
-        const { gameId, rating, difficulty, hoursPlayed, reviewText } = validation.data;
+        const { gameId, rating, difficulty, hoursPlayed, reviewText, screenshots } = validation.data;
 
         // Verifica se o usuário já fez review deste jogo (regra de negócio opcional, mas boa)
         const existingReview = await prisma.review.findFirst({
@@ -53,19 +54,27 @@ export async function createReview(params: CreateReviewParams) {
             return { success: false, error: "Você já avaliou este jogo." };
         }
 
+        const validScreenshots = screenshots || [];
+
         const review = await prisma.review.create({
             data: {
                 rating,
                 difficulty,
                 hours_played: hoursPlayed,
                 review_text: reviewText,
+                screenshots: validScreenshots,
                 game_id: gameId,
                 user_id: userId,
             },
         });
 
-        // Concede XP por escrever a review (+100 XP rápida, +200 XP se tiver análise detalhada com >= 50 caracteres)
-        const xpBonus = reviewText && reviewText.trim().length >= 50 ? 200 : 100;
+        // Concede XP por escrever a review:
+        // +100 XP rápida, +200 XP se tiver análise detalhada (>= 50 caracteres)
+        // +50 XP bônus se incluir ao menos 1 screenshot
+        const textXP = reviewText && reviewText.trim().length >= 50 ? 200 : 100;
+        const screenshotXP = validScreenshots.length > 0 ? 50 : 0;
+        const xpBonus = textXP + screenshotXP;
+
         const updatedUser = await prisma.user.update({
             where: { id: userId },
             data: {
@@ -121,7 +130,9 @@ export async function deleteReview(reviewId: string) {
             return { success: false, error: "Você não tem permissão para deletar esta review." };
         }
 
-        const xpDeduct = review.review_text && review.review_text.trim().length >= 50 ? 200 : 100;
+        const textDeduct = review.review_text && review.review_text.trim().length >= 50 ? 200 : 100;
+        const screenshotDeduct = (review.screenshots?.length || 0) > 0 ? 50 : 0;
+        const xpDeduct = textDeduct + screenshotDeduct;
 
         await prisma.review.delete({
             where: { id: reviewId },
@@ -175,7 +186,7 @@ export async function updateReview(params: UpdateReviewParams) {
         };
     }
 
-    const { reviewId, rating, difficulty, hoursPlayed, reviewText } = validation.data;
+    const { reviewId, rating, difficulty, hoursPlayed, reviewText, screenshots } = validation.data;
 
     try {
         const review = await prisma.review.findUnique({
@@ -190,6 +201,13 @@ export async function updateReview(params: UpdateReviewParams) {
             return { success: false, error: "Você não tem permissão para editar esta review." };
         }
 
+        const validScreenshots = screenshots || [];
+
+        // Calcular ajuste de XP de screenshots se fotos forem adicionadas ou removidas na edição
+        const oldScreenshotXP = (review.screenshots?.length || 0) > 0 ? 50 : 0;
+        const newScreenshotXP = validScreenshots.length > 0 ? 50 : 0;
+        const xpDifference = newScreenshotXP - oldScreenshotXP;
+
         const updatedReview = await prisma.review.update({
             where: { id: reviewId },
             data: {
@@ -197,11 +215,28 @@ export async function updateReview(params: UpdateReviewParams) {
                 difficulty,
                 hours_played: hoursPlayed,
                 review_text: reviewText,
+                screenshots: validScreenshots,
             },
         });
 
+        if (xpDifference !== 0) {
+            const updatedUser = await prisma.user.update({
+                where: { id: session.user.id },
+                data: {
+                    xp_points: { increment: xpDifference },
+                },
+                select: { xp_points: true },
+            });
+            const { level: newLevel } = calculateLevelFromXP(Math.max(0, updatedUser.xp_points));
+            await prisma.user.update({
+                where: { id: session.user.id },
+                data: { level: newLevel },
+            });
+        }
+
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
+        revalidatePath("/profile");
         revalidatePath("/");
         return { success: true, review: updatedReview };
     } catch (error: unknown) {

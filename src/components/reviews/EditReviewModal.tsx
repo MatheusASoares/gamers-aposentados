@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, Edit } from "lucide-react";
+import { Loader2, Edit, ImagePlus, X, Sparkles } from "lucide-react";
 import { updateReview } from "@/app/lib/review-actions";
+import { compressImage } from "@/lib/image-compressor";
 import { useRouter } from "next/navigation";
 import {
     Dialog,
@@ -20,6 +21,7 @@ export interface EditReviewModalProps {
         difficulty: number | null;
         hours_played: number | null;
         review_text: string | null;
+        screenshots?: string[];
         game: {
             title: string;
         };
@@ -27,10 +29,13 @@ export interface EditReviewModalProps {
     trigger?: React.ReactNode;
 }
 
+const MAX_SCREENSHOTS = 4;
+
 export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
     const [loading, setLoading] = useState(false);
+    const [uploadingImages, setUploadingImages] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     // Form state initialized with existing review data
@@ -39,26 +44,113 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     const [hoursPlayed, setHoursPlayed] = useState(review.hours_played?.toString() || "");
     const [reviewText, setReviewText] = useState(review.review_text || "");
 
+    // Screenshots state
+    const [screenshots, setScreenshots] = useState<{ file?: File; previewUrl: string; uploadedUrl?: string }[]>(
+        (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
+    );
+
+    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files || []);
+        if (!files.length) return;
+
+        if (screenshots.length + files.length > MAX_SCREENSHOTS) {
+            setError(`Você pode anexar no máximo ${MAX_SCREENSHOTS} screenshots por review.`);
+            return;
+        }
+
+        setError(null);
+        setUploadingImages(true);
+
+        try {
+            const newScreenshots = await Promise.all(
+                files.map(async (rawFile) => {
+                    const compressed = await compressImage(rawFile);
+                    const previewUrl = URL.createObjectURL(compressed);
+                    return { file: compressed, previewUrl };
+                })
+            );
+
+            setScreenshots((prev) => [...prev, ...newScreenshots].slice(0, MAX_SCREENSHOTS));
+        } catch (err) {
+            console.error("[EditReviewModal] Erro ao processar imagem:", err);
+            setError("Erro ao processar imagem. Tente outro arquivo.");
+        } finally {
+            setUploadingImages(false);
+        }
+    };
+
+    const handleRemoveScreenshot = (index: number) => {
+        setScreenshots((prev) => {
+            const item = prev[index];
+            if (item?.file && item.previewUrl) {
+                URL.revokeObjectURL(item.previewUrl);
+            }
+            return prev.filter((_, i) => i !== index);
+        });
+    };
+
+    const uploadAllScreenshots = async (): Promise<string[]> => {
+        const urls: string[] = [];
+
+        for (const item of screenshots) {
+            if (item.uploadedUrl) {
+                urls.push(item.uploadedUrl);
+                continue;
+            }
+
+            if (!item.file) continue;
+
+            const formData = new FormData();
+            formData.append("file", item.file);
+            formData.append("folder", "screenshots");
+
+            const res = await fetch("/api/upload", {
+                method: "POST",
+                body: formData,
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                throw new Error(data.error || "Falha ao enviar screenshot para a nuvem");
+            }
+
+            const data = await res.json();
+            urls.push(data.url);
+        }
+
+        return urls;
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
         setLoading(true);
 
-        const res = await updateReview({
-            reviewId: review.id,
-            rating: parseInt(rating),
-            difficulty: parseInt(difficulty),
-            hoursPlayed: hoursPlayed ? parseInt(hoursPlayed) : undefined,
-            reviewText,
-        });
+        try {
+            const uploadedUrls = await uploadAllScreenshots();
 
-        setLoading(false);
+            const res = await updateReview({
+                reviewId: review.id,
+                rating: parseInt(rating),
+                difficulty: parseInt(difficulty),
+                hoursPlayed: hoursPlayed ? parseInt(hoursPlayed) : undefined,
+                reviewText,
+                screenshots: uploadedUrls,
+            });
 
-        if (res.success) {
-            setOpen(false);
-            router.refresh();
-        } else {
-            setError(res.error || "Ocorreu um erro ao atualizar a review.");
+            setLoading(false);
+
+            if (res.success) {
+                setOpen(false);
+                router.refresh();
+            } else {
+                setError(res.error || "Ocorreu um erro ao atualizar a review.");
+            }
+        } catch (err: unknown) {
+            console.error("[EditReviewModal] Erro ao submeter:", err);
+            const msg = err instanceof Error ? err.message : "Erro ao salvar alterações.";
+            setError(msg);
+            setLoading(false);
         }
     };
 
@@ -71,7 +163,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                     </button>
                 )}
             </DialogTrigger>
-            <DialogContent className="border-zinc-800 bg-zinc-950 text-white sm:max-w-[425px]">
+            <DialogContent className="border-zinc-800 bg-zinc-950 text-white sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="text-primary text-2xl font-black tracking-wider uppercase">
                         Editar Review
@@ -81,7 +173,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                     </DialogDescription>
                 </DialogHeader>
 
-                <form onSubmit={handleSubmit} className="space-y-4 py-4">
+                <form onSubmit={handleSubmit} className="space-y-4 py-2">
                     {error && (
                         <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-500">
                             {error}
@@ -139,7 +231,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                             Sua Análise (Opcional)
                         </label>
                         <textarea
-                            rows={4}
+                            rows={3}
                             placeholder="Descreva sua experiência com o jogo..."
                             value={reviewText}
                             onChange={(e) => setReviewText(e.target.value)}
@@ -147,9 +239,63 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                         ></textarea>
                     </div>
 
+                    {/* Screenshots */}
+                    <div className="space-y-2 pt-1">
+                        <div className="flex items-center justify-between">
+                            <label className="text-sm font-bold text-zinc-300 uppercase">
+                                Screenshots ({screenshots.length}/{MAX_SCREENSHOTS})
+                            </label>
+                            <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
+                                <Sparkles className="h-3 w-3" />
+                                {screenshots.length > 0 ? "+50 XP Bônus Ativo!" : "+50 XP Bônus"}
+                            </span>
+                        </div>
+
+                        <div className="grid grid-cols-4 gap-2">
+                            {screenshots.map((item, idx) => (
+                                <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900">
+                                    <img
+                                        src={item.previewUrl}
+                                        alt={`Screenshot ${idx + 1}`}
+                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveScreenshot(idx)}
+                                        className="absolute top-1 right-1 p-1 bg-black/80 text-white rounded-full opacity-90 hover:bg-red-600 transition-colors"
+                                        title="Remover imagem"
+                                    >
+                                        <X className="h-3.5 w-3.5" />
+                                    </button>
+                                </div>
+                            ))}
+
+                            {screenshots.length < MAX_SCREENSHOTS && (
+                                <label className="flex flex-col items-center justify-center aspect-video rounded-lg border-2 border-dashed border-zinc-800 hover:border-primary/60 bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer transition-all">
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        multiple
+                                        onChange={handleFileSelect}
+                                        disabled={uploadingImages || loading}
+                                        className="hidden"
+                                    />
+                                    {uploadingImages ? (
+                                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                                    ) : (
+                                        <>
+                                            <ImagePlus className="h-5 w-5 text-zinc-400 group-hover:text-primary mb-1" />
+                                            <span className="text-[10px] font-bold text-zinc-500 uppercase">Adicionar</span>
+                                        </>
+                                    )}
+                                </label>
+                            )}
+                        </div>
+                    </div>
+
                     <button
                         type="submit"
-                        disabled={loading}
+                        disabled={loading || uploadingImages}
                         className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-500 p-3 font-black tracking-wide text-zinc-950 uppercase shadow-[0_0_15px_rgba(245,158,11,0.3)] transition-all hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {loading ? (

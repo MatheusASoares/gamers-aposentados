@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import { calculateGameXP, calculateLevelFromXP, getRankTierTitle } from "../app/lib/xp-engine";
+import { prisma } from "../src/lib/prisma";
+import { calculateGameXP, calculateLevelFromXP, getRankTierTitle } from "../src/app/lib/xp-engine";
 
 async function main() {
   console.log("Starting Retroactive XP & Level Backfill...");

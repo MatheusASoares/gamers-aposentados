@@ -158,6 +158,7 @@ model Review {
   difficulty   Int?     // 1 a 5
   review_text  String?  @db.Text
   hours_played Int?     // Seu "hours = played" (Stats reais)
+  screenshots  String[] @default([])
   
   // Conexões
   user_id      String

@@ -30,8 +30,9 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const extension = file.name.split(".").pop() || "jpg";
-        const filename = `avatars/${session.user.id}.${extension}`;
+        const folder = (formData.get("folder") as string) || "avatars";
+        const extension = file.name.split(".").pop() || "webp";
+        const filename = `${folder}/${session.user.id}-${Date.now()}.${extension}`;
 
         const blob = await put(filename, file, {
             access: "public",

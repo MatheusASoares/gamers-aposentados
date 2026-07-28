@@ -1,5 +1,5 @@
-import { prisma } from "../lib/prisma";
-import { calculateGameXP, calculateLevelFromXP, getRankTierTitle } from "../app/lib/xp-engine";
+import { prisma } from "../src/lib/prisma";
+import { calculateGameXP, calculateLevelFromXP, getRankTierTitle } from "../src/app/lib/xp-engine";
 
 const hltbMapping: Record<string, number> = {
   "Demon's Crest": 5,
