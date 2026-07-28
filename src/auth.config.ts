@@ -12,7 +12,12 @@ export const authConfig = {
             const isApiRoute = nextUrl.pathname.startsWith("/api");
             const isAuthApiRoute = nextUrl.pathname.startsWith("/api/auth");
             const isHomeRoute = nextUrl.pathname === "/";
-            const isPublicRoute = isAuthRoute || (isApiRoute && isAuthApiRoute) || isHomeRoute;
+            const isPublicRoute =
+                isAuthRoute ||
+                (isApiRoute && isAuthApiRoute) ||
+                isHomeRoute ||
+                nextUrl.pathname === "/site.webmanifest" ||
+                nextUrl.pathname === "/favicon.ico";
 
             if (!isPublicRoute) {
                 // Se a rota não for pública e o usuário não estiver logado, bloqueia
