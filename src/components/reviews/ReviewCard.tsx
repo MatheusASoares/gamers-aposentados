@@ -1,45 +1,67 @@
 import { useState } from "react";
 import Image from "next/image";
-import { ArrowRight, Calendar, Share2, User, Trash2, Check, Star, Camera, X, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+    ArrowRight,
+    Calendar,
+    Share2,
+    User,
+    Trash2,
+    Check,
+    Star,
+    Camera,
+    X,
+    ChevronLeft,
+    ChevronRight,
+    Flame,
+    Clock,
+} from "lucide-react";
 import { format } from "date-fns";
 import { deleteReview } from "@/app/lib/review-actions";
 import { EditReviewModal } from "./EditReviewModal";
 import { UserLink } from "@/components/ui/user-link";
 import { useRouter } from "next/navigation";
 
+const DIFFICULTY_MAP: Record<number, { label: string; icon: string; color: string }> = {
+    1: { label: "Muito Fácil", icon: "🟢", color: "border-emerald-500/30 text-emerald-400 bg-emerald-950/40" },
+    2: { label: "Tranquilo", icon: "🔵", color: "border-cyan-500/30 text-cyan-400 bg-cyan-950/40" },
+    3: { label: "Desafiador", icon: "🟡", color: "border-amber-500/30 text-amber-400 bg-amber-950/40" },
+    4: { label: "Difícil", icon: "🟠", color: "border-orange-500/30 text-orange-400 bg-orange-950/40" },
+    5: { label: "Extremo", icon: "🔴", color: "border-rose-500/30 text-rose-400 bg-rose-950/40" },
+};
+
 const getRatingStyle = (rating: number) => {
     if (rating === 10) {
         return {
-            container: "border-amber-400/60 bg-zinc-950/95 shadow-[0_0_20px_rgba(251,191,36,0.5)] group-hover:border-amber-400 group-hover:shadow-[0_0_25px_rgba(251,191,36,0.7)] text-amber-400 flex-col",
-            text: "text-2xl font-black text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] leading-none",
-            showStar: true
+            container: "border-amber-400/80 bg-gradient-to-b from-amber-400 to-amber-600 text-zinc-950 shadow-[0_0_20px_rgba(251,191,36,0.6)] font-black",
+            text: "text-2xl font-black drop-shadow-md leading-none",
+            showStar: true,
         };
     }
     if (rating >= 8) {
         return {
-            container: "border-emerald-500/40 bg-zinc-950/85 shadow-[0_0_15px_rgba(16,185,129,0.3)] group-hover:border-emerald-500 group-hover:shadow-[0_0_20px_rgba(16,185,129,0.5)] text-emerald-400",
-            text: "text-xl font-black text-emerald-400 drop-shadow-[0_0_6px_rgba(52,211,153,0.3)]",
-            showStar: false
+            container: "border-emerald-500/60 bg-gradient-to-b from-emerald-500 to-emerald-700 text-zinc-950 shadow-[0_0_15px_rgba(16,185,129,0.5)] font-black",
+            text: "text-xl font-black drop-shadow-md",
+            showStar: false,
         };
     }
     if (rating >= 6) {
         return {
-            container: "border-sky-500/40 bg-zinc-950/85 shadow-[0_0_15px_rgba(14,165,233,0.2)] group-hover:border-sky-500 group-hover:shadow-[0_0_20px_rgba(14,165,233,0.4)] text-sky-400",
-            text: "text-xl font-black text-sky-400 drop-shadow-[0_0_6px_rgba(56,189,248,0.3)]",
-            showStar: false
+            container: "border-cyan-500/60 bg-gradient-to-b from-cyan-500 to-cyan-700 text-zinc-950 shadow-[0_0_15px_rgba(6,182,212,0.4)] font-black",
+            text: "text-xl font-black drop-shadow-md",
+            showStar: false,
         };
     }
     if (rating >= 4) {
         return {
-            container: "border-amber-500/30 bg-zinc-950/85 shadow-[0_0_10px_rgba(245,158,11,0.15)] group-hover:border-amber-500 group-hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] text-amber-500/90",
-            text: "text-xl font-black text-amber-500/90 drop-shadow-[0_0_6px_rgba(245,158,11,0.2)]",
-            showStar: false
+            container: "border-amber-500/60 bg-gradient-to-b from-amber-500 to-amber-700 text-zinc-950 shadow-[0_0_12px_rgba(245,158,11,0.3)] font-black",
+            text: "text-xl font-black drop-shadow-md",
+            showStar: false,
         };
     }
     return {
-        container: "border-rose-500/40 bg-zinc-950/85 shadow-[0_0_15px_rgba(244,63,94,0.3)] group-hover:border-rose-500 group-hover:shadow-[0_0_20px_rgba(244,63,94,0.5)] text-rose-500",
-        text: "text-xl font-black text-rose-500 drop-shadow-[0_0_6px_rgba(251,113,133,0.3)]",
-        showStar: false
+        container: "border-rose-500/60 bg-gradient-to-b from-rose-500 to-rose-700 text-white shadow-[0_0_15px_rgba(244,63,94,0.5)] font-black",
+        text: "text-xl font-black drop-shadow-md",
+        showStar: false,
     };
 };
 
@@ -48,12 +70,15 @@ export interface ReviewCardProps {
         id: string;
         user_id: string;
         rating: number;
+        difficulty?: number | null;
+        hours_played?: number | null;
         review_text: string | null;
         screenshots?: string[];
         created_at: Date;
         user: {
             name: string | null;
             username: string | null;
+            image?: string | null;
         };
         game: {
             title: string;
@@ -75,6 +100,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
 
     const formattedDate = format(new Date(review.created_at), "MMM dd, yyyy");
     const screenshots = review.screenshots || [];
+    const difficultyInfo = review.difficulty ? DIFFICULTY_MAP[review.difficulty] : null;
 
     const handleDelete = async () => {
         setIsDeleting(true);
@@ -89,7 +115,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
 
     const handleShare = () => {
         navigator.clipboard.writeText(
-            `${review.game.title} - ${review.rating}/10\n\n"${review.review_text || ""}"`,
+            `${review.game.title} - ${review.rating}/10\n\n"${review.review_text || ""}"`
         );
         setIsCopied(true);
         setTimeout(() => setIsCopied(false), 2000);
@@ -101,10 +127,17 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
     return (
         <>
             <div
-                className={`glass-card border border-theme bg-theme-card group relative flex overflow-hidden rounded-2xl shadow-xl backdrop-blur-sm transition-all duration-500 hover:border-theme-primary/40 hover:shadow-[0_0_30px_var(--theme-glow)] ${layout === "list" ? "h-auto flex-col md:h-auto md:flex-row" : "min-h-112.5 flex-col"} ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
+                className={`glass-card group relative flex overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/80 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_35px_rgba(189,13,242,0.25)] ${
+                    layout === "list" ? "h-auto flex-col md:h-auto md:flex-row" : "min-h-[480px] flex-col"
+                } ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
             >
+                {/* Game Cover Container */}
                 <div
-                    className={`relative flex items-center justify-center overflow-hidden bg-zinc-950 px-4 py-8 ${layout === "list" ? "aspect-video w-full shrink-0 md:aspect-3/4 md:w-70" : "min-h-75 w-full"}`}
+                    className={`relative flex items-center justify-center overflow-hidden bg-zinc-950 px-4 py-8 ${
+                        layout === "list"
+                            ? "aspect-video w-full shrink-0 md:aspect-3/4 md:w-72"
+                            : "min-h-72 w-full"
+                    }`}
                 >
                     {coverUrl ? (
                         <>
@@ -117,9 +150,9 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                                     className="scale-125 object-cover blur-3xl transition-transform duration-700 group-hover:scale-110"
                                 />
                             </div>
-                            <div className="absolute inset-0 z-0 bg-linear-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+                            <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
 
-                            <div className="relative z-10 aspect-3/4 h-full max-h-80 w-auto overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-all duration-500 group-hover:scale-105 group-hover:border-[#bd0df2]/40 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.3)]">
+                            <div className="relative z-10 aspect-3/4 h-full max-h-80 w-auto overflow-hidden rounded-2xl border border-white/10 shadow-[0_0_35px_rgba(0,0,0,0.85)] transition-all duration-500 group-hover:scale-105 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.4)]">
                                 <Image
                                     src={coverUrl}
                                     alt={`Cover of ${review.game.title}`}
@@ -131,57 +164,73 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                         </>
                     ) : (
                         <div className="z-10 flex h-full w-full items-center justify-center bg-zinc-950">
-                            <span className="text-xs font-bold tracking-widest text-[#bd0df2]/50 uppercase">
+                            <span className="text-xs font-black tracking-widest text-primary/50 uppercase">
                                 No Image
                             </span>
                         </div>
                     )}
-                    {/* Dark overlay behind rating for readability */}
-                    <div className="pointer-events-none absolute inset-0 z-0 bg-linear-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
+                    
+                    <div className="pointer-events-none absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent opacity-80" />
 
-                    {/* Dynamic Styled Rating Badge */}
+                    {/* Rating Badge */}
                     {(() => {
                         const ratingStyle = getRatingStyle(review.rating);
                         return (
-                            <div className={`absolute top-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-xl border backdrop-blur-xl transition-all duration-500 group-hover:scale-110 ${ratingStyle.container}`}>
-                                <span className={ratingStyle.text}>
-                                    {review.rating}
-                                </span>
-                                {ratingStyle.showStar && (
-                                    <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400 animate-pulse mt-0.5" />
-                                )}
+                            <div
+                                className={`absolute top-4 right-4 z-20 flex h-14 w-14 items-center justify-center rounded-2xl border transition-all duration-500 group-hover:scale-110 ${ratingStyle.container}`}
+                            >
+                                <div className="flex flex-col items-center justify-center">
+                                    <span className={ratingStyle.text}>{review.rating}</span>
+                                    {ratingStyle.showStar && (
+                                        <Star className="h-3 w-3 fill-zinc-950 text-zinc-950 animate-pulse" />
+                                    )}
+                                </div>
                             </div>
                         );
                     })()}
                 </div>
 
-                <div className="z-10 flex flex-1 flex-col p-6">
-                    <div className="mb-4 flex flex-wrap items-center gap-3">
-                        <span className="rounded-md border border-[#bd0df2]/20 bg-[#bd0df2]/10 px-3 py-1 text-xs font-black tracking-[0.2em] text-[#bd0df2] uppercase shadow-[0_0_10px_rgba(189,13,242,0.1)]">
+                {/* Content Panel */}
+                <div className="z-10 flex flex-1 flex-col p-6 space-y-4">
+                    
+                    {/* Quest Badges Row */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        <span className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-black tracking-widest text-primary uppercase shadow-[0_0_10px_rgba(189,13,242,0.15)]">
                             {review.game.quest_type === "MAIN_QUEST" ? "Main Quest" : "Side Quest"}
                         </span>
+
                         {review.game.platform && (
-                            <span className="rounded-md border border-white/10 bg-zinc-800/50 px-3 py-1 text-xs font-black tracking-[0.2em] text-zinc-300 uppercase">
+                            <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[11px] font-extrabold text-zinc-300 uppercase">
                                 {review.game.platform}
                             </span>
                         )}
-                        {screenshots.length > 0 && (
-                            <span className="flex items-center gap-1 rounded-md border border-emerald-500/30 bg-emerald-950/40 px-2.5 py-1 text-xs font-bold text-emerald-400">
-                                <Camera className="h-3 w-3" />
-                                {screenshots.length} {screenshots.length === 1 ? "print" : "prints"}
+
+                        {difficultyInfo && (
+                            <span className={`rounded-lg border px-2.5 py-1 text-[11px] font-extrabold uppercase flex items-center gap-1 ${difficultyInfo.color}`}>
+                                <span>{difficultyInfo.icon}</span>
+                                <span>{difficultyInfo.label}</span>
+                            </span>
+                        )}
+
+                        {review.hours_played && (
+                            <span className="rounded-lg border border-cyan-500/30 bg-cyan-950/30 px-2.5 py-1 text-[11px] font-extrabold text-cyan-400 uppercase flex items-center gap-1">
+                                <Clock className="h-3 w-3" />
+                                {review.hours_played}h
                             </span>
                         )}
                     </div>
 
-                    <h3 className="mb-2 text-2xl leading-tight font-black tracking-tight text-zinc-100 transition-colors duration-300 group-hover:text-white">
+                    {/* Game Title */}
+                    <h3 className="text-2xl leading-tight font-black tracking-tight text-white transition-colors duration-300 group-hover:text-primary">
                         {review.game.title}
                     </h3>
 
-                    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold tracking-wider text-zinc-500 uppercase">
-                        <User className="h-3 w-3 text-[#bd0df2]" />
+                    {/* Author & Date Bar */}
+                    <div className="flex items-center gap-2 text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                        <User className="h-3.5 w-3.5 text-primary" />
                         <span>
                             Por{" "}
-                            <strong className="text-zinc-300 transition-colors hover:text-[#bd0df2]">
+                            <strong className="text-zinc-200 hover:text-primary transition-colors">
                                 <UserLink
                                     userId={review.user_id}
                                     name={review.user.name}
@@ -189,22 +238,25 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                                 />
                             </strong>
                         </span>
-                        <span className="mx-1 text-zinc-700">•</span>
-                        <Calendar className="h-3 w-3 text-[#bd0df2]" />
+                        <span className="text-zinc-700">•</span>
+                        <Calendar className="h-3.5 w-3.5 text-primary" />
                         <span>{formattedDate}</span>
                     </div>
 
+                    {/* Review Text */}
                     <p
-                        className={`mb-4 flex-1 text-sm leading-relaxed text-zinc-300 transition-all duration-300 ${isExpanded ? "" : "line-clamp-4"} ${layout === "list" && !isExpanded ? "line-clamp-3" : ""}`}
+                        className={`flex-1 text-sm leading-relaxed text-zinc-300 font-medium transition-all duration-300 ${
+                            isExpanded ? "" : "line-clamp-4"
+                        } ${layout === "list" && !isExpanded ? "line-clamp-3" : ""}`}
                     >
                         {review.review_text || "O usuário não providenciou um texto para esta review."}
                     </p>
 
                     {/* Screenshot Thumbnails Gallery */}
                     {screenshots.length > 0 && (
-                        <div className="mb-5 space-y-1.5">
-                            <span className="text-[10px] font-extrabold uppercase tracking-widest text-zinc-500 flex items-center gap-1">
-                                <Camera className="h-3 w-3 text-primary" /> Galeria de Screenshots
+                        <div className="space-y-2 pt-1 border-t border-zinc-800/60">
+                            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
+                                <Camera className="h-3.5 w-3.5 text-emerald-400" /> Galeria ({screenshots.length} {screenshots.length === 1 ? "print" : "prints"})
                             </span>
                             <div className="grid grid-cols-4 gap-2">
                                 {screenshots.map((url, index) => (
@@ -212,15 +264,15 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                                         key={index}
                                         type="button"
                                         onClick={() => setActiveScreenshotIndex(index)}
-                                        className="relative aspect-video rounded-lg overflow-hidden border border-zinc-800 hover:border-primary/70 bg-zinc-900 group/img transition-all hover:scale-105 shadow-md"
+                                        className="relative aspect-video rounded-xl overflow-hidden border border-zinc-800 hover:border-emerald-500/80 bg-zinc-900 group/img transition-all hover:scale-105 shadow-md"
                                     >
                                         <img
                                             src={url}
                                             alt={`Screenshot ${index + 1} de ${review.game.title}`}
                                             className="w-full h-full object-cover transition-all group-hover/img:brightness-110"
                                         />
-                                        <div className="absolute inset-0 bg-black/20 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
-                                            <span className="text-[10px] font-bold text-white uppercase bg-black/60 px-1.5 py-0.5 rounded">Ver</span>
+                                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span className="text-[9px] font-black text-white uppercase bg-black/70 px-1.5 py-0.5 rounded">Ver</span>
                                         </div>
                                     </button>
                                 ))}
@@ -228,17 +280,21 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                         </div>
                     )}
 
-                    <div className="mt-auto flex items-center justify-between border-t border-white/5 pt-5">
+                    {/* Card Actions Footer */}
+                    <div className="mt-auto flex items-center justify-between border-t border-zinc-800/80 pt-4">
                         <button
                             onClick={() => setIsExpanded(!isExpanded)}
-                            className="group/btn flex items-center gap-2 text-xs font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_5px_rgba(189,13,242,0.3)] transition-colors hover:text-white"
+                            className="group/btn flex items-center gap-1.5 text-xs font-black tracking-widest text-primary uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.4)] transition-colors hover:text-white"
                         >
                             {isExpanded ? "Mostrar Menos" : "Review Completa"}{" "}
                             <ArrowRight
-                                className={`h-3 w-3 transition-transform duration-300 ${isExpanded ? "-rotate-90 group-hover/btn:-translate-y-1" : "group-hover/btn:translate-x-1.5"}`}
+                                className={`h-3.5 w-3.5 transition-transform duration-300 ${
+                                    isExpanded ? "-rotate-90 group-hover/btn:-translate-y-1" : "group-hover/btn:translate-x-1.5"
+                                }`}
                             />
                         </button>
-                        <div className="flex items-center gap-4 text-zinc-500">
+
+                        <div className="flex items-center gap-3 text-zinc-500">
                             {currentUserId === review.user_id && (
                                 <>
                                     {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
@@ -259,11 +315,11 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                             )}
                             <button
                                 onClick={handleShare}
-                                className="transition-colors hover:text-[#bd0df2] hover:drop-shadow-[0_0_8px_rgba(189,13,242,0.5)]"
+                                className="transition-colors hover:text-primary hover:drop-shadow-[0_0_8px_rgba(189,13,242,0.5)]"
                                 title="Compartilhar"
                             >
                                 {isCopied ? (
-                                    <Check className="h-4 w-4 text-green-400" />
+                                    <Check className="h-4 w-4 text-emerald-400" />
                                 ) : (
                                     <Share2 className="h-4 w-4" />
                                 )}
@@ -273,19 +329,19 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                 </div>
             </div>
 
-            {/* Lightbox / Zoom Modal for Screenshots */}
+            {/* Lightbox / Zoom Modal */}
             {activeScreenshotIndex !== null && (
                 <div
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-4 animate-in fade-in duration-200"
+                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-xl p-4 animate-in fade-in duration-200"
                     onClick={() => setActiveScreenshotIndex(null)}
                 >
                     <div
-                        className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center"
+                        className="relative max-w-5xl w-full max-h-[90vh] flex flex-col items-center justify-center space-y-3"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        {/* Header controls */}
-                        <div className="absolute -top-12 left-0 right-0 flex items-center justify-between text-white">
-                            <span className="text-sm font-bold tracking-wide">
+                        <div className="w-full flex items-center justify-between text-white">
+                            <span className="text-sm font-black tracking-wide flex items-center gap-2">
+                                <Camera className="h-4 w-4 text-emerald-400" />
                                 {review.game.title} — Screenshot ({activeScreenshotIndex + 1}/{screenshots.length})
                             </span>
                             <button
@@ -297,8 +353,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                             </button>
                         </div>
 
-                        {/* Screenshot Full view */}
-                        <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-2xl">
+                        <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-zinc-800 bg-zinc-950 shadow-2xl">
                             <img
                                 src={screenshots[activeScreenshotIndex]}
                                 alt={`Screenshot ${activeScreenshotIndex + 1}`}
@@ -306,7 +361,6 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                             />
                         </div>
 
-                        {/* Navigation controls */}
                         {screenshots.length > 1 && (
                             <>
                                 <button
@@ -315,7 +369,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                                             prev !== null ? (prev === 0 ? screenshots.length - 1 : prev - 1) : 0
                                         )
                                     }
-                                    className="absolute left-3 top-1/2 -translate-y-1/2 p-3 bg-black/60 hover:bg-black/90 text-white rounded-full transition-colors border border-white/10"
+                                    className="absolute left-3 top-1/2 -translate-y-1/2 p-3 bg-black/70 hover:bg-black/90 text-white rounded-full transition-colors border border-white/10"
                                     title="Anterior"
                                 >
                                     <ChevronLeft className="h-6 w-6" />
@@ -326,7 +380,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                                             prev !== null ? (prev === screenshots.length - 1 ? 0 : prev + 1) : 0
                                         )
                                     }
-                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-black/60 hover:bg-black/90 text-white rounded-full transition-colors border border-white/10"
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 p-3 bg-black/70 hover:bg-black/90 text-white rounded-full transition-colors border border-white/10"
                                     title="Próxima"
                                 >
                                     <ChevronRight className="h-6 w-6" />

@@ -518,13 +518,13 @@ export function RandomizerClient({
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
             <div className="relative z-10 flex w-full flex-col gap-8">
-                {/* Header Area */}
+                {/* Header Area (Padrão do Aplicativo) */}
                 <div className="flex flex-col justify-between gap-6 border-b border-white/5 pb-8 md:flex-row md:items-end">
-                    <div>
-                        <h1 className="mb-2 text-4xl font-black tracking-tight text-white lg:text-5xl">
-                            THE GREAT RANDOMIZER
-                        </h1>
-                        <p className="text-lg font-medium tracking-wide text-zinc-400">
+                    <div className="space-y-3">
+                        <h2 className="text-4xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-5xl">
+                            The Great Randomizer
+                        </h2>
+                        <p className="max-w-2xl text-lg font-medium text-zinc-400">
                             May the RNG be in your favor, Commander.
                         </p>
                     </div>
@@ -625,7 +625,7 @@ export function RandomizerClient({
 
                             {/* MY Choices */}
                             <div
-                                className={`flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10 ${addingGame ? "relative z-50" : "relative z-10"}`}
+                                className={`glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md transition-colors ${addingGame ? "relative z-50" : "relative z-10"}`}
                             >
                                 <div className="mb-2 flex items-center justify-between">
                                     <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
@@ -759,7 +759,7 @@ export function RandomizerClient({
                             </div>
 
                             {/* OTHER USER's Choices */}
-                            <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10">
+                            <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
                                 <div className="mb-2 flex items-center justify-between">
                                     <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
                                         {otherUserName}&apos;s Choices
@@ -812,7 +812,7 @@ export function RandomizerClient({
 
                             {/* Special Break Card (Month 6/12 Pause) */}
                             {questType === "SIDE" && (
-                                <div className="flex flex-col gap-4 rounded-2xl border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-md transition-colors hover:border-white/10">
+                                <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
                                     <div className="mb-2">
                                         <span className="text-sm font-black tracking-widest text-amber-400 uppercase drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">
                                             Pausa da Side Quest
@@ -1047,7 +1047,7 @@ export function RandomizerClient({
 
                         {/* Right Column: Randomizer Tool Area */}
                         <div>
-                            <div className="group relative flex min-h-125 flex-col items-center justify-center overflow-hidden rounded-3xl border border-white/10 bg-zinc-900/30 p-8 lg:p-12">
+                            <div className="glass-card border border-theme bg-theme-card group relative flex min-h-125 flex-col items-center justify-center overflow-hidden rounded-3xl p-8 shadow-2xl backdrop-blur-md lg:p-12">
                                 {/* Glow effect */}
                                 <div className="absolute -top-24 -right-24 size-64 rounded-full bg-[#bd0df2]/20 blur-[100px]"></div>
 

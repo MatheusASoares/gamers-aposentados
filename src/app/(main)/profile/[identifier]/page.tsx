@@ -100,8 +100,20 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     };
 
     return (
-        <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-10 px-6 py-8 md:px-8 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-8 px-6 py-8 md:px-8 lg:px-12">
             
+            {/* Top Page Header (Padrão do Aplicativo) */}
+            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
+                <div className="space-y-3">
+                    <h2 className="text-4xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-5xl">
+                        Hall of Fame
+                    </h2>
+                    <p className="max-w-2xl text-lg font-medium text-zinc-400">
+                        Celebrate the legendary achievements, rank progress, and conquered games of the vanguard.
+                    </p>
+                </div>
+            </div>
+
             {/* 1. HERO HEADER: 3-Column Profile Showcase */}
             <div className="glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[2rem] p-6 shadow-2xl md:p-8 lg:p-10">
                 {/* Ambient Neon Glows */}

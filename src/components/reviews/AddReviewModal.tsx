@@ -1,8 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Loader2, ImagePlus, X, Sparkles } from "lucide-react";
+import {
+    Plus,
+    Loader2,
+    ImagePlus,
+    X,
+    Sparkles,
+    Star,
+    Flame,
+    Clock,
+    Gamepad2,
+    Award,
+    CheckCircle2,
+    ShieldAlert,
+} from "lucide-react";
 import { createReview } from "@/app/lib/review-actions";
 import { compressImage } from "@/lib/image-compressor";
 import {
@@ -21,6 +34,22 @@ export interface AddReviewModalProps {
 
 const MAX_SCREENSHOTS = 4;
 
+const DIFFICULTY_LEVELS = [
+    { value: 1, label: "Muito Fácil", color: "border-emerald-500/40 text-emerald-400 bg-emerald-950/30", icon: "🟢" },
+    { value: 2, label: "Tranquilo", color: "border-cyan-500/40 text-cyan-400 bg-cyan-950/30", icon: "🔵" },
+    { value: 3, label: "Desafiador", color: "border-amber-500/40 text-amber-400 bg-amber-950/30", icon: "🟡" },
+    { value: 4, label: "Difícil", color: "border-orange-500/40 text-orange-400 bg-orange-950/30", icon: "🟠" },
+    { value: 5, label: "Extremo", color: "border-rose-500/40 text-rose-400 bg-rose-950/30", icon: "🔴" },
+];
+
+const getRatingColor = (val: number) => {
+    if (val === 10) return { bg: "bg-amber-400 text-zinc-950 border-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.6)]", label: "Masterpiece ★" };
+    if (val >= 8) return { bg: "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]", label: "Excelente" };
+    if (val >= 6) return { bg: "bg-cyan-500 text-zinc-950 border-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.4)]", label: "Bom" };
+    if (val >= 4) return { bg: "bg-amber-500/80 text-zinc-950 border-amber-400", label: "Mediano" };
+    return { bg: "bg-rose-500 text-white border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.5)]", label: "Ruim" };
+};
+
 export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -30,20 +59,29 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
     // Form state
     const [gameId, setGameId] = useState("");
-    const [rating, setRating] = useState("10");
-    const [difficulty, setDifficulty] = useState("3");
+    const [rating, setRating] = useState(10);
+    const [difficulty, setDifficulty] = useState(3);
     const [hoursPlayed, setHoursPlayed] = useState("");
     const [reviewText, setReviewText] = useState("");
 
-    // Screenshots state (local Files before upload or URLs)
-    const [screenshots, setScreenshots] = useState<{ file: File; previewUrl: string; uploadedUrl?: string }[]>([]);
+    // Screenshots state
+    const [screenshots, setScreenshots] = useState<{ file: File; previewUrl: string }[]>([]);
+
+    const selectedGame = useMemo(() => {
+        return games.find((g) => g.id === gameId);
+    }, [games, gameId]);
+
+    // Live XP calculation
+    const isDetailed = reviewText.trim().length >= 50;
+    const hasScreenshots = screenshots.length > 0;
+    const calculatedXP = (isDetailed ? 200 : 100) + (hasScreenshots ? 50 : 0);
 
     const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
         if (!files.length) return;
 
         if (screenshots.length + files.length > MAX_SCREENSHOTS) {
-            setError(`Você pode anexar no máximo ${MAX_SCREENSHOTS} screenshots por review.`);
+            setError(`Você pode anexar no máximo ${MAX_SCREENSHOTS} screenshots.`);
             return;
         }
 
@@ -53,7 +91,6 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
         try {
             const newScreenshots = await Promise.all(
                 files.map(async (rawFile) => {
-                    // Compress Image client-side to WebP (1920x1080, 80% quality)
                     const compressed = await compressImage(rawFile);
                     const previewUrl = URL.createObjectURL(compressed);
                     return { file: compressed, previewUrl };
@@ -81,13 +118,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
     const uploadAllScreenshots = async (): Promise<string[]> => {
         const urls: string[] = [];
-
         for (const item of screenshots) {
-            if (item.uploadedUrl) {
-                urls.push(item.uploadedUrl);
-                continue;
-            }
-
             const formData = new FormData();
             formData.append("file", item.file);
             formData.append("folder", "screenshots");
@@ -99,13 +130,12 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
             if (!res.ok) {
                 const data = await res.json();
-                throw new Error(data.error || "Falha ao enviar screenshot para a nuvem");
+                throw new Error(data.error || "Falha ao enviar screenshot.");
             }
 
             const data = await res.json();
             urls.push(data.url);
         }
-
         return urls;
     };
 
@@ -115,20 +145,18 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
         setLoading(true);
 
         if (!gameId) {
-            setError("Selecione um jogo.");
+            setError("Selecione um jogo da sua lista.");
             setLoading(false);
             return;
         }
 
         try {
-            // 1. Upload screenshots first
             const uploadedUrls = await uploadAllScreenshots();
 
-            // 2. Create review with screenshots
             const res = await createReview({
                 gameId,
-                rating: parseInt(rating),
-                difficulty: parseInt(difficulty),
+                rating,
+                difficulty,
                 hoursPlayed: hoursPlayed ? parseInt(hoursPlayed) : undefined,
                 reviewText,
                 screenshots: uploadedUrls,
@@ -136,10 +164,9 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
             if (res.success) {
                 setOpen(false);
-                // reset form
                 setGameId("");
-                setRating("10");
-                setDifficulty("3");
+                setRating(10);
+                setDifficulty(3);
                 setHoursPlayed("");
                 setReviewText("");
                 setScreenshots([]);
@@ -149,191 +176,372 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
             }
         } catch (err: unknown) {
             console.error("[AddReviewModal] Erro ao submeter:", err);
-            const msg = err instanceof Error ? err.message : "Erro de conexão ou falha no servidor.";
+            const msg = err instanceof Error ? err.message : "Erro de conexão ao salvar.";
             setError(msg);
         } finally {
             setLoading(false);
         }
     };
 
-    // Calculation of potential XP bonus
-    const screenshotBonusCount = Math.min(screenshots.length, 3);
-    const screenshotXP = screenshotBonusCount * 50;
+    const coverUrl = selectedGame?.cover_url?.replace("t_cover_big", "t_1080p") || null;
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
                 {trigger || (
-                    <button className="bg-primary hover:bg-primary/90 group flex items-center gap-2 rounded-lg px-6 py-3 text-sm font-bold tracking-wide text-white shadow-[0_0_15px_rgba(189,13,242,0.3)] transition-all active:scale-95">
+                    <button className="bg-primary hover:bg-primary/90 group flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black tracking-wider text-white shadow-[0_0_20px_rgba(189,13,242,0.4)] transition-all active:scale-95">
                         <Plus className="h-5 w-5 transition-transform group-hover:rotate-90" />
                         WRITE A REVIEW
                     </button>
                 )}
             </DialogTrigger>
-            <DialogContent className="border-zinc-800 bg-zinc-950 text-white sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
-                    <DialogTitle className="text-primary text-2xl font-black tracking-wider uppercase flex items-center justify-between">
-                        Nova Review
-                    </DialogTitle>
-                    <DialogDescription className="text-zinc-400">
-                        Compartilhe sua sabedoria sobre o jogo e mostre suas melhores prints!
-                    </DialogDescription>
-                </DialogHeader>
-
-                <form onSubmit={handleSubmit} className="space-y-4 py-2">
-                    {error && (
-                        <div className="rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-sm text-red-500">
-                            {error}
-                        </div>
+            <DialogContent className="border-zinc-800 bg-zinc-950/95 text-white sm:max-w-4xl md:max-w-5xl p-0 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl border flex flex-col md:flex-row max-h-[92vh]">
+                
+                {/* LEFT PANEL: Game Spotlight & Live Preview */}
+                <div className="w-full md:w-80 shrink-0 bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-6 border-b md:border-b-0 md:border-r border-zinc-800/80 flex flex-col justify-between relative overflow-hidden">
+                    
+                    {/* Ambient Blurred Background Cover */}
+                    {coverUrl && (
+                        <div
+                            className="absolute inset-0 bg-cover bg-center opacity-15 blur-2xl pointer-events-none scale-125"
+                            style={{ backgroundImage: `url(${coverUrl})` }}
+                        />
                     )}
 
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300 uppercase">Jogo</label>
-                        {games.length === 0 ? (
-                            <div className="w-full rounded-lg border border-red-500/50 bg-red-500/10 p-3 text-center text-sm font-medium text-red-500">
-                                Nenhuma quest completa disponível para review.
-                            </div>
-                        ) : (
-                            <select
-                                value={gameId}
-                                onChange={(e) => setGameId(e.target.value)}
-                                className="focus:border-primary w-full rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-white transition-colors focus:outline-none"
-                                required
-                            >
-                                <option value="" disabled>
-                                    Selecione um jogo já jogado...
-                                </option>
-                                {games.map((game) => (
-                                    <option key={game.id} value={game.id}>
-                                        {game.title}
-                                    </option>
-                                ))}
-                            </select>
-                        )}
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-zinc-300 uppercase">
-                                Nota (0-10)
-                            </label>
-                            <input
-                                type="number"
-                                min="0"
-                                max="10"
-                                step="1"
-                                value={rating}
-                                onChange={(e) => setRating(e.target.value)}
-                                className="focus:border-primary w-full rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-center text-xl font-bold text-white transition-colors focus:outline-none"
-                                required
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-zinc-300 uppercase">
-                                Dificuldade (1-5)
-                            </label>
-                            <input
-                                type="number"
-                                min="1"
-                                max="5"
-                                step="1"
-                                value={difficulty}
-                                onChange={(e) => setDifficulty(e.target.value)}
-                                className="focus:border-primary w-full rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-center text-xl font-bold text-white transition-colors focus:outline-none"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300 uppercase">
-                            Horas Jogadas
-                        </label>
-                        <input
-                            type="number"
-                            min="0"
-                            placeholder="ex: 45"
-                            value={hoursPlayed}
-                            onChange={(e) => setHoursPlayed(e.target.value)}
-                            className="focus:border-primary w-full rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-white transition-colors focus:outline-none"
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-bold text-zinc-300 uppercase">
-                            Sua Análise (Opcional)
-                        </label>
-                        <textarea
-                            rows={3}
-                            placeholder="Descreva sua experiência com o jogo..."
-                            value={reviewText}
-                            onChange={(e) => setReviewText(e.target.value)}
-                            className="focus:border-primary w-full resize-none rounded-lg border border-zinc-800 bg-zinc-900 p-3 text-white transition-colors focus:outline-none"
-                        ></textarea>
-                    </div>
-
-                    {/* Screenshot Upload Section */}
-                    <div className="space-y-2 pt-1">
-                        <div className="flex items-center justify-between">
-                            <label className="text-sm font-bold text-zinc-300 uppercase flex items-center gap-1.5">
-                                Screenshots ({screenshots.length}/{MAX_SCREENSHOTS})
-                            </label>
-                            <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                                <Sparkles className="h-3 w-3" />
-                                {screenshots.length > 0 ? "+50 XP Bônus Ativo!" : "+50 XP Bônus ao anexar prints"}
+                    <div className="relative z-10 space-y-5">
+                        <div className="flex items-center gap-2">
+                            <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                            <span className="text-xs font-black tracking-widest text-primary uppercase">
+                                Guild Review Studio
                             </span>
                         </div>
 
-                        {/* Dropzone & Preview list */}
-                        <div className="grid grid-cols-4 gap-2">
-                            {screenshots.map((item, idx) => (
-                                <div key={idx} className="relative group aspect-video rounded-lg overflow-hidden border border-zinc-700 bg-zinc-900">
-                                    <img
-                                        src={item.previewUrl}
-                                        alt={`Screenshot ${idx + 1}`}
-                                        className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                                    />
-                                    <button
-                                        type="button"
-                                        onClick={() => handleRemoveScreenshot(idx)}
-                                        className="absolute top-1 right-1 p-1 bg-black/80 text-white rounded-full opacity-90 hover:bg-red-600 transition-colors"
-                                        title="Remover imagem"
-                                    >
-                                        <X className="h-3.5 w-3.5" />
-                                    </button>
-                                </div>
-                            ))}
-
-                            {screenshots.length < MAX_SCREENSHOTS && (
-                                <label className="flex flex-col items-center justify-center aspect-video rounded-lg border-2 border-dashed border-zinc-800 hover:border-primary/60 bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer transition-all">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        multiple
-                                        onChange={handleFileSelect}
-                                        disabled={uploadingImages || loading}
-                                        className="hidden"
-                                    />
-                                    {uploadingImages ? (
-                                        <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                        {/* Game Cover Display */}
+                        {selectedGame ? (
+                            <div className="space-y-3">
+                                <div className="relative aspect-3/4 w-full overflow-hidden rounded-xl border border-zinc-700/80 shadow-[0_0_25px_rgba(0,0,0,0.8)] group">
+                                    {coverUrl ? (
+                                        <img
+                                            src={coverUrl}
+                                            alt={selectedGame.title}
+                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
                                     ) : (
-                                        <>
-                                            <ImagePlus className="h-5 w-5 text-zinc-400 group-hover:text-primary mb-1" />
-                                            <span className="text-[10px] font-bold text-zinc-500 uppercase">Adicionar</span>
-                                        </>
+                                        <div className="flex h-full w-full items-center justify-center bg-zinc-900 text-zinc-600">
+                                            <Gamepad2 className="h-12 w-12 opacity-40" />
+                                        </div>
                                     )}
-                                </label>
-                            )}
+                                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-70" />
+                                    <div className="absolute bottom-3 left-3 right-3">
+                                        <span className="text-xs font-bold text-zinc-400 block uppercase tracking-wider">
+                                            Quest Completa
+                                        </span>
+                                        <h4 className="text-lg font-black text-white leading-tight drop-shadow-md">
+                                            {selectedGame.title}
+                                        </h4>
+                                    </div>
+                                </div>
+                            </div>
+                        ) : (
+                            <div className="aspect-3/4 w-full rounded-xl border-2 border-dashed border-zinc-800 bg-zinc-900/40 flex flex-col items-center justify-center p-6 text-center text-zinc-500">
+                                <Gamepad2 className="h-10 w-10 mb-2 opacity-30 text-primary" />
+                                <p className="text-xs font-bold uppercase tracking-wider">
+                                    Selecione um jogo ao lado para ver o preview
+                                </p>
+                            </div>
+                        )}
+
+                        {/* Live XP Calculator Card */}
+                        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-zinc-900/80 p-4 space-y-2 shadow-lg">
+                            <div className="flex items-center justify-between">
+                                <span className="text-xs font-black tracking-wider text-amber-400 uppercase flex items-center gap-1.5">
+                                    <Award className="h-4 w-4" /> Recompensa de XP
+                                </span>
+                                <span className="text-lg font-black text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
+                                    +{calculatedXP} XP
+                                </span>
+                            </div>
+                            <div className="space-y-1 text-[11px] text-zinc-400 font-medium">
+                                <div className="flex justify-between">
+                                    <span>Review Básica:</span>
+                                    <span className="text-zinc-300 font-bold">+100 XP</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Análise (≥50 caracteres):</span>
+                                    <span className={isDetailed ? "text-emerald-400 font-bold" : "text-zinc-600"}>
+                                        {isDetailed ? "+100 XP ✓" : "+0 XP"}
+                                    </span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span>Com Screenshots:</span>
+                                    <span className={hasScreenshots ? "text-emerald-400 font-bold" : "text-zinc-600"}>
+                                        {hasScreenshots ? "+50 XP ✓" : "+0 XP"}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
-                    <button
-                        type="submit"
-                        disabled={loading || uploadingImages || games.length === 0}
-                        className="bg-primary hover:bg-primary/90 mt-4 flex w-full items-center justify-center gap-2 rounded-lg p-3 font-bold tracking-wide text-white uppercase shadow-[0_0_15px_rgba(189,13,242,0.3)] transition-all disabled:cursor-not-allowed disabled:opacity-50"
-                    >
-                        {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Publicar Review"}
-                    </button>
-                </form>
+                    <div className="relative z-10 pt-4 text-[11px] text-zinc-500 text-center border-t border-zinc-800/60">
+                        Gamers Aposentados • XP System
+                    </div>
+                </div>
+
+                {/* RIGHT PANEL: Form Controls */}
+                <div className="flex-1 p-6 md:p-8 overflow-y-auto max-h-[92vh] space-y-6">
+                    <DialogHeader className="p-0 space-y-1">
+                        <DialogTitle className="text-2xl md:text-3xl font-black tracking-tight text-white uppercase flex items-center gap-2">
+                            Criar Análise <Sparkles className="h-5 w-5 text-primary animate-bounce" />
+                        </DialogTitle>
+                        <DialogDescription className="text-zinc-400 text-sm">
+                            Compartilhe sua nota, nível de desafio e momentos épicos do jogo.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        {error && (
+                            <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm font-medium text-red-400 flex items-center gap-2 animate-in fade-in">
+                                <ShieldAlert className="h-5 w-5 shrink-0" />
+                                {error}
+                            </div>
+                        )}
+
+                        {/* Game Selection */}
+                        <div className="space-y-2">
+                            <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center justify-between">
+                                <span>Jogo Concluído *</span>
+                                {games.length > 0 && (
+                                    <span className="text-[10px] text-zinc-500 font-normal">
+                                        {games.length} jogos prontos para review
+                                    </span>
+                                )}
+                            </label>
+                            {games.length === 0 ? (
+                                <div className="w-full rounded-xl border border-red-500/40 bg-red-950/20 p-4 text-center text-sm font-bold text-red-400">
+                                    Nenhum jogo concluído pendente de review.
+                                </div>
+                            ) : (
+                                <select
+                                    value={gameId}
+                                    onChange={(e) => setGameId(e.target.value)}
+                                    className="focus:border-primary w-full rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 text-white font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-primary"
+                                    required
+                                >
+                                    <option value="" disabled>
+                                        Escolha um jogo da sua lista de quests...
+                                    </option>
+                                    {games.map((g) => (
+                                        <option key={g.id} value={g.id}>
+                                            {g.title}
+                                        </option>
+                                    ))}
+                                </select>
+                            )}
+                        </div>
+
+                        {/* Rating Selector (0 to 10 Pills) */}
+                        <div className="space-y-3">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                    <Star className="h-4 w-4 text-amber-400 fill-amber-400" /> Nota Final (0 - 10) *
+                                </label>
+                                <span className={`text-xs font-black px-3 py-1 rounded-full border ${getRatingColor(rating).bg}`}>
+                                    {rating}/10 — {getRatingColor(rating).label}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-11 gap-1.5 p-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70">
+                                {Array.from({ length: 11 }).map((_, i) => {
+                                    const isSelected = rating === i;
+                                    return (
+                                        <button
+                                            key={i}
+                                            type="button"
+                                            onClick={() => setRating(i)}
+                                            className={`h-11 rounded-lg font-black text-sm transition-all duration-200 ${
+                                                isSelected
+                                                    ? getRatingColor(i).bg + " scale-110 z-10"
+                                                    : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                                            }`}
+                                        >
+                                            {i}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Difficulty & Hours Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                            
+                            {/* Difficulty Card Picker */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                    <Flame className="h-4 w-4 text-orange-500" /> Dificuldade
+                                </label>
+                                <div className="grid grid-cols-5 gap-1.5">
+                                    {DIFFICULTY_LEVELS.map((lvl) => {
+                                        const isSelected = difficulty === lvl.value;
+                                        return (
+                                            <button
+                                                key={lvl.value}
+                                                type="button"
+                                                onClick={() => setDifficulty(lvl.value)}
+                                                className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all text-center ${
+                                                    isSelected
+                                                        ? `${lvl.color} border-2 font-black shadow-md scale-105`
+                                                        : "border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                                                }`}
+                                            >
+                                                <span className="text-base">{lvl.icon}</span>
+                                                <span className="text-[10px] font-bold mt-1 tracking-tight">{lvl.value}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                                <div className="text-[11px] font-semibold text-zinc-400 text-center pt-0.5">
+                                    Nível: <strong className="text-white">{DIFFICULTY_LEVELS.find(d => d.value === difficulty)?.label}</strong>
+                                </div>
+                            </div>
+
+                            {/* Hours Played Input */}
+                            <div className="space-y-2">
+                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                    <Clock className="h-4 w-4 text-cyan-400" /> Horas Jogadas
+                                </label>
+                                <div className="relative">
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        placeholder="ex: 45"
+                                        value={hoursPlayed}
+                                        onChange={(e) => setHoursPlayed(e.target.value)}
+                                        className="focus:border-primary w-full rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 text-white font-bold transition-colors focus:outline-none pr-12"
+                                    />
+                                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 uppercase">
+                                        horas
+                                    </span>
+                                </div>
+                                {/* Preset Buttons */}
+                                <div className="flex gap-1.5 pt-1">
+                                    {[10, 25, 50, 100].map((preset) => (
+                                        <button
+                                            key={preset}
+                                            type="button"
+                                            onClick={() => setHoursPlayed(preset.toString())}
+                                            className="px-2 py-1 text-[10px] font-bold rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+                                        >
+                                            +{preset}h
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Review Textarea */}
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                                    Sua Análise Escrita
+                                </label>
+                                <span className={`text-[11px] font-bold ${isDetailed ? "text-emerald-400" : "text-zinc-500"}`}>
+                                    {reviewText.trim().length} / 50 caracteres {isDetailed ? "(+100 XP Garanti)" : "(para +100 XP bônus)"}
+                                </span>
+                            </div>
+                            <textarea
+                                rows={4}
+                                placeholder="O que achou da história, jogabilidade, gráficos e momentos marcantes? Conte para a guilda..."
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                                className="focus:border-primary w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/90 p-4 text-sm text-white transition-colors focus:outline-none focus:ring-1 focus:ring-primary leading-relaxed"
+                            />
+                        </div>
+
+                        {/* Screenshots Upload Grid */}
+                        <div className="space-y-3 pt-2 border-t border-zinc-800/80">
+                            <div className="flex items-center justify-between">
+                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-2">
+                                    Capturas de Tela ({screenshots.length}/{MAX_SCREENSHOTS})
+                                </label>
+                                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full">
+                                    <Sparkles className="h-3 w-3" />
+                                    {hasScreenshots ? "+50 XP Bônus Ativo!" : "+50 XP Bônus com prints"}
+                                </span>
+                            </div>
+
+                            <div className="grid grid-cols-4 gap-3">
+                                {screenshots.map((item, idx) => (
+                                    <div key={idx} className="relative group aspect-video rounded-xl overflow-hidden border border-zinc-700 bg-zinc-900 shadow-md">
+                                        <img
+                                            src={item.previewUrl}
+                                            alt={`Screenshot ${idx + 1}`}
+                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => handleRemoveScreenshot(idx)}
+                                            className="absolute top-1.5 right-1.5 p-1 bg-black/80 text-white rounded-full opacity-90 hover:bg-red-600 transition-colors shadow"
+                                            title="Remover imagem"
+                                        >
+                                            <X className="h-3.5 w-3.5" />
+                                        </button>
+                                    </div>
+                                ))}
+
+                                {screenshots.length < MAX_SCREENSHOTS && (
+                                    <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-800 hover:border-primary bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer transition-all group">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            multiple
+                                            onChange={handleFileSelect}
+                                            disabled={uploadingImages || loading}
+                                            className="hidden"
+                                        />
+                                        {uploadingImages ? (
+                                            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                                        ) : (
+                                            <>
+                                                <ImagePlus className="h-6 w-6 text-zinc-500 group-hover:text-primary transition-colors mb-1" />
+                                                <span className="text-[10px] font-black text-zinc-500 group-hover:text-white uppercase tracking-wider">
+                                                    Anexar Print
+                                                </span>
+                                            </>
+                                        )}
+                                    </label>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <div className="pt-4 flex items-center gap-4">
+                            <button
+                                type="button"
+                                onClick={() => setOpen(false)}
+                                className="px-6 py-3.5 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white font-bold text-sm transition-colors uppercase tracking-wider"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                type="submit"
+                                disabled={loading || uploadingImages || games.length === 0}
+                                className="flex-1 bg-gradient-to-r from-[#bd0df2] to-purple-600 hover:from-[#bd0df2]/90 hover:to-purple-500 flex items-center justify-center gap-2 rounded-xl py-3.5 font-black text-sm tracking-wider text-white uppercase shadow-[0_0_25px_rgba(189,13,242,0.4)] transition-all active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                        <span>Processando...</span>
+                                    </>
+                                ) : (
+                                    <>
+                                        <CheckCircle2 className="h-5 w-5" />
+                                        <span>Publicar Review (+{calculatedXP} XP)</span>
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </DialogContent>
         </Dialog>
     );
