@@ -15,7 +15,7 @@
         "db:migrate": "prisma migrate dev",
         "db:seed": "tsx prisma/seed.ts",
         "db:deploy": "prisma migrate deploy",
-        "db:studio": "prisma studio",
+        "db:prod:push": "npx dotenv-cli -e .env.production -- npx prisma db push",
         "db:agent:up": "docker compose up -d postgres_agent",
         "db:agent:push": "npx dotenv-cli -e .env.agent -- npx prisma db push",
         "db:agent:seed": "npx dotenv-cli -e .env.agent -- npx tsx prisma/seed.ts",
