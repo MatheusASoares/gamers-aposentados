@@ -1,9 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import logo from "../../../public/logo.jpg";
 import {
     LayoutDashboard,
     History,
@@ -27,7 +25,7 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname();
     const { data: session } = useSession();
-    const equippedTheme = (session?.user as any)?.equipped_theme || "cyberpunk";
+    const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
 
     const isActive = (path: string) => {
         if (path === "/") return pathname === "/";

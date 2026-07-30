@@ -4,15 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import {
   Trophy,
-  Shield,
   ChevronRight,
   Sparkles,
   Gamepad2,
   CheckCircle2,
-  Compass,
-  Swords,
-  Crown,
-  Flame
 } from "lucide-react";
 import { calculateLevelFromXP, getRankTierDetails } from "@/app/lib/xp-engine";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -44,22 +39,7 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
   const lastGame = user.lastCompletedGame;
   const bannerItem = REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === user.equippedBanner);
 
-  // Render dynamic rank icon based on tier
-  const renderRankIcon = (iconName: string, className: string) => {
-    switch (iconName) {
-      case "compass":
-        return <Compass className={className} />;
-      case "swords":
-        return <Swords className={className} />;
-      case "crown":
-        return <Crown className={className} />;
-      case "flame":
-        return <Flame className={className} />;
-      case "shield":
-      default:
-        return <Shield className={className} />;
-    }
-  };
+
 
   return (
     <div

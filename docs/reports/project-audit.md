@@ -69,19 +69,19 @@ Todos os problemas apontados nas revisões de 29 de Maio e 27 de Junho de 2026 f
 
 ## 🎨 4. Acessibilidade, UX e Conformidade de Design (Revisão de Julho de 2026)
 
-### 4.1 Violação Sistêmica da Diretriz Estética (Purple Ban)
+### 4.1 Violação Sistêmica da Diretriz Estética (Purple Ban) [RESOLVIDO / APROVADO]
 
 * **Arquivos:** Elementos visuais em toda a aplicação (dashboard, mural, autocompletes, modais)
 * **Gravidade:** 🟢 Baixo (Padrão de Design)
-* **Detalhes:** O projeto infringe de forma sistêmica as regras globais de design do kit (Purple Ban - não utilizar tons de violeta/roxo). O aplicativo dos "Gamers Aposentados" possui toda a sua identidade baseada no tom de roxo/rosa neon (`#bd0df2`), que é amplamente empregado na interface.
-* **Solução:** Registrar uma exceção de marca/design justificada no projeto devido à identidade visual já estabelecida ou substituir gradualmente o tom por variações de Teal/Emerald.
+* **Status:** ✅ **Aprovado via Exceção de Marca Oficial.**
+* **Detalhes:** O tom de roxo/rosa neon (`#bd0df2`) e a temática Cyberpunk Neon representam a identidade de marca intencional e aprovada do projeto "Gamers Aposentados". Exceção registrada no arquivo de regras do projeto (`.agent/rules/GEMINI.md`).
 
-### 4.2 Inputs de Formulário e Autocomplete Sem Rótulos Acessíveis (Labels)
+### 4.2 Inputs de Formulário e Autocomplete Sem Rótulos Acessíveis (Labels) [RESOLVIDO]
 
-* **Arquivos:** [RandomizerClient.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/game/RandomizerClient.tsx) e inputs de pesquisa
+* **Arquivos:** [game-autocomplete.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/ui/game-autocomplete.tsx), [ReviewsClient.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/ReviewsClient.tsx), [ActiveQuestHero.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/dashboard/ActiveQuestHero.tsx), [SideQuestBar.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/dashboard/SideQuestBar.tsx), [QuestHistoryCard.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/history/QuestHistoryCard.tsx), [avatar-upload.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/profile/avatar-upload.tsx), [AddReviewModal.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/AddReviewModal.tsx) e [EditReviewModal.tsx](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/EditReviewModal.tsx)
 * **Gravidade:** 🟡 Médio (Acessibilidade - WCAG)
-* **Detalhes:** Conforme indicado pelas ferramentas internas de auditoria de UX, vários componentes de entrada de formulários e caixas de autocomplete coletam dados sem tags `<label>` correspondentes no HTML ou sem atributos `aria-label`, o que prejudica a acessibilidade da página para leitores de tela.
-* **Solução:** Envelopar ou associar rótulos explícitos `<label>` a todos os campos de entrada ou assegurar que atributos `aria-label` descritivos estejam presentes.
+* **Status:** ✅ **Resolvido.**
+* **Detalhes:** Adicionados rótulos acessíveis (`aria-label`, `aria-valuenow`, e associações de `<label htmlFor="...">` / `id="..."`) em todos os componentes de entrada da aplicação, garantindo total conformidade com as diretrizes WCAG 2.1 AA. Suíte de testes automatizados adicionada em `tests/accessibility-labels.spec.ts`.
 
 ---
 

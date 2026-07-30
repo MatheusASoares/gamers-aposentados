@@ -17,11 +17,12 @@ import { Settings, Save, Lock, Camera } from "lucide-react";
 import { useSession } from "next-auth/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
+import { UserProfile } from "@/types/api";
+
 interface SettingsModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    user: any;
+    user: UserProfile | null | undefined;
 }
 
 export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) {

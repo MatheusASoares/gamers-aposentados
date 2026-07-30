@@ -75,6 +75,7 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
                     <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                     <Input
                         autoFocus
+                        aria-label="Buscar jogo no banco de dados IGDB"
                         placeholder="Buscar jogo no IGDB..."
                         className="focus-visible:ring-primary focus-visible:border-primary w-full rounded-xl border-white/10 bg-zinc-900/80 py-6 pr-4 pl-9 text-white placeholder:text-zinc-500"
                         value={query}

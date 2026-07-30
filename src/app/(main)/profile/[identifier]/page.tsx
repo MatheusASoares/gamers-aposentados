@@ -1,10 +1,9 @@
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect, notFound } from "next/navigation";
-import { Trophy, Gamepad2, Star, Calendar, Sparkles, Shield, Award, Compass, Swords, Crown, Flame } from "lucide-react";
+import { Trophy, Sparkles, Award } from "lucide-react";
 import Image from "next/image";
 import { FavoriteGamesModule } from "@/components/profile/favorite-games-module";
-import { Separator } from "@/components/ui/separator";
 import { AvatarUpload } from "@/components/profile/avatar-upload";
 import { setFavoriteGames, setFavoriteGamesOfYear } from "@/app/lib/user-actions";
 import { HallOfFameGallery, CompletedGameItem } from "@/components/profile/hall-of-fame-gallery";
@@ -46,7 +45,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     const isOwner = currentUserId === user.id;
 
     // Fetch equipped_frame, equipped_banner and equipped_theme via raw SQL to bypass stale Prisma Client JS definitions
-    const dbUserExtra: any[] = await prisma.$queryRaw`SELECT equipped_frame, equipped_banner, equipped_theme FROM users WHERE id = ${user.id}`;
+    const dbUserExtra = await prisma.$queryRaw<{ equipped_frame: string | null; equipped_banner: string | null; equipped_theme: string | null }[]>`SELECT equipped_frame, equipped_banner, equipped_theme FROM users WHERE id = ${user.id}`;
     const equippedFrame = dbUserExtra?.[0]?.equipped_frame || null;
     const equippedBanner = dbUserExtra?.[0]?.equipped_banner || null;
     const equippedTheme = dbUserExtra?.[0]?.equipped_theme || "cyberpunk";
@@ -82,22 +81,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     const tierDetails = getRankTierDetails(level);
     const equippedTitle = user.equipped_title || tierDetails.name;
 
-    // Helper for Rank Tier Icon
-    const renderRankIcon = (iconName: string, className: string) => {
-        switch (iconName) {
-            case "compass":
-                return <Compass className={className} />;
-            case "swords":
-                return <Swords className={className} />;
-            case "crown":
-                return <Crown className={className} />;
-            case "flame":
-                return <Flame className={className} />;
-            case "shield":
-            default:
-                return <Shield className={className} />;
-        }
-    };
+
 
     return (
         <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-8 px-6 py-8 md:px-8 lg:px-12">

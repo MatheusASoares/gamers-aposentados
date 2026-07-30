@@ -11,16 +11,21 @@ import {
     Star,
     Camera,
     Award,
-    Sparkles,
     SlidersHorizontal,
     Gamepad2,
 } from "lucide-react";
 
+import { ReviewCardProps } from "./ReviewCard";
+
 export interface ReviewsClientProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    reviews: any[];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    games: any[];
+    reviews: ReviewCardProps["review"][];
+    games: {
+        id: string;
+        title: string;
+        cover_url?: string | null;
+        platform?: string | null;
+        quest_type?: string;
+    }[];
     currentUserId?: string;
 }
 
@@ -146,6 +151,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                             <input
                                 type="text"
+                                aria-label="Buscar por jogo, usuário ou palavra-chave"
                                 placeholder="Buscar por jogo, usuário ou palavra-chave..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}

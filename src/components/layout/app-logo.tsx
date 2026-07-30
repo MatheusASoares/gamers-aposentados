@@ -3,7 +3,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import logo from "../../../public/logo.jpg";
-import { Shield, Gamepad2, Sparkles, Flame } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AppLogoProps {

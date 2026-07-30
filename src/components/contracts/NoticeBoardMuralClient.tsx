@@ -223,7 +223,6 @@ export function NoticeBoardMuralClient({
                                 }}
                             />
                             {/* Layer 2: Crisp right-aligned artwork scaling proportionally without stretch or clipping */}
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img
                                 src={(game.artwork_url || game.cover_url) ?? undefined}
                                 alt=""

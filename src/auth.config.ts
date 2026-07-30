@@ -40,10 +40,10 @@ export const authConfig = {
                 session.user.username = token.username as string;
                 session.user.image = (token.image as string) ?? session.user.image;
                 session.user.email = (token.email as string) ?? session.user.email;
-                (session.user as any).equipped_frame = token.equipped_frame as string | null;
-                (session.user as any).equipped_title = token.equipped_title as string | null;
-                (session.user as any).equipped_banner = token.equipped_banner as string | null;
-                (session.user as any).equipped_theme = (token.equipped_theme as string) || "cyberpunk";
+                session.user.equipped_frame = token.equipped_frame as string | null;
+                session.user.equipped_title = token.equipped_title as string | null;
+                session.user.equipped_banner = token.equipped_banner as string | null;
+                session.user.equipped_theme = (token.equipped_theme as string) || "cyberpunk";
             }
             return session;
         },
@@ -53,10 +53,10 @@ export const authConfig = {
                 token.username = user.username;
                 token.image = user.image;
                 token.email = user.email;
-                token.equipped_frame = (user as any).equipped_frame || null;
-                token.equipped_title = (user as any).equipped_title || null;
-                token.equipped_banner = (user as any).equipped_banner || null;
-                token.equipped_theme = (user as any).equipped_theme || "cyberpunk";
+                token.equipped_frame = user.equipped_frame || null;
+                token.equipped_title = user.equipped_title || null;
+                token.equipped_banner = user.equipped_banner || null;
+                token.equipped_theme = user.equipped_theme || "cyberpunk";
             }
             if (trigger === "update") {
                 if (session?.username) token.username = session.username;

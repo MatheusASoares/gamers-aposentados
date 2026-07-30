@@ -3,6 +3,7 @@ import { prisma } from "../../../lib/prisma";
 import { auth } from "@/auth";
 import { Prisma } from "@prisma/client";
 import { isRandomizerPlayer } from "@/lib/randomizer-players";
+import { executeRoll } from "@/app/lib/pool-actions";
 
 const mapPoolInput = (input: Partial<Prisma.PoolUncheckedCreateInput> & { type?: string }) => {
     const data: Partial<Prisma.PoolUncheckedCreateInput> = {};
@@ -93,36 +94,11 @@ export async function PUT(request: Request) {
         if (!id) return NextResponse.json({ error: "ID is required" }, { status: 400 });
 
         if (action === "draw") {
-            // Run randomizer and close pool in a transaction
-            const poolWithEntries = await prisma.pool.findUnique({
-                where: { id },
-                include: { entries: true },
-            });
-            if (!poolWithEntries)
-                return NextResponse.json({ error: "Pool not found" }, { status: 404 });
-            if (!poolWithEntries.entries || poolWithEntries.entries.length === 0)
-                return NextResponse.json({ error: "No entries in pool" }, { status: 400 });
-
-            const randomIndex = Math.floor(Math.random() * poolWithEntries.entries.length);
-            const winnerEntry = poolWithEntries.entries[randomIndex];
-
-            const now = new Date();
-
-            const [updatedPool, updatedGame] = await prisma.$transaction([
-                prisma.pool.update({
-                    where: { id },
-                    data: { winner_game_id: winnerEntry.game_id, status: "CLOSED" },
-                }),
-                prisma.gameProgress.updateMany({
-                    where: {
-                        game_id: winnerEntry.game_id,
-                        status: "SUGGESTED",
-                    },
-                    data: { status: "ACTIVE", start_date: now },
-                }),
-            ]);
-
-            return NextResponse.json({ pool: updatedPool, winner: updatedGame });
+            const result = await executeRoll(id);
+            if (!result.success) {
+                return NextResponse.json({ error: result.error }, { status: 400 });
+            }
+            return NextResponse.json(result);
         }
 
         // Generic update

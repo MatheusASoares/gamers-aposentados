@@ -275,6 +275,8 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                             </div>
                             <input
                                 type="range"
+                                aria-label="Ajustar porcentagem de progresso do jogo"
+                                aria-valuenow={percentage}
                                 min="0"
                                 max="100"
                                 value={percentage}

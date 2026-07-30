@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 
 export interface AddReviewModalProps {
-    games: { id: string; title: string; cover_url: string | null }[];
+    games: { id: string; title: string; cover_url?: string | null; platform?: string | null; quest_type?: string }[];
     trigger?: React.ReactNode;
 }
 
@@ -406,12 +406,14 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
                             {/* Hours Played Input */}
                             <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                <label htmlFor="add-review-hours-played" className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
                                     <Clock className="h-4 w-4 text-cyan-400" /> Horas Jogadas
                                 </label>
                                 <div className="relative">
                                     <input
+                                        id="add-review-hours-played"
                                         type="number"
+                                        aria-label="Horas jogadas"
                                         min="0"
                                         placeholder="ex: 45"
                                         value={hoursPlayed}
@@ -492,6 +494,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
                                     <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-800 hover:border-primary bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer transition-all group">
                                         <input
                                             type="file"
+                                            aria-label="Upload de screenshots do jogo"
                                             accept="image/*"
                                             multiple
                                             onChange={handleFileSelect}

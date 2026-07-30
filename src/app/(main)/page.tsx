@@ -268,8 +268,8 @@ export default async function DashboardPage() {
           })
         : null;
 
-    const dbUserExtra: any[] = userId
-        ? await prisma.$queryRaw`SELECT equipped_frame, equipped_banner FROM users WHERE id = ${userId}`
+    const dbUserExtra = userId
+        ? await prisma.$queryRaw<{ equipped_frame: string | null; equipped_banner: string | null }[]>`SELECT equipped_frame, equipped_banner FROM users WHERE id = ${userId}`
         : [];
     const equippedFrame = dbUserExtra?.[0]?.equipped_frame || null;
     const equippedBanner = dbUserExtra?.[0]?.equipped_banner || null;

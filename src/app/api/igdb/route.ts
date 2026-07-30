@@ -16,11 +16,11 @@ export async function POST(request: Request) {
 
         const data = await searchGamesIGDB(body.query);
         return NextResponse.json(data);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-        console.error("IGDB API Route Error:", err.message || err);
+    } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        console.error("IGDB API Route Error:", errorMessage);
         return NextResponse.json(
-            { error: "Internal Server Error", details: err.message },
+            { error: "Internal Server Error", details: errorMessage },
             { status: 500 },
         );
     }

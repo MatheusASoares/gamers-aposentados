@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, Trophy, History, Save, Pencil, X, Shield, Swords, Compass, Sparkles, Gamepad2, Flame } from "lucide-react";
+import { Loader2, Trophy, History, Save, Pencil, X, Sparkles, Flame } from "lucide-react";
 import { GiSwordsEmblem, GiDragonHead, GiSpaceship, GiPortal, GiRetroController, GiCyberEye } from "react-icons/gi";
 import Image from "next/image";
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
@@ -19,6 +19,7 @@ import {
     insertSpecialGame,
 } from "@/app/lib/pool-actions";
 import { cn } from "@/lib/utils";
+import { HltbAiResponse, HltbAiResult } from "@/types/api";
 
 type QuestType = "MAIN" | "SIDE";
 
@@ -76,7 +77,7 @@ export function RandomizerClient({
     otherPlayerName: string;
 }) {
     const { data: session } = useSession();
-    const equippedTheme = (session?.user as any)?.equipped_theme || "cyberpunk";
+    const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
 
     const [questType, setQuestType] = useState<QuestType>("SIDE");
 
@@ -189,11 +190,10 @@ export function RandomizerClient({
             });
 
             if (aiRes.ok) {
-                const aiData = await aiRes.json();
+                const aiData: HltbAiResponse = await aiRes.json();
                 setHltbTimes((prev) => {
                     const next = { ...prev };
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    aiData.results.forEach((r: any) => {
+                    aiData.results.forEach((r: HltbAiResult) => {
                         next[r.title] = r.mainStory || null;
                     });
                     return next;
@@ -218,8 +218,7 @@ export function RandomizerClient({
 
         // Fetch lock status
         getRandomizerStatus(questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST").then((res) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setLockStatus(res as any);
+            setLockStatus(res);
         });
 
         loadPool(questType);
@@ -350,10 +349,9 @@ export function RandomizerClient({
                     });
 
                     if (aiRes.ok) {
-                        const aiData = await aiRes.json();
+                        const aiData: HltbAiResponse = await aiRes.json();
                         const newTimes = { ...hltbTimes };
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        aiData.results.forEach((r: any) => {
+                        aiData.results.forEach((r: HltbAiResult) => {
                             newTimes[r.title] = r.mainStory || null;
                         });
                         setHltbTimes(newTimes);

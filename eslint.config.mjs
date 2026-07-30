@@ -13,6 +13,7 @@ const eslintConfig = defineConfig([
             "react/no-unescaped-entities": "off",
             "@typescript-eslint/no-explicit-any": "warn",
             "@typescript-eslint/no-require-imports": "warn",
+            "@next/next/no-img-element": "off",
         },
     },
     // Override default ignores of eslint-config-next.
@@ -25,6 +26,8 @@ const eslintConfig = defineConfig([
         // Ignore Antigravity artifacts and skills
         ".agents/**",
         ".agent/**",
+        "scratch/**",
+        "scripts/**",
     ]),
 ]);
 

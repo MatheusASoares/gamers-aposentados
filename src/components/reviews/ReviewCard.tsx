@@ -12,7 +12,6 @@ import {
     X,
     ChevronLeft,
     ChevronRight,
-    Flame,
     Clock,
 } from "lucide-react";
 import { format } from "date-fns";
@@ -297,8 +296,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                         <div className="flex items-center gap-3 text-zinc-500">
                             {currentUserId === review.user_id && (
                                 <>
-                                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                    <EditReviewModal review={review as any} />
+                                    <EditReviewModal review={review} />
                                     <button
                                         onClick={handleDelete}
                                         className="transition-colors hover:text-red-500 hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.5)]"

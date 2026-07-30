@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Game } from "@prisma/client";
 import { GameAutocomplete, GameSearchResult } from "@/components/ui/game-autocomplete";
 import Image from "next/image";
-import { Heart, Edit2, Check, X, Loader2, Gamepad2, Medal, Trophy } from "lucide-react";
+import { Edit2, Check, X, Loader2, Gamepad2, Trophy } from "lucide-react";
 
 interface FavoriteGamesModuleProps {
     title: string;

@@ -8,7 +8,6 @@ import {
   Gamepad2,
   Crown,
   Flame,
-  Trophy
 } from "lucide-react";
 import { getTitleBadgeStyle } from "@/lib/constants/rewards";
 import { cn } from "@/lib/utils";

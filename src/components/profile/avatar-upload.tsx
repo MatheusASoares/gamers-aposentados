@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import { Camera } from "lucide-react";
 import { updateProfileImage } from "@/app/lib/user-actions";
 import { useSession } from "next-auth/react";
@@ -99,6 +99,7 @@ export function AvatarUpload({ currentImage, name, isOwner, frameUrl, className 
             <input
                 ref={fileInputRef}
                 type="file"
+                aria-label="Upload de foto de perfil"
                 accept="image/*"
                 className="hidden"
                 onChange={handleFileChange}

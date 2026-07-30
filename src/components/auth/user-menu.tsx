@@ -21,8 +21,7 @@ export default async function UserMenu() {
     return (
         <div className="flex items-center gap-4">
             <span className="text-sm text-gray-500">
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                Signed in as {session.user.email} ({(session.user as any).username || "User"})
+                Signed in as {session.user.email} ({session.user.username || "User"})
             </span>
             <form
                 action={async () => {

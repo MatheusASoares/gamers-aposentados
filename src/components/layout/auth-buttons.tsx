@@ -2,13 +2,12 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { User, LogOut, Settings, Trophy } from "lucide-react";
+import { LogOut, Settings, Trophy } from "lucide-react";
 import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { SettingsModal } from "@/components/auth/settings-modal";
 import { handleSignOut } from "@/lib/actions";
 import Link from "next/link";
-import Image from "next/image";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -19,11 +18,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSession } from "next-auth/react";
 
+import { UserProfile } from "@/types/api";
 import { UserAvatar } from "@/components/ui/user-avatar";
 
 interface AuthButtonsProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    user: any; // Using any for now to avoid dragging in session types, improving later
+    user: UserProfile | null | undefined;
 }
 
 export function AuthButtons({ user }: AuthButtonsProps) {
@@ -34,7 +33,7 @@ export function AuthButtons({ user }: AuthButtonsProps) {
     // Use the live session image & frame so it updates instantly after equipping
     const { data: session } = useSession();
     const liveImage = session?.user?.image ?? user?.image;
-    const equippedFrame = (session?.user as any)?.equipped_frame ?? user?.equipped_frame ?? null;
+    const equippedFrame = session?.user?.equipped_frame ?? user?.equipped_frame ?? null;
 
     const openLogin = () => {
         setRegisterOpen(false);
