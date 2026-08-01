@@ -313,3 +313,32 @@ html:not([data-theme]) .glass-card,
     background: var(--theme-primary);
     box-shadow: 0 0 10px var(--theme-glow);
 }
+
+/* Banner Dynamic Animation Keyframes */
+@keyframes scanlineSweep {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(100%); }
+}
+
+@keyframes laserSweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+@keyframes holoSweep {
+    0% { transform: translateX(-100%) rotate(15deg); }
+    100% { transform: translateX(100%) rotate(15deg); }
+}
+
+.animate-scanline-sweep {
+    animation: scanlineSweep 4s linear infinite;
+}
+
+.animate-laser-sweep {
+    animation: laserSweep 3s ease-in-out infinite alternate;
+}
+
+.animate-holo-sweep {
+    animation: holoSweep 5s ease-in-out infinite;
+}
+

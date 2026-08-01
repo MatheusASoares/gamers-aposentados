@@ -13,6 +13,7 @@ import { calculateLevelFromXP, getRankTierDetails } from "@/app/lib/xp-engine";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { TitleBadge } from "@/components/ui/title-badge";
 import { REWARDS_CATALOG } from "@/lib/constants/rewards";
+import { BannerFxOverlay } from "@/components/profile/banner-fx-overlay";
 
 export interface UserProfileWidgetProps {
   user: {
@@ -37,13 +38,14 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
   const tierDetails = getRankTierDetails(level);
   const title = user.equippedTitle || tierDetails.name;
   const lastGame = user.lastCompletedGame;
-  const bannerItem = REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === user.equippedBanner);
+  const activeBannerId = user.equippedBanner || "banner-retro-arcade";
+  const bannerItem = REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === activeBannerId) || REWARDS_CATALOG.find((r) => r.id === "banner-retro-arcade");
 
 
 
   return (
     <div
-      className="glass-card animate-fade-in-up relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-6 md:p-8"
+      className="glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[290px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-6 md:p-8"
       data-testid="user-profile-widget"
     >
       {/* Dynamic Ambient Glow matching the unlocked Rank Tier */}
@@ -58,76 +60,57 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
             alt={bannerItem.name || "Banner de Perfil"}
             fill
             priority
+            unoptimized
             sizes="100vw"
-            className="object-cover object-center opacity-35 mix-blend-luminosity brightness-90 transition-opacity duration-700"
+            className="object-cover object-center opacity-90 transition-all duration-700 hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/75 to-zinc-950/40" />
+          {/* Smooth Vignette Scrim for High-Definition Text Legibility */}
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/20" />
+          {/* Dynamic Animated FX Overlay */}
+          <BannerFxOverlay effectType={bannerItem.effectType} bannerId={bannerItem.id} />
         </div>
       )}
 
-      {/* Balanced 3-Column Layout (4 - 4 - 4 Grid) */}
+      {/* Balanced 3-Column Layout (5 - 4 - 3 Grid) */}
       <div className="relative z-10 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
 
-        {/* Column 1: Player Profile & Level Progress (4 cols) */}
-        <div className="flex flex-col justify-between gap-5 lg:col-span-4 lg:border-r lg:border-white/5 lg:pr-6">
-          {/* Avatar & Player Info */}
-          <div className="flex items-center gap-10 md:gap-12">
-            <div className="relative shrink-0">
-              <UserAvatar
-                src={user.image || null}
-                name={user.name || null}
-                frameUrl={user.equippedFrame}
-                size="2xl"
-              />
-            </div>
-
-            <div className="flex flex-col gap-1.5 min-w-0">
-              <div className="flex items-center gap-2">
-                <h2 className="truncate text-2xl font-black tracking-tight text-white sm:text-3xl">
-                  {user.name || "Gamer"}
-                </h2>
-                {/* Level Pill */}
-                <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/40 bg-amber-500/15 px-2.5 py-0.5 text-xs font-black text-amber-300 uppercase shadow-[0_0_10px_rgba(251,191,36,0.2)]">
-                  <Sparkles className="h-3 w-3 text-amber-400" />
-                  Lvl {level}
-                </span>
-              </div>
-
-              {/* Dynamic Rank Title with custom color theme & icon */}
-              <TitleBadge title={title} />
-            </div>
+        {/* Column 1: Player Profile & Info (5 cols) */}
+        <div className="flex items-center gap-6 lg:col-span-5 lg:border-r lg:border-white/10 lg:pr-6">
+          <div className="relative shrink-0">
+            <UserAvatar
+              src={user.image || null}
+              name={user.name || null}
+              frameUrl={user.equippedFrame}
+              size="2xl"
+            />
           </div>
 
-          {/* XP Progress Card */}
-          <div className="flex flex-col gap-2.5 rounded-2xl border border-white/5 bg-zinc-950/60 p-4 shadow-inner">
-            <div className="flex items-center justify-between text-xs font-black tracking-widest uppercase">
-              <span className="text-zinc-400">Career XP</span>
-              <span className={tierDetails.titleColor}>
-                {currentLevelXP} / {nextLevelXP} XP ({progressPercentage}%)
+          <div className="flex flex-col gap-2 min-w-0">
+            <div className="flex flex-wrap items-center gap-2">
+              <h2 className="truncate text-2xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-3xl">
+                {user.name || "Gamer"}
+              </h2>
+              <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-3 py-0.5 text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                Lvl {level}
               </span>
             </div>
-            <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-900 p-0.5 border border-white/5">
-              <div
-                className="h-full rounded-full bg-theme-primary progress-glow transition-all duration-700"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-            <div className="flex justify-between text-xs font-bold text-zinc-500">
-              <span>Total: {user.xpPoints} XP</span>
-              <span>Próximo nível em {nextLevelXP - currentLevelXP} XP</span>
+
+            <div className="pt-0.5">
+              <TitleBadge title={title} />
             </div>
           </div>
         </div>
 
         {/* Column 2: Featured Last Completed Game Showcase Card (4 cols) */}
-        <div className="flex flex-col items-center justify-center gap-2.5 lg:col-span-4">
-          <div className="flex items-center gap-2 text-xs font-black tracking-widest text-emerald-400 uppercase">
+        <div className="flex flex-col items-center justify-center gap-2 lg:col-span-4">
+          <div className="flex items-center gap-2 text-xs font-black tracking-widest text-emerald-400 uppercase drop-shadow-sm">
             <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>Último Jogo Zerado</span>
           </div>
 
           {lastGame ? (
-            <div className="group relative aspect-[3/4] h-52 sm:h-56 w-auto overflow-hidden rounded-2xl border border-emerald-500/30 bg-zinc-900 shadow-[0_0_25px_rgba(16,185,129,0.2)]">
+            <div className="group relative aspect-[3/4] h-48 sm:h-52 w-auto overflow-hidden rounded-2xl border border-emerald-500/40 bg-zinc-950 shadow-[0_0_25px_rgba(16,185,129,0.3)]">
               {lastGame.coverUrl ? (
                 <Image
                   src={lastGame.coverUrl.startsWith("//") ? `https:${lastGame.coverUrl}` : lastGame.coverUrl}
@@ -153,26 +136,40 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
               </div>
             </div>
           ) : (
-            <div className="flex aspect-[3/4] h-52 w-auto items-center justify-center rounded-2xl border border-dashed border-white/5 bg-zinc-900/40 p-4 text-xs font-bold text-zinc-500 uppercase">
+            <div className="flex aspect-[3/4] h-48 w-auto items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/60 p-4 text-xs font-bold text-zinc-400 uppercase backdrop-blur-md">
               Nenhum jogo zerado
             </div>
           )}
         </div>
 
-        {/* Column 3: Stats Summary & Main CTA (4 cols) */}
-        <div className="flex flex-col justify-between gap-4 lg:col-span-4 lg:border-l lg:border-white/5 lg:pl-6">
+        {/* Column 3: Stats Summary & Career XP (3 cols) */}
+        <div className="flex flex-col justify-between gap-3 lg:col-span-3 lg:border-l lg:border-white/10 lg:pl-6">
+          {/* XP Progress - Sleek Glass */}
+          <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/60 p-3.5 shadow-xl backdrop-blur-md">
+            <div className="flex items-center justify-between text-[11px] font-black tracking-widest uppercase">
+              <span className="text-zinc-300">Career XP</span>
+              <span className={`${tierDetails.titleColor} font-black`}>
+                {currentLevelXP}/{nextLevelXP} XP
+              </span>
+            </div>
+            <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-950 p-0.5 border border-white/10">
+              <div
+                className="h-full rounded-full bg-theme-primary progress-glow transition-all duration-700"
+                style={{ width: `${progressPercentage}%` }}
+              />
+            </div>
+          </div>
+
           {/* Stats Grid */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-zinc-950/60 p-4 text-center">
-              <span className="text-xs font-black tracking-widest text-zinc-400 uppercase">Completed</span>
-              <span className="text-2xl font-black text-white md:text-3xl">{user.completedGamesCount}</span>
-              <span className="text-xs font-bold text-zinc-500">Jogos Zerados</span>
+          <div className="grid grid-cols-2 gap-2">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/60 p-2.5 text-center shadow-xl backdrop-blur-md">
+              <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Zerados</span>
+              <span className="text-xl font-black text-white drop-shadow-md">{user.completedGamesCount}</span>
             </div>
 
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 text-center">
-              <span className="text-xs font-black tracking-widest text-amber-400 uppercase">Platinas</span>
-              <span className="text-2xl font-black text-amber-300 md:text-3xl">{user.platinumCount} 🏆</span>
-              <span className="text-xs font-bold text-amber-400/80">100% Concluído</span>
+            <div className="flex flex-col items-center justify-center rounded-xl border border-amber-500/30 bg-black/60 p-2.5 text-center shadow-xl backdrop-blur-md">
+              <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">Platinas</span>
+              <span className="text-xl font-black text-amber-300 drop-shadow-md">{user.platinumCount} 🏆</span>
             </div>
           </div>
 

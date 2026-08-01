@@ -61,21 +61,28 @@ A progressão do **Gamers Aposentados** recompensa o jogador a cada nível alcan
 
 | Nível | Item Desbloqueado | Tipo de Item | Raridade | Asset / Efeito Visual |
 | :---: | :--- | :---: | :---: | :--- |
-| **Nível 1** | **Aposentado Novato** (Título)<br>**Moldura de Madeira & Couro** (Borda) | Título<br>Borda | Comum | `wooden-frame.png`<br>Borda rústica de carvalho entalhado. |
-| **Nível 2** | **Insígnia: Primeiro Passo** | Badge | Comum | Badge comemorativo no perfil. |
-| **Nível 3** | **Limpador de Poeira** (Título) | Título | Comum | Título para quem desengavetou os primeiros jogos. |
-| **Nível 4** | **Borda Bronze Forjado** (Borda) | Moldura | Incomum | `bronze-frame.png`<br>Moldura metálica de bronze com acabamento de armadura. |
-| **Nível 5** | **Caçador de Backlog** (Título) | Título | Incomum | Título desbloqueado ao acumular vitórias iniciais. |
-| **Nível 6** | **Banner Retro Arcade 16-Bit** | Banner | Incomum | Capa temática em pixel-art para o cabeçalho do perfil. |
-| **Nível 7** | **Borda Prata da Guilda** (Borda) | Moldura | Raro | `silver-frame.png`<br>Moldura espelhada de prata polida. |
-| **Nível 8** | **Destruidor de Pendências** (Título) | Título | Raro | Título de prestígio avançado. |
-| **Nível 9** | **Borda Cyber Neon Cyan** (Borda) | Moldura | Raro | `cyber-neon-frame.png`<br>Borda energizada futurista com anel de plasma cyan. |
-| **Nível 10** | **Veterano dos Controles** (Título) | Título | Épico | Título comemorativo de 10 níveis concluídos. |
-| **Nível 12** | **Borda Ouro Entalhado** (Borda) | Moldura | Épico | `gold-frame.png`<br>Moldura áurea rica em detalhes góticos. |
-| **Nível 14** | **Banner Mestre do Tempo Gamer** | Banner | Épico | Fundo estelar estilizado de galáxia e ampulheta quântica. |
-| **Nível 16** | **Lenda do Retrogaming** (Título) | Título | Épico | Título honorário supremo. |
-| **Nível 18** | **Borda Aura Violeta Celestial** (Borda) | Moldura | Épico | `celestial-violet-frame.png`<br>Moldura mística envolta em cristais e aura cósmica. |
-| **Nível 20+** | **Mestre da Guilda Aposentada** (Título)<br>**Borda Fogo da Fênix** (Lendária) | Título<br>Moldura | Lendário | `legendary-frame.png`<br>Moldura suprema em chamas douradas e runas pulsantes. |
+| **Nível 1** | **Aposentado Novato** | Título | Comum | Título inicial da guilda. |
+| **Nível 2** | **Moldura de Madeira & Couro** | Moldura | Comum | `wooden-frame.png` (Borda rústica de carvalho). |
+| **Nível 3** | **Insígnia: Primeiro Passo** | Badge | Comum | Emblema de conclusão da primeira quest. |
+| **Nível 4** | **Limpador de Poeira** | Título | Comum | Título para quem tirou jogos mofados da gaveta. |
+| **Nível 5** | **Borda Bronze Forjado** | Moldura | Incomum | `bronze-frame.png` (Moldura de bronze reforçada). |
+| **Nível 6** | **Caçador de Backlog** | Título | Incomum | Título por vitórias sobre jogos acumulados. |
+| **Nível 7** | **Banner Retro Arcade 16-Bit** | Banner | Incomum | `banner-retro-arcade.png` + Efeito CRT Scanlines 16-Bit. |
+| **Nível 8** | **Borda Prata da Guilda** | Moldura | Raro | `silver-frame.png` (Moldura espelhada de prata). |
+| **Nível 9** | **Tema RPG Fantasy Medieval** | Tema | Raro | Estética *The Witcher 3 & Skyrim* com pergaminho escuro. |
+| **Nível 10** | **Destruidor de Pendências** | Título | Raro | Título para quem não deixa nenhum backlog impune. |
+| **Nível 11** | **Banner Cyber Synthwave Neon** *(NOVO)* | Banner | Raro | `banner-synthwave-neon.svg` + Grid 3D Neon & Sol Synthwave (`#bd0df2`). |
+| **Nível 12** | **Borda Cyber Neon Cyan** | Moldura | Raro | `cyber-neon-frame.png` (Borda futurista energizada). |
+| **Nível 13** | **Veterano dos Controles** | Título | Épico | Domina a arte de finalizar campanhas épicas. |
+| **Nível 14** | **Borda Ouro Entalhado** | Moldura | Épico | `gold-frame.png` (Moldura áurea rica em detalhes góticos). |
+| **Nível 15** | **Tema RPG Espacial Sci-Fi** | Tema | Épico | Estética *Starfield & No Man's Sky* com vácuo estelar. |
+| **Nível 16** | **Banner Mestre do Tempo Gamer** | Banner | Épico | `banner-chronos.png` + Poeira Estelar & Ampulheta Quântica. |
+| **Nível 17** | **Lenda do Retrogaming** | Título | Épico | Sabedoria gamer inquestionável na comunidade. |
+| **Nível 18** | **Borda Aura Violeta Celestial** | Moldura | Épico | `celestial-violet-frame.png` (Cristais e aura cósmica). |
+| **Nível 19** | **Mestre da Guilda Aposentada** | Título | Lendário | O nível supremo de quem venceu o backlog. |
+| **Nível 20** | **Borda Fogo da Fênix** | Moldura | Lendário | `legendary-frame.png` (Chamas douradas e runas). |
+| **Nível 21** | **Banner Holoflux Matrix / Nexo** *(NOVO)* | Banner | Lendário | `banner-holoflux-matrix.svg` + Varredura Holográfica & Laser Matrix. |
+| **Nível 22** | **Tema Pixel Art Retrogaming** | Tema | Lendário | Estética 16-bit *Chrono Trigger* com CRT retro. |
 
 ---
 

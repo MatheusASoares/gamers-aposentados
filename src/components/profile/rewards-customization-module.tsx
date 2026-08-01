@@ -9,6 +9,7 @@ import { equipTitle, equipFrame, equipBanner, equipTheme } from "@/app/lib/gamif
 import { REWARDS_CATALOG, RewardItem, getTitleBadgeStyle, isRewardUnlocked } from "@/lib/constants/rewards";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { renderTitleIcon } from "@/components/ui/title-badge";
+import { BannerFxOverlay } from "@/components/profile/banner-fx-overlay";
 
 interface RewardsCustomizationModuleProps {
   userLevel: number;
@@ -49,8 +50,8 @@ export function RewardsCustomizationModule({
     {
       id: "cyberpunk",
       level: 1,
-      name: "Cyberpunk Neon (Padrão)",
-      description: "Visual futurista com vidro translúcido, roxo elétrico e plasma cyan.",
+      name: "Cyber Neon",
+      description: '"Wake up, Samurai! We have a city to burn."',
       rarity: "COMMON" as const,
       colors: ["#bd0df2", "#06b6d4", "#09090b"],
     },
@@ -360,26 +361,42 @@ export function RewardsCustomizationModule({
             const isUnlocked = isRewardUnlocked(item.level, userLevel);
             const isEquipped = currentBanner === item.id;
 
+            // Rarity glow styles
+            const rarityGlow =
+              item.rarity === "LEGENDARY"
+                ? "border-amber-400 shadow-[0_0_25px_rgba(251,191,36,0.35)]"
+                : item.rarity === "EPIC"
+                ? "border-purple-500 shadow-[0_0_20px_rgba(168,85,247,0.35)]"
+                : item.rarity === "RARE"
+                ? "border-[#bd0df2] shadow-[0_0_18px_rgba(189,13,242,0.35)]"
+                : "border-cyan-400/60 shadow-[0_0_12px_rgba(34,211,238,0.25)]";
+
             return (
               <div
                 key={item.id}
                 className={`flex flex-col gap-4 rounded-2xl border p-5 transition-all ${
                   isEquipped
-                    ? "border-cyan-400 bg-cyan-500/10 shadow-[0_0_20px_rgba(6,182,212,0.25)]"
+                    ? "border-cyan-400 bg-cyan-500/10 shadow-[0_0_25px_rgba(6,182,212,0.3)] ring-1 ring-cyan-400/50"
                     : isUnlocked
-                    ? "border-white/5 bg-zinc-900/40 hover:border-cyan-400/40"
+                    ? `bg-zinc-900/60 hover:scale-[1.01] ${rarityGlow}`
                     : "border-white/5 bg-zinc-950/40 opacity-50"
                 }`}
               >
-                <div className="relative h-32 w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-900">
+                {/* Banner Preview Card with FX Overlay */}
+                <div className="relative h-36 w-full overflow-hidden rounded-xl border border-white/10 bg-zinc-950 shadow-inner">
                   {item.assetUrl ? (
-                    <Image
-                      src={item.assetUrl}
-                      alt={item.name}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 50vw"
-                      className="object-cover"
-                    />
+                    <>
+                      <Image
+                        src={item.assetUrl}
+                        alt={item.name}
+                        fill
+                        unoptimized
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        className="object-cover opacity-90 transition-transform duration-500 hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent" />
+                      <BannerFxOverlay effectType={item.effectType} bannerId={item.id} />
+                    </>
                   ) : (
                     <div className="flex h-full w-full items-center justify-center bg-gradient-to-r from-purple-900 to-zinc-900 text-xs font-bold text-zinc-400">
                       Preview Indisponível
@@ -406,7 +423,7 @@ export function RewardsCustomizationModule({
                     disabled={!isOwner || loadingId === item.id}
                     className={`mt-2 w-full rounded-xl py-2.5 text-xs font-black uppercase transition-all ${
                       isEquipped
-                        ? "bg-cyan-400 text-zinc-950 shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+                        ? "bg-cyan-400 text-zinc-950 shadow-[0_0_15px_rgba(6,182,212,0.5)]"
                         : "bg-white/10 text-white hover:bg-cyan-400 hover:text-zinc-950"
                     }`}
                   >
