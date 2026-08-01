@@ -40,8 +40,8 @@ export function Breadcrumbs() {
     const segments = pathname.split("/").filter((segment) => segment !== "");
 
     return (
-        <nav className="text-muted-foreground flex items-center text-sm">
-            <Link href="/" className="hover:text-primary flex items-center gap-1 transition-colors">
+        <nav className="text-muted-foreground flex items-center text-sm select-none cursor-default">
+            <Link href="/" className="hover:text-primary flex items-center gap-1 transition-colors cursor-pointer">
                 <Home className="h-4 w-4" />
                 <span className="sr-only">Home</span>
             </Link>
@@ -54,7 +54,7 @@ export function Breadcrumbs() {
                     <Fragment key={path}>
                         <Link
                             href={path}
-                            className={`hover:text-primary capitalize transition-colors ${isLast ? "text-foreground pointer-events-none font-medium" : ""}`}
+                            className={`hover:text-primary capitalize transition-colors ${isLast ? "text-foreground cursor-default font-medium" : "cursor-pointer"}`}
                         >
                             <BreadcrumbLabel segment={segment} />
                         </Link>
