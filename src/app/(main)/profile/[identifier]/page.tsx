@@ -48,10 +48,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     // Fetch equipped_frame, equipped_banner and equipped_theme via raw SQL to bypass stale Prisma Client JS definitions
     const dbUserExtra = await prisma.$queryRaw<{ equipped_frame: string | null; equipped_banner: string | null; equipped_theme: string | null }[]>`SELECT equipped_frame, equipped_banner, equipped_theme FROM users WHERE id = ${user.id}`;
     const equippedFrame = dbUserExtra?.[0]?.equipped_frame || null;
-    const equippedBanner = dbUserExtra?.[0]?.equipped_banner || "banner-retro-arcade";
+    const equippedBanner = dbUserExtra?.[0]?.equipped_banner || null;
     const equippedTheme = dbUserExtra?.[0]?.equipped_theme || "cyberpunk";
 
-    const bannerItem = REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === equippedBanner) || REWARDS_CATALOG.find((r) => r.id === "banner-retro-arcade");
+    const bannerItem = equippedBanner ? REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === equippedBanner) : null;
 
     // Fetch completed progress entries with game details
     const completedProgresses = await prisma.gameProgress.findMany({

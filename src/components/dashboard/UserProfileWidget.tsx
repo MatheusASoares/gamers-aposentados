@@ -38,8 +38,8 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
   const tierDetails = getRankTierDetails(level);
   const title = user.equippedTitle || tierDetails.name;
   const lastGame = user.lastCompletedGame;
-  const activeBannerId = user.equippedBanner || "banner-retro-arcade";
-  const bannerItem = REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === activeBannerId) || REWARDS_CATALOG.find((r) => r.id === "banner-retro-arcade");
+  const activeBannerId = user.equippedBanner || null;
+  const bannerItem = activeBannerId ? REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === activeBannerId) : null;
 
 
 
