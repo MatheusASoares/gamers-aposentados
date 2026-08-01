@@ -140,17 +140,19 @@ export function Sidebar({ className }: SidebarProps) {
                 </div>
             </div>
 
-            <div className="relative z-10 mt-auto space-y-1 border-t border-theme bg-black/40 px-4 py-6 backdrop-blur-sm">
-                <form action={handleSignOut}>
-                    <Button
-                        variant="ghost"
-                        className="h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest text-red-500 uppercase transition-all duration-300 hover:border hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]"
-                    >
-                        <LogOut className="h-5 w-5" />
-                        Logout
-                    </Button>
-                </form>
-            </div>
+            {session?.user && (
+                <div className="relative z-10 mt-auto space-y-1 border-t border-theme bg-black/40 px-4 py-6 backdrop-blur-sm">
+                    <form action={handleSignOut}>
+                        <Button
+                            variant="ghost"
+                            className="h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest text-red-500 uppercase transition-all duration-300 hover:border hover:border-red-500/20 hover:bg-red-500/10 hover:text-red-400 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)]"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            Logout
+                        </Button>
+                    </form>
+                </div>
+            )}
         </div>
     );
 }
