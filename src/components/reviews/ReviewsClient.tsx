@@ -33,9 +33,10 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
     const searchParams = useSearchParams();
     const paramType = searchParams.get("type");
     const paramUser = searchParams.get("user");
+    const paramSearch = searchParams.get("search");
 
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState(() => paramSearch || "");
     const [filterType, setFilterType] = useState<"ALL" | "MAIN_QUEST" | "SIDE_QUEST">(() => {
         if (paramType === "MAIN_QUEST" || paramType === "SIDE_QUEST") {
             return paramType;

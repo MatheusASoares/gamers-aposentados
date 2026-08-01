@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { Trophy, Award, Sparkles, CheckCircle2 } from "lucide-react";
+import Link from "next/link";
+import { Trophy, Award, Sparkles, CheckCircle2, MessageSquare } from "lucide-react";
 import { claimPlatinumBonus } from "@/app/lib/gamification-actions";
 import { calculateGameXP } from "@/app/lib/xp-engine";
 
@@ -148,7 +149,7 @@ export function HallOfFameGallery({
                                     </div>
 
                                     {/* Platinum Status / Claim Button */}
-                                    <div className="mt-5 border-t border-white/10 pt-4">
+                                    <div className="mt-5 border-t border-white/10 pt-4 flex flex-col gap-2.5">
                                         {item.isPlatinum ? (
                                             <div className="flex items-center gap-2 rounded-xl border border-amber-500/40 bg-amber-500/15 p-3 text-xs font-black text-amber-300 shadow-[0_0_15px_rgba(251,191,36,0.15)]">
                                                 <Award className="h-4 w-4 shrink-0 text-amber-400" />
@@ -173,6 +174,15 @@ export function HallOfFameGallery({
                                                 <span>Campanha Zerada</span>
                                             </div>
                                         )}
+
+                                        {/* Botão Ver Review */}
+                                        <Link
+                                            href={`/reviews?search=${encodeURIComponent(item.title)}`}
+                                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-zinc-900/60 px-3 py-2 text-xs font-bold text-zinc-300 transition-all hover:border-theme-primary/60 hover:bg-theme-primary/10 hover:text-white hover:shadow-[0_0_15px_var(--theme-glow)]"
+                                        >
+                                            <MessageSquare className="h-4 w-4 text-cyan-400" />
+                                            <span>Ver Review do Jogo</span>
+                                        </Link>
                                     </div>
                                 </div>
                             </div>
