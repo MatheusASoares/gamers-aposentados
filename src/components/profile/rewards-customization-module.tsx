@@ -51,7 +51,7 @@ export function RewardsCustomizationModule({
       id: "cyberpunk",
       level: 1,
       name: "Cyber Neon",
-      description: '"Wake up, Samurai! We have a city to burn."',
+      description: '"Acorda, Samurai! Temos uma cidade pra queimar."',
       rarity: "COMMON" as const,
       colors: ["#bd0df2", "#06b6d4", "#09090b"],
     },
