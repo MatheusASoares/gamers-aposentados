@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -26,7 +26,10 @@ export function LoginModal({ open, onOpenChange, onSwitchToRegister }: LoginModa
                 className="bg-card border-border border-primary/20 overflow-hidden p-0 sm:max-w-md"
                 onInteractOutside={(e) => e.preventDefault()}
             >
-                <DialogTitle className="sr-only">Login to your account</DialogTitle>
+                <DialogTitle className="sr-only font-bold">Login to your account</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Insira suas credenciais para acessar sua conta no Gamers Aposentados.
+                </DialogDescription>
                 <div className="relative p-8">
                     {/* Background Pattern */}
                     <div className="pointer-events-none absolute inset-0 bg-[url('data:image/svg+xml;base64,...')] opacity-5" />

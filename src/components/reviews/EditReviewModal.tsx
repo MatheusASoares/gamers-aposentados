@@ -188,6 +188,8 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                 )}
             </DialogTrigger>
             <DialogContent className="border-zinc-800 bg-zinc-950/95 text-white sm:max-w-4xl md:max-w-5xl p-0 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl border flex flex-col md:flex-row max-h-[92vh]">
+                <DialogTitle className="sr-only font-bold">Editar Review</DialogTitle>
+                <DialogDescription className="sr-only">Formulário para editar review de jogo</DialogDescription>
                 
                 {/* LEFT PANEL: Game Spotlight */}
                 <div className="w-full md:w-80 shrink-0 bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-6 border-b md:border-b-0 md:border-r border-zinc-800/80 flex flex-col justify-between relative overflow-hidden">

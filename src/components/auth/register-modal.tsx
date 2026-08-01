@@ -1,6 +1,6 @@
 "use client";
 
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -24,7 +24,10 @@ export function RegisterModal({ open, onOpenChange, onSwitchToLogin }: RegisterM
                 className="bg-card border-border border-primary/20 overflow-hidden p-0 sm:max-w-md"
                 onInteractOutside={(e) => e.preventDefault()}
             >
-                <DialogTitle className="sr-only">Create an account</DialogTitle>
+                <DialogTitle className="sr-only font-bold">Create an account</DialogTitle>
+                <DialogDescription className="sr-only">
+                    Crie sua conta para se juntar à guilda Gamers Aposentados.
+                </DialogDescription>
                 <div className="p-8">
                     <div className="mb-6 flex flex-col items-center text-center">
                         <div className="bg-primary/10 mb-2 rounded-full p-2">
