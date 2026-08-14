@@ -79,13 +79,16 @@ export async function validateGameEligibilityForPool(
         };
     }
 
-    // Regra 2: se ele for dropped pelos 2 players (Lucas e Matheus), pode participar de pools e quests novamente
-    const droppedCount = progresses.filter((p) => p.status === "DROPPED").length;
-    if (droppedCount < activeUserIds.length) {
-        return {
-            eligible: false,
-            error: "Este jogo possui progresso registrado e não foi abandonado (dropped) por ambos os jogadores oficiais.",
-        };
+    // Regra 2: se algum jogador dropou o jogo, ele só pode entrar se AMBOS tiverem status DROPPED
+    const hasDropped = progresses.some((p) => p.status === "DROPPED");
+    if (hasDropped) {
+        const droppedCount = progresses.filter((p) => p.status === "DROPPED").length;
+        if (droppedCount < activeUserIds.length) {
+            return {
+                eligible: false,
+                error: "Este jogo possui progresso registrado e não foi abandonado (dropped) por ambos os jogadores oficiais.",
+            };
+        }
     }
 
     return { eligible: true };
