@@ -10,6 +10,7 @@ import {
     Map,
     Scroll,
     Trophy,
+    Scale,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -134,6 +135,20 @@ export function Sidebar({ className }: SidebarProps) {
                             >
                                 <Dices className={cn("h-5 w-5 transition-colors", isActive("/randomizer") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-fuchsia-400")} />
                                 Randomizer
+                            </Button>
+                        </Link>
+                        <Link href="/deals" passHref>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "h-12 w-full justify-start gap-4 rounded-xl text-sm font-bold tracking-widest uppercase transition-all duration-300",
+                                    isActive("/deals")
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-6 hover:text-zinc-300",
+                                )}
+                            >
+                                <Scale className={cn("h-5 w-5 transition-colors", isActive("/deals") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-emerald-400")} />
+                                Deals Tracker
                             </Button>
                         </Link>
                     </nav>
