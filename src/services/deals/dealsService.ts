@@ -175,12 +175,15 @@ export class DealsService {
                 const currencyRate = await CurrencyService.getUsdBrlRate();
                 let deals: FeaturedDealItem[] = [];
 
-                // 1. Try IsThereAnyDeal API first
-                if (ItadClient.isConfigured()) {
+                // 1. If steam_only filter is requested, fetch directly from Steam Store API
+                if (filter === "steam_only") {
+                    deals = await SteamStoreClient.getFeaturedSpecials();
+                } else if (ItadClient.isConfigured()) {
+                    // 2. Otherwise try IsThereAnyDeal API first
                     deals = await ItadClient.getTopDeals(filter);
                 }
 
-                // 2. Fallback to Steam Store specials if ITAD not configured or returned no deals
+                // 3. Fallback to Steam Store specials if ITAD not configured or returned no deals
                 if (deals.length === 0) {
                     deals = await SteamStoreClient.getFeaturedSpecials();
                 }

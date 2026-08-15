@@ -4,7 +4,7 @@ export type Region = "US" | "BR";
 
 export type WinningRegion = "US" | "BR" | "EQUAL";
 
-export type DealFilterType = "best_savings" | "historical_low" | "highest_cut";
+export type DealFilterType = "best_savings" | "historical_low" | "steam_only" | "highest_cut";
 
 export interface CurrencyRate {
     code: string; // "USD"

@@ -218,6 +218,21 @@ export class DealComparator {
                 .sort((a, b) => b.savingsPercent - a.savingsPercent || b.discountPercent - a.discountPercent);
         }
 
+        if (filter === "steam_only") {
+            return normalized
+                .filter(
+                    (item) =>
+                        item.storeBR.toLowerCase().includes("steam") ||
+                        item.storeUS.toLowerCase().includes("steam"),
+                )
+                .sort((a, b) => {
+                    if (b.savingsPercent !== a.savingsPercent) {
+                        return b.savingsPercent - a.savingsPercent;
+                    }
+                    return (b.absoluteSavingsBRL || 0) - (a.absoluteSavingsBRL || 0);
+                });
+        }
+
         if (filter === "highest_cut") {
             return normalized.sort(
                 (a, b) => b.discountPercent - a.discountPercent || b.savingsPercent - a.savingsPercent,

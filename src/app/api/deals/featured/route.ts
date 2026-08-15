@@ -8,7 +8,12 @@ export async function GET(request: NextRequest) {
     try {
         const { searchParams } = new URL(request.url);
         const filterParam = searchParams.get("filter") as DealFilterType | null;
-        const validFilters: DealFilterType[] = ["best_savings", "historical_low", "highest_cut"];
+        const validFilters: DealFilterType[] = [
+            "best_savings",
+            "historical_low",
+            "steam_only",
+            "highest_cut",
+        ];
         const filter = validFilters.includes(filterParam as DealFilterType)
             ? (filterParam as DealFilterType)
             : "best_savings";

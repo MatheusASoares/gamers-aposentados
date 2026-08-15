@@ -9,7 +9,7 @@ import {
     ArrowUpRight,
     TrendingDown,
     Trophy,
-    Percent,
+    Gamepad2,
     Sparkles,
     ChevronLeft,
     ChevronRight,
@@ -55,9 +55,9 @@ export function TopDealsCarousel({
             icon: <Trophy className="h-3.5 w-3.5 text-amber-400" />,
         },
         {
-            id: "highest_cut",
-            label: "Maiores Descontos (%)",
-            icon: <Percent className="h-3.5 w-3.5" />,
+            id: "steam_only",
+            label: "Só na Steam",
+            icon: <Gamepad2 className="h-3.5 w-3.5 text-cyan-400" />,
         },
     ];
 
