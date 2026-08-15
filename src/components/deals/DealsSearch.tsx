@@ -4,7 +4,7 @@
 
 import React, { useState, useEffect, useRef, useTransition } from "react";
 import Image from "next/image";
-import { Search, Loader2, X, Sparkles, Gamepad2 } from "lucide-react";
+import { Search, Loader2, X, Gamepad2, Sparkles } from "lucide-react";
 import { SearchGameItem } from "@/types/deals";
 import { cn } from "@/lib/utils";
 
@@ -16,32 +16,16 @@ interface DealsSearchProps {
 export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<SearchGameItem[]>([]);
-    const [isOpen, setIsOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
     const [selectedIndex, setSelectedIndex] = useState(-1);
     const [, startTransition] = useTransition();
 
-    const inputRef = useRef<HTMLInputElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const inputRef = useRef<HTMLInputElement>(null);
+    const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Global keyboard shortcut '/' to focus search input
-    useEffect(() => {
-        const handleKeyDown = (e: KeyboardEvent) => {
-            if (
-                e.key === "/" &&
-                document.activeElement?.tagName !== "INPUT" &&
-                document.activeElement?.tagName !== "TEXTAREA"
-            ) {
-                e.preventDefault();
-                inputRef.current?.focus();
-            }
-        };
-
-        window.addEventListener("keydown", handleKeyDown);
-        return () => window.removeEventListener("keydown", handleKeyDown);
-    }, []);
-
-    // Close dropdown on click outside
+    // Click outside handler to close dropdown
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -56,20 +40,48 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Debounced search effect
+    // Global keyboard shortcut '/' to focus search
     useEffect(() => {
-        if (!query.trim() || query.trim().length < 2) {
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (
+                e.key === "/" &&
+                document.activeElement !== inputRef.current &&
+                !["INPUT", "TEXTAREA"].includes(
+                    (document.activeElement as HTMLElement)?.tagName,
+                )
+            ) {
+                e.preventDefault();
+                inputRef.current?.focus();
+            }
+        };
+
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, []);
+
+    // Perform live search with debouncing
+    useEffect(() => {
+        if (debounceTimerRef.current) {
+            clearTimeout(debounceTimerRef.current);
+        }
+
+        const trimmed = query.trim();
+        if (trimmed.length < 2) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setResults([]);
-            setIsOpen(false);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setIsLoading(false);
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            setIsOpen(false);
             return;
         }
 
         setIsLoading(true);
-        const timer = setTimeout(async () => {
+
+        debounceTimerRef.current = setTimeout(async () => {
             try {
                 const res = await fetch(
-                    `/api/deals/search?q=${encodeURIComponent(query.trim())}`,
+                    `/api/deals/search?q=${encodeURIComponent(trimmed)}`,
                 );
                 if (res.ok) {
                     const data = await res.json();
@@ -86,44 +98,47 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
             }
         }, 300);
 
-        return () => clearTimeout(timer);
+        return () => {
+            if (debounceTimerRef.current) {
+                clearTimeout(debounceTimerRef.current);
+            }
+        };
     }, [query]);
 
-    const handleSelect = (game: SearchGameItem) => {
-        setIsOpen(false);
-        setQuery(game.title);
-        onSelectGame(game);
+    // Keyboard navigation (ArrowDown, ArrowUp, Enter, Escape)
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (!isOpen || results.length === 0) return;
+
+        switch (e.key) {
+            case "ArrowDown":
+                e.preventDefault();
+                setSelectedIndex((prev) =>
+                    prev < results.length - 1 ? prev + 1 : prev,
+                );
+                break;
+            case "ArrowUp":
+                e.preventDefault();
+                setSelectedIndex((prev) => (prev > 0 ? prev - 1 : 0));
+                break;
+            case "Enter":
+                e.preventDefault();
+                if (selectedIndex >= 0 && selectedIndex < results.length) {
+                    handleSelect(results[selectedIndex]);
+                } else if (results.length > 0) {
+                    handleSelect(results[0]);
+                }
+                break;
+            case "Escape":
+                e.preventDefault();
+                setIsOpen(false);
+                break;
+        }
     };
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (!isOpen || results.length === 0) {
-            if (e.key === "Enter" && query.trim()) {
-                onSelectGame({
-                    id: query.trim().toLowerCase(),
-                    title: query.trim(),
-                    slug: query.trim().toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                });
-                setIsOpen(false);
-            }
-            return;
-        }
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            setSelectedIndex((prev) => (prev < results.length - 1 ? prev + 1 : 0));
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            setSelectedIndex((prev) => (prev > 0 ? prev - 1 : results.length - 1));
-        } else if (e.key === "Enter") {
-            e.preventDefault();
-            if (selectedIndex >= 0 && selectedIndex < results.length) {
-                handleSelect(results[selectedIndex]);
-            } else if (results.length > 0) {
-                handleSelect(results[0]);
-            }
-        } else if (e.key === "Escape") {
-            setIsOpen(false);
-        }
+    const handleSelect = (item: SearchGameItem) => {
+        setQuery(item.title);
+        setIsOpen(false);
+        onSelectGame(item);
     };
 
     const handleClear = () => {
@@ -135,8 +150,11 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
 
     return (
         <div ref={containerRef} className={cn("relative w-full", className)}>
+            {/* Input Bar */}
             <div className="relative flex items-center">
-                <Search className="pointer-events-none absolute left-4 h-4 w-4 text-zinc-500 transition-colors group-focus-within:text-theme-primary" />
+                <div className="pointer-events-none absolute left-3.5 flex items-center justify-center text-zinc-400">
+                    <Search className="h-4 w-4" />
+                </div>
 
                 <input
                     ref={inputRef}

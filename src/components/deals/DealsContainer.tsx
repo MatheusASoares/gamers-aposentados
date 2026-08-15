@@ -162,7 +162,7 @@ export function DealsContainer() {
                     )}
                 </div>
 
-                {/* Search & Control Bar (Glass card padronizado com o tema) */}
+                {/* Search & Control Bar */}
                 <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-5 shadow-2xl backdrop-blur-md">
                     <DealsSearch onSelectGame={handleSelectSearchGame} className="w-full max-w-full" />
 

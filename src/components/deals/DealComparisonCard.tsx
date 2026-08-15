@@ -5,15 +5,18 @@
 import React from "react";
 import Image from "next/image";
 import {
+    DealComparisonResult,
+    RegionDeal,
+} from "@/types/deals";
+import {
     Trophy,
-    ExternalLink,
     TrendingDown,
+    ExternalLink,
+    Store,
     ShieldCheck,
     RefreshCw,
     Info,
-    Store,
 } from "lucide-react";
-import { DealComparisonResult, RegionDeal } from "@/types/deals";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +29,7 @@ interface DealComparisonCardProps {
 export function DealComparisonCard({
     comparison,
     onRefresh,
-    isRefreshing,
+    isRefreshing = false,
 }: DealComparisonCardProps) {
     const {
         title,
