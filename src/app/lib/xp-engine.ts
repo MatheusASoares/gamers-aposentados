@@ -166,3 +166,15 @@ export function calculateGameXP({
 
   return Math.round(finalXP);
 }
+
+export function calculateReviewXP({
+  reviewText,
+  screenshots = [],
+}: {
+  reviewText?: string | null;
+  screenshots?: string[] | null;
+}): number {
+  const textXP = reviewText && reviewText.trim().length >= 50 ? 200 : 100;
+  const screenshotXP = screenshots && screenshots.length > 0 ? 50 : 0;
+  return textXP + screenshotXP;
+}

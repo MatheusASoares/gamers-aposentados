@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { generateContractsForGame } from "@/services/notice-board-service";
+import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
 
 export async function generateNoticeBoardAction(gameId: string) {
     const session = await auth();
@@ -170,8 +171,9 @@ export async function completeContractAction(contractProgressId: string) {
                 },
             });
 
+            let isGameFinished = false;
             if (gameProgress) {
-                const isGameFinished = completedPercentage === 100;
+                isGameFinished = completedPercentage === 100;
                 await tx.gameProgress.update({
                     where: { id: gameProgress.id },
                     data: {
@@ -202,11 +204,15 @@ export async function completeContractAction(contractProgressId: string) {
                 });
             }
 
-            return { success: true };
+            return { success: true, isGameFinished };
         });
 
+        if (result.isGameFinished) {
+            await recalculateUserXPAndLevel(userId);
+        }
+
         revalidatePath("/dashboard");
-        return result;
+        return { success: true };
     } catch (error) {
         console.error("Erro em completeContractAction:", error);
         const errorMessage = error instanceof Error ? error.message : "Desconhecido";
@@ -288,8 +294,9 @@ export async function uncompleteContractAction(contractProgressId: string) {
                 },
             });
 
+            let isStillFinished = false;
             if (gameProgress) {
-                const isStillFinished = newPercentage === 100;
+                isStillFinished = newPercentage === 100;
                 await tx.gameProgress.update({
                     where: { id: gameProgress.id },
                     data: {
@@ -326,11 +333,15 @@ export async function uncompleteContractAction(contractProgressId: string) {
                 }
             }
 
-            return { success: true };
+            const wasCompleted = gameProgress?.status === "COMPLETED";
+            return { success: true, isStillFinished, wasCompleted };
         });
 
+        if (result.wasCompleted && !result.isStillFinished) {
+            await recalculateUserXPAndLevel(userId);
+        }
+
         revalidatePath("/dashboard");
-        revalidatePath(`/games/${result ? "" : ""}`);
         return { success: true };
     } catch (error) {
         console.error("Erro em uncompleteContractAction:", error);

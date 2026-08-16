@@ -7,7 +7,8 @@ import { revalidatePath } from "next/cache";
 
 import { z } from "zod";
 
-import { calculateLevelFromXP } from "./xp-engine";
+import { calculateReviewXP } from "./xp-engine";
+import { recalculateUserXPAndLevel } from "./gamification-actions";
 
 const baseReviewSchema = z.object({
     rating: z.number().min(0, "A nota deve ser no mínimo 0").max(10, "A nota deve ser no máximo 10"),
@@ -68,27 +69,8 @@ export async function createReview(params: CreateReviewParams) {
             },
         });
 
-        // Concede XP por escrever a review:
-        // +100 XP rápida, +200 XP se tiver análise detalhada (>= 50 caracteres)
-        // +50 XP bônus se incluir ao menos 1 screenshot
-        const textXP = reviewText && reviewText.trim().length >= 50 ? 200 : 100;
-        const screenshotXP = validScreenshots.length > 0 ? 50 : 0;
-        const xpBonus = textXP + screenshotXP;
-
-        const updatedUser = await prisma.user.update({
-            where: { id: userId },
-            data: {
-                xp_points: { increment: xpBonus },
-            },
-            select: { xp_points: true },
-        });
-
-        // Recalcula o Nível do usuário
-        const { level: newLevel } = calculateLevelFromXP(updatedUser.xp_points);
-        await prisma.user.update({
-            where: { id: userId },
-            data: { level: newLevel },
-        });
+        const xpBonus = calculateReviewXP({ reviewText, screenshots: validScreenshots });
+        await recalculateUserXPAndLevel(userId);
 
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
@@ -130,28 +112,11 @@ export async function deleteReview(reviewId: string) {
             return { success: false, error: "Você não tem permissão para deletar esta review." };
         }
 
-        const textDeduct = review.review_text && review.review_text.trim().length >= 50 ? 200 : 100;
-        const screenshotDeduct = (review.screenshots?.length || 0) > 0 ? 50 : 0;
-        const xpDeduct = textDeduct + screenshotDeduct;
-
         await prisma.review.delete({
             where: { id: reviewId },
         });
 
-        // Deduz o XP e recalcula o Nível do usuário
-        const updatedUser = await prisma.user.update({
-            where: { id: session.user.id },
-            data: {
-                xp_points: { decrement: xpDeduct },
-            },
-            select: { xp_points: true },
-        });
-
-        const { level: newLevel } = calculateLevelFromXP(Math.max(0, updatedUser.xp_points));
-        await prisma.user.update({
-            where: { id: session.user.id },
-            data: { level: newLevel },
-        });
+        await recalculateUserXPAndLevel(session.user.id);
 
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");
@@ -203,11 +168,6 @@ export async function updateReview(params: UpdateReviewParams) {
 
         const validScreenshots = screenshots || [];
 
-        // Calcular ajuste de XP de screenshots se fotos forem adicionadas ou removidas na edição
-        const oldScreenshotXP = (review.screenshots?.length || 0) > 0 ? 50 : 0;
-        const newScreenshotXP = validScreenshots.length > 0 ? 50 : 0;
-        const xpDifference = newScreenshotXP - oldScreenshotXP;
-
         const updatedReview = await prisma.review.update({
             where: { id: reviewId },
             data: {
@@ -219,20 +179,7 @@ export async function updateReview(params: UpdateReviewParams) {
             },
         });
 
-        if (xpDifference !== 0) {
-            const updatedUser = await prisma.user.update({
-                where: { id: session.user.id },
-                data: {
-                    xp_points: { increment: xpDifference },
-                },
-                select: { xp_points: true },
-            });
-            const { level: newLevel } = calculateLevelFromXP(Math.max(0, updatedUser.xp_points));
-            await prisma.user.update({
-                where: { id: session.user.id },
-                data: { level: newLevel },
-            });
-        }
+        await recalculateUserXPAndLevel(session.user.id);
 
         revalidatePath("/dashboard/reviews");
         revalidatePath("/reviews");

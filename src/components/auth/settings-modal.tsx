@@ -6,7 +6,6 @@ import {
     Dialog,
     DialogContent,
     DialogDescription,
-    DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -349,6 +348,42 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                         <span>{profileMessage.text}</span>
                                     </div>
                                 )}
+
+                                {/* Gamification & Effects Test Hub */}
+                                <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <Sparkles className="h-4 w-4 text-[#bd0df2] animate-pulse" />
+                                            <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
+                                                Efeitos & Celebrações
+                                            </span>
+                                        </div>
+                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                            Level Up VFX
+                                        </span>
+                                    </div>
+                                    <p className="text-[11px] text-zinc-400">
+                                        Experimente a animação épica de Level Up com partículas e efeitos sonoros adaptados ao tema ativo.
+                                    </p>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={() => {
+                                            if (typeof window !== "undefined") {
+                                                const trigger = (window as unknown as { triggerLevelUpTest?: (level?: number) => void }).triggerLevelUpTest;
+                                                if (trigger) {
+                                                    trigger(userLevel ? userLevel + 1 : 7);
+                                                } else {
+                                                    window.dispatchEvent(new CustomEvent("ga:trigger-level-up", { detail: { newLevel: userLevel ? userLevel + 1 : 7 } }));
+                                                }
+                                            }
+                                        }}
+                                        className="w-full h-10 border-[#bd0df2]/40 bg-[#bd0df2]/10 hover:bg-[#bd0df2]/20 text-[#bd0df2] hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer"
+                                    >
+                                        <Sparkles className="h-3.5 w-3.5 mr-2" />
+                                        Testar Animação de Level Up
+                                    </Button>
+                                </div>
 
                                 <Button
                                     type="submit"

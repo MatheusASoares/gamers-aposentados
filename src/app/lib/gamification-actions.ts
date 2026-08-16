@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import {
   calculateGameXP,
+  calculateReviewXP,
   calculateLevelFromXP,
   getRankTierTitle
 } from "@/app/lib/xp-engine";
@@ -13,15 +14,22 @@ import {
  * Recalculates and updates total XP, level, and default title for a given user.
  */
 export async function recalculateUserXPAndLevel(userId: string) {
-  const completedProgresses = await prisma.gameProgress.findMany({
-    where: {
-      user_id: userId,
-      status: "COMPLETED",
-    },
-    include: {
-      game: true,
-    },
-  });
+  const [completedProgresses, userReviews] = await Promise.all([
+    prisma.gameProgress.findMany({
+      where: {
+        user_id: userId,
+        status: "COMPLETED",
+      },
+      include: {
+        game: true,
+      },
+    }),
+    prisma.review.findMany({
+      where: {
+        user_id: userId,
+      },
+    }),
+  ]);
 
   let totalXP = 0;
   for (const progress of completedProgresses) {
@@ -32,6 +40,14 @@ export async function recalculateUserXPAndLevel(userId: string) {
       failedRollsCount: 0,
     });
     totalXP += gameXP;
+  }
+
+  for (const review of userReviews) {
+    const reviewXP = calculateReviewXP({
+      reviewText: review.review_text,
+      screenshots: review.screenshots,
+    });
+    totalXP += reviewXP;
   }
 
   const { level } = calculateLevelFromXP(totalXP);
@@ -230,8 +246,12 @@ export async function runBackfillXP(): Promise<{ success: boolean; count?: numbe
     for (const u of users) {
       await recalculateUserXPAndLevel(u.id);
     }
-    revalidatePath("/");
-    revalidatePath("/profile");
+    try {
+      revalidatePath("/");
+      revalidatePath("/profile");
+    } catch {
+      // Ignored outside Next.js request context (e.g. scripts/CLI)
+    }
     return { success: true, count: users.length };
   } catch (error) {
     console.error("[runBackfillXP] Error:", error);
