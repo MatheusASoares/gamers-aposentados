@@ -6,6 +6,9 @@ import { revalidatePath } from "next/cache";
 import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { generateContractsForGame } from "@/services/notice-board-service";
 import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
+import { ensureUserContractProgress } from "@/services/notice-board-progression";
+
+export { ensureUserContractProgress };
 
 export async function generateNoticeBoardAction(gameId: string) {
     const session = await auth();

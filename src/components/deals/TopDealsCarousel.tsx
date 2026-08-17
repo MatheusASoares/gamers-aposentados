@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import {
     Flame,
@@ -37,11 +37,12 @@ export function TopDealsCarousel({
     isLoading = false,
 }: TopDealsCarouselProps) {
     const [currentPage, setCurrentPage] = useState(1);
+    const [prevFilter, setPrevFilter] = useState(activeFilter);
 
-    // Reset page to 1 whenever activeFilter changes
-    useEffect(() => {
+    if (prevFilter !== activeFilter) {
+        setPrevFilter(activeFilter);
         setCurrentPage(1);
-    }, [activeFilter]);
+    }
 
     const filterOptions: Array<{ id: DealFilterType; label: string; icon: React.ReactNode }> = [
         {

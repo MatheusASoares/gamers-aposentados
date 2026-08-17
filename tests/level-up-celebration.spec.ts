@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { getRankTierDetails } from "../src/app/lib/xp-engine";
-import { REWARDS_CATALOG, getUnlockedRewardsForLevel } from "../src/lib/constants/rewards";
+import { getUnlockedRewardsForLevel } from "../src/lib/constants/rewards";
 
 test.describe("Level Up Celebration & Theming System", () => {
     test("getRankTierDetails returns appropriate tier details for each level bracket", () => {

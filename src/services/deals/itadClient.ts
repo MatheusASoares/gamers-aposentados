@@ -337,7 +337,7 @@ export class ItadClient {
                         let priceUS = usMatch?.price;
                         let storeUS = usMatch?.store || "Steam";
                         let dealUrlUS = usMatch?.url || "";
-                        let isLowestUS = usMatch?.isLowest;
+                        const isLowestUS = usMatch?.isLowest;
 
                         if (priceUS === undefined) {
                             const resolvedBatch = batchUsPrices.get(item.id);

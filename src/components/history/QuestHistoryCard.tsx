@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
     Trophy,
     Skull,
@@ -11,11 +12,12 @@ import {
     History,
     CheckCircle,
     RefreshCw,
+    RotateCcw,
     X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { QuestHistoryData } from "@/app/lib/history-actions";
-import { completeQuest, updateQuestProgress } from "@/app/lib/quest-actions";
+import { completeQuest, updateQuestProgress, resumeDroppedQuest } from "@/app/lib/quest-actions";
 
 interface QuestHistoryCardProps {
     data: QuestHistoryData;
@@ -72,6 +74,7 @@ function getStatusDisplay(status: string) {
 }
 
 export function QuestHistoryCard({ data, currentUserId, priority = false }: QuestHistoryCardProps) {
+    const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
     const [isUpdating, setIsUpdating] = useState(false);
     const [percentage, setPercentage] = useState(0);
@@ -282,8 +285,29 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                 {p.userId === currentUserId && (
                                                     <div className="mt-5 flex flex-col gap-2">
                                                         {!isUpdating ? (
-                                                            <div className="flex gap-2">
-                                                                {p.status !== "COMPLETED" && (
+                                                            <div className="flex flex-wrap gap-2">
+                                                                {p.status === "DROPPED" && (
+                                                                    <button
+                                                                        disabled={isLoading}
+                                                                        onClick={async (e) => {
+                                                                            e.stopPropagation();
+                                                                            setIsLoading(true);
+                                                                            const res = await resumeDroppedQuest(
+                                                                                data.winnerId || "",
+                                                                            );
+                                                                            if (!res.success)
+                                                                                alert(res.error || "Erro ao retomar quest.");
+                                                                            else
+                                                                                router.refresh();
+                                                                            setIsLoading(false);
+                                                                        }}
+                                                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#bd0df2]/30 bg-[#bd0df2]/15 py-3 text-xs font-black tracking-widest text-[#bd0df2] uppercase transition-all hover:bg-[#bd0df2]/25 hover:shadow-[0_0_15px_rgba(189,13,242,0.3)] disabled:opacity-50"
+                                                                    >
+                                                                        <RotateCcw className="size-4" />
+                                                                        Retomar Quest
+                                                                    </button>
+                                                                )}
+                                                                {p.status !== "COMPLETED" && p.status !== "DROPPED" && (
                                                                     <button
                                                                         disabled={isLoading}
                                                                         onClick={async (e) => {
@@ -296,6 +320,8 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                                                 );
                                                                             if (!res.success)
                                                                                 alert(res.error);
+                                                                            else
+                                                                                router.refresh();
                                                                             setIsLoading(false);
                                                                         }}
                                                                         className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-green-500/20 bg-green-500/10 py-3 text-xs font-black tracking-widest text-green-500 uppercase transition-all hover:bg-green-500/20 disabled:opacity-50"

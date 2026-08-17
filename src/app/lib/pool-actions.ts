@@ -407,15 +407,18 @@ export async function executeRoll(poolId: string) {
                 });
             }
 
-            // Set winner game to ACTIVE for all users
+            // Set winner game to ACTIVE for active users (reativa se era SUGGESTED ou DROPPED)
             await tx.gameProgress.updateMany({
                 where: {
                     game_id: winnerEntry.game_id,
-                    status: "SUGGESTED",
+                    user_id: { in: activeUsers.map((u) => u.id) },
+                    status: { in: ["SUGGESTED", "DROPPED"] },
                 },
                 data: {
                     status: "ACTIVE",
                     start_date: new Date(),
+                    end_date: null,
+                    progress_percentage: 0,
                 },
             });
 
@@ -428,6 +431,9 @@ export async function executeRoll(poolId: string) {
 
         revalidatePath("/randomizer");
         revalidatePath("/");
+        revalidatePath("/quests");
+        revalidatePath("/dashboard");
+        revalidatePath("/board");
         return { success: true, ...result };
     } catch (error: unknown) {
         console.error("Error executing roll:", error);

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
 import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
+import { ensureUserContractProgress } from "@/services/notice-board-progression";
 
 export async function updateQuestProgress(
     gameId: string,
@@ -251,6 +252,20 @@ export async function joinQuest(gameId: string): Promise<{ success: boolean; err
                     return { success: false, error: "Este jogo já foi concluído e não pode ser jogado novamente." };
                 }
 
+                // Se o jogo está no status inicial de sugestão/sorteio (SUGGESTED), permite iniciar diretamente!
+                if (existing.status === "SUGGESTED") {
+                    await tx.gameProgress.update({
+                        where: { id: existing.id },
+                        data: {
+                            status: "ACTIVE",
+                            progress_percentage: 0,
+                            start_date: new Date(),
+                            end_date: null,
+                        },
+                    });
+                    return { success: true };
+                }
+
                 // Regra 2.1: "se ele for dropped pelos 2 players, pode participar novamente"
                 const activeUsers = await tx.user.findMany({
                     where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
@@ -304,3 +319,92 @@ export async function joinQuest(gameId: string): Promise<{ success: boolean; err
         return { success: false, error: e instanceof Error ? e.message : String(e) };
     }
 }
+
+export async function resumeDroppedQuest(gameId: string): Promise<{ success: boolean; error?: string }> {
+    const session = await auth();
+    if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+    try {
+        const result = await prisma.$transaction(async (tx) => {
+            const game = await tx.game.findUnique({
+                where: { id: gameId },
+            });
+            if (!game) {
+                return { success: false, error: "Jogo não encontrado." };
+            }
+
+            const existing = await tx.gameProgress.findUnique({
+                where: {
+                    user_id_game_id: {
+                        user_id: session.user.id,
+                        game_id: gameId,
+                    },
+                },
+            });
+
+            if (!existing) {
+                return { success: false, error: "Registro de progresso não encontrado para este jogo." };
+            }
+
+            if (existing.status === "ACTIVE") {
+                return { success: true };
+            }
+
+            if (existing.status === "COMPLETED") {
+                return { success: false, error: "Este jogo já foi concluído e não pode ser retomado." };
+            }
+
+            if (existing.status !== "DROPPED") {
+                return { success: false, error: "Apenas jogos abandonados (dropped) podem ser retomados." };
+            }
+
+            // Verificar se o usuário já possui outro jogo ACTIVE na mesma categoria (MAIN_QUEST ou SIDE_QUEST)
+            const activeQuestsInCategory = await tx.gameProgress.findMany({
+                where: {
+                    user_id: session.user.id,
+                    status: "ACTIVE",
+                    game: {
+                        quest_type: game.quest_type,
+                    },
+                },
+                include: { game: true },
+            });
+
+            if (activeQuestsInCategory.length > 0) {
+                const activeTitle = activeQuestsInCategory[0].game.title;
+                const categoryLabel = game.quest_type === "MAIN_QUEST" ? "Main Quest" : "Side Quest";
+                return {
+                    success: false,
+                    error: `Você já possui a ${categoryLabel} "${activeTitle}" ativa. Conclua ou pause antes de retomar outra.`,
+                };
+            }
+
+            // Atualiza o progresso para ACTIVE, limpando end_date e mantendo progress_percentage
+            await tx.gameProgress.update({
+                where: { id: existing.id },
+                data: {
+                    status: "ACTIVE",
+                    end_date: null,
+                    start_date: new Date(),
+                },
+            });
+
+            return { success: true };
+        });
+
+        if (result.success) {
+            await ensureUserContractProgress(session.user.id, gameId);
+            revalidatePath("/");
+            revalidatePath("/quests");
+            revalidatePath("/dashboard");
+            revalidatePath("/board");
+            revalidatePath("/reviews");
+        }
+
+        return result;
+    } catch (e: unknown) {
+        console.error("Error resuming quest:", e);
+        return { success: false, error: e instanceof Error ? e.message : String(e) };
+    }
+}
+

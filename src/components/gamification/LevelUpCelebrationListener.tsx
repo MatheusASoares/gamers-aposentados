@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { LevelUpCelebrationModal } from "./LevelUpCelebrationModal";
 
 interface LevelUpCelebrationListenerProps {
@@ -24,7 +24,8 @@ export function LevelUpCelebrationListener({
     oldLevel: Math.max(1, (userLevel || 2) - 1),
   });
 
-  const checkLevelProgression = useCallback(() => {
+  // Check progression on level prop updates
+  useEffect(() => {
     if (!userId || !userLevel) return;
 
     try {
@@ -37,6 +38,7 @@ export function LevelUpCelebrationListener({
       } else {
         const lastLevel = parseInt(stored, 10);
         if (!isNaN(lastLevel) && userLevel > lastLevel) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setModalState({
             isOpen: true,
             newLevel: userLevel,
@@ -48,11 +50,6 @@ export function LevelUpCelebrationListener({
       // Ignore localStorage restrictions
     }
   }, [userId, userLevel]);
-
-  // Check progression on level prop updates
-  useEffect(() => {
-    checkLevelProgression();
-  }, [checkLevelProgression]);
 
   // Expose global test trigger
   useEffect(() => {

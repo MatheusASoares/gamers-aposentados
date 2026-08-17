@@ -109,8 +109,34 @@ export default async function DashboardPage() {
     ]);
 
     // --- Block 2: Dependent Data Fetching (Parallel) ---
-    const [mainQuestProgress, sideQuestProgress] = await Promise.all([
-        latestMainPool?.winner_game_id
+    // Busca se o usuário logado possui uma quest ativa (status === "ACTIVE") na categoria.
+    // Se tiver, prioriza essa quest individual (ex: retomada de quest dropada).
+    // Caso contrário, faz fallback para o progresso do jogo do último sorteio da categoria.
+    const [userActiveMainProgress, userActiveSideProgress] = await Promise.all([
+        userId
+            ? prisma.gameProgress.findFirst({
+                  where: {
+                      user_id: userId,
+                      status: "ACTIVE",
+                      game: { quest_type: "MAIN_QUEST" },
+                  },
+                  include: { game: { include: { nominator: true } } },
+              })
+            : null,
+        userId
+            ? prisma.gameProgress.findFirst({
+                  where: {
+                      user_id: userId,
+                      status: "ACTIVE",
+                      game: { quest_type: "SIDE_QUEST" },
+                  },
+                  include: { game: { include: { nominator: true } } },
+              })
+            : null,
+    ]);
+
+    const [fallbackMainProgress, fallbackSideProgress] = await Promise.all([
+        !userActiveMainProgress && latestMainPool?.winner_game_id && userId
             ? prisma.gameProgress.findUnique({
                   where: {
                       user_id_game_id: { user_id: userId, game_id: latestMainPool.winner_game_id },
@@ -118,7 +144,7 @@ export default async function DashboardPage() {
                   include: { game: { include: { nominator: true } } },
               })
             : null,
-        latestSidePool?.winner_game_id
+        !userActiveSideProgress && latestSidePool?.winner_game_id && userId
             ? prisma.gameProgress.findUnique({
                   where: {
                       user_id_game_id: { user_id: userId, game_id: latestSidePool.winner_game_id },
@@ -127,6 +153,9 @@ export default async function DashboardPage() {
               })
             : null,
     ]);
+
+    const mainQuestProgress = userActiveMainProgress || fallbackMainProgress;
+    const sideQuestProgress = userActiveSideProgress || fallbackSideProgress;
 
     // Format raw random reviews for StatsGrid component
     const randomReviewsForStats = rawRandomReviews.map((r) => ({

@@ -63,6 +63,7 @@ interface ContractWithProgress extends CampaignContract {
 
 interface NoticeBoardMuralClientProps {
     isPlayer: boolean;
+    currentUserId?: string;
     mainGame: Game | null;
     sideGame: Game | null;
     mainContracts: ContractWithProgress[];
@@ -71,6 +72,7 @@ interface NoticeBoardMuralClientProps {
 
 export function NoticeBoardMuralClient({
     isPlayer,
+    currentUserId,
     mainGame,
     sideGame,
     mainContracts,
@@ -81,6 +83,15 @@ export function NoticeBoardMuralClient({
     const [isConfirmOpen, setIsConfirmOpen] = useState(false);
     const [isClearConfirmOpen, setIsClearConfirmOpen] = useState(false);
     const [targetGameId, setTargetGameId] = useState<string | null>(null);
+
+    const getUserProgress = (contract: ContractWithProgress) => {
+        if (!contract.user_progresses || contract.user_progresses.length === 0) return undefined;
+        if (currentUserId) {
+            const found = contract.user_progresses.find((p) => p.user_id === currentUserId);
+            if (found) return found;
+        }
+        return contract.user_progresses[0];
+    };
 
     const mainLaneDrag = useDragScroll();
     const sideLaneDrag = useDragScroll();
@@ -202,9 +213,9 @@ export function NoticeBoardMuralClient({
         const hasContracts = contracts.length > 0;
 
         // Mobile UX Optimization: find the current single relevant contract to show on small screens
-        const activeContract = contracts.find((c) => c.user_progresses[0]?.status === "AVAILABLE");
+        const activeContract = contracts.find((c) => getUserProgress(c)?.status === "AVAILABLE");
         const nextContract =
-            activeContract || contracts.find((c) => c.user_progresses[0]?.status === "LOCKED");
+            activeContract || contracts.find((c) => getUserProgress(c)?.status === "LOCKED");
         const mobileTargetContract =
             nextContract || (contracts.length > 0 ? contracts[contracts.length - 1] : null);
 
@@ -329,7 +340,7 @@ export function NoticeBoardMuralClient({
                         className={`custom-scrollbar flex gap-6 overflow-x-auto px-1 pt-1 pb-4 ${drag.props.className}`}
                     >
                         {contracts.map((contract) => {
-                            const progress = contract.user_progresses[0];
+                            const progress = getUserProgress(contract);
                             const status = progress?.status || "LOCKED";
                             const progressId = progress?.id || "";
 

@@ -174,9 +174,8 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
             {/* Info Side (Bottom) */}
             <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-zinc-950/80 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
                 <div className="space-y-4">
-                    {/* Progress & HLTB Time */}
-                    {progress ? (
-                        <div className="space-y-3 pt-3">
+                    {/* Progress & HLTB Time */}                    {progress && progress.status !== "SUGGESTED" ? (
+                        <div className="space-y-3 pt-2">
                             <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
                                 <span>
                                     Progresso{" "}
@@ -206,7 +205,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                 </div>
 
                 <div className="mt-6 flex flex-col gap-2">
-                    {!progress ? (
+                    {!progress || progress.status === "SUGGESTED" ? (
                         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-zinc-900/40 py-6">
                             <p className="px-4 text-center text-sm font-medium text-zinc-400">
                                 Você não está participando desta quest com a comunidade.

@@ -178,15 +178,15 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
             <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-zinc-950/80 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
                 <div className="space-y-4">
                     {/* Progress Bar & HLTB */}
-                    {progress ? (
-                        <div className="space-y-3 pt-2">
-                            <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
+                    {progress && progress.status !== "SUGGESTED" ? (
+                        <div className="space-y-2 pt-2">
+                            <div className="flex items-center justify-between text-xs font-bold text-zinc-400 uppercase">
                                 <span>
                                     Progresso{" "}
                                     {progress.status === "COMPLETED"
                                         ? "Finalizado"
                                         : progress.status === "DROPPED"
-                                          ? "Dropado"
+                                          ? "Abandonado"
                                           : "Atual"}{" "}
                                     <span className="text-zinc-300">
                                         ({progress.progress_percentage}%)
@@ -210,7 +210,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
 
                 {/* Actions Buttons */}
                 <div className="mt-8 flex flex-col gap-3">
-                    {!progress ? (
+                    {!progress || progress.status === "SUGGESTED" ? (
                         <div className="flex flex-col items-center justify-center gap-2 rounded-xl border border-white/5 bg-zinc-900/40 py-6">
                             <p className="px-4 text-center text-sm font-medium text-zinc-400">
                                 Você não está participando desta quest com a comunidade.

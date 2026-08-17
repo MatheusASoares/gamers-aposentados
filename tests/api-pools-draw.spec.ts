@@ -197,4 +197,98 @@ test.describe("API Pools Draw Action Integration Tests", () => {
         const body = await response.json();
         expect(body.error).toContain("Pool incompleta");
     });
+
+    test("PUT /api/pools (action === 'draw') em jogo previamente DROPPED reativa para ACTIVE e zera porcentagem", async ({ page }) => {
+        // Criar 4 jogos de teste que ambos os jogadores oficiais já droparam no passado
+        const droppedGame1 = await prisma.game.create({
+            data: { title: "ApiTestGame Dropped 1", quest_type: "MAIN_QUEST" },
+        });
+        const droppedGame2 = await prisma.game.create({
+            data: { title: "ApiTestGame Dropped 2", quest_type: "MAIN_QUEST" },
+        });
+        const droppedGame3 = await prisma.game.create({
+            data: { title: "ApiTestGame Dropped 3", quest_type: "MAIN_QUEST" },
+        });
+        const droppedGame4 = await prisma.game.create({
+            data: { title: "ApiTestGame Dropped 4", quest_type: "MAIN_QUEST" },
+        });
+
+        // Registrar DROPPED com porcentagens e end_date para todos os jogos e usuários
+        for (const g of [droppedGame1, droppedGame2, droppedGame3, droppedGame4]) {
+            await prisma.gameProgress.createMany({
+                data: [
+                    {
+                        user_id: testUserId1,
+                        game_id: g.id,
+                        status: "DROPPED",
+                        progress_percentage: 60,
+                        end_date: new Date("2026-01-15"),
+                    },
+                    {
+                        user_id: testUserId2,
+                        game_id: g.id,
+                        status: "DROPPED",
+                        progress_percentage: 30,
+                        end_date: new Date("2026-01-15"),
+                    },
+                ],
+            });
+        }
+
+        // Criar pool aberta com os 4 jogos distintos
+        const pool = await prisma.pool.create({
+            data: {
+                type: "MAIN_QUEST",
+                status: "OPEN",
+                entries: {
+                    create: [
+                        { game_id: droppedGame1.id, user_id: testUserId1 },
+                        { game_id: droppedGame2.id, user_id: testUserId1 },
+                        { game_id: droppedGame3.id, user_id: testUserId2 },
+                        { game_id: droppedGame4.id, user_id: testUserId2 },
+                    ],
+                },
+            },
+        });
+
+        const timestamp = Date.now();
+        const testEmail = `draw_tester${timestamp}@test.com`;
+        await page.goto("/register", { waitUntil: "load" });
+        await page.getByLabel("Username").fill(`tester${timestamp}`);
+        await page.getByLabel("Email").fill(testEmail);
+        await page.getByLabel("Password").fill("testpass123");
+        await page.getByRole("button", { name: "Register" }).click();
+
+        await page.waitForURL(/.*\/login/);
+        await page.getByLabel("Email").fill(testEmail);
+        await page.getByLabel("Password").fill("testpass123");
+        await page.getByRole("button", { name: "Log in" }).click();
+        await expect(page.locator("body")).toContainText("Quest", { timeout: 15000 });
+
+        const response = await page.request.put("/api/pools", {
+            data: {
+                id: pool.id,
+                action: "draw",
+            },
+        });
+
+        expect(response.status()).toBe(200);
+        const body = await response.json();
+        expect(body.success).toBe(true);
+        expect(body.winnerId).toBeDefined();
+
+        // Verificar que o GameProgress do vencedor foi reativado para ACTIVE para ambos os usuários oficiais
+        const winnerProgresses = await prisma.gameProgress.findMany({
+            where: { game_id: body.winnerId },
+        });
+
+        expect(winnerProgresses.length).toBe(2);
+        for (const p of winnerProgresses) {
+            expect(p.status).toBe("ACTIVE");
+            expect(p.progress_percentage).toBe(0);
+            expect(p.end_date).toBeNull();
+            expect(p.start_date).not.toBeNull();
+        }
+    });
 });
+
