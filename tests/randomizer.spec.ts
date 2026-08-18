@@ -62,6 +62,21 @@ test.describe("Randomizer Flow", () => {
             await route.fulfill({ json });
         });
 
+        // Mock the AI HLTB API
+        await page.route("**/api/ai/hltb", async (route) => {
+            const json = {
+                results: [
+                    { title: "Mock 1", mainStory: 10 },
+                    { title: "Mock 2", mainStory: 15 },
+                    { title: "Mock 3", mainStory: 20 },
+                    { title: "Mock 4", mainStory: 25 },
+                    { title: "Mock 5", mainStory: 30 },
+                    { title: "Mock 6", mainStory: 35 },
+                ],
+            };
+            await route.fulfill({ json });
+        });
+
         const timestamp = Date.now();
         await page.goto("/register", { waitUntil: "load" });
         await page.getByLabel("Username").fill(`t${timestamp}`);

@@ -6,7 +6,6 @@ import { LogOut, Settings, Trophy } from "lucide-react";
 import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { SettingsModal } from "@/components/auth/settings-modal";
-import { handleSignOut } from "@/lib/actions";
 import Link from "next/link";
 import {
     DropdownMenu,
@@ -16,7 +15,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 
 import { UserProfile } from "@/types/api";
 import { UserAvatar } from "@/components/ui/user-avatar";
@@ -94,7 +93,7 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                         <DropdownMenuSeparator className="bg-white/5" />
                         <DropdownMenuItem
                             className="cursor-pointer text-red-500 focus:bg-red-500/10 focus:text-red-400"
-                            onClick={() => handleSignOut()}
+                            onClick={() => signOut({ callbackUrl: "/" })}
                         >
                             <LogOut className="mr-2 h-4 w-4" />
                             <span className="font-bold">Sair</span>

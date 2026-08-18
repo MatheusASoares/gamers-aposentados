@@ -3,73 +3,13 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { isRandomizerPlayer } from "@/lib/randomizer-players";
 import {
-  calculateGameXP,
-  calculateReviewXP,
-  calculateLevelFromXP,
-  getRankTierTitle
+  recalculateUserXPAndLevel as recalculateUserXPAndLevelLogic,
 } from "@/app/lib/xp-engine";
 
-/**
- * Recalculates and updates total XP, level, and default title for a given user.
- */
 export async function recalculateUserXPAndLevel(userId: string) {
-  const [completedProgresses, userReviews] = await Promise.all([
-    prisma.gameProgress.findMany({
-      where: {
-        user_id: userId,
-        status: "COMPLETED",
-      },
-      include: {
-        game: true,
-      },
-    }),
-    prisma.review.findMany({
-      where: {
-        user_id: userId,
-      },
-    }),
-  ]);
-
-  let totalXP = 0;
-  for (const progress of completedProgresses) {
-    const gameXP = calculateGameXP({
-      hltbHours: progress.game.hltb_time,
-      questType: progress.game.quest_type,
-      isPlatinum: progress.is_platinum,
-      failedRollsCount: 0,
-    });
-    totalXP += gameXP;
-  }
-
-  for (const review of userReviews) {
-    const reviewXP = calculateReviewXP({
-      reviewText: review.review_text,
-      screenshots: review.screenshots,
-    });
-    totalXP += reviewXP;
-  }
-
-  const { level } = calculateLevelFromXP(totalXP);
-
-  const currentUser = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { equipped_title: true, level: true },
-  });
-
-  // If no title is equipped or user leveled up, assign default title if none set
-  const titleToSet = currentUser?.equipped_title || getRankTierTitle(level);
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      xp_points: totalXP,
-      level: level,
-      equipped_title: titleToSet,
-    },
-  });
-
-  return { totalXP, level };
+  return recalculateUserXPAndLevelLogic(userId);
 }
 
 /**
@@ -239,8 +179,14 @@ export async function equipTheme(themeId: string): Promise<{ success: boolean; e
 
 /**
  * Backfill script helper to recalculate XP & Levels for all users.
+ * Protected: Requires active session from an authorized administrator.
  */
 export async function runBackfillXP(): Promise<{ success: boolean; count?: number; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id || !isRandomizerPlayer(session.user.email)) {
+    return { success: false, error: "Unauthorized: Apenas administradores podem executar o backfill de XP." };
+  }
+
   try {
     const users = await prisma.user.findMany({ select: { id: true } });
     for (const u of users) {

@@ -1,4 +1,5 @@
 import { QuestType } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 
 export interface RankTier {
   id: string;
@@ -178,3 +179,66 @@ export function calculateReviewXP({
   const screenshotXP = screenshots && screenshots.length > 0 ? 50 : 0;
   return textXP + screenshotXP;
 }
+
+/**
+ * Recalculates and updates total XP, level, and default title for a given user.
+ */
+export async function recalculateUserXPAndLevel(userId: string) {
+  const [completedProgresses, userReviews] = await Promise.all([
+    prisma.gameProgress.findMany({
+      where: {
+        user_id: userId,
+        status: "COMPLETED",
+      },
+      include: {
+        game: true,
+      },
+    }),
+    prisma.review.findMany({
+      where: {
+        user_id: userId,
+      },
+    }),
+  ]);
+
+  let totalXP = 0;
+  for (const progress of completedProgresses) {
+    const gameXP = calculateGameXP({
+      hltbHours: progress.game.hltb_time,
+      questType: progress.game.quest_type,
+      isPlatinum: progress.is_platinum,
+      failedRollsCount: 0,
+    });
+    totalXP += gameXP;
+  }
+
+  for (const review of userReviews) {
+    const reviewXP = calculateReviewXP({
+      reviewText: review.review_text,
+      screenshots: review.screenshots,
+    });
+    totalXP += reviewXP;
+  }
+
+  const { level } = calculateLevelFromXP(totalXP);
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { equipped_title: true, level: true },
+  });
+
+  // If no title is equipped or user leveled up, assign default title if none set
+  const titleToSet = currentUser?.equipped_title || getRankTierTitle(level);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      xp_points: totalXP,
+      level: level,
+      equipped_title: titleToSet,
+    },
+  });
+
+  return { totalXP, level };
+}
+

@@ -50,6 +50,8 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
     // Form Controls
     const [name, setName] = useState(user?.name || "");
     const [username, setUsername] = useState(user?.username || "");
+    const [currentPassword, setCurrentPassword] = useState("");
+    const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [newPassword, setNewPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
 
@@ -65,6 +67,8 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
         if (open) {
             setName(user?.name || "");
             setUsername(user?.username || "");
+            setCurrentPassword("");
+            setShowCurrentPassword(false);
             setNewPassword("");
             setShowPassword(false);
             setPreviewUrl(null);
@@ -143,18 +147,29 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
         e.preventDefault();
         setPasswordMessage(null);
 
+        if (!currentPassword) {
+            setPasswordMessage({ type: "error", text: "Informe a sua senha atual." });
+            return;
+        }
+
         if (newPassword.length < 6) {
-            setPasswordMessage({ type: "error", text: "A senha precisa ter no mínimo 6 caracteres." });
+            setPasswordMessage({ type: "error", text: "A nova senha precisa ter no mínimo 6 caracteres." });
             return;
         }
 
         startTransition(async () => {
-            const result = await changePassword({ newPassword });
-            if (result.success) {
-                setPasswordMessage({ type: "success", text: "Senha alterada com sucesso!" });
-                setNewPassword("");
-            } else {
-                setPasswordMessage({ type: "error", text: result.error || "Ocorreu um erro ao alterar a senha." });
+            try {
+                const result = await changePassword({ currentPassword, newPassword });
+                if (result?.success) {
+                    setPasswordMessage({ type: "success", text: "Senha alterada com sucesso!" });
+                    setCurrentPassword("");
+                    setNewPassword("");
+                } else {
+                    setPasswordMessage({ type: "error", text: result?.error || "Ocorreu um erro ao alterar a senha." });
+                }
+            } catch (err) {
+                console.error("[changePassword] Submission error:", err);
+                setPasswordMessage({ type: "error", text: "Falha ao processar solicitação de troca de senha." });
             }
         });
     };
@@ -413,6 +428,32 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                     <div>
                                         <p className="text-xs font-bold text-cyan-300 uppercase tracking-wider">Credenciais & Segurança</p>
                                         <p className="text-[11px] text-zinc-400">Altere sua senha de acesso a qualquer momento com segurança.</p>
+                                    </div>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <Label htmlFor="current-password" className="text-xs font-bold uppercase tracking-wider text-zinc-300">
+                                        Senha Atual
+                                    </Label>
+                                    <div className="relative">
+                                        <Lock className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+                                        <Input
+                                            id="current-password"
+                                            type={showCurrentPassword ? "text" : "password"}
+                                            placeholder="Digite sua senha atual"
+                                            value={currentPassword}
+                                            onChange={(e) => setCurrentPassword(e.target.value)}
+                                            className="h-11 pl-10 pr-10 bg-zinc-900/90 border-white/10 text-white placeholder:text-zinc-600 focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500 rounded-xl text-sm"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                            className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white transition-colors"
+                                            aria-label={showCurrentPassword ? "Ocultar senha atual" : "Exibir senha atual"}
+                                        >
+                                            {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                                        </button>
                                     </div>
                                 </div>
 

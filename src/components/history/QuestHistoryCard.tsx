@@ -84,7 +84,9 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
     const title = isMainQuest ? `${data.year} — Quarter Winner` : `${monthName} de ${data.year}`;
 
     // Filter out the winner from candidates to show the "Defeated" games
-    const defeatedCandidates = data.candidates.filter((c) => c.gameIgdbId !== data.winnerId);
+    const defeatedCandidates = data.candidates.filter(
+        (c) => (c.gameId || c.gameIgdbId) !== data.winnerId,
+    );
     const unanimous = defeatedCandidates.length === 0;
 
     // Use the official IGDB artwork/screenshot for the ambient background if available

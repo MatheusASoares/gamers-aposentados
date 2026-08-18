@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
+import type { GameSearchResult } from "@/components/ui/game-autocomplete";
 
 const UpdateProfileSchema = z.object({
     name: z.string().min(2, "Name must be at least 2 characters."),
@@ -64,7 +65,8 @@ export async function updateProfile(data: z.infer<typeof UpdateProfileSchema>) {
 }
 
 const ChangePasswordSchema = z.object({
-    newPassword: z.string().min(6, "Password must be at least 6 characters."),
+    currentPassword: z.string().min(1, "A senha atual é obrigatória."),
+    newPassword: z.string().min(6, "A nova senha deve ter pelo menos 6 caracteres."),
 });
 
 export async function changePassword(data: z.infer<typeof ChangePasswordSchema>) {
@@ -72,11 +74,33 @@ export async function changePassword(data: z.infer<typeof ChangePasswordSchema>)
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
     const validatedFields = ChangePasswordSchema.safeParse(data);
-    if (!validatedFields.success) return { success: false, error: "Invalid password format" };
+    if (!validatedFields.success) {
+        return {
+            success: false,
+            error: validatedFields.error.issues[0]?.message || "Formato de senha inválido.",
+        };
+    }
 
-    const { newPassword } = validatedFields.data;
+    const { currentPassword, newPassword } = validatedFields.data;
 
     try {
+        const user = await prisma.user.findUnique({
+            where: { id: session.user.id },
+            select: { password: true },
+        });
+
+        if (!user) {
+            return { success: false, error: "Usuário não encontrado." };
+        }
+
+        // Se o usuário possui senha definida, validar a senha atual
+        if (user.password) {
+            const isMatch = await bcrypt.compare(currentPassword, user.password);
+            if (!isMatch) {
+                return { success: false, error: "A senha atual informada está incorreta." };
+            }
+        }
+
         const hashedPassword = await bcrypt.hash(newPassword, 10);
         await prisma.user.update({
             where: { id: session.user.id },
@@ -86,11 +110,9 @@ export async function changePassword(data: z.infer<typeof ChangePasswordSchema>)
         return { success: true };
     } catch (error) {
         console.error("Failed to change password", error);
-        return { success: false, error: "Failed to change password" };
+        return { success: false, error: "Falha ao alterar a senha." };
     }
 }
-
-import { GameSearchResult } from "@/components/ui/game-autocomplete";
 
 async function setFavoriteGamesBase(
     candidates: GameSearchResult[],

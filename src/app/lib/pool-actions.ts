@@ -13,7 +13,8 @@ export interface PoolEntryData {
     id: string; // PoolEntry ID (from DB)
     gameTitle: string;
     gameImageUrl: string;
-    gameIgdbId: string; // ID from IGDB search
+    gameIgdbId: string; // ID from IGDB search (or fallback to DB id)
+    gameId?: string; // Internal DB game_id
     userId: string;
     userName: string;
     hltb_time?: number | null;
@@ -128,7 +129,8 @@ export async function getOpenPool(questType: "MAIN" | "SIDE"): Promise<PoolData 
                 id: e.id,
                 gameTitle: e.game.title,
                 gameImageUrl: e.game.cover_url || "",
-                gameIgdbId: e.game_id,
+                gameIgdbId: e.game.igdb_id || e.game.id,
+                gameId: e.game.id,
                 userId: e.user_id,
                 userName: e.user.name || e.user.username || "Unknown",
                 hltb_time: e.game.hltb_time,
@@ -217,10 +219,14 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
 
             // 3. Create or find each game and create pool entries
             for (const game of games) {
-                // Check if game already exists by title or igdb id
+                // Check if game already exists by igdb_id, internal id, or title
                 let dbGame = await tx.game.findFirst({
                     where: {
-                        OR: [{ igdb_id: game.igdbId }, { title: game.nome }],
+                        OR: [
+                            { igdb_id: game.igdbId },
+                            { id: game.igdbId },
+                            { title: game.nome },
+                        ],
                     },
                 });
 
@@ -241,11 +247,12 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                         throw new Error(`Jogo "${dbGame.title}" inválido: ${eligibility.error}`);
                     }
 
-                    if (!dbGame.igdb_id || (!dbGame.cover_url && game.imageUrl)) {
+                    const hasValidNewIgdbId = game.igdbId && game.igdbId !== dbGame.id;
+                    if ((!dbGame.igdb_id && hasValidNewIgdbId) || (!dbGame.cover_url && game.imageUrl)) {
                         dbGame = await tx.game.update({
                             where: { id: dbGame.id },
                             data: {
-                                igdb_id: dbGame.igdb_id ? undefined : game.igdbId,
+                                igdb_id: !dbGame.igdb_id && hasValidNewIgdbId ? game.igdbId : undefined,
                                 cover_url: !dbGame.cover_url ? game.imageUrl : undefined,
                             },
                         });

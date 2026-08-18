@@ -1,6 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { calculateReviewXP, calculateGameXP, calculateLevelFromXP } from "../src/app/lib/xp-engine";
-import { recalculateUserXPAndLevel } from "../src/app/lib/gamification-actions";
+import { calculateReviewXP, calculateGameXP, calculateLevelFromXP, recalculateUserXPAndLevel } from "../src/app/lib/xp-engine";
 import { prisma } from "../src/lib/prisma";
 
 test.describe("XP and Gamification System", () => {
@@ -88,6 +87,72 @@ test.describe("XP and Gamification System", () => {
 
         // Cleanup
         await prisma.review.deleteMany({ where: { user_id: testUser.id } });
+        await prisma.gameProgress.deleteMany({ where: { user_id: testUser.id } });
+        await prisma.game.delete({ where: { id: testGame.id } });
+        await prisma.user.delete({ where: { id: testUser.id } });
+    });
+
+    test("recalculates and removes XP when a completed quest is dropped", async () => {
+        // 1. Create isolated test user
+        const testUser = await prisma.user.create({
+            data: {
+                email: `xp_drop_tester_${Date.now()}@test.com`,
+                name: "XP Drop Tester",
+            },
+        });
+
+        // 2. Create test game (Main Quest, 20h = 300 XP)
+        const testGame = await prisma.game.create({
+            data: {
+                title: `Drop Test Game ${Date.now()}`,
+                quest_type: "MAIN_QUEST",
+                hltb_time: 20,
+            },
+        });
+
+        // 3. Mark game COMPLETED
+        const progress = await prisma.gameProgress.create({
+            data: {
+                user_id: testUser.id,
+                game_id: testGame.id,
+                status: "COMPLETED",
+                progress_percentage: 100,
+            },
+        });
+
+        // 4. Initial XP recalculation after completion
+        const initial = await recalculateUserXPAndLevel(testUser.id);
+        expect(initial.totalXP).toBe(300);
+        expect(initial.level).toBe(3);
+
+        const userAfterComplete = await prisma.user.findUnique({
+            where: { id: testUser.id },
+            select: { xp_points: true, level: true },
+        });
+        expect(userAfterComplete?.xp_points).toBe(300);
+        expect(userAfterComplete?.level).toBe(3);
+
+        // 5. Simulate dropping the quest (change status to DROPPED and trigger recalculate)
+        await prisma.gameProgress.update({
+            where: { id: progress.id },
+            data: {
+                status: "DROPPED",
+                end_date: new Date(),
+            },
+        });
+
+        const afterDrop = await recalculateUserXPAndLevel(testUser.id);
+        expect(afterDrop.totalXP).toBe(0);
+        expect(afterDrop.level).toBe(1);
+
+        const userAfterDrop = await prisma.user.findUnique({
+            where: { id: testUser.id },
+            select: { xp_points: true, level: true },
+        });
+        expect(userAfterDrop?.xp_points).toBe(0);
+        expect(userAfterDrop?.level).toBe(1);
+
+        // Cleanup
         await prisma.gameProgress.deleteMany({ where: { user_id: testUser.id } });
         await prisma.game.delete({ where: { id: testGame.id } });
         await prisma.user.delete({ where: { id: testUser.id } });

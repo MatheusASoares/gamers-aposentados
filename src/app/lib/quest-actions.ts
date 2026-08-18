@@ -167,6 +167,8 @@ export async function dropQuest(gameId: string): Promise<{ success: boolean; err
             return { success: true };
         });
 
+        await recalculateUserXPAndLevel(session.user.id);
+
         revalidatePath("/");
         revalidatePath("/quests");
         revalidatePath("/dashboard");

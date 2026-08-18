@@ -1,4 +1,4 @@
-import { getTwitchToken } from "@/app/lib/igdb";
+import { getTwitchToken, sanitizeApicalypseQuery } from "@/app/lib/igdb";
 import { prisma } from "@/lib/prisma";
 
 export async function backfillArtworks() {
@@ -25,7 +25,7 @@ export async function backfillArtworks() {
 
     for (const game of games) {
         try {
-            const cleanTitle = game.title.replace(/ - pC| - stEam| - Ps[1-5]| - [sS]nes/ig, "").trim();
+            const cleanTitle = sanitizeApicalypseQuery(game.title.replace(/ - pC| - stEam| - Ps[1-5]| - [sS]nes/ig, "").trim());
             const response = await fetch("https://api.igdb.com/v4/games", {
                 method: "POST",
                 headers: {

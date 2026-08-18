@@ -7,6 +7,7 @@ export interface HistoryCandidate {
     gameTitle: string;
     gameImageUrl: string | null;
     gameIgdbId: string;
+    gameId?: string;
     nominatorId: string;
     nominatorName: string;
 }
@@ -98,7 +99,8 @@ export async function getQuestHistoryByYear(
                     id: e.id,
                     gameTitle: e.game.title,
                     gameImageUrl: e.game.cover_url,
-                    gameIgdbId: e.game.id,
+                    gameIgdbId: e.game.igdb_id || e.game.id,
+                    gameId: e.game.id,
                     nominatorId: e.user_id,
                     nominatorName: e.user.name || e.user.username || "Unknown",
                 })),

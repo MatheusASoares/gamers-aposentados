@@ -50,6 +50,9 @@ export const getTwitchToken = unstable_cache(
     },
 );
 
+import { sanitizeApicalypseQuery } from "@/lib/igdb-utils";
+export { sanitizeApicalypseQuery };
+
 export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]> {
     if (!query || query.trim().length === 0) {
         return [];
@@ -64,6 +67,7 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
     }
 
     try {
+        const sanitizedQuery = sanitizeApicalypseQuery(query);
         const response = await fetch("https://api.igdb.com/v4/games", {
             method: "POST",
             headers: {
@@ -73,7 +77,7 @@ export async function searchGamesIGDB(query: string): Promise<GameSearchResult[]
                 "Content-Type": "text/plain",
             },
             // Request hierarchy fields to filter out DLCs, alternate editions, and bundles in-memory
-            body: `search "${query}"; fields name, cover.image_id, category, game_type, parent_game, version_parent; limit 50;`,
+            body: `search "${sanitizedQuery}"; fields name, cover.image_id, category, game_type, parent_game, version_parent; limit 50;`,
             cache: "no-store",
         });
 
@@ -125,6 +129,7 @@ export async function getGameContextIGDB(title: string): Promise<{ summary?: str
     }
 
     try {
+        const sanitizedTitle = sanitizeApicalypseQuery(title);
         const response = await fetch("https://api.igdb.com/v4/games", {
             method: "POST",
             headers: {
@@ -133,7 +138,7 @@ export async function getGameContextIGDB(title: string): Promise<{ summary?: str
                 Accept: "application/json",
                 "Content-Type": "text/plain",
             },
-            body: `search "${title}"; fields name, summary, storyline; limit 1;`,
+            body: `search "${sanitizedTitle}"; fields name, summary, storyline; limit 1;`,
             cache: "no-store",
         });
 
