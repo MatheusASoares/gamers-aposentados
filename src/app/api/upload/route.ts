@@ -1,7 +1,7 @@
 import { put } from "@vercel/blob";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { validateImageMagicBytes } from "@/lib/file-validation";
+import { validateImageMagicBytes, isValidUploadFolder, sanitizeFileExtension, ALLOWED_UPLOAD_FOLDERS } from "@/lib/file-validation";
 
 const MAX_SIZE_BYTES = 2 * 1024 * 1024; // 2 MB
 
@@ -30,8 +30,18 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        const folder = (formData.get("folder") as string) || "avatars";
-        const extension = file.name.split(".").pop() || "webp";
+        const rawFolder = formData.get("folder");
+        if (rawFolder !== null && rawFolder !== undefined && rawFolder !== "") {
+            if (!isValidUploadFolder(rawFolder)) {
+                return NextResponse.json(
+                    { error: `Pasta de upload inválida. Pastas permitidas: ${ALLOWED_UPLOAD_FOLDERS.join(", ")}.` },
+                    { status: 400 },
+                );
+            }
+        }
+
+        const folder = (rawFolder as string) || "avatars";
+        const extension = sanitizeFileExtension(file.name);
         const filename = `${folder}/${session.user.id}-${Date.now()}.${extension}`;
 
         const blob = await put(filename, file, {

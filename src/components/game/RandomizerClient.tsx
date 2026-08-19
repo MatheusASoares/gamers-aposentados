@@ -331,48 +331,61 @@ export function RandomizerClient({
             const response = await saveSelections(questType, games);
 
             if (response.success) {
-                setSaveStatus({
-                    success: true,
-                    message: "Seleções salvas! Consultando AI Agent (HLTB)...",
-                });
                 setIsEditing(false);
-                // Reload pool to get fresh entry IDs
+                // Reload pool to get fresh entry IDs and pre-existing DB times
                 await loadPool(questType);
 
-                // Fetch AI Times
-                setIsFetchingHltb(true);
-                try {
-                    const aiRes = await fetch("/api/ai/hltb", {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ titles: games.map((g) => g.nome) }),
-                    });
+                // Identifica apenas os jogos que ainda não possuem tempo HLTB carregado
+                const titlesNeedingHltb = games
+                    .map((g) => g.nome)
+                    .filter((nome) => hltbTimes[nome] === undefined || hltbTimes[nome] === null);
 
-                    if (aiRes.ok) {
-                        const aiData: HltbAiResponse = await aiRes.json();
-                        const newTimes = { ...hltbTimes };
-                        aiData.results.forEach((r: HltbAiResult) => {
-                            newTimes[r.title] = r.mainStory || null;
-                        });
-                        setHltbTimes(newTimes);
-                        setSaveStatus({
-                            success: true,
-                            message: "Seleções salvas com sucesso!",
-                        });
-                    } else {
-                        setSaveStatus({
-                            success: true,
-                            message: "Seleções salvas (Falha no AI)",
-                        });
-                    }
-                } catch (err) {
-                    console.error("AI fetch failed", err);
+                if (titlesNeedingHltb.length > 0) {
                     setSaveStatus({
                         success: true,
-                        message: "Seleções salvas (Erro no AI)",
+                        message: "Seleções salvas! Consultando HLTB...",
                     });
-                } finally {
-                    setIsFetchingHltb(false);
+                    setIsFetchingHltb(true);
+                    try {
+                        const aiRes = await fetch("/api/ai/hltb", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ titles: titlesNeedingHltb }),
+                        });
+
+                        if (aiRes.ok) {
+                            const aiData: HltbAiResponse = await aiRes.json();
+                            setHltbTimes((prev) => {
+                                const next = { ...prev };
+                                aiData.results.forEach((r: HltbAiResult) => {
+                                    next[r.title] = r.mainStory || null;
+                                });
+                                return next;
+                            });
+                            setSaveStatus({
+                                success: true,
+                                message: "Seleções salvas com sucesso!",
+                            });
+                        } else {
+                            setSaveStatus({
+                                success: true,
+                                message: "Seleções salvas (Falha no HLTB)",
+                            });
+                        }
+                    } catch (err) {
+                        console.error("AI fetch failed", err);
+                        setSaveStatus({
+                            success: true,
+                            message: "Seleções salvas (Erro no HLTB)",
+                        });
+                    } finally {
+                        setIsFetchingHltb(false);
+                    }
+                } else {
+                    setSaveStatus({
+                        success: true,
+                        message: "Seleções salvas com sucesso!",
+                    });
                 }
             } else {
                 setSaveStatus({ success: false, message: response.error || "Erro ao salvar." });

@@ -23,39 +23,56 @@ export async function POST(request: Request) {
             );
         }
 
-        if (titles.length > 6) {
+        // Sanitizar e deduplicar títulos (case-insensitive)
+        const uniqueTitlesMap = new Map<string, string>();
+        for (const t of titles) {
+            if (typeof t === "string") {
+                const trimmed = t.trim();
+                if (trimmed && !uniqueTitlesMap.has(trimmed.toLowerCase())) {
+                    uniqueTitlesMap.set(trimmed.toLowerCase(), trimmed);
+                }
+            }
+        }
+        const uniqueTitles = Array.from(uniqueTitlesMap.values());
+
+        if (uniqueTitles.length === 0) {
+            return NextResponse.json(
+                { error: "Pelo menos um título de jogo válido deve ser fornecido." },
+                { status: 400 }
+            );
+        }
+
+        if (uniqueTitles.length > 6) {
              return NextResponse.json(
                 { error: "Maximum of 6 titles are allowed per request" },
                 { status: 400 }
             );
         }
 
-        // 3. Check Key
-        const apiKey = process.env.GEMINI_API_KEY;
-        if (!apiKey) {
-            console.error("GEMINI_API_KEY is not configured.");
-            return NextResponse.json(
-                { error: "AI service is not configured" },
-                { status: 500 }
-            );
-        }
-
-        // 4. Query DB for existing HLTB times
-        const existingGames = await prisma.game.findMany({
+        // 3. Query DB for existing HLTB times (case-insensitive)
+        const cachedGames = await prisma.game.findMany({
             where: {
-                title: { in: titles }
+                OR: uniqueTitles.map((t) => ({
+                    title: {
+                        equals: t,
+                        mode: "insensitive",
+                    },
+                })),
+                hltb_time: { not: null },
             },
-            select: { title: true, hltb_time: true }
+            select: { title: true, hltb_time: true },
         });
 
         const results: { title: string; mainStory: number | null }[] = [];
         const titlesToFetch: string[] = [];
 
-        for (const title of titles) {
-            const gameInDb = existingGames.find(g => g.title.toLowerCase() === title.toLowerCase());
-            if (gameInDb && gameInDb.hltb_time !== null) {
-                // Game already has time in DB, use it directly
-                results.push({ title, mainStory: gameInDb.hltb_time });
+        for (const title of uniqueTitles) {
+            const cached = cachedGames.find(
+                (g) => g.title.trim().toLowerCase() === title.toLowerCase() && g.hltb_time !== null
+            );
+            if (cached) {
+                // Game already has time in DB, use it directly (zero token cost)
+                results.push({ title, mainStory: cached.hltb_time });
             } else {
                 titlesToFetch.push(title);
             }
@@ -63,8 +80,18 @@ export async function POST(request: Request) {
 
         // If all are already in DB, return immediately
         if (titlesToFetch.length === 0) {
-            console.log(`[API /ai/hltb] Substituted all ${titles.length} games from DB cache.`);
+            console.log(`[API /ai/hltb] Substituted all ${uniqueTitles.length} games from DB cache.`);
             return NextResponse.json({ results });
+        }
+
+        // 4. Check Key only if AI call is needed
+        const apiKey = process.env.GEMINI_API_KEY;
+        if (!apiKey) {
+            console.error("GEMINI_API_KEY is not configured.");
+            return NextResponse.json(
+                { error: "AI service is not configured" },
+                { status: 500 }
+            );
         }
 
         // 5. Construct prompt only for games we need
@@ -174,33 +201,39 @@ Rules:
         // Limpa possíveis marcações markdown geradas pelo LLM (já que não estamos em "strict json mode")
         const cleanJsonText = rawText.replace(/```json/gi, "").replace(/```/g, "").trim();
 
-        // 7. Parse and return results
+        // 7. Parse and return results with batch update
         try {
             const parsedData = JSON.parse(cleanJsonText);
             
-            // Add new fetched data to results and save to DB
+            // Add new fetched data to results and batch save to DB
             if (parsedData && Array.isArray(parsedData.results)) {
+                const updateOperations = [];
+
                 for (const aiResult of parsedData.results) {
                     if (aiResult.title && aiResult.mainStory !== undefined) {
-                        // Push to the API response array
                         results.push({ title: aiResult.title, mainStory: aiResult.mainStory });
                         
-                        // Async update DB
-                        if (aiResult.mainStory !== null) {
-                            try {
-                                await prisma.game.updateMany({
+                        if (typeof aiResult.mainStory === "number") {
+                            updateOperations.push(
+                                prisma.game.updateMany({
                                     where: { 
                                         title: { 
-                                            equals: aiResult.title,
+                                            equals: aiResult.title.trim(),
                                             mode: 'insensitive' 
                                         } 
                                     },
                                     data: { hltb_time: aiResult.mainStory }
-                                });
-                            } catch (dbError) {
-                                console.error("[API /ai/hltb] Error updating DB for", aiResult.title, dbError);
-                            }
+                                })
+                            );
                         }
+                    }
+                }
+
+                if (updateOperations.length > 0) {
+                    try {
+                        await prisma.$transaction(updateOperations);
+                    } catch (dbError) {
+                        console.error("[API /ai/hltb] Error in batch updating DB:", dbError);
                     }
                 }
             }

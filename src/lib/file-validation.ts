@@ -67,3 +67,35 @@ export async function validateImageMagicBytes(file: File): Promise<boolean> {
         return false;
     }
 }
+
+/**
+ * Pastas permitidas para armazenamento de uploads (Allowlist de segurança)
+ */
+export const ALLOWED_UPLOAD_FOLDERS = ["avatars", "screenshots", "covers"] as const;
+export type AllowedUploadFolder = (typeof ALLOWED_UPLOAD_FOLDERS)[number];
+
+/**
+ * Valida se a pasta informada pertence à allowlist de pastas permitidas.
+ */
+export function isValidUploadFolder(folder: unknown): folder is AllowedUploadFolder {
+    return typeof folder === "string" && (ALLOWED_UPLOAD_FOLDERS as readonly string[]).includes(folder);
+}
+
+/**
+ * Extensões de imagem permitidas no upload.
+ */
+export const ALLOWED_IMAGE_EXTENSIONS = ["png", "jpg", "jpeg", "gif", "webp"] as const;
+export type AllowedImageExtension = (typeof ALLOWED_IMAGE_EXTENSIONS)[number];
+
+/**
+ * Extrai e sanitiza a extensão do arquivo garantindo apenas extensões válidas e seguras.
+ */
+export function sanitizeFileExtension(filename: string): string {
+    const rawExtension = filename.split(".").pop()?.toLowerCase() || "";
+    const cleanExtension = rawExtension.replace(/[^a-z0-9]/g, "");
+    if ((ALLOWED_IMAGE_EXTENSIONS as readonly string[]).includes(cleanExtension)) {
+        return cleanExtension;
+    }
+    return "webp";
+}
+

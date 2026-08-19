@@ -112,15 +112,12 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     };
 
     const uploadAllScreenshots = async (): Promise<string[]> => {
-        const urls: string[] = [];
-
-        for (const item of screenshots) {
+        const uploadPromises = screenshots.map(async (item) => {
             if (item.uploadedUrl) {
-                urls.push(item.uploadedUrl);
-                continue;
+                return item.uploadedUrl;
             }
 
-            if (!item.file) continue;
+            if (!item.file) return null;
 
             const formData = new FormData();
             formData.append("file", item.file);
@@ -137,10 +134,11 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
             }
 
             const data = await res.json();
-            urls.push(data.url);
-        }
+            return data.url as string;
+        });
 
-        return urls;
+        const results = await Promise.all(uploadPromises);
+        return results.filter((url): url is string => Boolean(url));
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

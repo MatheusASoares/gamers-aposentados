@@ -8,6 +8,9 @@ import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
 import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
 import { ensureUserContractProgress } from "@/services/notice-board-progression";
+import { updateQuestProgressSchema } from "@/lib/quest-validation";
+
+export { updateQuestProgressSchema };
 
 export async function updateQuestProgress(
     gameId: string,
@@ -16,19 +19,29 @@ export async function updateQuestProgress(
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
+    const validation = updateQuestProgressSchema.safeParse({ gameId, percentage });
+    if (!validation.success) {
+        return {
+            success: false,
+            error: validation.error.issues[0]?.message || "Dados de progresso inválidos.",
+        };
+    }
+
+    const { gameId: validGameId, percentage: validPercentage } = validation.data;
+
     try {
         const result = await prisma.$transaction(async (tx) => {
             const existingProgress = await tx.gameProgress.findUnique({
                 where: {
                     user_id_game_id: {
                         user_id: session.user.id,
-                        game_id: gameId,
+                        game_id: validGameId,
                     },
                 },
             });
 
-            const dataToUpdate: Prisma.GameProgressUpdateInput = { progress_percentage: percentage };
-            if (percentage === 100) {
+            const dataToUpdate: Prisma.GameProgressUpdateInput = { progress_percentage: validPercentage };
+            if (validPercentage === 100) {
                 dataToUpdate.status = "COMPLETED";
                 dataToUpdate.end_date = new Date();
             } else if (
@@ -48,11 +61,11 @@ export async function updateQuestProgress(
                 await tx.gameProgress.create({
                     data: {
                         user_id: session.user.id,
-                        game_id: gameId,
-                        progress_percentage: percentage,
-                        status: percentage === 100 ? "COMPLETED" : "ACTIVE",
+                        game_id: validGameId,
+                        progress_percentage: validPercentage,
+                        status: validPercentage === 100 ? "COMPLETED" : "ACTIVE",
                         start_date: new Date(),
-                        ...(percentage === 100 ? { end_date: new Date() } : {}),
+                        ...(validPercentage === 100 ? { end_date: new Date() } : {}),
                     },
                 });
             }

@@ -117,8 +117,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
     };
 
     const uploadAllScreenshots = async (): Promise<string[]> => {
-        const urls: string[] = [];
-        for (const item of screenshots) {
+        const uploadPromises = screenshots.map(async (item) => {
             const formData = new FormData();
             formData.append("file", item.file);
             formData.append("folder", "screenshots");
@@ -134,9 +133,10 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
             }
 
             const data = await res.json();
-            urls.push(data.url);
-        }
-        return urls;
+            return data.url as string;
+        });
+
+        return Promise.all(uploadPromises);
     };
 
     const handleSubmit = async (e: React.FormEvent) => {

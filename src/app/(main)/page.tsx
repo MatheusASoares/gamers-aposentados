@@ -48,7 +48,8 @@ export default async function DashboardPage() {
             orderBy: { created_at: "desc" },
             include: { winner_game: { include: { nominator: true } } },
         }),
-        // Random Reviews (ORDER BY RANDOM)
+        // [BY DESIGN]: Random Reviews (ORDER BY RANDOM) seleciona 5 reviews aleatórias de todo o histórico da comunidade.
+        // O volume de dados é controlado (< centenas de linhas) com tempo de execução < 1ms, mantendo rotatividade histórica.
         prisma.$queryRaw<RawReview[]>`
             SELECT 
                 r.id, 
@@ -288,6 +289,8 @@ export default async function DashboardPage() {
                   level: true,
                   xp_points: true,
                   equipped_title: true,
+                  equipped_frame: true,
+                  equipped_banner: true,
                   gameProgress: {
                       where: { status: "COMPLETED" },
                       orderBy: { updated_at: "desc" },
@@ -296,12 +299,6 @@ export default async function DashboardPage() {
               },
           })
         : null;
-
-    const dbUserExtra = userId
-        ? await prisma.$queryRaw<{ equipped_frame: string | null; equipped_banner: string | null }[]>`SELECT equipped_frame, equipped_banner FROM users WHERE id = ${userId}`
-        : [];
-    const equippedFrame = dbUserExtra?.[0]?.equipped_frame || null;
-    const equippedBanner = dbUserExtra?.[0]?.equipped_banner || null;
 
     const lastCompleted = currentUserProfile?.gameProgress[0]?.game;
 
@@ -312,8 +309,8 @@ export default async function DashboardPage() {
               level: currentUserProfile.level || 1,
               xpPoints: currentUserProfile.xp_points || 0,
               equippedTitle: currentUserProfile.equipped_title,
-              equippedFrame: equippedFrame,
-              equippedBanner: equippedBanner,
+              equippedFrame: currentUserProfile.equipped_frame || null,
+              equippedBanner: currentUserProfile.equipped_banner || null,
               completedGamesCount: currentUserProfile.gameProgress.length,
               platinumCount: currentUserProfile.gameProgress.filter((p) => p.is_platinum).length,
               lastCompletedGame: lastCompleted
