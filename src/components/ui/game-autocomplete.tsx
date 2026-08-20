@@ -35,11 +35,15 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ query: query.trim() }),
                     });
-                    if (!response.ok) throw new Error("API Route Failed");
+                    if (!response.ok) {
+                        setResults([]);
+                        return;
+                    }
                     const data = await response.json();
-                    setResults(data);
+                    setResults(Array.isArray(data) ? data : []);
                 } catch (error) {
                     console.error("IGDB Route fetch error:", error);
+                    setResults([]);
                 } finally {
                     setIsLoading(false);
                 }

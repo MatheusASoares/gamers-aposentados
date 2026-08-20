@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
     Plus,
@@ -66,6 +66,35 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
 
     // Screenshots state
     const [screenshots, setScreenshots] = useState<{ file: File; previewUrl: string }[]>([]);
+    const screenshotsRef = useRef(screenshots);
+
+    useEffect(() => {
+        screenshotsRef.current = screenshots;
+    }, [screenshots]);
+
+    const cleanupBlobScreenshots = (items: { previewUrl: string }[]) => {
+        items.forEach((item) => {
+            if (item.previewUrl?.startsWith("blob:")) {
+                URL.revokeObjectURL(item.previewUrl);
+            }
+        });
+    };
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            cleanupBlobScreenshots(screenshotsRef.current);
+        };
+    }, []);
+
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            cleanupBlobScreenshots(screenshots);
+            setScreenshots([]);
+            setError(null);
+        }
+        setOpen(newOpen);
+    };
 
     const selectedGame = useMemo(() => {
         return games.find((g) => g.id === gameId);
@@ -109,7 +138,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
     const handleRemoveScreenshot = (index: number) => {
         setScreenshots((prev) => {
             const item = prev[index];
-            if (item?.previewUrl) {
+            if (item?.previewUrl && item.previewUrl.startsWith("blob:")) {
                 URL.revokeObjectURL(item.previewUrl);
             }
             return prev.filter((_, i) => i !== index);
@@ -163,6 +192,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
             });
 
             if (res.success) {
+                cleanupBlobScreenshots(screenshots);
                 setOpen(false);
                 setGameId("");
                 setRating(10);
@@ -186,7 +216,7 @@ export function AddReviewModal({ games, trigger }: AddReviewModalProps) {
     const coverUrl = selectedGame?.cover_url?.replace("t_cover_big", "t_1080p") || null;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 {trigger || (
                     <button className="bg-primary hover:bg-primary/90 group flex items-center gap-2 rounded-xl px-6 py-3 text-sm font-black tracking-wider text-white shadow-[0_0_20px_rgba(189,13,242,0.4)] transition-all active:scale-95">

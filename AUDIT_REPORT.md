@@ -191,27 +191,28 @@
 ### 4.1 Vazamento de Memória com `URL.createObjectURL` Sem `revokeObjectURL`
 
 - **Arquivos:**
-    - [`src/components/reviews/AddReviewModal.tsx:95`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/AddReviewModal.tsx#L95)
-    - [`src/components/reviews/EditReviewModal.tsx:90`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/EditReviewModal.tsx#L90)
-    - [`src/components/profile/avatar-upload.tsx:45`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/profile/avatar-upload.tsx#L45)
-- **Problema:** Strings `blob:http://...` criadas pelo navegador permanecem alocadas na memória do DOM até o descarregamento da página. Se o usuário abrir o modal, selecionar imagens e fechar sem submeter, os buffers de imagem não são liberados.
-- **Correção:** Adicionar cleanup no `useEffect` de desmontagem ou revogar URLs no fechamento do modal.
+    - [`src/components/reviews/AddReviewModal.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/AddReviewModal.tsx)
+    - [`src/components/reviews/EditReviewModal.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/EditReviewModal.tsx)
+    - [`src/components/profile/avatar-upload.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/profile/avatar-upload.tsx)
+    - [`src/components/auth/settings-modal.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/auth/settings-modal.tsx)
+- **Status:** **DONE (Corrigido e Otimizado)**
+- **Otimização Aplicada:** Implementado ciclo de vida completo de desalocação de buffers blob (`URL.revokeObjectURL`) com cleanup via `useEffect` no unmount, revogação prévia ao substituir previews, e revogação ao fechar modais ou submeter formulários. Validado via suíte de testes Playwright `tests/blob-cleanup-memory.spec.ts`.
 
 ---
 
 ### 4.2 Estado Dessincronizado no Modal de Edição (`EditReviewModal`)
 
-- **Arquivo:** [`src/components/reviews/EditReviewModal.tsx:58-66`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/EditReviewModal.tsx#L58-L66)
-- **Problema:** O formulário inicializa o estado uma única vez na montagem via `useState(review.rating)`. Caso as props do componente mudem ou o modal seja reutilizado, os inputs não refletem os dados atualizados.
-- **Correção:** Sincronizar o estado com a prop `review` quando o modal for aberto (`useEffect` ouvindo `open` e `review.id`).
+- **Arquivo:** [`src/components/reviews/EditReviewModal.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/reviews/EditReviewModal.tsx)
+- **Status:** **DONE (Corrigido e Otimizado)**
+- **Otimização Aplicada:** Implementado `useEffect` reativo sincronizando os campos do formulário (`rating`, `difficulty`, `hoursPlayed`, `reviewText`, `screenshots`) sempre que o modal é aberto (`open === true`) ou a prop `review` é alterada, garantindo reset de rascunhos descartados e sincronização instantânea com o banco/pai. Validado via Playwright `tests/edit-review-sync.spec.ts`.
 
 ---
 
 ### 4.3 Falta de Tratamento de Erro / Type Guard em `GameAutocomplete`
 
-- **Arquivo:** [`src/components/ui/game-autocomplete.tsx:39-40`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/ui/game-autocomplete.tsx#L39-L40)
-- **Problema:** Se a rota `/api/igdb` retornar um objeto de erro (ex: `{ error: "Unauthorized" }`), a linha `setResults(data)` atribui um objeto não-iterável ao estado. Na renderização, `results.map` estoura com: `TypeError: results.map is not a function`.
-- **Correção:** Usar `setResults(Array.isArray(data) ? data : [])`.
+- **Arquivo:** [`src/components/ui/game-autocomplete.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/ui/game-autocomplete.tsx)
+- **Status:** **DONE (Corrigido e Otimizado)**
+- **Otimização Aplicada:** Implementado type guard `Array.isArray(data) ? data : []`, validação antecipada de status `!response.ok` com fallback defensivo e limpeza de `setResults([])` no bloco `catch`, eliminando qualquer risco de `TypeError: results.map is not a function`. Validado via Playwright `tests/game-autocomplete-guard.spec.ts`.
 
 ---
 
@@ -220,18 +221,16 @@
 ### 5.1 Faltam Índices Essenciais no `prisma/schema.prisma`
 
 - **Arquivo:** [`prisma/schema.prisma`](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma)
-- **Problema:** As tabelas mais movimentadas não possuem índices nas colunas filtradas frequentemente:
-    - `Game`: Falta índice em `title` e `created_at`.
-    - `GameProgress`: Falta índice composto em `@@index([user_id, status])` e `@@index([game_id, status])`.
-    - `Pool`: Falta índice composto em `@@index([type, status, created_at])`.
-    - `Review`: Falta índice em `created_at`.
+- **Status:** **DONE (Corrigido e Otimizado)**
+- **Otimização Aplicada:** Adicionados índices essenciais simples e compostos (`Game`: `@@index([title])`, `@@index([created_at])`; `GameProgress`: `@@index([user_id, status])`, `@@index([game_id, status])`; `Pool`: `@@index([type, status, created_at])`; `Review`: `@@index([created_at])`). Sincronizado com o banco PostgreSQL local via `prisma db push`, gerado client atualizado e validado via testes automatizados Playwright em `tests/schema-indexes.spec.ts`.
+
+---
 
 ### 5.2 Comportamento de Exclusão em Cascata Incompleto
 
-- **Arquivo:** [`prisma/schema.prisma:164-165, 203-205`](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma#L164-L165)
-- **Problema:**
-    - `Review.user`: Falta `onDelete: Cascade`. Se um usuário for deletado, o banco recusa a exclusão por violação de chave estrangeira.
-    - `PoolEntry.pool` e `PoolEntry.user`: Faltam `onDelete: Cascade`.
+- **Arquivo:** [`prisma/schema.prisma`](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma)
+- **Status:** **DONE (Corrigido e Otimizado)**
+- **Otimização Aplicada:** Adicionada a diretiva `onDelete: Cascade` nas relações `Review.user`, `PoolEntry.pool` e `PoolEntry.user`. Sincronizado com o banco PostgreSQL local via `prisma db push`, gerado client atualizado e validado via testes automatizados de exclusão em cascata em `tests/schema-cascade-delete.spec.ts`.
 
 ---
 

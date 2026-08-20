@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useRef } from "react";
+import { useState, useTransition, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -59,12 +59,31 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const previewUrlRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        previewUrlRef.current = previewUrl;
+    }, [previewUrl]);
+
+    const revokeBlobUrl = (url: string | null) => {
+        if (url?.startsWith("blob:")) {
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            revokeBlobUrl(previewUrlRef.current);
+        };
+    }, []);
 
     const [prevOpen, setPrevOpen] = useState(open);
 
     if (open !== prevOpen) {
         setPrevOpen(open);
         if (open) {
+            revokeBlobUrl(previewUrl);
             setName(user?.name || "");
             setUsername(user?.username || "");
             setCurrentPassword("");
@@ -75,8 +94,21 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
             setPendingFile(null);
             setProfileMessage(null);
             setPasswordMessage(null);
+        } else {
+            revokeBlobUrl(previewUrl);
+            setPreviewUrl(null);
+            setPendingFile(null);
         }
     }
+
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            revokeBlobUrl(previewUrl);
+            setPreviewUrl(null);
+            setPendingFile(null);
+        }
+        onOpenChange(newOpen);
+    };
 
     const handleAvatarClick = () => fileInputRef.current?.click();
 
@@ -95,7 +127,11 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
 
         setProfileMessage(null);
         setPendingFile(file);
-        setPreviewUrl(URL.createObjectURL(file));
+        const newUrl = URL.createObjectURL(file);
+        setPreviewUrl((prev) => {
+            revokeBlobUrl(prev);
+            return newUrl;
+        });
     };
 
     const handleProfileSubmit = (e: React.FormEvent) => {
@@ -130,6 +166,10 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                 uploadedImageUrl = data.url;
                 await update({ image: data.url });
                 setPendingFile(null);
+                setPreviewUrl((prev) => {
+                    revokeBlobUrl(prev);
+                    return null;
+                });
             }
 
             // 2. Save profile fields
@@ -196,7 +236,7 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
     const pStrength = getPasswordStrength(newPassword);
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
                 className="sm:max-w-[500px] overflow-hidden border border-[#bd0df2]/30 bg-zinc-950/95 text-white shadow-[0_0_60px_rgba(189,13,242,0.25)] backdrop-blur-2xl p-0 transition-all duration-300"
             >

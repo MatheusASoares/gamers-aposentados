@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Loader2, Edit, ImagePlus, X, Sparkles, Star, Flame, Clock, Gamepad2, Award, CheckCircle2, ShieldAlert } from "lucide-react";
 import { updateReview } from "@/app/lib/review-actions";
 import { compressImage } from "@/lib/image-compressor";
@@ -65,6 +65,59 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     const [screenshots, setScreenshots] = useState<{ file?: File; previewUrl: string; uploadedUrl?: string }[]>(
         (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
     );
+    const screenshotsRef = useRef(screenshots);
+
+    useEffect(() => {
+        screenshotsRef.current = screenshots;
+    }, [screenshots]);
+
+    const cleanupBlobScreenshots = (items: { previewUrl: string }[]) => {
+        items.forEach((item) => {
+            if (item.previewUrl?.startsWith("blob:")) {
+                URL.revokeObjectURL(item.previewUrl);
+            }
+        });
+    };
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            cleanupBlobScreenshots(screenshotsRef.current);
+        };
+    }, []);
+
+    // Sync state with review props when opened or when review data changes
+    useEffect(() => {
+        if (open) {
+            setRating(review.rating);
+            setDifficulty(review.difficulty || 3);
+            setHoursPlayed(review.hours_played?.toString() || "");
+            setReviewText(review.review_text || "");
+            setScreenshots(
+                (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
+            );
+            setError(null);
+        }
+    }, [
+        open,
+        review.id,
+        review.rating,
+        review.difficulty,
+        review.hours_played,
+        review.review_text,
+        review.screenshots,
+    ]);
+
+    const handleOpenChange = (newOpen: boolean) => {
+        if (!newOpen) {
+            cleanupBlobScreenshots(screenshots);
+            setScreenshots(
+                (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
+            );
+            setError(null);
+        }
+        setOpen(newOpen);
+    };
 
     // Live XP calculation
     const isDetailed = reviewText.trim().length >= 50;
@@ -104,7 +157,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     const handleRemoveScreenshot = (index: number) => {
         setScreenshots((prev) => {
             const item = prev[index];
-            if (item?.file && item.previewUrl) {
+            if (item?.previewUrl && item.previewUrl.startsWith("blob:")) {
                 URL.revokeObjectURL(item.previewUrl);
             }
             return prev.filter((_, i) => i !== index);
@@ -161,6 +214,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
             setLoading(false);
 
             if (res.success) {
+                cleanupBlobScreenshots(screenshots);
                 setOpen(false);
                 router.refresh();
             } else {
@@ -177,7 +231,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     const coverUrl = review.game.cover_url?.replace("t_cover_big", "t_1080p") || null;
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 {trigger || (
                     <button className="transition-colors hover:text-amber-400" title="Editar Review">

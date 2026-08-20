@@ -11,11 +11,11 @@ datasource db {
 
 // --- ENUMS (As regras fixas) ---
 enum GameStatus {
-  SUGGESTED   // Está no backlog
-  IN_POOL     // Entrou no sorteio (Randomizer)
-  ACTIVE      // Foi o escolhido (Winner)
-  COMPLETED   // Zerado
-  DROPPED     // Dropado
+  SUGGESTED // Está no backlog
+  IN_POOL // Entrou no sorteio (Randomizer)
+  ACTIVE // Foi o escolhido (Winner)
+  COMPLETED // Zerado
+  DROPPED // Dropado
 }
 
 enum QuestType {
@@ -35,46 +35,46 @@ model User {
   username      String?   @unique
   email         String?   @unique
   emailVerified DateTime? @map("email_verified")
-  password      String?   
-  image         String?   
+  password      String?
+  image         String?
   name          String?
   created_at    DateTime  @default(now())
 
-  accounts      Account[]
-  sessions      Session[]
+  accounts Account[]
+  sessions Session[]
 
   // Relações (O User tem vários...)
-  nominations  Game[]            @relation("Nominator") // Jogos que indicou
-  reviews      Review[]                                 // Reviews que fez
-  poolEntries  PoolEntry[]                              // Entradas no sorteio
-  gameProgress GameProgress[]                           // Progresso nos jogos
-  favoriteGames Game[]           @relation("UserFavorites") // Jogos favoritos
-  favoriteGamesYear Game[]       @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
+  nominations        Game[]                     @relation("Nominator") // Jogos que indicou
+  reviews            Review[] // Reviews que fez
+  poolEntries        PoolEntry[] // Entradas no sorteio
+  gameProgress       GameProgress[] // Progresso nos jogos
+  favoriteGames      Game[]                     @relation("UserFavorites") // Jogos favoritos
+  favoriteGamesYear  Game[]                     @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
   contractProgresses CampaignContractProgress[]
 
-  xp_points     Int       @default(0)
-  level         Int       @default(1)
-  equipped_title String?
-  equipped_frame String?
+  xp_points       Int     @default(0)
+  level           Int     @default(1)
+  equipped_title  String?
+  equipped_frame  String?
   equipped_banner String?
-  equipped_theme String?   @default("cyberpunk")
+  equipped_theme  String? @default("cyberpunk")
 
   @@map("users")
 }
 
 model Account {
-  id                 String  @id @default(uuid())
-  userId             String  @map("user_id")
-  type               String
-  provider           String
-  providerAccountId  String  @map("provider_account_id")
-  refresh_token      String? @db.Text
-  access_token       String? @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String? @db.Text
-  session_state      String?
+  id                String  @id @default(uuid())
+  userId            String  @map("user_id")
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -93,123 +93,129 @@ model Session {
 }
 
 model Game {
-  id             String      @id @default(uuid())
-  igdb_id        String?     @unique
-  title          String
-  platform       String?     // PC, Switch, PS5...
-  cover_url      String?     // Capa do jogo
-  artwork_url    String?     // Arte em landscape/ultrawide para banners
+  id          String  @id @default(uuid())
+  igdb_id     String? @unique
+  title       String
+  platform    String? // PC, Switch, PS5...
+  cover_url   String? // Capa do jogo
+  artwork_url String? // Arte em landscape/ultrawide para banners
 
   // Regras de Negócio
-  quest_type     QuestType   // Main ou Side? [Critico para as regras]
-  
+  quest_type QuestType // Main ou Side? [Critico para as regras]
+
   // Tempos
-  hltb_time      Int?        // "How Long to Beat" (Regra < 10h)
-  
+  hltb_time Int? // "How Long to Beat" (Regra < 10h)
+
   // Quem indicou? (FK para User)
   nominated_by_id String?
-  nominator       User?     @relation("Nominator", fields: [nominated_by_id], references: [id], onDelete: SetNull)
+  nominator       User?   @relation("Nominator", fields: [nominated_by_id], references: [id], onDelete: SetNull)
 
   // Datas
-  created_at     DateTime    @default(now())
+  created_at DateTime @default(now())
 
   // Relações
-  reviews        Review[]
-  poolEntries    PoolEntry[] // Participações em sorteios
-  wonPools       Pool[]      @relation("WinnerGame") // Potes que esse jogo venceu
-  progress       GameProgress[]
-  favoritedBy    User[]      @relation("UserFavorites") // Usuários que favoritararam
-  favoritedByYear User[]     @relation("UserFavoritesYear") // Usuários que favoritararam pro Ano Atual
-  contracts      CampaignContract[]
+  reviews         Review[]
+  poolEntries     PoolEntry[] // Participações em sorteios
+  wonPools        Pool[]             @relation("WinnerGame") // Potes que esse jogo venceu
+  progress        GameProgress[]
+  favoritedBy     User[]             @relation("UserFavorites") // Usuários que favoritararam
+  favoritedByYear User[]             @relation("UserFavoritesYear") // Usuários que favoritararam pro Ano Atual
+  contracts       CampaignContract[]
 
+  @@index([title])
+  @@index([created_at])
   @@map("games")
 }
 
 // Novo modelo: Rastreia o progresso de cada gamer em cada jogo (Regra 3)
 model GameProgress {
-  id                  String     @id @default(uuid())
-  user_id             String
-  user                User       @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  
-  game_id             String
-  game                Game       @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  id      String @id @default(uuid())
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  game_id String
+  game    Game   @relation(fields: [game_id], references: [id], onDelete: Cascade)
 
   status              GameStatus @default(SUGGESTED) // O status agora é individual
-  progress_percentage Int        @default(0)         // De 0 a 100
+  progress_percentage Int        @default(0) // De 0 a 100
 
-  start_date          DateTime?  // Quando este usuário começou
-  end_date            DateTime?  // Quando completou ou dropou
+  start_date DateTime? // Quando este usuário começou
+  end_date   DateTime? // Quando completou ou dropou
 
-  is_platinum         Boolean    @default(false)
-  platinum_at         DateTime?
+  is_platinum Boolean   @default(false)
+  platinum_at DateTime?
 
-  created_at          DateTime   @default(now())
-  updated_at          DateTime   @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   // Garantir que um usuário tenha apenas 1 progresso por jogo
   @@unique([user_id, game_id])
+  @@index([user_id, status])
+  @@index([game_id, status])
   @@map("game_progress")
 }
 
 // Equivalente ao seu "Reviews" (Perfeito!)
 model Review {
   id           String   @id @default(uuid())
-  rating       Int      // 0 a 10 ou 0 a 5
-  difficulty   Int?     // 1 a 5
+  rating       Int // 0 a 10 ou 0 a 5
+  difficulty   Int? // 1 a 5
   review_text  String?  @db.Text
-  hours_played Int?     // Seu "hours = played" (Stats reais)
+  hours_played Int? // Seu "hours = played" (Stats reais)
   screenshots  String[] @default([])
-  
-  // Conexões
-  user_id      String
-  user         User     @relation(fields: [user_id], references: [id])
-  game_id      String
-  game         Game     @relation(fields: [game_id], references: [id], onDelete: Cascade)
 
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt @default(now())
+  // Conexões
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  game_id String
+  game    Game   @relation(fields: [game_id], references: [id], onDelete: Cascade)
+
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now()) @updatedAt
 
   @@unique([user_id, game_id])
+  @@index([created_at])
   @@map("reviews")
 }
 
 // Equivalente ao seu "Randomizer" (Generalizado para Main e Side)
 model Pool {
-  id           String    @id @default(uuid())
-  
+  id String @id @default(uuid())
+
   // Se for Side Quest, tem mês/ano. Se for Main, pode ser nulo.
-  month        Int?
-  year         Int?
-  type         QuestType 
-  
-  status       PoolStatus @default(OPEN)
+  month Int?
+  year  Int?
+  type  QuestType
+
+  status PoolStatus @default(OPEN)
 
   // O Vencedor (Sorteado)
   winner_game_id String?
-  winner_game    Game?     @relation("WinnerGame", fields: [winner_game_id], references: [id], onDelete: SetNull)
+  winner_game    Game?   @relation("WinnerGame", fields: [winner_game_id], references: [id], onDelete: SetNull)
 
   // Os jogos que estão concorrendo neste pote
-  entries      PoolEntry[]
+  entries PoolEntry[]
 
-  created_at   DateTime  @default(now())
+  created_at DateTime @default(now())
 
+  @@index([type, status, created_at])
   @@map("pools")
 }
 
 // Equivalente ao seu "RandomizerEntries" (Tabela Pivô)
 model PoolEntry {
-  id        String   @id @default(uuid())
-  
-  pool_id   String
-  pool      Pool     @relation(fields: [pool_id], references: [id])
-  
-  game_id   String
-  game      Game     @relation(fields: [game_id], references: [id], onDelete: Cascade)
-  
+  id String @id @default(uuid())
+
+  pool_id String
+  pool    Pool   @relation(fields: [pool_id], references: [id], onDelete: Cascade)
+
+  game_id String
+  game    Game   @relation(fields: [game_id], references: [id], onDelete: Cascade)
+
   // Quem colocou esse jogo NESTE pote específico? 
   // (Importante: As regras dizem Input Voce vs Padrinho )
-  user_id   String
-  user      User     @relation(fields: [user_id], references: [id])
+  user_id String
+  user    User   @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@unique([pool_id, game_id])
   @@map("pool_entries")
@@ -225,19 +231,19 @@ enum ContractStatus {
 }
 
 model CampaignContract {
-  id                  String                     @id @default(uuid())
+  id                  String @id @default(uuid())
   game_id             String
-  game                Game                       @relation(fields: [game_id], references: [id], onDelete: Cascade)
-  sequence_order      Int                        // Ordem sequencial iniciando em 1
+  game                Game   @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  sequence_order      Int // Ordem sequencial iniciando em 1
   title               String
-  objective           String                     @db.Text
-  daily_atomic_quest  String                     @db.Text
-  progress_percentage Int                        // Porcentagem acumulada de progresso do jogo ao concluir este contrato (ex: 12, 25, 100)
-  
-  user_progresses     CampaignContractProgress[]
+  objective           String @db.Text
+  daily_atomic_quest  String @db.Text
+  progress_percentage Int // Porcentagem acumulada de progresso do jogo ao concluir este contrato (ex: 12, 25, 100)
 
-  created_at          DateTime                   @default(now())
-  updated_at          DateTime                   @updatedAt
+  user_progresses CampaignContractProgress[]
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@unique([game_id, sequence_order])
   @@map("campaign_contracts")
@@ -251,8 +257,8 @@ model CampaignContractProgress {
   contract    CampaignContract @relation(fields: [contract_id], references: [id], onDelete: Cascade)
   status      ContractStatus   @default(LOCKED)
 
-  created_at  DateTime         @default(now())
-  updated_at  DateTime         @updatedAt
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   @@unique([user_id, contract_id])
   @@map("campaign_contract_progress")

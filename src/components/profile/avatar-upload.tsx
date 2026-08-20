@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useRef, useState, useTransition, useEffect } from "react";
 
 import { Camera } from "lucide-react";
 import { updateProfileImage } from "@/app/lib/user-actions";
@@ -20,8 +20,27 @@ export function AvatarUpload({ currentImage, name, isOwner, frameUrl, className 
     const { update } = useSession();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [preview, setPreview] = useState<string | null>(null);
+    const previewRef = useRef<string | null>(null);
+
+    useEffect(() => {
+        previewRef.current = preview;
+    }, [preview]);
+
     const [error, setError] = useState<string | null>(null);
     const [isPending, startTransition] = useTransition();
+
+    const revokeBlobUrl = (url: string | null) => {
+        if (url?.startsWith("blob:")) {
+            URL.revokeObjectURL(url);
+        }
+    };
+
+    // Cleanup on unmount
+    useEffect(() => {
+        return () => {
+            revokeBlobUrl(previewRef.current);
+        };
+    }, []);
 
     const src = preview || currentImage || "";
 
@@ -42,29 +61,51 @@ export function AvatarUpload({ currentImage, name, isOwner, frameUrl, className 
         }
 
         setError(null);
-        setPreview(URL.createObjectURL(file));
+        const newPreview = URL.createObjectURL(file);
+        setPreview((prev) => {
+            revokeBlobUrl(prev);
+            return newPreview;
+        });
 
         startTransition(async () => {
             const formData = new FormData();
             formData.append("file", file);
 
-            const res = await fetch("/api/upload", { method: "POST", body: formData });
-            const data = await res.json();
+            try {
+                const res = await fetch("/api/upload", { method: "POST", body: formData });
+                const data = await res.json();
 
-            if (!res.ok) {
-                setError(data.error || "Falha no upload.");
-                setPreview(null);
-                return;
+                if (!res.ok) {
+                    setError(data.error || "Falha no upload.");
+                    setPreview((prev) => {
+                        revokeBlobUrl(prev);
+                        return null;
+                    });
+                    return;
+                }
+
+                const result = await updateProfileImage(data.url);
+                if (!result.success) {
+                    setError(result.error || "Falha ao salvar.");
+                    setPreview((prev) => {
+                        revokeBlobUrl(prev);
+                        return null;
+                    });
+                    return;
+                }
+
+                await update({ image: data.url });
+                setPreview((prev) => {
+                    revokeBlobUrl(prev);
+                    return null;
+                });
+            } catch {
+                setError("Erro inesperado no upload.");
+                setPreview((prev) => {
+                    revokeBlobUrl(prev);
+                    return null;
+                });
             }
-
-            const result = await updateProfileImage(data.url);
-            if (!result.success) {
-                setError(result.error || "Falha ao salvar.");
-                setPreview(null);
-                return;
-            }
-
-            await update({ image: data.url });
         });
     };
 

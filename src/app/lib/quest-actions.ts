@@ -10,8 +10,6 @@ import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
 import { ensureUserContractProgress } from "@/services/notice-board-progression";
 import { updateQuestProgressSchema } from "@/lib/quest-validation";
 
-export { updateQuestProgressSchema };
-
 export async function updateQuestProgress(
     gameId: string,
     percentage: number,
