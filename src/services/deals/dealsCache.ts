@@ -38,21 +38,36 @@ class InMemoryCache {
         this.cache.delete(key);
     }
 
+    /**
+     * Delete all entries matching a prefix or regex pattern.
+     */
+    deletePattern(pattern: string | RegExp): void {
+        const regex = typeof pattern === "string" ? new RegExp(`^${pattern}`) : pattern;
+        for (const key of this.cache.keys()) {
+            if (regex.test(key)) {
+                this.cache.delete(key);
+            }
+        }
+    }
+
     clear(): void {
         this.cache.clear();
     }
 
     /**
-     * Helper to wrap async function calls with caching.
+     * Helper to wrap async function calls with caching, with optional forceRefresh bypass.
      */
     async getOrSet<T>(
         key: string,
         fetcher: () => Promise<T>,
         ttlSeconds: number,
+        forceRefresh = false,
     ): Promise<T> {
-        const cached = this.get<T>(key);
-        if (cached !== null) {
-            return cached;
+        if (!forceRefresh) {
+            const cached = this.get<T>(key);
+            if (cached !== null) {
+                return cached;
+            }
         }
 
         const freshData = await fetcher();

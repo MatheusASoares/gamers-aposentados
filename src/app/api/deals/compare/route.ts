@@ -18,11 +18,16 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        const comparison = await DealsService.compareGame({
-            title,
-            gameId,
-            steamAppId,
-        });
+        const forceRefresh = searchParams.get("refresh") === "true";
+
+        const comparison = await DealsService.compareGame(
+            {
+                title,
+                gameId,
+                steamAppId,
+            },
+            forceRefresh,
+        );
 
         if (!comparison) {
             return NextResponse.json(
@@ -31,7 +36,13 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        return NextResponse.json(comparison);
+        return NextResponse.json(comparison, {
+            headers: forceRefresh
+                ? {
+                      "Cache-Control": "no-store, no-cache, must-revalidate",
+                  }
+                : undefined,
+        });
     } catch (err) {
         console.error("[API /api/deals/compare] Error:", err);
         return NextResponse.json(

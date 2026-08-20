@@ -14,8 +14,9 @@ import { DealsSearch } from "./DealsSearch";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { DealComparisonCard } from "./DealComparisonCard";
 import { ComparisonSkeleton, FeaturedDealsSkeleton } from "./DealsSkeleton";
-import { Sparkles, AlertCircle, Zap } from "lucide-react";
+import { Sparkles, AlertCircle, Zap, RefreshCw, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 const QUICK_SUGGESTIONS = [
     { title: "ELDEN RING", steamAppId: 1245620 },
@@ -33,29 +34,49 @@ export function DealsContainer() {
 
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
+    const [isRefreshing, setIsRefreshing] = useState(false);
+    const [cooldown, setCooldown] = useState(0);
+    const [justUpdated, setJustUpdated] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [, startTransition] = useTransition();
 
-    // Fetch featured deals with filter support
-    const loadFeaturedDeals = useCallback(async (filter: DealFilterType = "best_savings") => {
-        setIsLoadingFeatured(true);
-        try {
-            const res = await fetch(`/api/deals/featured?filter=${filter}`);
-            if (res.ok) {
-                const data = await res.json();
-                startTransition(() => {
-                    setFeaturedDeals(data.deals || []);
-                    if (data.currencyRate) {
-                        setCurrencyRate(data.currencyRate);
-                    }
-                });
+    // Cooldown countdown timer
+    useEffect(() => {
+        if (cooldown <= 0) return;
+        const timer = setInterval(() => {
+            setCooldown((prev) => Math.max(0, prev - 1));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [cooldown]);
+
+    // Fetch featured deals with filter support and optional cache bypass
+    const loadFeaturedDeals = useCallback(
+        async (filter: DealFilterType = "best_savings", forceRefresh = false) => {
+            if (!forceRefresh) {
+                setIsLoadingFeatured(true);
             }
-        } catch (err) {
-            console.error("Error loading featured deals:", err);
-        } finally {
-            setIsLoadingFeatured(false);
-        }
-    }, []);
+            try {
+                const res = await fetch(
+                    `/api/deals/featured?filter=${filter}${forceRefresh ? "&refresh=true" : ""}`,
+                    forceRefresh ? { cache: "no-store" } : undefined,
+                );
+                if (res.ok) {
+                    const data = await res.json();
+                    startTransition(() => {
+                        setFeaturedDeals(data.deals || []);
+                        if (data.currencyRate) {
+                            setCurrencyRate(data.currencyRate);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Error loading featured deals:", err);
+            } finally {
+                setIsLoadingFeatured(false);
+            }
+        },
+        [],
+    );
 
     useEffect(() => {
         loadFeaturedDeals(activeFilter);
@@ -63,6 +84,59 @@ export function DealsContainer() {
 
     const handleFilterChange = (newFilter: DealFilterType) => {
         setActiveFilter(newFilter);
+    };
+
+    // Manual Refresh button handler (bypasses cache for featured deals and currency rate)
+    const handleManualRefresh = async () => {
+        if (isRefreshing || cooldown > 0) return;
+        setIsRefreshing(true);
+        setJustUpdated(false);
+
+        try {
+            const refreshPromises: Promise<unknown>[] = [
+                loadFeaturedDeals(activeFilter, true),
+            ];
+
+            // If there's an active comparison, refresh it simultaneously
+            if (comparison) {
+                const searchParams = new URLSearchParams();
+                searchParams.set("title", comparison.title);
+                if (comparison.id) searchParams.set("gameId", comparison.id);
+                if (comparison.steamAppId) {
+                    searchParams.set("steamAppId", String(comparison.steamAppId));
+                }
+                searchParams.set("refresh", "true");
+
+                refreshPromises.push(
+                    fetch(`/api/deals/compare?${searchParams.toString()}`, {
+                        cache: "no-store",
+                    })
+                        .then((res) => (res.ok ? res.json() : null))
+                        .then((data: DealComparisonResult | null) => {
+                            if (data) {
+                                startTransition(() => {
+                                    setComparison(data);
+                                    if (data.currencyRate) {
+                                        setCurrencyRate(data.currencyRate);
+                                    }
+                                });
+                            }
+                        })
+                        .catch((err) =>
+                            console.error("Error refreshing comparison data:", err),
+                        ),
+                );
+            }
+
+            await Promise.all(refreshPromises);
+            setJustUpdated(true);
+            setCooldown(8);
+            setTimeout(() => setJustUpdated(false), 2500);
+        } catch (err) {
+            console.error("Manual refresh failed:", err);
+        } finally {
+            setIsRefreshing(false);
+        }
     };
 
     // Handle game comparison selection
@@ -146,18 +220,58 @@ export function DealsContainer() {
                         </p>
                     </div>
 
-                    {/* Live Exchange Rate Pill */}
+                    {/* Live Exchange Rate Pill + Manual Refresh Button */}
                     {currencyRate && (
-                        <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-zinc-900/40 px-4 py-2.5 shadow-xl backdrop-blur-md">
-                            <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
-                            <div className="text-xs">
-                                <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
-                                    Câmbio Comercial (AwesomeAPI)
-                                </span>
-                                <span className="text-sm font-extrabold text-emerald-400">
-                                    1 USD = R$ {currencyRate.rate.toFixed(2)}
-                                </span>
+                        <div className="flex items-center gap-2.5">
+                            <div className="flex items-center gap-3 rounded-2xl border border-white/5 bg-zinc-900/40 px-4 py-2.5 shadow-xl backdrop-blur-md">
+                                <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                                <div className="text-xs">
+                                    <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
+                                        Câmbio Comercial (AwesomeAPI)
+                                    </span>
+                                    <span className="text-sm font-extrabold text-emerald-400">
+                                        1 USD = R$ {currencyRate.rate.toFixed(2)}
+                                    </span>
+                                </div>
                             </div>
+
+                            {/* Refresh Button */}
+                            <button
+                                type="button"
+                                onClick={handleManualRefresh}
+                                disabled={isRefreshing || cooldown > 0}
+                                title={
+                                    cooldown > 0
+                                        ? `Aguarde ${cooldown}s para atualizar novamente`
+                                        : "Atualizar cotação e promoções agora"
+                                }
+                                aria-label="Atualizar cotação e ofertas"
+                                className={cn(
+                                    "group relative flex h-11 w-11 items-center justify-center rounded-2xl border transition-all duration-300 shadow-xl backdrop-blur-md",
+                                    justUpdated
+                                        ? "border-emerald-500/50 bg-emerald-950/40 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                                        : cooldown > 0 || isRefreshing
+                                          ? "border-white/5 bg-zinc-900/20 text-zinc-600 cursor-not-allowed"
+                                          : "border-white/10 bg-zinc-900/50 text-zinc-300 hover:border-[#bd0df2]/60 hover:bg-[#bd0df2]/10 hover:text-white hover:shadow-[0_0_15px_rgba(189,13,242,0.25)] active:scale-95",
+                                )}
+                            >
+                                {justUpdated ? (
+                                    <Check className="h-4 w-4 text-emerald-400 animate-in zoom-in-50 duration-200" />
+                                ) : (
+                                    <RefreshCw
+                                        className={cn(
+                                            "h-4 w-4 transition-transform",
+                                            isRefreshing && "animate-spin text-[#bd0df2]",
+                                        )}
+                                    />
+                                )}
+
+                                {cooldown > 0 && !justUpdated && (
+                                    <span className="absolute -top-1.5 -right-1.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-zinc-800 border border-zinc-700 px-1 text-[9px] font-extrabold text-zinc-300">
+                                        {cooldown}
+                                    </span>
+                                )}
+                            </button>
                         </div>
                     )}
                 </div>

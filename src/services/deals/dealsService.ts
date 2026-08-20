@@ -46,22 +46,29 @@ export class DealsService {
     /**
      * Compares a game between US and BR official stores.
      */
-    static async compareGame(params: {
-        title: string;
-        gameId?: string;
-        steamAppId?: number;
-    }): Promise<DealComparisonResult | null> {
+    static async compareGame(
+        params: {
+            title: string;
+            gameId?: string;
+            steamAppId?: number;
+        },
+        forceRefresh = false,
+    ): Promise<DealComparisonResult | null> {
         const { title, gameId, steamAppId } = params;
         const cleanTitle = title.trim();
         if (!cleanTitle && !gameId && !steamAppId) return null;
 
         const cacheKey = `deals:compare:${gameId || steamAppId || cleanTitle.toLowerCase()}`;
 
+        if (forceRefresh) {
+            dealsCache.delete(cacheKey);
+        }
+
         return dealsCache.getOrSet(
             cacheKey,
             async () => {
                 // Step 1: Get latest currency exchange rate
-                const currencyRate = await CurrencyService.getUsdBrlRate();
+                const currencyRate = await CurrencyService.getUsdBrlRate(forceRefresh);
 
                 let usPrices: StorePrice[] = [];
                 let brPrices: StorePrice[] = [];
@@ -163,16 +170,25 @@ export class DealsService {
     /**
      * Gets Top Deals / Featured Specials prioritizing IsThereAnyDeal, sorted by filter.
      */
-    static async getFeaturedDeals(filter: DealFilterType = "best_savings"): Promise<{
+    static async getFeaturedDeals(
+        filter: DealFilterType = "best_savings",
+        forceRefresh = false,
+    ): Promise<{
         deals: FeaturedDealItem[];
         currencyRate: CurrencyRate;
     }> {
         const cacheKey = `deals:featured_list:${filter}`;
 
+        if (forceRefresh) {
+            dealsCache.deletePattern("deals:featured_list:");
+            dealsCache.deletePattern("steam:featured_specials");
+            dealsCache.deletePattern("itad:top_deals_curated_v2:");
+        }
+
         return dealsCache.getOrSet(
             cacheKey,
             async () => {
-                const currencyRate = await CurrencyService.getUsdBrlRate();
+                const currencyRate = await CurrencyService.getUsdBrlRate(forceRefresh);
                 let deals: FeaturedDealItem[] = [];
 
                 // 1. If steam_only filter is requested, fetch directly from Steam Store API

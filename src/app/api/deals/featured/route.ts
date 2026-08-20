@@ -17,9 +17,16 @@ export async function GET(request: NextRequest) {
         const filter = validFilters.includes(filterParam as DealFilterType)
             ? (filterParam as DealFilterType)
             : "best_savings";
+        const forceRefresh = searchParams.get("refresh") === "true";
 
-        const data = await DealsService.getFeaturedDeals(filter);
-        return NextResponse.json(data);
+        const data = await DealsService.getFeaturedDeals(filter, forceRefresh);
+        return NextResponse.json(data, {
+            headers: forceRefresh
+                ? {
+                      "Cache-Control": "no-store, no-cache, must-revalidate",
+                  }
+                : undefined,
+        });
     } catch (err) {
         console.error("[API /api/deals/featured] Error:", err);
         return NextResponse.json(
