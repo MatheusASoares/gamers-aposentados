@@ -21,15 +21,15 @@ export interface SteamSaleEvent {
  * As 4 Grandes Sales Sazonais (Spring, Summer, Autumn, Winter) + Principais Next Fests e Festivais.
  */
 export const STEAM_SALES_SCHEDULE: SteamSaleEvent[] = [
-    // 2026 Events
+    // 2026 Major Seasonal Events
     {
         id: "steam-spring-sale-2026",
         name: "Steam Spring Sale 2026",
         shortName: "Spring Sale",
         type: "MAJOR_SEASONAL",
-        startDate: "2026-03-12T17:00:00Z",
-        endDate: "2026-03-19T17:00:00Z",
-        description: "A grande promoção de outono no hemisfério sul e primavera no norte.",
+        startDate: "2026-03-19T17:00:00Z",
+        endDate: "2026-03-26T17:00:00Z",
+        description: "A grande promoção sazonal de primavera.",
         tip: "Uma das 4 maiores promoções do ano! Milhares de jogos com descontos de até 90%.",
         emoji: "🌸",
         accentColor: "#22c55e",
@@ -50,12 +50,12 @@ export const STEAM_SALES_SCHEDULE: SteamSaleEvent[] = [
     },
     {
         id: "steam-autumn-sale-2026",
-        name: "Steam Autumn Sale 2026 (Black Friday)",
+        name: "Steam Autumn Sale 2026",
         shortName: "Autumn Sale",
         type: "MAJOR_SEASONAL",
-        startDate: "2026-11-24T17:00:00Z",
-        endDate: "2026-12-01T17:00:00Z",
-        description: "Promoção da Black Friday e período de indicações para os prêmios The Steam Awards.",
+        startDate: "2026-10-01T17:00:00Z",
+        endDate: "2026-10-08T17:00:00Z",
+        description: "A grande promoção de outono oficial da Valve confirmada pelo SteamDB.",
         tip: "Excelente oportunidade para pegar os lançamentos do ano com os primeiros grandes cortes de preço.",
         emoji: "🍂",
         accentColor: "#ea580c",
@@ -74,7 +74,7 @@ export const STEAM_SALES_SCHEDULE: SteamSaleEvent[] = [
         accentColor: "#38bdf8",
         badgeClass: "border-sky-500/40 bg-sky-500/15 text-sky-300",
     },
-    // 2027 Events Preview
+    // 2027 Major Seasonal Events
     {
         id: "steam-spring-sale-2027",
         name: "Steam Spring Sale 2027",
@@ -100,6 +100,32 @@ export const STEAM_SALES_SCHEDULE: SteamSaleEvent[] = [
         emoji: "☀️",
         accentColor: "#f59e0b",
         badgeClass: "border-amber-500/40 bg-amber-500/15 text-amber-300",
+    },
+    {
+        id: "steam-autumn-sale-2027",
+        name: "Steam Autumn Sale 2027",
+        shortName: "Autumn Sale",
+        type: "MAJOR_SEASONAL",
+        startDate: "2027-09-30T17:00:00Z",
+        endDate: "2027-10-07T17:00:00Z",
+        description: "Promoção de outono e indicações do Steam Awards 2027.",
+        tip: "Descontos de outono em títulos de peso.",
+        emoji: "🍂",
+        accentColor: "#ea580c",
+        badgeClass: "border-orange-500/40 bg-orange-500/15 text-orange-300",
+    },
+    {
+        id: "steam-winter-sale-2027",
+        name: "Steam Winter Sale 2027 (Fim de Ano)",
+        shortName: "Winter Sale",
+        type: "MAJOR_SEASONAL",
+        startDate: "2027-12-16T17:00:00Z",
+        endDate: "2028-01-03T17:00:00Z",
+        description: "A gigantesca promoção de fim de ano de 2027.",
+        tip: "Votação do Steam Awards e promoções de fim de ano.",
+        emoji: "❄️",
+        accentColor: "#38bdf8",
+        badgeClass: "border-sky-500/40 bg-sky-500/15 text-sky-300",
     },
 ];
 

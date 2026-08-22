@@ -30,6 +30,21 @@ function formatDateBR(isoString: string): string {
     });
 }
 
+function formatSalePeriod(startIso: string, endIso: string): string {
+    const start = new Date(startIso);
+    const end = new Date(endIso);
+    const startFormatted = start.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+    });
+    const endFormatted = end.toLocaleDateString("pt-BR", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+    });
+    return `${startFormatted} a ${endFormatted} • 14:00 BRT`;
+}
+
 export function SteamSaleCountdownCard() {
     const [now, setNow] = useState<Date>(() => new Date());
     const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
@@ -62,7 +77,7 @@ export function SteamSaleCountdownCard() {
     if (!activeTarget) return null;
 
     return (
-        <div className="glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[1.5rem] p-4 sm:p-6 shadow-2xl backdrop-blur-md transition-all duration-300">
+        <div className="glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[1.25rem] sm:rounded-[1.5rem] p-4 sm:p-5 shadow-2xl backdrop-blur-md transition-all duration-300">
             {/* Ambient Background Glow matching the Sale Accent */}
             <div
                 className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-[100px] transition-colors duration-1000"
@@ -71,18 +86,18 @@ export function SteamSaleCountdownCard() {
             <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#bd0df2]/10 blur-[100px]" />
 
             {/* Main Header & Sale Radar */}
-            <div className="relative z-10 flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+            <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                 
                 {/* Left: Event Info */}
-                <div className="flex flex-col gap-2.5 min-w-0 flex-1">
+                <div className="flex flex-col gap-2 min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                         {currentSale ? (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/50 bg-red-500/20 px-3 py-1 text-xs font-black text-red-300 uppercase shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse">
-                                <Flame className="h-4 w-4 fill-red-400 text-red-400" />
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-red-500/50 bg-red-500/20 px-3 py-0.5 text-xs font-black text-red-300 uppercase shadow-[0_0_15px_rgba(239,68,68,0.4)] animate-pulse">
+                                <Flame className="h-3.5 w-3.5 fill-red-400 text-red-400" />
                                 PROMOÇÃO AO VIVO NA STEAM!
                             </span>
                         ) : (
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-theme-primary/40 bg-theme-primary/15 px-3 py-1 text-xs font-black text-theme-primary uppercase shadow-[0_0_12px_var(--theme-glow)]">
+                            <span className="inline-flex items-center gap-1.5 rounded-full border border-theme-primary/40 bg-theme-primary/15 px-3 py-0.5 text-xs font-black text-theme-primary uppercase shadow-[0_0_12px_var(--theme-glow)]">
                                 <Clock className="h-3.5 w-3.5" />
                                 RADAR DE PROMOÇÕES STEAM
                             </span>
@@ -98,20 +113,15 @@ export function SteamSaleCountdownCard() {
                             {activeTarget.emoji}
                         </span>
                         <div>
-                            <h3 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white uppercase drop-shadow-md">
+                            <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase drop-shadow-md">
                                 {activeTarget.name}
                             </h3>
-                            <p className="text-xs sm:text-sm font-medium text-zinc-400">
-                                {currentSale
-                                    ? `Em andamento até ${formatDateBR(currentSale.endDate)} às 14:00 BRT`
-                                    : `Início oficial: ${formatDateBR(activeTarget.startDate)} às 14:00 BRT`}
+                            <p className="text-xs sm:text-sm font-medium text-zinc-300 flex items-center gap-1.5 flex-wrap mt-0.5">
+                                <span className="text-zinc-400 font-normal">Duração:</span>
+                                <span className="font-semibold text-zinc-100">{formatSalePeriod(activeTarget.startDate, activeTarget.endDate)}</span>
                             </p>
                         </div>
                     </div>
-
-                    <p className="text-xs text-zinc-400 max-w-xl line-clamp-2">
-                        💡 <strong className="text-zinc-300 font-bold">Dica da Guilda:</strong> {activeTarget.tip}
-                    </p>
                 </div>
 
                 {/* Right: Live 4-Pill Countdown Timer */}
@@ -183,7 +193,7 @@ export function SteamSaleCountdownCard() {
             </div>
 
             {/* Collapsible Roadmap Trigger */}
-            <div className="relative z-10 mt-5 pt-4 border-t border-theme/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="relative z-10 mt-3.5 pt-3 border-t border-theme/20 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <button
                     type="button"
                     onClick={() => setIsRoadmapOpen((prev) => !prev)}

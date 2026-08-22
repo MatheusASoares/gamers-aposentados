@@ -9,6 +9,7 @@
         "start": "next start",
         "lint": "eslint .",
         "format": "prettier --write .",
+        "sales:check": "tsx scripts/verify-steam-sales.ts",
         "test": "playwright test",
         "test:ui": "playwright test --ui",
         "db:reset": "prisma migrate reset --force",
