@@ -14,6 +14,7 @@ import { DealsSearch } from "./DealsSearch";
 import { TopDealsCarousel } from "./TopDealsCarousel";
 import { DealComparisonCard } from "./DealComparisonCard";
 import { ComparisonSkeleton, FeaturedDealsSkeleton } from "./DealsSkeleton";
+import { SteamSaleCountdownCard } from "./SteamSaleCountdownCard";
 import { Sparkles, AlertCircle, Zap, RefreshCw, Check } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -275,6 +276,9 @@ export function DealsContainer() {
                         </div>
                     )}
                 </div>
+
+                {/* Steam Major Sales Live Radar & Countdown Card */}
+                <SteamSaleCountdownCard />
 
                 {/* Search & Control Bar */}
                 <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-5 shadow-2xl backdrop-blur-md">
