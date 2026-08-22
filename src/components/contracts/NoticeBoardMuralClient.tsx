@@ -222,7 +222,7 @@ export function NoticeBoardMuralClient({
         return (
             <div className="space-y-4">
                 {/* Lane Header */}
-                <div className="glass-card border border-theme bg-theme-card relative flex min-h-[180px] flex-col justify-between gap-4 overflow-hidden rounded-2xl px-6 py-6 sm:min-h-[200px] sm:flex-row sm:items-center">
+                <div className="glass-card border border-theme bg-theme-card relative flex min-h-[160px] flex-col justify-between gap-4 overflow-hidden rounded-2xl p-4 sm:p-6 sm:min-h-[200px] sm:flex-row sm:items-center">
                     {/* Ambient Dual-Layer Artwork Background */}
                     {(game.artwork_url || game.cover_url) && (
                         <div className="pointer-events-none absolute inset-0 hidden sm:block">
@@ -249,21 +249,21 @@ export function NoticeBoardMuralClient({
                         </div>
                     )}
 
-                    <div className="relative z-10 flex items-center gap-5">
+                    <div className="relative z-10 flex items-center gap-3.5 sm:gap-5 min-w-0 flex-1">
                         <div
                             className={cn(
-                                "shrink-0 rounded-2xl border border-white/5 bg-zinc-900/90 p-3.5",
+                                "shrink-0 rounded-2xl border border-white/5 bg-zinc-900/90 p-2.5 sm:p-3.5",
                                 badgeText === "Main Quest" ? "text-amber-400" : "text-[#bd0df2]",
                             )}
                         >
                             {icon}
                         </div>
 
-                        <div className="space-y-2">
-                            <div className="flex flex-col items-start gap-1.5">
+                        <div className="space-y-1 sm:space-y-2 min-w-0 flex-1">
+                            <div className="flex flex-col items-start gap-1">
                                 <span
                                     className={cn(
-                                        "rounded-full border px-2.5 py-0.5 text-xs font-black tracking-wider uppercase",
+                                        "rounded-full border px-2.5 py-0.5 text-[10px] sm:text-xs font-black tracking-wider uppercase",
                                         badgeText === "Main Quest"
                                             ? "border-amber-400/20 bg-amber-400/10 text-amber-400"
                                             : "border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2]",
@@ -271,12 +271,12 @@ export function NoticeBoardMuralClient({
                                 >
                                     {badgeText}
                                 </span>
-                                <h3 className="text-shadow-glow text-3xl font-black tracking-tighter text-white uppercase sm:text-4xl">
+                                <h3 className="text-shadow-glow text-xl sm:text-3xl md:text-4xl font-black tracking-tight text-white uppercase line-clamp-2 break-words">
                                     {game.title}
                                 </h3>
                             </div>
                             {(game.platform || game.hltb_time) && (
-                                <p className="text-xs font-medium text-zinc-400">
+                                <p className="text-[11px] sm:text-xs font-medium text-zinc-400 truncate">
                                     {game.platform ? `Plataforma: ${game.platform}` : ""}
                                     {game.platform && game.hltb_time ? " | " : ""}
                                     {game.hltb_time ? `HLTB: ${game.hltb_time}h` : ""}
@@ -290,7 +290,7 @@ export function NoticeBoardMuralClient({
                         <Button
                             disabled={isPending}
                             onClick={() => handleGenerateBoard(game.id)}
-                            className="relative z-20 shrink-0 h-10 rounded-xl bg-gradient-to-r from-[#bd0df2] to-[#d946ef] px-5 py-2.5 text-xs font-black tracking-wider text-white uppercase shadow-[0_0_20px_rgba(189,13,242,0.4)] transition-all hover:scale-[1.05] active:scale-95 disabled:opacity-50"
+                            className="relative z-20 shrink-0 h-10 w-full sm:w-auto rounded-xl bg-gradient-to-r from-[#bd0df2] to-[#d946ef] px-5 py-2.5 text-xs font-black tracking-wider text-white uppercase shadow-[0_0_20px_rgba(189,13,242,0.4)] transition-all hover:scale-[1.05] active:scale-95 disabled:opacity-50"
                         >
                             {isPending ? (
                                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -305,7 +305,7 @@ export function NoticeBoardMuralClient({
                             disabled={isPending}
                             onClick={() => handleClearBoard(game.id)}
                             variant="destructive"
-                            className="relative z-20 shrink-0 h-10 rounded-xl border border-red-500/30 bg-red-950/80 px-5 py-2.5 text-xs font-black tracking-wider text-red-300 uppercase transition-all hover:scale-[1.05] hover:bg-red-900 active:scale-95 disabled:opacity-50"
+                            className="relative z-20 shrink-0 h-10 w-full sm:w-auto rounded-xl border border-red-500/30 bg-red-950/80 px-5 py-2.5 text-xs font-black tracking-wider text-red-300 uppercase transition-all hover:scale-[1.05] hover:bg-red-900 active:scale-95 disabled:opacity-50"
                         >
                             {isPending ? (
                                 <Loader2 className="mr-1.5 h-4 w-4 animate-spin" />
@@ -539,14 +539,14 @@ export function NoticeBoardMuralClient({
             <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
-            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col gap-12 px-6 py-8 md:px-8 lg:px-12 lg:py-12">
+            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col gap-6 sm:gap-12 px-2 sm:px-6 py-4 sm:py-8 md:px-8 lg:px-12 lg:py-12">
                 {/* Header Area */}
-                <div className="flex flex-col justify-between gap-8 border-b border-white/5 pb-8 lg:flex-row lg:items-end">
-                    <div>
-                        <h1 className="text-shadow-glow mb-2 text-4xl font-black tracking-tight text-white uppercase lg:text-5xl">
+                <div className="flex flex-col justify-between gap-6 sm:gap-8 border-b border-white/5 pb-6 sm:pb-8 lg:flex-row lg:items-end">
+                    <div className="space-y-1 sm:space-y-2">
+                        <h1 className="text-shadow-glow mb-1.5 sm:mb-2 text-3xl font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
                             BOARD
                         </h1>
-                        <p className="text-lg font-medium tracking-wide text-zinc-400">
+                        <p className="text-xs sm:text-base md:text-lg font-medium tracking-wide text-zinc-400">
                             Backlog fatigue ends here. Take up your contracts, defeat the bosses,
                             and finish the story.
                         </p>
