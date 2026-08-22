@@ -286,7 +286,27 @@ export class DealsService {
                     ];
                 }
 
-                // 4. Normalize and Sort by Best Regional Advantage / ATL / Highest Cut
+                // 4. Resolve any missing cover images using Steam Store in parallel
+                const missingCoverDeals = deals.filter((d) => !d.coverImage);
+                if (missingCoverDeals.length > 0) {
+                    await Promise.allSettled(
+                        missingCoverDeals.map(async (deal) => {
+                            try {
+                                const searchHits = await SteamStoreClient.searchGames(deal.title);
+                                if (searchHits.length > 0 && searchHits[0].coverImage) {
+                                    deal.coverImage = searchHits[0].coverImage;
+                                    if (!deal.steamAppId) {
+                                        deal.steamAppId = searchHits[0].steamAppId;
+                                    }
+                                }
+                            } catch (err) {
+                                console.error(`[DealsService] Failed to resolve cover for ${deal.title}:`, err);
+                            }
+                        }),
+                    );
+                }
+
+                // 5. Normalize and Sort by Best Regional Advantage / ATL / Highest Cut
                 const normalized = DealComparator.normalizeFeaturedDeals(
                     deals,
                     currencyRate,

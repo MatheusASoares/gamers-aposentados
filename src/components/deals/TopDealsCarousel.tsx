@@ -171,8 +171,11 @@ export function TopDealsCarousel({
                                             unoptimized
                                         />
                                     ) : (
-                                        <div className="flex h-full w-full items-center justify-center text-zinc-600">
-                                            No Image
+                                        <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-zinc-900 via-zinc-950 to-purple-950/20 p-3 text-center">
+                                            <Gamepad2 className="h-6 w-6 text-theme-primary/60 mb-1" />
+                                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 line-clamp-1">
+                                                {deal.title}
+                                            </span>
                                         </div>
                                     )}
 

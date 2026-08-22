@@ -228,7 +228,7 @@ export function DealsContainer() {
                                 <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-400 animate-pulse" />
                                 <div className="text-xs">
                                     <span className="text-[10px] font-bold uppercase tracking-wider text-zinc-400 block">
-                                        Câmbio Comercial (AwesomeAPI)
+                                        Câmbio Comercial
                                     </span>
                                     <span className="text-sm font-extrabold text-emerald-400">
                                         1 USD = R$ {currencyRate.rate.toFixed(2)}

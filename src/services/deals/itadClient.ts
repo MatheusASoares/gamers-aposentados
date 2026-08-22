@@ -33,7 +33,13 @@ interface ItadDealItemRaw {
     slug: string;
     title: string;
     type?: string;
-    assets?: { banner400?: string; banner300?: string; boxart?: string };
+    assets?: {
+        banner600?: string;
+        banner400?: string;
+        banner300?: string;
+        banner145?: string;
+        boxart?: string;
+    };
     deal?: {
         shop?: { id: number; name: string };
         price?: { amount: number; currency: string };
@@ -360,7 +366,12 @@ export class ItadClient {
                             id: item.id,
                             title: item.title,
                             slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                            coverImage: item.assets?.banner400 || item.assets?.banner300 || item.assets?.boxart || null,
+                            coverImage:
+                                item.assets?.banner600 ||
+                                item.assets?.banner400 ||
+                                item.assets?.banner300 ||
+                                item.assets?.boxart ||
+                                null,
                             discountPercent: Number(deal.cut ?? 0),
                             priceUS,
                             priceBR,
