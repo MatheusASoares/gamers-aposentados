@@ -57,32 +57,35 @@ A progressão do **Gamers Aposentados** recompensa o jogador a cada nível alcan
 
 * **Fórmula do XP Necessário**: $XP_{\text{req}}(N) = \lfloor 100 \times N^{1.25} \rfloor$
 
-#### 🎁 Tabela Oficial de Recompensas e Desbloqueios por Nível
+#### 🎁 Tabela Oficial de Recompensas e Desbloqueios por Nível (Nível 1 ao 25)
 
-| Nível | Item Desbloqueado | Tipo de Item | Raridade | Asset / Efeito Visual |
-| :---: | :--- | :---: | :---: | :--- |
-| **Nível 1** | **Aposentado Novato** | Título | Comum | Título inicial da guilda. |
-| **Nível 2** | **Moldura de Madeira & Couro** | Moldura | Comum | `wooden-frame.png` (Borda rústica de carvalho). |
-| **Nível 3** | **Insígnia: Primeiro Passo** | Badge | Comum | Emblema de conclusão da primeira quest. |
-| **Nível 4** | **Limpador de Poeira** | Título | Comum | Título para quem tirou jogos mofados da gaveta. |
-| **Nível 5** | **Borda Bronze Forjado** | Moldura | Incomum | `bronze-frame.png` (Moldura de bronze reforçada). |
-| **Nível 6** | **Caçador de Backlog** | Título | Incomum | Título por vitórias sobre jogos acumulados. |
-| **Nível 7** | **Banner Retro Arcade 16-Bit** | Banner | Incomum | `banner-retro-arcade.png` + Efeito CRT Scanlines 16-Bit. |
-| **Nível 8** | **Borda Prata da Guilda** | Moldura | Raro | `silver-frame.png` (Moldura espelhada de prata). |
-| **Nível 9** | **Tema RPG Fantasy Medieval** | Tema | Raro | Estética *The Witcher 3 & Skyrim* com pergaminho escuro. |
-| **Nível 10** | **Destruidor de Pendências** | Título | Raro | Título para quem não deixa nenhum backlog impune. |
-| **Nível 11** | **Banner Cyber Synthwave Neon** *(NOVO)* | Banner | Raro | `banner-synthwave-neon.svg` + Grid 3D Neon & Sol Synthwave (`#bd0df2`). |
-| **Nível 12** | **Borda Cyber Neon Cyan** | Moldura | Raro | `cyber-neon-frame.png` (Borda futurista energizada). |
-| **Nível 13** | **Veterano dos Controles** | Título | Épico | Domina a arte de finalizar campanhas épicas. |
-| **Nível 14** | **Borda Ouro Entalhado** | Moldura | Épico | `gold-frame.png` (Moldura áurea rica em detalhes góticos). |
-| **Nível 15** | **Tema RPG Espacial Sci-Fi** | Tema | Épico | Estética *Starfield & No Man's Sky* com vácuo estelar. |
-| **Nível 16** | **Banner Mestre do Tempo Gamer** | Banner | Épico | `banner-chronos.png` + Poeira Estelar & Ampulheta Quântica. |
-| **Nível 17** | **Lenda do Retrogaming** | Título | Épico | Sabedoria gamer inquestionável na comunidade. |
-| **Nível 18** | **Borda Aura Violeta Celestial** | Moldura | Épico | `celestial-violet-frame.png` (Cristais e aura cósmica). |
-| **Nível 19** | **Mestre da Guilda Aposentada** | Título | Lendário | O nível supremo de quem venceu o backlog. |
-| **Nível 20** | **Borda Fogo da Fênix** | Moldura | Lendário | `legendary-frame.png` (Chamas douradas e runas). |
-| **Nível 21** | **Banner Holoflux Matrix / Nexo** *(NOVO)* | Banner | Lendário | `banner-holoflux-matrix.svg` + Varredura Holográfica & Laser Matrix. |
-| **Nível 22** | **Tema Pixel Art Retrogaming** | Tema | Lendário | Estética 16-bit *Chrono Trigger* com CRT retro. |
+| Nível | Item Desbloqueado | Tipo de Item | Raridade | Asset / Efeito Visual | Status do Item |
+| :---: | :--- | :---: | :---: | :--- | :---: |
+| **Nível 1** | **Aposentado Novato** + **Cyber Neon** | Título + Tema | Comum | Título inicial + Tema Base Cyberpunk Neon. | ✅ *Liberado* |
+| **Nível 2** | **Moldura de Carvalho & Madeira** | Moldura | Comum | `wooden-frame.png` (Borda rústica de carvalho). | ✅ *Liberado* |
+| **Nível 3** | **Insígnia: Primeiro Passo** | Badge | Comum | Emblema de conclusão da primeira quest. | ✅ *Liberado* |
+| **Nível 4** | **Limpador de Poeira** | Título | Comum | Título para quem tirou jogos mofados da gaveta. | ✅ *Liberado* |
+| **Nível 5** | **Borda Bronze Forjado** | Moldura | Incomum | `bronze-frame.png` (Moldura de bronze reforçada). | ✅ *Liberado* |
+| **Nível 6** | **Caçador de Backlog** | Título | Incomum | Título por vitórias sobre jogos acumulados. | ✅ *Liberado* |
+| **Nível 7** | **Banner Retro Arcade 16-Bit** | Banner | Incomum | `banner-retro-arcade.png` + Efeito CRT Scanlines. | ✅ *Liberado* |
+| **Nível 8** | **Borda Prata da Guilda** | Moldura | Raro | `silver-frame.png` (Moldura espelhada de prata). | ✅ *Liberado* |
+| **Nível 9** | **Tema Taverna Medieval** | Tema | Raro | Estética *The Witcher 3* com brasas vivas e serif clássico. | 🆕 *Pronto* |
+| **Nível 10** | **Destruidor de Pendências** | Título | Raro | Título para quem não deixa nenhum backlog impune. | 🆕 *Pronto* |
+| **Nível 11** | **Banner Dragão de Sangue** | Banner | Raro | `banner-fantasy-dragon.png` + Chamas e brasas nórdicas. | 🆕 *Pronto* |
+| **Nível 12** | **Borda Plasma Cyberpunk** | Moldura | Raro | `cyber-neon-frame.png` (Borda ciberenergizada cyan). | 🆕 *Pronto* |
+| **Nível 13** | **Veterano dos Controles** | Título | Épico | Domina a arte de finalizar campanhas épicas. | 🆕 *Pronto* |
+| **Nível 14** | **Borda Ouro Gótico** | Moldura | Épico | `gold-frame.png` (Moldura áurea rica em detalhes góticos). | 🆕 *Pronto* |
+| **Nível 15** | **Tema Odisseia Estelar** | Tema | Épico | Estética *Starfield / Sci-Fi* com telemetria e monospace. | 🆕 *Pronto* |
+| **Nível 16** | **Banner Templo de Chronos** | Banner | Épico | `banner-chronos.png` + Poeira Estelar & Ampulheta. | 🆕 *Pronto* |
+| **Nível 17** | **Lenda do Retrogaming** | Título | Épico | Sabedoria gamer inquestionável na comunidade. | 🆕 *Pronto* |
+| **Nível 18** | **Borda Aura do Vazio** | Moldura | Épico | `celestial-violet-frame.png` (Cristais e aura cósmica). | 🆕 *Pronto* |
+| **Nível 19** | **Mestre da Guilda Aposentada** | Título | Lendário | O nível supremo de quem venceu o backlog. | 🆕 *Pronto* |
+| **Nível 20** | **Borda Chama da Fênix** | Moldura | Lendário | `legendary-frame.png` (Chamas douradas e rubi). | 🆕 *Pronto* |
+| **Nível 21** | **Banner Éter Astral** | Banner | Lendário | `banner-astral-crystal.png` + Partículas Mako e aura estelar. | 🆕 *Pronto* |
+| **Nível 22** | **Tema Arcade Retrô** | Tema | Lendário | Estética 16-bit *SNES* com fontes arcade e relevo. | 🆕 *Pronto* |
+| **Nível 23** | **Banner Santuário do Sol Nascente** | Banner | Lendário | `banner-japanese-sunrise.jpg` + Pétalas de Sakura & Crepúsculo Monte Fuji. | 🆕 *Pronto* |
+| **Nível 24** | **Borda Coroa das Cinzas** | Moldura | Lendário | `frame-bonfire-cinders.png` (Ferro forjado, runas e chamas). | 🆕 *Pronto* |
+| **Nível 25** | **Imortal do Backlog Zero** + **Fogueira de Lordran** | Título + Tema | Lendário | Título Mítico Supremo + Tema *Dark Souls Gritty Bonfire*. | 🆕 *Pronto* |
 
 ---
 

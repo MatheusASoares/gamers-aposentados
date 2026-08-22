@@ -8,6 +8,7 @@ import {
   Gamepad2,
   Crown,
   Flame,
+  Trophy,
 } from "lucide-react";
 import { getTitleBadgeStyle } from "@/lib/constants/rewards";
 import { cn } from "@/lib/utils";
@@ -29,9 +30,11 @@ export function renderTitleIcon(titleName: string | null, className: string = "h
     case "Veterano dos Controles":
       return <Gamepad2 className={cn("text-purple-300 drop-shadow-[0_0_6px_rgba(189,13,242,0.6)]", className)} />;
     case "Lenda do Retrogaming":
-      return <Crown className={cn("text-fuchsia-300 drop-shadow-[0_0_6px_rgba(217,70,239,0.6)]", className)} />;
+      return <Crown className={cn("text-pink-300 drop-shadow-[0_0_6px_rgba(236,72,153,0.6)]", className)} />;
     case "Mestre da Guilda Aposentada":
       return <Flame className={cn("text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]", className)} />;
+    case "Imortal do Backlog Zero":
+      return <Trophy className={cn("text-orange-400 drop-shadow-[0_0_10px_rgba(234,88,12,0.9)]", className)} />;
     case "Aposentado Novato":
     default:
       return <Shield className={cn("text-zinc-400", className)} />;

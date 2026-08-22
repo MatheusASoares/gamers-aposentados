@@ -147,6 +147,50 @@ function playPixelSound(ctx: AudioContext, master: GainNode) {
 }
 
 /**
+ * 5. Almas Sombrias / Dark Souls Theme: Ominous Cathedral Bell & Roaring Bonfire
+ */
+function playDarkSoulsSound(ctx: AudioContext, master: GainNode) {
+  const now = ctx.currentTime;
+
+  // Deep resonant cathedral bell (D2 + D3 + F3 + A3 harmonic chime)
+  const bellFreqs = [73.42, 146.83, 174.61, 220.0, 440.0];
+  bellFreqs.forEach((freq, i) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = i === 0 ? "triangle" : "sine";
+    osc.frequency.setValueAtTime(freq, now);
+
+    const duration = 3.5;
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.exponentialRampToValueAtTime(0.25 / (i + 1), now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+
+    osc.connect(gain);
+    gain.connect(master);
+
+    osc.start(now);
+    osc.stop(now + duration + 0.05);
+  });
+
+  // Bonfire fiery flame swell
+  const flameOsc = ctx.createOscillator();
+  const flameGain = ctx.createGain();
+  flameOsc.type = "sawtooth";
+  flameOsc.frequency.setValueAtTime(55, now);
+  flameOsc.frequency.exponentialRampToValueAtTime(110, now + 1.2);
+
+  flameGain.gain.setValueAtTime(0.001, now);
+  flameGain.gain.exponentialRampToValueAtTime(0.12, now + 0.5);
+  flameGain.gain.exponentialRampToValueAtTime(0.0001, now + 2.5);
+
+  flameOsc.connect(flameGain);
+  flameGain.connect(master);
+  flameOsc.start(now);
+  flameOsc.stop(now + 2.6);
+}
+
+/**
  * Main dispatcher to play themed level-up audio
  */
 export function playLevelUpAudio(theme: string = "cyberpunk", isMuted: boolean = false) {
@@ -161,7 +205,9 @@ export function playLevelUpAudio(theme: string = "cyberpunk", isMuted: boolean =
     masterGain.connect(ctx.destination);
 
     const cleanTheme = theme.toLowerCase();
-    if (cleanTheme.includes("medieval")) {
+    if (cleanTheme.includes("darksouls") || cleanTheme.includes("ascendant") || cleanTheme.includes("souls")) {
+      playDarkSoulsSound(ctx, masterGain);
+    } else if (cleanTheme.includes("medieval")) {
       playMedievalSound(ctx, masterGain);
     } else if (cleanTheme.includes("space")) {
       playSpaceSound(ctx, masterGain);

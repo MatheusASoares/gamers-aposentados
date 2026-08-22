@@ -129,14 +129,15 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
                     {/* COLUMN 1: LEFT - Avatar & Player Name (4 cols) */}
                     <div className="flex items-center gap-6 border-b border-white/10 pb-6 lg:col-span-5 lg:border-b-0 lg:border-r lg:border-white/10 lg:pb-0 lg:pr-6">
-                        <div className="relative shrink-0">
+                        <div className="relative shrink-0 flex items-center justify-center">
                             {isOwner ? (
                                 <AvatarUpload
                                     currentImage={user.image || null}
                                     name={user.name || null}
                                     isOwner={isOwner}
                                     frameUrl={equippedFrame}
-                                    className={`h-24 w-24 md:h-32 md:w-32 ${equippedFrame ? "" : `border-2 ${tierDetails.avatarBorder}`}`}
+                                    size="2xl"
+                                    cssFrameClass={equippedFrame ? undefined : `border-2 ${tierDetails.avatarBorder}`}
                                 />
                             ) : (
                                 <UserAvatar
@@ -144,6 +145,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                                     name={user.name || null}
                                     frameUrl={equippedFrame}
                                     size="2xl"
+                                    cssFrameClass={equippedFrame ? undefined : `border-2 ${tierDetails.avatarBorder}`}
                                 />
                             )}
                         </div>

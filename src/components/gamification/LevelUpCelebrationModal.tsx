@@ -116,6 +116,7 @@ export function LevelUpCelebrationModal({
   const isMedieval = cleanTheme.includes("medieval");
   const isSpace = cleanTheme.includes("space");
   const isPixel = cleanTheme.includes("pixel");
+  const isDarkSouls = cleanTheme.includes("darksouls") || cleanTheme.includes("ascendant") || cleanTheme.includes("souls");
 
   // Dynamic Theme Styling Tokens
   let modalBorder = "border-[#bd0df2]/50 shadow-[0_0_60px_rgba(189,13,242,0.35)]";
@@ -123,7 +124,12 @@ export function LevelUpCelebrationModal({
   let btnPrimary = "bg-gradient-to-r from-[#bd0df2] to-[#06b6d4] hover:from-[#a00ad0] hover:to-[#0891b2] text-white shadow-[0_0_25px_rgba(189,13,242,0.5)]";
   let badgeThemeStyle = "border-[#bd0df2]/40 bg-[#bd0df2]/10 text-fuchsia-300";
 
-  if (isMedieval) {
+  if (isDarkSouls) {
+    modalBorder = "border-orange-600/80 shadow-[0_0_70px_rgba(234,88,12,0.55)] border-t-2 border-t-orange-500 bg-gradient-to-b from-zinc-950 via-[#140d0a] to-black";
+    titleGlow = "text-white drop-shadow-[0_0_25px_rgba(234,88,12,0.8)] font-serif uppercase tracking-widest";
+    btnPrimary = "bg-gradient-to-r from-orange-700 via-orange-600 to-red-700 hover:from-orange-600 hover:to-orange-500 text-white font-bold shadow-[0_0_30px_rgba(234,88,12,0.6)] border border-orange-500/60 uppercase tracking-wider";
+    badgeThemeStyle = "border-orange-600/60 bg-orange-950/70 text-orange-300 shadow-[0_0_15px_rgba(234,88,12,0.4)]";
+  } else if (isMedieval) {
     modalBorder = "border-amber-600/80 shadow-[0_0_60px_rgba(217,119,6,0.45)]";
     titleGlow = "text-transparent bg-clip-text bg-gradient-to-r from-amber-300 via-yellow-200 to-orange-400 drop-shadow-[0_0_25px_rgba(245,158,11,0.6)]";
     btnPrimary = "bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-amber-100 shadow-[0_0_25px_rgba(217,119,6,0.5)] border border-amber-400/50";

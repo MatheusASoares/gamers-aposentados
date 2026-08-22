@@ -13,10 +13,20 @@ interface AvatarUploadProps {
     name: string | null;
     isOwner: boolean;
     frameUrl?: string | null;
+    cssFrameClass?: string | null;
+    size?: "sm" | "md" | "lg" | "xl" | "2xl";
     className?: string;
 }
 
-export function AvatarUpload({ currentImage, name, isOwner, frameUrl, className }: AvatarUploadProps) {
+export function AvatarUpload({
+    currentImage,
+    name,
+    isOwner,
+    frameUrl,
+    cssFrameClass,
+    size = "2xl",
+    className
+}: AvatarUploadProps) {
     const { update } = useSession();
     const fileInputRef = useRef<HTMLInputElement>(null);
     const [preview, setPreview] = useState<string | null>(null);
@@ -110,27 +120,28 @@ export function AvatarUpload({ currentImage, name, isOwner, frameUrl, className 
     };
 
     return (
-        <div className="relative">
+        <div className="relative inline-flex items-center justify-center">
             <button
                 type="button"
                 onClick={handleClick}
                 disabled={!isOwner || isPending}
-                className={`group relative ${isOwner ? "cursor-pointer" : "cursor-default"}`}
+                className={`group relative no-theme border-0 bg-transparent p-0 m-0 shadow-none outline-none focus:outline-none overflow-visible rounded-full ${isOwner ? "cursor-pointer" : "cursor-default"}`}
                 aria-label={isOwner ? "Alterar foto de perfil" : undefined}
             >
-                <div className={`transition-opacity ${isPending ? "opacity-50" : isOwner ? "group-hover:opacity-70" : ""}`}>
+                <div className={`transition-opacity ${isPending ? "opacity-50" : isOwner ? "group-hover:opacity-80" : ""}`}>
                     <UserAvatar
                         src={src}
                         name={name}
                         frameUrl={frameUrl}
-                        size="xl"
+                        cssFrameClass={cssFrameClass}
+                        size={size}
                         className={className}
                     />
                 </div>
 
                 {isOwner && !isPending && (
                     <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
-                        <div className="rounded-full bg-black/60 p-3">
+                        <div className="rounded-full bg-black/60 p-3 shadow-lg">
                             <Camera className="h-6 w-6 text-white" />
                         </div>
                     </div>

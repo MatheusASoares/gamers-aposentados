@@ -1,6 +1,6 @@
 export type RewardType = 'TITLE' | 'FRAME' | 'BANNER' | 'BADGE' | 'THEME';
 export type RewardRarity = 'COMMON' | 'UNCOMMON' | 'RARE' | 'EPIC' | 'LEGENDARY';
-export type BannerEffectType = 'scanline' | 'cosmic-stars' | 'dragon-fire' | 'crystal-aura' | 'synthwave-grid' | 'hologram-sweep';
+export type BannerEffectType = 'scanline' | 'cosmic-stars' | 'dragon-fire' | 'crystal-aura' | 'synthwave-grid' | 'hologram-sweep' | 'sakura-twilight';
 
 export interface RewardItem {
   id: string;
@@ -91,7 +91,7 @@ export const REWARDS_CATALOG: RewardItem[] = [
     id: 'theme-medieval',
     level: 9,
     type: 'THEME',
-    name: 'Fantasia Sombria',
+    name: 'Taverna Medieval',
     description: '"Dê uma moeda para o seu Bruxo, ó Vale da Abundância."',
     rarity: 'RARE',
   },
@@ -145,7 +145,7 @@ export const REWARDS_CATALOG: RewardItem[] = [
     id: 'theme-space',
     level: 15,
     type: 'THEME',
-    name: 'Espaço Profundo',
+    name: 'Odisseia Estelar',
     description: '"Ao infinito e além das estrelas da Orla Exterior."',
     rarity: 'EPIC',
   },
@@ -209,8 +209,44 @@ export const REWARDS_CATALOG: RewardItem[] = [
     id: 'theme-pixel',
     level: 22,
     type: 'THEME',
-    name: 'Pixel Retrô',
+    name: 'Arcade Retrô',
     description: '"Pressione Start para reviver a era de ouro dos 16-bits."',
+    rarity: 'LEGENDARY',
+  },
+  {
+    id: 'banner-japanese-sunrise',
+    level: 23,
+    type: 'BANNER',
+    name: 'Santuário do Sol Nascente',
+    description: '"Onde as pétalas de cerejeira encontram o crepúsculo sob o Monte Fuji."',
+    rarity: 'LEGENDARY',
+    assetUrl: '/assets/banners/banner-japanese-sunrise.jpg',
+    effectType: 'sakura-twilight',
+  },
+  {
+    id: 'frame-bonfire-cinders',
+    level: 24,
+    type: 'FRAME',
+    name: 'Coroa das Cinzas',
+    description: '"Mesmo que o fogo se apague, sua lenda arderá para sempre."',
+    rarity: 'LEGENDARY',
+    assetUrl: '/assets/frames/frame-bonfire-cinders-v2.png',
+    cssClass: 'border-2 border-orange-600 shadow-[0_0_25px_rgba(234,88,12,0.8)] ring-2 ring-red-600/50',
+  },
+  {
+    id: 'title-imortal-backlog',
+    level: 25,
+    type: 'TITLE',
+    name: 'Imortal do Backlog Zero',
+    description: 'O triunfo absoluto sobre o backlog e todas as eras dos games.',
+    rarity: 'LEGENDARY',
+  },
+  {
+    id: 'theme-ascendant',
+    level: 25,
+    type: 'THEME',
+    name: 'Fogueira de Lordran',
+    description: '"Mesmo na escuridão mais profunda, uma brasa ainda queima. Não ouse se tornar Hollow."',
     rarity: 'LEGENDARY',
   },
 ];
@@ -254,19 +290,21 @@ export function getNextRewardUnlock(currentLevel: number): RewardItem | undefine
 export function getTitleBadgeStyle(titleName: string | null): string {
   switch (titleName) {
     case 'Limpador de Poeira':
-      return 'border-emerald-500/60 bg-emerald-500/20 text-emerald-300 shadow-[0_0_12px_rgba(16,185,129,0.3)]';
+      return 'border-emerald-500/70 bg-emerald-950/50 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.35)]';
     case 'Caçador de Backlog':
-      return 'border-cyan-500/60 bg-cyan-500/20 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.3)]';
+      return 'border-cyan-500/70 bg-cyan-950/50 text-cyan-300 shadow-[0_0_15px_rgba(6,182,212,0.35)]';
     case 'Destruidor de Pendências':
-      return 'border-blue-500/60 bg-blue-500/20 text-blue-300 shadow-[0_0_15px_rgba(59,130,246,0.3)]';
+      return 'border-blue-500/70 bg-blue-950/50 text-blue-300 shadow-[0_0_16px_rgba(59,130,246,0.4)]';
     case 'Veterano dos Controles':
-      return 'border-[#bd0df2]/70 bg-[#bd0df2]/25 text-purple-200 shadow-[0_0_18px_rgba(189,13,242,0.35)]';
+      return 'border-[#bd0df2]/80 bg-[#bd0df2]/25 text-purple-200 shadow-[0_0_18px_rgba(189,13,242,0.4)]';
     case 'Lenda do Retrogaming':
-      return 'border-fuchsia-500/70 bg-fuchsia-500/25 text-fuchsia-200 shadow-[0_0_18px_rgba(217,70,239,0.35)]';
+      return 'border-pink-500/80 bg-gradient-to-r from-pink-500/30 to-purple-600/30 text-pink-200 shadow-[0_0_20px_rgba(236,72,153,0.45)]';
     case 'Mestre da Guilda Aposentada':
-      return 'border-amber-400/80 bg-gradient-to-r from-amber-500/30 via-rose-500/30 to-amber-500/30 text-amber-200 shadow-[0_0_20px_rgba(251,191,36,0.4)]';
+      return 'border-amber-400/90 bg-gradient-to-r from-amber-500/35 via-yellow-400/30 to-amber-600/35 text-amber-100 shadow-[0_0_22px_rgba(251,191,36,0.5)] ring-1 ring-amber-300/30';
+    case 'Imortal do Backlog Zero':
+      return 'border-orange-500/90 bg-gradient-to-r from-red-600/40 via-orange-500/40 to-amber-500/35 text-orange-100 shadow-[0_0_28px_rgba(234,88,12,0.7)] ring-1 ring-orange-400/60';
     case 'Aposentado Novato':
     default:
-      return 'border-zinc-700 bg-zinc-800/80 text-zinc-300 shadow-[0_0_10px_rgba(255,255,255,0.05)]';
+      return 'border-zinc-700 bg-zinc-900/80 text-zinc-300 shadow-[0_0_10px_rgba(255,255,255,0.05)]';
   }
 }

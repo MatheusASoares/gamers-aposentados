@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Audiowide&family=Cinzel:wght@600;700;800;900&family=MedievalSharp&family=Orbitron:wght@600;700;800;900&family=Press+Start+2P&family=Rajdhani:wght@600;700&family=VT323&display=swap');
 @import "tailwindcss";
 @config "../../tailwind.config.ts";
 
@@ -14,6 +15,7 @@
    THEME ENGINE: Semantic Color Tokens & Overrides
    ========================================================================== */
 
+/* Tema 1: Cyber Neon (Cyberpunk 2077 & Tron) - Padrão */
 :root,
 [data-theme="cyberpunk"] {
     --background: 240 10% 3.9%;
@@ -31,7 +33,7 @@
     --theme-secondary-rgb: 6, 182, 212;
     --theme-bg: #09090b;
     --theme-card-bg: rgba(24, 24, 27, 0.85);
-    --theme-border: rgba(255, 255, 255, 0.08);
+    --theme-border: rgba(189, 13, 242, 0.35);
     --theme-glow: rgba(189, 13, 242, 0.5);
     --theme-title-accent: #bd0df2;
 }
@@ -41,9 +43,11 @@
     --background: 24 25% 4%;
     --foreground: 40 30% 95%;
     --card: 24 20% 8%;
+    --card-foreground: 40 30% 95%;
     --primary: 38 92% 50%;
     --border: 38 92% 35%;
     --ring: 38 92% 50%;
+    --radius: 0.375rem;
 
     --theme-primary: #f59e0b;
     --theme-primary-rgb: 245, 158, 11;
@@ -56,43 +60,16 @@
     --theme-title-accent: #fbbf24;
 }
 
-/* Atmospheric Campfire Embers & Parchment Frame for Medieval Theme */
-[data-theme="theme-medieval"] body::before {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-image: 
-        radial-gradient(circle at 50% 100%, rgba(217, 119, 6, 0.15) 0%, transparent 60%),
-        radial-gradient(circle at 20% 20%, rgba(220, 38, 38, 0.1) 0%, transparent 40%);
-    z-index: 0;
-    pointer-events: none;
-}
-
-[data-theme="theme-medieval"] .glass-card {
-    background: linear-gradient(145deg, rgba(32, 23, 14, 0.96), rgba(16, 12, 8, 0.96)) !important;
-    border: 2px solid #d97706 !important;
-    box-shadow: inset 0 0 15px rgba(217, 119, 6, 0.15), 0 0 25px rgba(217, 119, 6, 0.35) !important;
-}
-
-[data-theme="theme-medieval"] h1,
-[data-theme="theme-medieval"] h2,
-[data-theme="theme-medieval"] h3 {
-    font-family: ui-serif, Georgia, Cambria, "Times New Roman", Times, serif !important;
-    letter-spacing: 0.05em !important;
-}
-
 /* Tema 3: RPG Espacial Sci-Fi (Starfield & No Man's Sky) */
 [data-theme="theme-space"] {
     --background: 220 60% 3%;
     --foreground: 210 40% 98%;
     --card: 220 50% 8%;
+    --card-foreground: 210 40% 98%;
     --primary: 199 89% 60%;
     --border: 199 89% 40%;
     --ring: 199 89% 60%;
+    --radius: 0.25rem;
 
     --theme-primary: #38bdf8;
     --theme-primary-rgb: 56, 189, 248;
@@ -105,47 +82,16 @@
     --theme-title-accent: #38bdf8;
 }
 
-/* Sci-Fi Holographic Telemetry Grid & Starfield Dust for Space Theme */
-[data-theme="theme-space"] body::before {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background-image: 
-        radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 15% 85%, rgba(251, 191, 36, 0.12) 0%, transparent 45%),
-        linear-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(56, 189, 248, 0.04) 1px, transparent 1px);
-    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
-    z-index: 0;
-    pointer-events: none;
-}
-
-[data-theme="theme-space"] .glass-card {
-    background: linear-gradient(135deg, rgba(6, 22, 54, 0.96), rgba(2, 9, 28, 0.96)) !important;
-    border: 2px solid #38bdf8 !important;
-    box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.2), 0 0 30px rgba(56, 189, 248, 0.45) !important;
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
-}
-
-[data-theme="theme-space"] h1,
-[data-theme="theme-space"] h2,
-[data-theme="theme-space"] h3 {
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
-    letter-spacing: 0.12em !important;
-}
-
-/* Tema 4: Pixel Art Retrogaming (Chrono Trigger & Final Fantasy 16-Bit) */
+/* Tema 4: Pixel Art Retrogaming (Chrono Trigger & 16-Bit Arcade) */
 [data-theme="theme-pixel"] {
     --background: 240 60% 5%;
     --foreground: 120 100% 95%;
     --card: 240 60% 10%;
+    --card-foreground: 120 100% 95%;
     --primary: 142 76% 50%;
     --border: 45 93% 47%;
     --ring: 142 76% 50%;
+    --radius: 0.125rem;
 
     --theme-primary: #22c55e;
     --theme-primary-rgb: 34, 197, 94;
@@ -158,29 +104,34 @@
     --theme-title-accent: #4ade80;
 }
 
-/* CRT Scanlines & 16-Bit Retro Window Box Styling for Pixel Theme */
-[data-theme="theme-pixel"] body::after {
-    content: " ";
-    display: block;
-    position: fixed;
-    top: 0;
-    left: 0;
-    bottom: 0;
-    right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-    background-size: 100% 4px;
-    z-index: 999;
-    pointer-events: none;
-    opacity: 0.45;
+/* Tema 5: Almas Sombrias (Dark Souls & Lordran Gritty) */
+[data-theme="theme-darksouls"],
+[data-theme="theme-ascendant"] {
+    --background: 0 10% 3%;
+    --foreground: 210 20% 98%;
+    --card: 0 15% 5%;
+    --card-foreground: 210 20% 98%;
+    --primary: 24 95% 53%;
+    --border: 24 85% 35%;
+    --ring: 24 95% 53%;
+    --radius: 0.25rem;
+
+    --theme-primary: #ea580c;
+    --theme-primary-rgb: 234, 88, 12;
+    --theme-secondary: #dc2626;
+    --theme-secondary-rgb: 220, 38, 38;
+    --theme-bg: #060505;
+    --theme-card-bg: rgba(14, 10, 10, 0.96);
+    --theme-border: rgba(234, 88, 12, 0.4);
+    --theme-glow: rgba(234, 88, 12, 0.6);
+    --theme-title-accent: #fdba74;
 }
 
-[data-theme="theme-pixel"] .glass-card {
-    background: linear-gradient(145deg, rgba(8, 22, 60, 0.95), rgba(3, 10, 32, 0.95)) !important;
-    border: 2px solid #f59e0b !important;
-    box-shadow: inset 0 0 0 1px #06b6d4, 0 0 20px rgba(34, 197, 94, 0.35) !important;
-}
+/* ==========================================================================
+   THEME AMBIENT BACKGROUNDS & PARTICLES (body::before & body::after)
+   ========================================================================== */
 
-/* Holo Cyber Matrix Grid & Neon Plasma for Cyberpunk Theme */
+/* 1. Cyber Neon: Holographic Matrix Grid & Neon Plasma */
 html:not([data-theme]) body::before,
 [data-theme="cyberpunk"] body::before {
     content: " ";
@@ -191,8 +142,8 @@ html:not([data-theme]) body::before,
     bottom: 0;
     right: 0;
     background-image: 
-        radial-gradient(circle at 90% 10%, rgba(189, 13, 242, 0.18) 0%, transparent 45%),
-        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 90% 10%, rgba(189, 13, 242, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.18) 0%, transparent 50%),
         linear-gradient(rgba(189, 13, 242, 0.04) 1px, transparent 1px),
         linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
@@ -200,12 +151,323 @@ html:not([data-theme]) body::before,
     pointer-events: none;
 }
 
+/* 2. Medieval: Campfire Floating Embers & Dark Parchment Ambient */
+[data-theme="theme-medieval"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 50% 100%, rgba(217, 119, 6, 0.22) 0%, transparent 65%),
+        radial-gradient(circle at 20% 20%, rgba(220, 38, 38, 0.15) 0%, transparent 45%),
+        radial-gradient(circle at 80% 30%, rgba(245, 158, 11, 0.1) 0%, transparent 40%);
+    animation: emberPulse 6s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 3. Space: Sci-Fi Telemetry Grid & Orbit Starfield Dust */
+[data-theme="theme-space"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 85% 15%, rgba(56, 189, 248, 0.22) 0%, transparent 50%),
+        radial-gradient(circle at 15% 85%, rgba(251, 191, 36, 0.14) 0%, transparent 45%),
+        linear-gradient(rgba(56, 189, 248, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(56, 189, 248, 0.05) 1px, transparent 1px);
+    background-size: 100% 100%, 100% 100%, 40px 40px, 40px 40px;
+    animation: spaceTwinkle 8s ease-in-out infinite alternate;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* 4. Pixel Retro: CRT Scanlines & Screen Glass Vignette */
+[data-theme="theme-pixel"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 50% 50%, transparent 50%, rgba(0, 0, 0, 0.5) 100%),
+        radial-gradient(circle at 85% 10%, rgba(34, 197, 94, 0.15) 0%, transparent 40%),
+        radial-gradient(circle at 15% 90%, rgba(245, 158, 11, 0.12) 0%, transparent 40%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+[data-theme="theme-pixel"] body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+    background-size: 100% 4px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.4;
+}
+
+/* 5. Almas Sombrias: Bonfire Ember Glow & Ash Atmosphere */
+[data-theme="theme-darksouls"] body::before,
+[data-theme="theme-ascendant"] body::before {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-image: 
+        radial-gradient(circle at 50% 100%, rgba(234, 88, 12, 0.22) 0%, transparent 65%),
+        radial-gradient(circle at 15% 20%, rgba(220, 38, 38, 0.1) 0%, transparent 45%),
+        radial-gradient(circle at 85% 35%, rgba(185, 28, 28, 0.08) 0%, transparent 40%),
+        radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.7) 0%, transparent 80%);
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   THEMED GLASS CARDS, BUTTONS & TYPOGRAPHY TRANSFORMATIONS
+   ========================================================================== */
+
+/* 1. Cyberpunk Theme */
 html:not([data-theme]) .glass-card,
 [data-theme="cyberpunk"] .glass-card {
     background: linear-gradient(135deg, rgba(28, 10, 42, 0.96), rgba(8, 6, 18, 0.96)) !important;
     border: 2px solid #bd0df2 !important;
-    border-left: 4px solid #06b6d4 !important;
-    box-shadow: inset 0 0 20px rgba(189, 13, 242, 0.2), 0 0 30px rgba(189, 13, 242, 0.45), 0 0 10px rgba(6, 182, 212, 0.3) !important;
+    border-left: 5px solid #06b6d4 !important;
+    box-shadow: inset 0 0 20px rgba(189, 13, 242, 0.25), 0 0 30px rgba(189, 13, 242, 0.45), 0 0 12px rgba(6, 182, 212, 0.3) !important;
+}
+
+[data-theme="cyberpunk"] h1,
+[data-theme="cyberpunk"] h2,
+[data-theme="cyberpunk"] h3,
+[data-theme="cyberpunk"] h4,
+[data-theme="cyberpunk"] h5,
+[data-theme="cyberpunk"] h6,
+[data-theme="cyberpunk"] .font-heading {
+    font-family: 'Audiowide', sans-serif !important;
+    letter-spacing: 0.08em !important;
+    text-shadow: 0 0 12px rgba(189, 13, 242, 0.5) !important;
+}
+
+[data-theme="cyberpunk"] button:not(.no-theme) {
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+}
+
+/* 2. Medieval (The Witcher 3 / Dark Fantasy) */
+[data-theme="theme-medieval"] .glass-card {
+    background: linear-gradient(145deg, rgba(32, 23, 14, 0.96), rgba(16, 12, 8, 0.96)) !important;
+    border: 2px solid #d97706 !important;
+    box-shadow: inset 0 0 15px rgba(217, 119, 6, 0.25), 0 0 30px rgba(217, 119, 6, 0.4) !important;
+    border-radius: 0.5rem !important;
+}
+
+[data-theme="theme-medieval"] h1,
+[data-theme="theme-medieval"] h2,
+[data-theme="theme-medieval"] h3,
+[data-theme="theme-medieval"] h4,
+[data-theme="theme-medieval"] h5,
+[data-theme="theme-medieval"] h6,
+[data-theme="theme-medieval"] .font-heading {
+    font-family: 'MedievalSharp', 'Cinzel', ui-serif, Georgia, serif !important;
+    letter-spacing: 0.06em !important;
+    color: #fbbf24 !important;
+    text-shadow: 0 0 15px rgba(245, 158, 11, 0.6) !important;
+}
+
+[data-theme="theme-medieval"] body,
+[data-theme="theme-medieval"] button,
+[data-theme="theme-medieval"] span,
+[data-theme="theme-medieval"] p {
+    font-family: 'Cinzel', ui-serif, Georgia, serif;
+}
+
+[data-theme="theme-medieval"] button:not(.no-theme) {
+    border: 1px solid #f59e0b !important;
+    box-shadow: 0 0 15px rgba(245, 158, 11, 0.35) !important;
+}
+
+/* 3. Space (Starfield & Sci-Fi Cockpit HUD) */
+[data-theme="theme-space"] .glass-card {
+    background: linear-gradient(135deg, rgba(6, 22, 54, 0.96), rgba(2, 9, 28, 0.96)) !important;
+    border: 2px solid #38bdf8 !important;
+    box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.3), 0 0 30px rgba(56, 189, 248, 0.5) !important;
+    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px)) !important;
+}
+
+[data-theme="theme-space"] h1,
+[data-theme="theme-space"] h2,
+[data-theme="theme-space"] h3,
+[data-theme="theme-space"] h4,
+[data-theme="theme-space"] h5,
+[data-theme="theme-space"] h6,
+[data-theme="theme-space"] .font-heading {
+    font-family: 'Orbitron', 'Rajdhani', monospace !important;
+    letter-spacing: 0.16em !important;
+    text-transform: uppercase !important;
+    color: #38bdf8 !important;
+    text-shadow: 0 0 15px rgba(56, 189, 248, 0.7) !important;
+}
+
+[data-theme="theme-space"] body,
+[data-theme="theme-space"] button,
+[data-theme="theme-space"] span,
+[data-theme="theme-space"] p {
+    font-family: 'Rajdhani', ui-monospace, monospace;
+    letter-spacing: 0.05em;
+}
+
+[data-theme="theme-space"] button:not(.no-theme) {
+    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px) !important;
+    border: 1px solid #38bdf8 !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+}
+
+/* 4. Pixel Retro (Chrono Trigger & Arcade 16-Bit) */
+[data-theme="theme-pixel"] .glass-card {
+    background: linear-gradient(145deg, rgba(8, 22, 60, 0.98), rgba(3, 10, 32, 0.98)) !important;
+    border: 4px solid #f59e0b !important;
+    box-shadow: 5px 5px 0px #000, -4px -4px 0px #06b6d4, inset 0 0 0 2px #22c55e !important;
+    border-radius: 0px !important;
+}
+
+[data-theme="theme-pixel"] h1,
+[data-theme="theme-pixel"] h2,
+[data-theme="theme-pixel"] h3,
+[data-theme="theme-pixel"] h4,
+[data-theme="theme-pixel"] h5,
+[data-theme="theme-pixel"] h6,
+[data-theme="theme-pixel"] .font-heading,
+[data-theme="theme-pixel"] .font-pixel {
+    font-family: 'Press Start 2P', monospace !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.05em !important;
+    color: #4ade80 !important;
+    text-shadow: 3px 3px 0px #000, 0 0 14px rgba(34, 197, 94, 0.7) !important;
+}
+
+[data-theme="theme-pixel"] h1,
+[data-theme="theme-pixel"] .text-4xl,
+[data-theme="theme-pixel"] .text-5xl {
+    font-size: clamp(1.8rem, 3.2vw, 2.6rem) !important;
+    line-height: 1.4 !important;
+}
+
+[data-theme="theme-pixel"] h2,
+[data-theme="theme-pixel"] .text-3xl {
+    font-size: clamp(1.4rem, 2.4vw, 2.0rem) !important;
+    line-height: 1.4 !important;
+}
+
+[data-theme="theme-pixel"] h3,
+[data-theme="theme-pixel"] .text-2xl {
+    font-size: clamp(1.1rem, 1.8vw, 1.45rem) !important;
+    line-height: 1.4 !important;
+}
+
+/* Long text, reviews, and paragraphs in Pixel Art: Clean, readable 80s/90s CRT terminal font */
+[data-theme="theme-pixel"] p,
+[data-theme="theme-pixel"] .review-text,
+[data-theme="theme-pixel"] blockquote,
+[data-theme="theme-pixel"] textarea,
+[data-theme="theme-pixel"] input {
+    font-family: 'VT323', monospace !important;
+    font-size: 1.25rem !important;
+    line-height: 1.4 !important;
+    letter-spacing: 0.03em !important;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+[data-theme="theme-pixel"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]) {
+    border-radius: 0px !important;
+    border: 3px solid #f59e0b !important;
+    box-shadow: 4px 4px 0px #000 !important;
+    font-family: 'Press Start 2P', monospace !important;
+    font-size: 0.72rem !important;
+    letter-spacing: 0.03em !important;
+    transition: transform 0.05s ease, box-shadow 0.05s ease;
+}
+
+[data-theme="theme-pixel"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):active {
+    transform: translate(2px, 2px);
+    box-shadow: 1px 1px 0px #000 !important;
+}
+
+/* 5. Almas Sombrias (Dark Souls & Lordran Gritty) */
+[data-theme="theme-darksouls"] .glass-card,
+[data-theme="theme-ascendant"] .glass-card {
+    background: linear-gradient(180deg, rgba(16, 12, 12, 0.98), rgba(8, 6, 6, 0.98)) !important;
+    border: 1px solid rgba(234, 88, 12, 0.35) !important;
+    border-top: 2px solid #ea580c !important;
+    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.85), 0 0 35px rgba(0, 0, 0, 0.9), 0 0 12px rgba(234, 88, 12, 0.2) !important;
+    border-radius: 0.25rem !important;
+}
+
+[data-theme="theme-darksouls"] h1,
+[data-theme="theme-darksouls"] h2,
+[data-theme="theme-darksouls"] h3,
+[data-theme="theme-darksouls"] h4,
+[data-theme="theme-darksouls"] h5,
+[data-theme="theme-darksouls"] h6,
+[data-theme="theme-darksouls"] .font-heading,
+[data-theme="theme-ascendant"] h1,
+[data-theme="theme-ascendant"] h2,
+[data-theme="theme-ascendant"] h3,
+[data-theme="theme-ascendant"] h4,
+[data-theme="theme-ascendant"] h5,
+[data-theme="theme-ascendant"] h6,
+[data-theme="theme-ascendant"] .font-heading {
+    font-family: 'Cinzel', Georgia, serif !important;
+    letter-spacing: 0.12em !important;
+    text-transform: uppercase !important;
+    color: #f8fafc !important; /* Pure solid high-contrast bone white */
+    text-shadow: 2px 2px 4px #000, 0 0 15px rgba(234, 88, 12, 0.5) !important;
+}
+
+[data-theme="theme-darksouls"] body,
+[data-theme="theme-darksouls"] span,
+[data-theme="theme-darksouls"] p,
+[data-theme="theme-ascendant"] body,
+[data-theme="theme-ascendant"] span,
+[data-theme="theme-ascendant"] p {
+    font-family: var(--font-sans), system-ui, sans-serif;
+    color: #e2e8f0; /* Crisp bone white for 100% WCAG AAA accessibility */
+}
+
+[data-theme="theme-darksouls"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]),
+[data-theme="theme-ascendant"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]) {
+    border-radius: 0.25rem !important;
+    border: 1px solid #ea580c !important;
+    background: linear-gradient(180deg, #241611, #0e0907) !important;
+    color: #f8fafc !important;
+    box-shadow: 0 0 15px rgba(234, 88, 12, 0.35) !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    transition: all 0.2s ease;
+}
+
+[data-theme="theme-darksouls"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover,
+[data-theme="theme-ascendant"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover {
+    box-shadow: 0 0 25px rgba(234, 88, 12, 0.6) !important;
+    border-color: #f97316 !important;
 }
 
 @layer base {
@@ -235,7 +497,7 @@ html:not([data-theme]) .glass-card,
 .theme-glow { box-shadow: 0 0 20px -3px var(--theme-glow) !important; }
 .theme-glow-strong { box-shadow: 0 0 30px -2px var(--theme-glow) !important; }
 
-/* Glass Card Effect */
+/* Glass Card Default */
 .glass-card {
     background: var(--theme-card-bg);
     backdrop-filter: blur(12px);
@@ -258,7 +520,10 @@ html:not([data-theme]) .glass-card,
     box-shadow: 0 0 15px var(--theme-glow);
 }
 
-/* Staggered entrance animations */
+/* ==========================================================================
+   KEYFRAME ANIMATIONS
+   ========================================================================== */
+
 @keyframes fadeInUp {
     from {
         opacity: 0;
@@ -279,6 +544,44 @@ html:not([data-theme]) .glass-card,
     }
 }
 
+@keyframes emberPulse {
+    0% {
+        opacity: 0.75;
+        transform: scale(1);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1.03);
+    }
+}
+
+@keyframes spaceTwinkle {
+    0% {
+        opacity: 0.7;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes goldShimmer {
+    0% {
+        filter: drop-shadow(0 0 10px rgba(234, 179, 8, 0.2));
+    }
+    100% {
+        filter: drop-shadow(0 0 25px rgba(234, 179, 8, 0.45));
+    }
+}
+
+@keyframes cyberGlitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+}
+
 .animate-fade-in-up {
     animation: fadeInUp 0.5s ease-out forwards;
     opacity: 0;
@@ -293,6 +596,10 @@ html:not([data-theme]) .glass-card,
     );
     background-size: 200% 100%;
     animation: shimmer 2s infinite;
+}
+
+.cyber-glitch-hover:hover {
+    animation: cyberGlitch 0.25s ease-in-out infinite;
 }
 
 /* Custom Scrollbars */

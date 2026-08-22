@@ -46,10 +46,13 @@ export function LevelUpParticles({ theme = "cyberpunk", className = "" }: LevelU
     const isMedieval = cleanTheme.includes("medieval");
     const isSpace = cleanTheme.includes("space");
     const isPixel = cleanTheme.includes("pixel");
+    const isDarkSouls = cleanTheme.includes("darksouls") || cleanTheme.includes("ascendant") || cleanTheme.includes("souls");
 
     // Palette per theme
     let colors: string[] = [];
-    if (isMedieval) {
+    if (isDarkSouls) {
+      colors = ["#ea580c", "#f97316", "#ef4444", "#dc2626", "#d4d4d8", "#f3f4f6", "#71717a", "#451a03"];
+    } else if (isMedieval) {
       colors = ["#f59e0b", "#dc2626", "#d97706", "#fbbf24", "#ef4444", "#fef08a"];
     } else if (isSpace) {
       colors = ["#38bdf8", "#fbbf24", "#818cf8", "#c084fc", "#e0f2fe", "#ffffff"];
@@ -63,12 +66,29 @@ export function LevelUpParticles({ theme = "cyberpunk", className = "" }: LevelU
     const centerX = window.innerWidth / 2;
     const centerY = window.innerHeight / 2;
 
-    const particleCount = isSpace ? 180 : 150;
+    const particleCount = isDarkSouls ? 200 : isSpace ? 180 : 150;
 
     for (let i = 0; i < particleCount; i++) {
       const color = colors[Math.floor(Math.random() * colors.length)];
 
-      if (isMedieval) {
+      if (isDarkSouls) {
+        // Bonfire intense fiery sparks & turbulent ash flakes
+        const angle = (Math.random() - 0.5) * Math.PI * 0.9 - Math.PI / 2; // Upward volcanic cone
+        const speed = Math.random() * 9 + 4;
+        particles.push({
+          x: centerX + (Math.random() - 0.5) * 140,
+          y: centerY + (Math.random() - 0.5) * 80,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          size: Math.random() * 5 + 2,
+          color,
+          alpha: 1,
+          decay: Math.random() * 0.007 + 0.003,
+          rotation: Math.random() * Math.PI * 2,
+          vRotation: (Math.random() - 0.5) * 0.1,
+          shape: Math.random() > 0.4 ? "diamond" : "circle",
+        });
+      } else if (isMedieval) {
         // Campfire rising embers
         particles.push({
           x: centerX + (Math.random() - 0.5) * window.innerWidth * 0.8,
@@ -146,7 +166,15 @@ export function LevelUpParticles({ theme = "cyberpunk", className = "" }: LevelU
         ctx.save();
         ctx.globalAlpha = Math.max(0, p.alpha);
 
-        if (isMedieval) {
+        if (isDarkSouls) {
+          // Intense bonfire sparks and rising ash
+          p.x += p.vx + (Math.random() - 0.5) * 1.5;
+          p.y += p.vy;
+          p.vx *= 0.97;
+          p.vy -= 0.08; // accelerated buoyant rise
+          p.rotation += p.vRotation;
+          p.alpha -= p.decay;
+        } else if (isMedieval) {
           // Ember rising physics
           p.x += p.vx + Math.sin(p.y * 0.02) * 0.8;
           p.y += p.vy;
@@ -179,7 +207,10 @@ export function LevelUpParticles({ theme = "cyberpunk", className = "" }: LevelU
         ctx.rotate(p.rotation);
 
         // Theme glow effect
-        if (isMedieval) {
+        if (isDarkSouls) {
+          ctx.shadowBlur = 16;
+          ctx.shadowColor = p.color;
+        } else if (isMedieval) {
           ctx.shadowBlur = 12;
           ctx.shadowColor = p.color;
         } else if (isSpace) {

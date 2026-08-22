@@ -54,15 +54,26 @@ export function RewardsCustomizationModule({
       description: '"Acorda, Samurai! Temos uma cidade pra queimar."',
       rarity: "COMMON" as const,
       colors: ["#bd0df2", "#06b6d4", "#09090b"],
+      tag: "⚡ Glitch & Plasma Matrix",
     },
     ...REWARDS_CATALOG.filter((item) => item.type === "THEME").map((item) => ({
       ...item,
       colors:
         item.id === "theme-medieval"
-          ? ["#d97706", "#b91c1c", "#120e0b"]
+          ? ["#f59e0b", "#dc2626", "#0d0a07"]
           : item.id === "theme-space"
-          ? ["#38bdf8", "#fbbf24", "#030712"]
-          : ["#22c55e", "#f59e0b", "#050716"],
+          ? ["#38bdf8", "#fbbf24", "#010410"]
+          : item.id === "theme-pixel"
+          ? ["#22c55e", "#f59e0b", "#050716"]
+          : ["#ea580c", "#f97316", "#080606"],
+      tag:
+        item.id === "theme-medieval"
+          ? "🔥 Brasas Vivas & Serif Clássico"
+          : item.id === "theme-space"
+          ? "🛰️ Telemetria & Monospace Cósmico"
+          : item.id === "theme-pixel"
+          ? "👾 CRT Scanlines & Relevo 16-Bit"
+          : "🔥 Fogueira, Cinzas & Ferro Forjado",
     })),
   ];
 
@@ -474,6 +485,12 @@ export function RewardsCustomizationModule({
                   <p className="line-clamp-2 text-xs font-medium text-zinc-400">
                     {item.description}
                   </p>
+
+                  {item.tag && (
+                    <div className="inline-flex items-center gap-1.5 self-start rounded-md bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-zinc-300 border border-white/10">
+                      {item.tag}
+                    </div>
+                  )}
 
                   <div className="mt-2 flex items-center gap-2">
                     <span className="text-xs font-bold text-zinc-400 uppercase">Paleta:</span>

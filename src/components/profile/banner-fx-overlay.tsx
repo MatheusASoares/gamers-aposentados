@@ -21,7 +21,9 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
       ? "cosmic-stars"
       : bannerId === "banner-astral-crystal"
       ? "crystal-aura"
-      : bannerId === "banner-synthwave-neon"
+      : bannerId === "banner-japanese-sunrise" || bannerId === "banner-sakura-fuji"
+      ? "sakura-twilight"
+      : bannerId === "banner-synthwave-neon" || bannerId === "banner-synthwave-grid"
       ? "synthwave-grid"
       : bannerId === "banner-holoflux-matrix"
       ? "hologram-sweep"
@@ -123,6 +125,26 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
           <div className="absolute inset-0 border-2 border-cyan-400/30 shadow-[0_0_25px_rgba(34,211,238,0.35)]" />
           <div className="absolute top-0 left-0 h-4 w-4 border-t-2 border-l-2 border-amber-400 shadow-[0_0_10px_#facc15]" />
           <div className="absolute bottom-0 right-0 h-4 w-4 border-b-2 border-r-2 border-[#bd0df2] shadow-[0_0_10px_#bd0df2]" />
+        </div>
+      )}
+
+      {/* 7. SAKURA TWILIGHT & MT FUJI EFFECT */}
+      {activeEffect === "sakura-twilight" && (
+        <div className="relative h-full w-full">
+          {/* Subtle Twilight Sunset Horizon Glow */}
+          <div className="absolute inset-0 bg-gradient-to-r from-pink-500/15 via-amber-500/10 to-indigo-950/25 animate-pulse" />
+
+          {/* Drifting Sakura Petals & Floating Lantern Embers */}
+          <div className="absolute inset-0 opacity-80">
+            <div className="absolute top-1/4 left-1/6 h-2 w-2 rounded-full bg-pink-300 shadow-[0_0_10px_#f472b6] animate-ping" />
+            <div className="absolute bottom-1/3 left-1/3 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_12px_#fde047] animate-pulse" />
+            <div className="absolute top-1/3 right-1/4 h-2 w-2 rounded-full bg-pink-200 shadow-[0_0_12px_#fbcfe8] animate-pulse" />
+            <div className="absolute bottom-1/4 right-1/3 h-1.5 w-1.5 rounded-full bg-yellow-400 shadow-[0_0_14px_#facc15] animate-ping" />
+            <div className="absolute top-1/2 left-2/3 h-1 w-1 rounded-full bg-white shadow-[0_0_8px_#ffffff] animate-ping" />
+          </div>
+
+          {/* Cherry Blossom & Japanese Gold Border Accent */}
+          <div className="absolute inset-0 border border-pink-400/40 shadow-[inset_0_0_25px_rgba(244,114,182,0.25)]" />
         </div>
       )}
     </div>
