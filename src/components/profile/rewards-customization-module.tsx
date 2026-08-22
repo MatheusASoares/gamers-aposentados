@@ -173,21 +173,21 @@ export function RewardsCustomizationModule({
   };
 
   return (
-    <div className="glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[1.5rem] p-6 shadow-2xl backdrop-blur-md">
+    <div className="glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[1.5rem] p-3.5 sm:p-6 shadow-2xl backdrop-blur-md w-full min-w-0">
       {/* Header Row */}
-      <div className="mb-6 flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4">
+      <div className="mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/5 pb-4">
         <div className="flex items-center gap-2.5">
-          <Trophy className="h-6 w-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]" />
-          <h3 className="text-base font-black tracking-widest text-white uppercase">
-            Armário de Recompensas & Personalização
+          <Trophy className="h-5 w-5 sm:h-6 sm:w-6 text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)] shrink-0" />
+          <h3 className="text-sm sm:text-base font-black tracking-widest text-white uppercase">
+            Armário de Recompensas
           </h3>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/5 bg-zinc-900/60 p-1.5">
+        <div className="flex items-center gap-1.5 sm:gap-2 rounded-xl border border-white/5 bg-zinc-900/60 p-1 sm:p-1.5 overflow-x-auto custom-scrollbar no-scrollbar w-full sm:w-auto max-w-full">
           <button
             onClick={() => setActiveTab("frames")}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-black uppercase transition-all ${
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 sm:px-4 py-2 text-xs font-black uppercase transition-all whitespace-nowrap ${
               activeTab === "frames"
                 ? "bg-[#bd0df2] text-white shadow-[0_0_12px_rgba(189,13,242,0.5)]"
                 : "text-zinc-400 hover:text-white"
@@ -199,7 +199,7 @@ export function RewardsCustomizationModule({
 
           <button
             onClick={() => setActiveTab("titles")}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-black uppercase transition-all ${
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 sm:px-4 py-2 text-xs font-black uppercase transition-all whitespace-nowrap ${
               activeTab === "titles"
                 ? "bg-amber-500 text-zinc-950 shadow-[0_0_12px_rgba(245,158,11,0.5)]"
                 : "text-zinc-400 hover:text-white"
@@ -211,7 +211,7 @@ export function RewardsCustomizationModule({
 
           <button
             onClick={() => setActiveTab("banners")}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-black uppercase transition-all ${
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 sm:px-4 py-2 text-xs font-black uppercase transition-all whitespace-nowrap ${
               activeTab === "banners"
                 ? "bg-cyan-500 text-zinc-950 shadow-[0_0_12px_rgba(6,182,212,0.5)]"
                 : "text-zinc-400 hover:text-white"
@@ -223,7 +223,7 @@ export function RewardsCustomizationModule({
 
           <button
             onClick={() => setActiveTab("themes")}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-black uppercase transition-all ${
+            className={`flex shrink-0 items-center gap-2 rounded-lg px-3 sm:px-4 py-2 text-xs font-black uppercase transition-all whitespace-nowrap ${
               activeTab === "themes"
                 ? "bg-rose-500 text-white shadow-[0_0_12px_rgba(244,63,94,0.5)]"
                 : "text-zinc-400 hover:text-white"

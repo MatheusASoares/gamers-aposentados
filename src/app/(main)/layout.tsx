@@ -1,5 +1,6 @@
 import { Sidebar } from "@/components/layout/sidebar";
 import { Header } from "@/components/layout/header";
+import { BottomNav } from "@/components/layout/bottom-nav";
 import { ReactNode } from "react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
@@ -22,15 +23,19 @@ export default async function MainLayout({ children }: { children: ReactNode }) 
     }
 
     return (
-        <div className="bg-background flex min-h-screen">
+        <div className="bg-background flex min-h-screen w-full overflow-x-hidden">
+            {/* Desktop Sidebar (100% inalterada, fixa e visível a partir de md:) */}
             <Sidebar className="fixed top-0 left-0 z-50 hidden h-full md:flex" />
 
-            <div className="flex min-h-screen flex-1 flex-col md:ml-64">
+            <div className="flex min-h-screen flex-1 flex-col min-w-0 w-full overflow-x-hidden md:ml-64">
                 <Header />
-                <main className="mx-auto w-full max-w-[1600px] flex-1 overflow-auto p-6">
+                <main className="w-full flex-1 overflow-x-hidden p-2 sm:p-4 pb-24 md:p-0 md:pb-6">
                     {children}
                 </main>
             </div>
+
+            {/* Mobile Bottom Navigation Bar (Visível exclusivamente no mobile < md) */}
+            <BottomNav />
 
             <LevelUpCelebrationListener
                 userLevel={userLevel}
@@ -40,3 +45,4 @@ export default async function MainLayout({ children }: { children: ReactNode }) 
         </div>
     );
 }
+

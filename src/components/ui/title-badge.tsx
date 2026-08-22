@@ -48,12 +48,12 @@ export function TitleBadge({ title, className, iconClassName }: TitleBadgeProps)
   return (
     <div
       className={cn(
-        "inline-flex items-center gap-2 rounded-xl border px-3 py-1.5 text-xs font-black uppercase tracking-wider transition-all",
+        "inline-flex items-center gap-1.5 sm:gap-2 rounded-xl border px-2.5 py-1 sm:px-3 sm:py-1.5 text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all max-w-full overflow-hidden",
         badgeStyle,
         className
       )}
     >
-      {renderTitleIcon(displayTitle, iconClassName)}
+      {renderTitleIcon(displayTitle, cn("h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0", iconClassName))}
       <span className="truncate">{displayTitle}</span>
     </div>
   );

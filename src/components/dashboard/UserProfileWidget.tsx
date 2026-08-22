@@ -45,7 +45,7 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
 
   return (
     <div
-      className="glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[290px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-6 md:p-8"
+      className="glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-4 sm:p-6 md:p-8"
       data-testid="user-profile-widget"
     >
       {/* Dynamic Ambient Glow matching the unlocked Rank Tier */}
@@ -72,31 +72,32 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
       )}
 
       {/* Balanced 3-Column Layout (5 - 4 - 3 Grid) */}
-      <div className="relative z-10 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-center">
+      <div className="relative z-10 grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-center">
 
         {/* Column 1: Player Profile & Info (5 cols) */}
-        <div className="flex items-center gap-6 lg:col-span-5 lg:border-r lg:border-white/10 lg:pr-6">
+        <div className="flex items-center gap-3.5 sm:gap-6 min-w-0 lg:col-span-5 lg:border-r lg:border-white/10 lg:pr-6">
           <div className="relative shrink-0">
             <UserAvatar
               src={user.image || null}
               name={user.name || null}
               frameUrl={user.equippedFrame}
-              size="2xl"
+              size="xl"
+              className="sm:h-20 sm:w-20"
             />
           </div>
 
-          <div className="flex flex-col gap-2 min-w-0">
-            <div className="flex flex-wrap items-center gap-2">
-              <h2 className="truncate text-2xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-3xl">
+          <div className="flex flex-col gap-1 sm:gap-2 min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h2 className="truncate text-xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-2xl md:text-3xl">
                 {user.name || "Gamer"}
               </h2>
-              <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-3 py-0.5 text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
-                <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+              <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-2 py-0.5 text-[10px] sm:text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                 Lvl {level}
               </span>
             </div>
 
-            <div className="pt-0.5">
+            <div className="pt-0.5 max-w-full">
               <TitleBadge title={title} />
             </div>
           </div>

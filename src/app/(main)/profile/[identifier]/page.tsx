@@ -85,22 +85,22 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
 
 
     return (
-        <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-8 px-6 py-8 md:px-8 lg:px-12">
+        <div className="mx-auto flex w-full max-w-[1920px] flex-col gap-6 sm:gap-8 px-1 sm:px-6 py-4 sm:py-8 md:px-8 lg:px-12">
             
             {/* Top Page Header (Padrão do Aplicativo) */}
-            <div className="flex flex-col justify-between gap-6 md:flex-row md:items-end">
-                <div className="space-y-3">
-                    <h2 className="text-4xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-5xl">
+            <div className="flex flex-col justify-between gap-4 sm:gap-6 md:flex-row md:items-end">
+                <div className="space-y-1 sm:space-y-2">
+                    <h2 className="text-3xl font-black tracking-tight text-white uppercase drop-shadow-md sm:text-4xl md:text-5xl">
                         Hall of Fame
                     </h2>
-                    <p className="max-w-2xl text-lg font-medium text-zinc-400">
+                    <p className="max-w-2xl text-xs sm:text-base md:text-lg font-medium text-zinc-400">
                         Celebrate the legendary achievements, rank progress, and conquered games of the vanguard.
                     </p>
                 </div>
             </div>
 
             {/* 1. HERO HEADER: 3-Column Profile Showcase (Proporção igualada com o Armário de Recompensas) */}
-            <div className="glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[290px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-6 md:p-8" data-testid="hall-of-fame-profile-hero">
+            <div className="glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-3.5 sm:p-6 md:p-8" data-testid="hall-of-fame-profile-hero">
                 {/* Ambient Neon Glows */}
                 <div className={`pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full blur-[120px] ${tierDetails.glowColor}`}></div>
                 <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-amber-500/10 blur-[100px]"></div>
@@ -125,10 +125,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                 )}
 
                 {/* 3-Column Grid: Left (Avatar + Name) | Center (Rank & XP) | Right (Stats) */}
-                <div className="relative z-10 grid grid-cols-1 gap-8 lg:grid-cols-12 lg:items-center">
+                <div className="relative z-10 grid grid-cols-1 gap-5 sm:gap-8 lg:grid-cols-12 lg:items-center">
 
                     {/* COLUMN 1: LEFT - Avatar & Player Name (4 cols) */}
-                    <div className="flex items-center gap-6 border-b border-white/10 pb-6 lg:col-span-5 lg:border-b-0 lg:border-r lg:border-white/10 lg:pb-0 lg:pr-6">
+                    <div className="flex items-center gap-3.5 sm:gap-6 border-b border-white/10 pb-5 sm:pb-6 lg:col-span-5 lg:border-b-0 lg:border-r lg:border-white/10 lg:pb-0 lg:pr-6">
                         <div className="relative shrink-0 flex items-center justify-center">
                             {isOwner ? (
                                 <AvatarUpload
@@ -136,7 +136,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                                     name={user.name || null}
                                     isOwner={isOwner}
                                     frameUrl={equippedFrame}
-                                    size="2xl"
+                                    size="xl"
+                                    className="sm:h-20 sm:w-20"
                                     cssFrameClass={equippedFrame ? undefined : `border-2 ${tierDetails.avatarBorder}`}
                                 />
                             ) : (
@@ -144,20 +145,21 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                                     src={user.image || null}
                                     name={user.name || null}
                                     frameUrl={equippedFrame}
-                                    size="2xl"
+                                    size="xl"
+                                    className="sm:h-20 sm:w-20"
                                     cssFrameClass={equippedFrame ? undefined : `border-2 ${tierDetails.avatarBorder}`}
                                 />
                             )}
                         </div>
 
                         {/* Player Name, Username & Level Pill */}
-                        <div className="flex flex-col gap-2 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <h1 className="truncate text-3xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-4xl">
+                        <div className="flex flex-col gap-1 sm:gap-2 min-w-0 flex-1">
+                            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                                <h1 className="truncate text-xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-3xl md:text-4xl">
                                     {user.name || "Gamer"}
                                 </h1>
-                                <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-3 py-0.5 text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
-                                    <Sparkles className="h-3.5 w-3.5 text-amber-400" />
+                                <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-2 py-0.5 text-[10px] sm:text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+                                    <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                                     Lvl {level}
                                 </span>
                             </div>
@@ -166,7 +168,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                                 @{user.username || "user"}
                             </p>
 
-                            <div className="pt-1">
+                            <div className="pt-0.5 sm:pt-1 max-w-full">
                                 <TitleBadge title={equippedTitle} />
                             </div>
                         </div>
@@ -175,8 +177,8 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                     {/* COLUMN 2: CENTER - XP Progress Bar (4 cols) */}
                     <div className="flex flex-col justify-center gap-3 lg:col-span-4 lg:px-4">
                         {/* XP Progress Card - Sleek Translucent Glass */}
-                        <div className="flex flex-col gap-2.5 rounded-2xl border border-white/10 bg-black/60 p-4 shadow-xl backdrop-blur-md">
-                            <div className="flex justify-between text-xs font-black tracking-widest uppercase">
+                        <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/60 p-3 sm:p-4 shadow-xl backdrop-blur-md">
+                            <div className="flex flex-wrap items-center justify-between gap-1 text-[11px] sm:text-xs font-black tracking-wider uppercase">
                                 <span className="text-zinc-300 drop-shadow-sm">Career XP</span>
                                 <span className={`${tierDetails.titleColor} font-black drop-shadow-sm`}>
                                     {currentLevelXP} / {nextLevelXP} XP ({progressPercentage}%)
@@ -188,7 +190,7 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
                                     style={{ width: `${progressPercentage}%` }}
                                 />
                             </div>
-                            <div className="flex justify-between text-xs font-bold text-zinc-400">
+                            <div className="flex flex-wrap items-center justify-between gap-1 text-[10px] sm:text-xs font-bold text-zinc-400">
                                 <span>Total: {xpPoints} XP</span>
                                 <span>Próximo nível em {nextLevelXP - currentLevelXP} XP</span>
                             </div>

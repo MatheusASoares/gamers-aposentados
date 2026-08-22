@@ -98,13 +98,13 @@ export function GameAutocomplete({ onSelect, onCancel }: GameAutocompleteProps) 
             </div>
 
             {results.length > 0 && (
-                <div className="absolute top-full right-0 left-0 z-50 mt-2 max-h-80 overflow-hidden overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 shadow-2xl">
+                <div className="custom-scrollbar absolute top-full right-0 left-0 z-50 mt-2 max-h-60 sm:max-h-80 overflow-hidden overflow-y-auto rounded-xl border border-white/10 bg-zinc-900 shadow-2xl">
                     <div className="flex flex-col gap-1 p-2">
                         {results.map((game) => (
                             <button
                                 key={game.id}
                                 onClick={() => onSelect(game)}
-                                className="group flex w-full items-center gap-4 rounded-lg p-2 text-left transition-colors hover:bg-white/5"
+                                className="group flex w-full items-center gap-3 sm:gap-4 rounded-lg p-2 text-left transition-colors hover:bg-white/5 active:bg-white/10"
                             >
                                 <div className="relative flex size-10 shrink-0 items-center justify-center overflow-hidden rounded bg-zinc-800 md:size-12">
                                     {game.imageUrl ? (

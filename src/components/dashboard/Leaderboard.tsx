@@ -80,14 +80,14 @@ export function Leaderboard({ players }: LeaderboardProps) {
             </div>
 
             {/* Content: Side-by-side Duelo */}
-            <div className="relative z-10 grid grid-cols-2 divide-x divide-white/5 bg-zinc-950/60 p-5 backdrop-blur-md flex-1 items-center">
+            <div className="relative z-10 grid grid-cols-2 divide-x divide-white/5 bg-zinc-950/60 p-3 sm:p-5 backdrop-blur-md flex-1 items-center">
                 {players.map((player, idx) => {
                     return (
-                        <div key={idx} className="flex flex-col items-center px-4 py-4 text-center w-full">
+                        <div key={idx} className="flex flex-col items-center px-2 sm:px-4 py-3 sm:py-4 text-center w-full min-w-0">
                             {/* Avatar */}
-                            <div className="group relative mb-3">
+                            <div className="group relative mb-2 sm:mb-3">
                                 <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-amber-500 to-[#bd0df2] opacity-50 blur-md transition-all duration-500 group-hover:scale-110 group-hover:opacity-75" />
-                                <div className="relative flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border-2 border-white/10 bg-zinc-900 shadow-[0_0_20px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105">
+                                <div className="relative flex h-14 w-14 sm:h-16 sm:w-16 items-center justify-center overflow-hidden rounded-full border-2 border-white/10 bg-zinc-900 shadow-[0_0_20px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105">
                                     {player.image ? (
                                         <Image
                                             src={player.image}
@@ -97,7 +97,7 @@ export function Leaderboard({ players }: LeaderboardProps) {
                                             className="object-cover"
                                         />
                                     ) : (
-                                        <span className="text-xl font-black text-zinc-400 uppercase">
+                                        <span className="text-lg sm:text-xl font-black text-zinc-400 uppercase">
                                             {player.name[0]}
                                         </span>
                                     )}
@@ -105,23 +105,23 @@ export function Leaderboard({ players }: LeaderboardProps) {
                             </div>
 
                             {/* Name */}
-                            <h4 className="mb-4 text-[17px] font-black tracking-tight text-white uppercase">
+                            <h4 className="mb-3 sm:mb-4 text-sm sm:text-[17px] font-black tracking-tight text-white uppercase truncate max-w-full">
                                 {player.name}
                             </h4>
 
                             {/* Medals grid */}
-                            <div className="w-full space-y-3">
+                            <div className="w-full space-y-2 sm:space-y-3">
                                 {/* Main Quests (Gold) */}
-                                <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3.5 transition-all hover:bg-amber-500/20 hover:scale-[1.02] duration-300">
-                                    <div className="flex items-center gap-2.5">
-                                        <GoldMedalIcon className="h-5 w-5" />
-                                        <span className="text-xs font-bold tracking-wider text-amber-400/90 uppercase">
-                                            Main quests
+                                <div className="flex items-center justify-between rounded-xl border border-amber-500/30 bg-amber-500/10 px-2.5 py-2.5 sm:px-4 sm:py-3.5 transition-all hover:bg-amber-500/20 hover:scale-[1.02] duration-300">
+                                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+                                        <GoldMedalIcon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                                        <span className="text-[10px] sm:text-xs font-bold tracking-wider text-amber-400/90 uppercase truncate">
+                                            Main
                                         </span>
                                     </div>
                                     <Link
                                         href={`/reviews?user=${player.id}&type=MAIN_QUEST`}
-                                        className="text-xl font-black text-white hover:text-amber-400 hover:underline transition-colors duration-200"
+                                        className="text-base sm:text-xl font-black text-white hover:text-amber-400 hover:underline transition-colors duration-200 shrink-0"
                                         title={`Ver reviews de Main Quests do ${player.name}`}
                                     >
                                         {player.goldMedals}
@@ -129,16 +129,16 @@ export function Leaderboard({ players }: LeaderboardProps) {
                                 </div>
 
                                 {/* Side Quests (Purple/Magenta) */}
-                                <div className="flex items-center justify-between rounded-xl border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-4 py-3.5 transition-all hover:bg-[#bd0df2]/20 hover:scale-[1.02] duration-300">
-                                    <div className="flex items-center gap-2.5">
-                                        <SilverMedalIcon className="h-5 w-5" />
-                                        <span className="text-xs font-bold tracking-wider text-[#bd0df2] uppercase">
-                                            Side quests
+                                <div className="flex items-center justify-between rounded-xl border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-2.5 py-2.5 sm:px-4 sm:py-3.5 transition-all hover:bg-[#bd0df2]/20 hover:scale-[1.02] duration-300">
+                                    <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
+                                        <SilverMedalIcon className="h-4 w-4 sm:h-5 sm:w-5 shrink-0" />
+                                        <span className="text-[10px] sm:text-xs font-bold tracking-wider text-[#bd0df2] uppercase truncate">
+                                            Side
                                         </span>
                                     </div>
                                     <Link
                                         href={`/reviews?user=${player.id}&type=SIDE_QUEST`}
-                                        className="text-xl font-black text-white hover:text-[#bd0df2] hover:underline transition-colors duration-200"
+                                        className="text-base sm:text-xl font-black text-white hover:text-[#bd0df2] hover:underline transition-colors duration-200 shrink-0"
                                         title={`Ver reviews de Side Quests do ${player.name}`}
                                     >
                                         {player.silverMedals}

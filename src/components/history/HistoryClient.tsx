@@ -61,14 +61,14 @@ export function HistoryClient({
             <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
-            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col gap-12 px-6 py-8 md:px-8 lg:px-12 lg:py-12">
+            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col gap-6 sm:gap-12 px-2 sm:px-6 py-4 sm:py-8 md:px-8 lg:px-12 lg:py-12">
                 {/* Header Area */}
-                <div className="flex flex-col justify-between gap-8 border-b border-white/5 pb-8 lg:flex-row lg:items-end">
+                <div className="flex flex-col justify-between gap-6 sm:gap-8 border-b border-white/5 pb-6 sm:pb-8 lg:flex-row lg:items-end">
                     <div>
-                        <h1 className="text-shadow-glow mb-2 text-4xl font-black tracking-tight text-white lg:text-5xl">
+                        <h1 className="text-shadow-glow mb-1.5 sm:mb-2 text-3xl font-black tracking-tight text-white sm:text-4xl lg:text-5xl">
                             QUESTS HISTORY
                         </h1>
-                        <p className="text-lg font-medium tracking-wide text-zinc-400">
+                        <p className="text-sm sm:text-lg font-medium tracking-wide text-zinc-400">
                             Hall of fame and shame. See which games were conquered.
                         </p>
                     </div>

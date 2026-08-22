@@ -103,7 +103,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
             />
 
             {/* Cover Image Side (Top Banner) */}
-            <div className="relative flex h-64 w-full flex-shrink-0 items-end overflow-hidden sm:h-80">
+            <div className="relative flex min-h-[16rem] sm:min-h-[20rem] w-full flex-shrink-0 items-end overflow-hidden">
                 {game.cover_url ? (
                     <>
                         {/* Enlarged Blurred Background Image */}
@@ -121,9 +121,9 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                         <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
 
                         {/* Content overlapping the banner */}
-                        <div className="relative z-10 flex w-full flex-row items-end gap-6 p-6 sm:p-8">
+                        <div className="relative z-10 flex w-full flex-row items-end gap-4 p-4 sm:gap-6 sm:p-8">
                             {/* Crisp Box Art */}
-                            <div className="relative h-44 w-32 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
+                            <div className="relative h-36 w-28 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
                                 <Image
                                     alt={game.title}
                                     className="object-cover"
@@ -135,19 +135,19 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                             </div>
 
                             {/* Title Block */}
-                            <div className="flex h-44 sm:h-56 flex-col justify-start pb-2">
-                                <div className="mb-3 flex items-center gap-2">
+                            <div className="flex min-h-[9rem] sm:h-56 flex-col justify-start pb-1 sm:pb-2 min-w-0 flex-1">
+                                <div className="mb-2 sm:mb-3 flex items-center gap-2 flex-wrap">
                                     <span
-                                        className="relative z-10 flex cursor-default select-none items-center gap-2 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-4 py-1.5 text-sm font-black tracking-widest text-[#bd0df2] uppercase shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/20"
+                                        className="relative z-10 flex cursor-default select-none items-center gap-1.5 sm:gap-2 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-black tracking-widest text-[#bd0df2] uppercase shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/20"
                                     >
-                                        <Compass className="h-4 w-4" />
+                                        <Compass className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                         Side Quest
                                     </span>
                                 </div>
-                                <h2 className="text-4xl leading-[1.1] font-black tracking-tighter text-white drop-shadow-md sm:text-5xl">
+                                <h2 className="text-2xl leading-[1.15] font-black tracking-tighter text-white drop-shadow-md sm:text-4xl md:text-5xl line-clamp-2">
                                     {game.title}
                                 </h2>
-                                <p className="mt-auto text-sm font-medium text-zinc-400 pb-1">
+                                <p className="mt-auto text-xs sm:text-sm font-medium text-zinc-400 pb-1 truncate">
                                     Indicado por:{" "}
                                     {game.nominator ? (
                                         <span className="font-bold text-white transition-colors hover:text-[#bd0df2]">

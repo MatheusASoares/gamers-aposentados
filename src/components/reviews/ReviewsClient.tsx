@@ -111,14 +111,14 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                 style={{ backgroundImage: "url('/noise.svg')" }}
             />
 
-            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col px-6 py-8 md:px-8 lg:px-12 lg:py-12">
+            <div className="relative z-10 mx-auto flex w-full max-w-[1920px] flex-col px-2 sm:px-6 py-4 sm:py-8 md:px-8 lg:px-12 lg:py-12">
                 {/* Hero Header Section (Padrão do Aplicativo) */}
-                <div className="mb-10 flex flex-col justify-between gap-6 md:flex-row md:items-end">
-                    <div className="space-y-3">
-                        <h2 className="text-4xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-5xl">
+                <div className="mb-6 sm:mb-10 flex flex-col justify-between gap-5 sm:gap-6 md:flex-row md:items-end">
+                    <div className="space-y-1.5 sm:space-y-3">
+                        <h2 className="text-3xl font-black tracking-tight text-white uppercase drop-shadow-md sm:text-4xl md:text-5xl">
                             Game Reviews
                         </h2>
-                        <p className="max-w-2xl text-lg font-medium text-zinc-400">
+                        <p className="max-w-2xl text-sm sm:text-lg font-medium text-zinc-400">
                             Honest takes from the retired vanguard of the golden era.
                         </p>
                     </div>
@@ -148,7 +148,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                     <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         
                         {/* Campo de Busca */}
-                        <div className="relative flex-1 min-w-[280px]">
+                        <div className="relative flex-1 min-w-0 w-full">
                             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
                             <input
                                 type="text"
@@ -169,10 +169,10 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                         </div>
 
                         {/* Botões de Filtro de Quest */}
-                        <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+                        <div className="flex items-center gap-1.5 sm:gap-2 overflow-x-auto custom-scrollbar no-scrollbar pb-1 lg:pb-0 w-full lg:w-auto">
                             <button
                                 onClick={() => setFilterType("ALL")}
-                                className={`rounded-xl border px-4 py-2 text-xs font-black tracking-wider uppercase transition-all whitespace-nowrap ${
+                                className={`rounded-xl border px-3 sm:px-4 py-2 text-xs font-black tracking-wider uppercase transition-all whitespace-nowrap shrink-0 ${
                                     filterType === "ALL"
                                         ? "border-theme-primary/60 bg-theme-primary/15 text-theme-primary shadow-[0_0_15px_var(--theme-glow)]"
                                         : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"
@@ -182,7 +182,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                             </button>
                             <button
                                 onClick={() => setFilterType("MAIN_QUEST")}
-                                className={`rounded-xl border px-4 py-2 text-xs font-black tracking-wider uppercase transition-all whitespace-nowrap ${
+                                className={`rounded-xl border px-3 sm:px-4 py-2 text-xs font-black tracking-wider uppercase transition-all whitespace-nowrap shrink-0 ${
                                     filterType === "MAIN_QUEST"
                                         ? "border-amber-400/60 bg-amber-400/15 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)]"
                                         : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"
@@ -192,7 +192,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                             </button>
                             <button
                                 onClick={() => setFilterType("SIDE_QUEST")}
-                                className={`rounded-xl border px-4 py-2 text-xs font-black tracking-wider uppercase transition-all whitespace-nowrap ${
+                                className={`rounded-xl border px-3 sm:px-4 py-2 text-xs font-black tracking-wider uppercase transition-all whitespace-nowrap shrink-0 ${
                                     filterType === "SIDE_QUEST"
                                         ? "border-cyan-400/60 bg-cyan-400/15 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
                                         : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"
@@ -204,28 +204,28 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                     </div>
 
                     {/* Linha de Ordenação, Filtro de Usuário e Modo de Exibição */}
-                    <div className="flex flex-wrap items-center justify-between gap-4 pt-2 border-t border-theme/20 text-xs font-bold uppercase text-zinc-400">
-                        <div className="flex flex-wrap items-center gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 border-t border-theme/20 text-xs font-bold uppercase text-zinc-400">
+                        <div className="flex flex-wrap items-center gap-3">
                             
-                            <div className="flex items-center gap-2">
-                                <SlidersHorizontal className="h-3.5 w-3.5 text-theme-primary" />
+                            <div className="flex items-center gap-1.5">
+                                <SlidersHorizontal className="h-3.5 w-3.5 text-theme-primary shrink-0" />
                                 <span>Ordenar:</span>
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value as "NEWEST" | "HIGHEST_RATED")}
-                                    className="rounded-lg border border-theme/30 bg-zinc-900 px-3 py-1.5 font-bold text-white transition-colors focus:border-theme-primary focus:outline-none cursor-pointer"
+                                    className="rounded-lg border border-theme/30 bg-zinc-900 px-2.5 py-1.5 font-bold text-white transition-colors focus:border-theme-primary focus:outline-none cursor-pointer"
                                 >
                                     <option value="NEWEST">Mais Recentes</option>
                                     <option value="HIGHEST_RATED">Maior Nota</option>
                                 </select>
                             </div>
 
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                                 <span>Gamer:</span>
                                 <select
                                     value={filterUser}
                                     onChange={(e) => setFilterUser(e.target.value)}
-                                    className="rounded-lg border border-theme/30 bg-zinc-900 px-3 py-1.5 font-bold text-white transition-colors focus:border-theme-primary focus:outline-none cursor-pointer"
+                                    className="rounded-lg border border-theme/30 bg-zinc-900 px-2.5 py-1.5 font-bold text-white transition-colors focus:border-theme-primary focus:outline-none cursor-pointer"
                                 >
                                     <option value="ALL">Todos os Membros</option>
                                     {uniqueUsers.map((u) => (
@@ -237,14 +237,14 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-4 ml-auto">
-                            <span className="text-zinc-500 font-bold">
+                        <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
+                            <span className="text-zinc-500 font-bold text-[11px] sm:text-xs">
                                 Exibindo <strong className="text-white">{filteredReviews.length}</strong> de {reviews.length} reviews
                             </span>
-                            <div className="flex overflow-hidden rounded-xl border border-theme/30 bg-zinc-950 text-zinc-500">
+                            <div className="flex shrink-0 overflow-hidden rounded-xl border border-theme/30 bg-zinc-950 text-zinc-500">
                                 <button
                                     onClick={() => setViewMode("grid")}
-                                    className={`p-2 transition-colors ${
+                                    className={`p-1.5 sm:p-2 transition-colors ${
                                         viewMode === "grid"
                                             ? "bg-zinc-800 text-white"
                                             : "hover:bg-zinc-900 hover:text-white"
@@ -255,7 +255,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                 </button>
                                 <button
                                     onClick={() => setViewMode("list")}
-                                    className={`p-2 transition-colors ${
+                                    className={`p-1.5 sm:p-2 transition-colors ${
                                         viewMode === "list"
                                             ? "bg-zinc-800 text-white"
                                             : "hover:bg-zinc-900 hover:text-white"

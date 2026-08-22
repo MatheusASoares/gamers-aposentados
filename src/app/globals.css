@@ -649,3 +649,17 @@ html:not([data-theme]) .glass-card,
     animation: holoSweep 5s ease-in-out infinite;
 }
 
+/* Mobile Safe Area & Touch Enhancements */
+.pb-safe {
+    padding-bottom: max(env(safe-area-inset-bottom, 0px), 16px);
+}
+.pt-safe {
+    padding-top: max(env(safe-area-inset-top, 0px), 0px);
+}
+
+/* Eliminate tap delay / grey highlight on mobile web */
+* {
+    -webkit-tap-highlight-color: transparent;
+}
+
+

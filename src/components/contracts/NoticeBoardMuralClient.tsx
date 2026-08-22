@@ -337,7 +337,7 @@ export function NoticeBoardMuralClient({
                         onMouseLeave={drag.props.onMouseLeave}
                         onMouseUp={drag.props.onMouseUp}
                         onMouseMove={drag.props.onMouseMove}
-                        className={`custom-scrollbar flex gap-6 overflow-x-auto px-1 pt-1 pb-4 ${drag.props.className}`}
+                        className={`custom-scrollbar flex gap-4 sm:gap-6 overflow-x-auto snap-x snap-mandatory px-2 sm:px-1 pt-1 pb-4 ${drag.props.className}`}
                     >
                         {contracts.map((contract) => {
                             const progress = getUserProgress(contract);
@@ -348,10 +348,9 @@ export function NoticeBoardMuralClient({
                             const isLocked = status === "LOCKED";
                             const isCompleted = status === "COMPLETED";
                             const isAvailable = status === "AVAILABLE";
-                            const isMobileTarget = contract.id === mobileTargetContract?.id;
 
                             let cardClasses =
-                                "relative flex-shrink-0 min-h-[210px] p-6 rounded-lg border-2 transition-all duration-300 flex flex-col justify-between overflow-hidden ";
+                                "relative flex-shrink-0 min-h-[210px] p-5 sm:p-6 rounded-lg border-2 transition-all duration-300 flex flex-col justify-between overflow-hidden flex w-[82vw] max-w-[320px] sm:w-96 shrink-0 snap-center ";
                             let cornerColorClass = "";
 
                             if (isLocked) {
@@ -366,12 +365,6 @@ export function NoticeBoardMuralClient({
                                 cardClasses +=
                                     "bg-zinc-900/95 border-[#bd0df2] text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/20 hover:shadow-[0_0_30px_rgba(189,13,242,0.3)] hover:scale-[1.01] ";
                                 cornerColorClass = "text-[#bd0df2]";
-                            }
-
-                            if (isMobileTarget) {
-                                cardClasses += "flex w-[calc(100vw-3rem)] max-w-sm sm:w-96";
-                            } else {
-                                cardClasses += "hidden sm:flex sm:w-96";
                             }
 
                             return (

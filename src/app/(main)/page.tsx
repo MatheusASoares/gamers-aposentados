@@ -323,7 +323,7 @@ export default async function DashboardPage() {
         : null;
 
     return (
-        <div className="mx-auto w-full max-w-[1920px] space-y-8 px-6 py-8 md:px-8 lg:px-12 lg:py-12">
+        <div className="mx-auto w-full max-w-[1920px] space-y-6 sm:space-y-8 px-2 sm:px-6 py-3 sm:py-8 md:px-8 lg:px-12 lg:py-12">
             {/* Gamification Profile Banner */}
             {userWidgetData && (
                 <div className="w-full">

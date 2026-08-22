@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Providers } from "@/components/providers";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -18,8 +18,19 @@ export const metadata: Metadata = {
     manifest: "/site.webmanifest",
     appleWebApp: {
         title: "Gamers Aposentados",
+        capable: true,
+        statusBarStyle: "black-translucent",
     },
 };
+
+export const viewport: Viewport = {
+    themeColor: "#09090b",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    viewportFit: "cover",
+};
+
 
 export default function RootLayout({ children }: { children: ReactNode }) {
     return (

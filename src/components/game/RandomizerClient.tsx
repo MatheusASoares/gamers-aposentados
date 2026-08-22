@@ -523,23 +523,23 @@ export function RandomizerClient({
     // --- Handlers ---
 
     return (
-        <div className="relative mx-auto min-h-screen w-full px-6 py-8">
+        <div className="relative mx-auto min-h-screen w-full px-2 sm:px-6 py-4 sm:py-8">
             {/* Background effects */}
             <div className="absolute inset-0 z-0 bg-gradient-to-b from-transparent via-black/30 to-black/50" />
             <div className="pointer-events-none absolute inset-0 z-0 bg-[url('/noise.svg')] opacity-[0.03] mix-blend-overlay" />
 
-            <div className="relative z-10 flex w-full flex-col gap-8">
+            <div className="relative z-10 flex w-full flex-col gap-6 sm:gap-8">
                 {/* Header Area (Padrão do Aplicativo) */}
-                <div className="flex flex-col justify-between gap-6 border-b border-white/5 pb-8 md:flex-row md:items-end">
-                    <div className="space-y-3">
-                        <h2 className="text-4xl font-black tracking-tight text-white uppercase drop-shadow-md md:text-5xl">
+                <div className="flex flex-col justify-between gap-5 sm:gap-6 border-b border-white/5 pb-6 sm:pb-8 md:flex-row md:items-end">
+                    <div className="space-y-1.5 sm:space-y-3">
+                        <h2 className="text-3xl font-black tracking-tight text-white uppercase drop-shadow-md sm:text-4xl md:text-5xl">
                             The Great Randomizer
                         </h2>
-                        <p className="max-w-2xl text-lg font-medium text-zinc-400">
+                        <p className="max-w-2xl text-sm sm:text-lg font-medium text-zinc-400">
                             May the RNG be in your favor, Commander.
                         </p>
                     </div>
-                    <div className="relative flex w-full max-w-[380px] flex-shrink-0 rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md sm:inline-flex sm:w-[400px]">
+                    <div className="relative flex w-full rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md sm:inline-flex sm:w-[400px]">
                         <div
                             className={cn(
                                 "ease-spring absolute top-1 bottom-1 left-1 w-[calc(50%-0.5rem)] rounded-xl transition-all duration-500",
@@ -1217,31 +1217,31 @@ export function RandomizerClient({
                         )}
                     </div>
 
-                    <div className="relative z-10 flex max-w-2xl flex-col items-center justify-center gap-8 text-center">
+                    <div className="relative z-10 flex max-w-2xl flex-col items-center justify-center gap-6 sm:gap-8 text-center w-full px-2">
                         {/* THEMED EMBLEM CONTAINER */}
-                        <div className="relative flex h-52 w-52 items-center justify-center perspective-[1000px]">
+                        <div className="relative flex h-40 w-40 sm:h-52 sm:w-52 items-center justify-center perspective-[1000px]">
                             {equippedTheme === "theme-medieval" ? (
                                 /* MEDIEVAL FLAMING RUNE EMBLEM */
-                                <div className="relative flex h-44 w-44 items-center justify-center rounded-3xl border-4 border-amber-500 bg-gradient-to-br from-amber-950 via-stone-900 to-black p-4 shadow-[0_0_90px_rgba(245,158,11,0.9),inset_0_0_35px_rgba(245,158,11,0.5)] animate-bounce">
+                                <div className="relative flex h-36 w-36 sm:h-44 sm:w-44 items-center justify-center rounded-3xl border-4 border-amber-500 bg-gradient-to-br from-amber-950 via-stone-900 to-black p-4 shadow-[0_0_90px_rgba(245,158,11,0.9),inset_0_0_35px_rgba(245,158,11,0.5)] animate-bounce">
                                     <div className="absolute inset-0 rounded-3xl border-2 border-dashed border-amber-400/50 animate-spin" />
                                     <ThemedEmblemIcon theme="theme-medieval" />
                                     <Flame className="absolute -bottom-3 -left-3 h-10 w-10 text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.8)] animate-pulse" />
                                 </div>
                             ) : equippedTheme === "theme-space" ? (
                                 /* SPACE QUANTUM GYROSCOPE EMBLEM */
-                                <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-4 border-sky-400 bg-gradient-to-br from-slate-950 via-sky-950 to-black p-4 shadow-[0_0_90px_rgba(56,189,248,0.9),inset_0_0_35px_rgba(56,189,248,0.5)] animate-pulse">
+                                <div className="relative flex h-36 w-36 sm:h-44 sm:w-44 items-center justify-center rounded-full border-4 border-sky-400 bg-gradient-to-br from-slate-950 via-sky-950 to-black p-4 shadow-[0_0_90px_rgba(56,189,248,0.9),inset_0_0_35px_rgba(56,189,248,0.5)] animate-pulse">
                                     <div className="absolute inset-0 rounded-full border-2 border-cyan-300/70 animate-spin" />
                                     <div className="absolute inset-2 rounded-full border border-dashed border-amber-400/60 animate-spin" />
                                     <ThemedEmblemIcon theme="theme-space" />
                                 </div>
                             ) : equippedTheme === "theme-pixel" ? (
                                 /* PIXEL ART 16-BIT RETRO EMBLEM */
-                                <div className="relative flex h-44 w-44 items-center justify-center rounded-2xl border-4 border-amber-400 bg-indigo-950 p-4 shadow-[0_0_90px_rgba(34,197,94,0.9),inset_0_0_0_3px_#06b6d4] animate-bounce">
+                                <div className="relative flex h-36 w-36 sm:h-44 sm:w-44 items-center justify-center rounded-2xl border-4 border-amber-400 bg-indigo-950 p-4 shadow-[0_0_90px_rgba(34,197,94,0.9),inset_0_0_0_3px_#06b6d4] animate-bounce">
                                     <ThemedEmblemIcon theme="theme-pixel" />
                                 </div>
                             ) : (
                                 /* CYBERPUNK NEON HOLO EMBLEM */
-                                <div className="relative flex h-44 w-44 items-center justify-center rounded-3xl border-4 border-[#bd0df2] border-l-4 border-l-[#06b6d4] bg-gradient-to-br from-purple-950 via-zinc-950 to-black p-4 shadow-[0_0_90px_rgba(189,13,242,0.9),0_0_40px_rgba(6,182,212,0.6)] animate-pulse">
+                                <div className="relative flex h-36 w-36 sm:h-44 sm:w-44 items-center justify-center rounded-3xl border-4 border-[#bd0df2] border-l-4 border-l-[#06b6d4] bg-gradient-to-br from-purple-950 via-zinc-950 to-black p-4 shadow-[0_0_90px_rgba(189,13,242,0.9),0_0_40px_rgba(6,182,212,0.6)] animate-pulse">
                                     <div className="absolute inset-0 rounded-3xl border-2 border-cyan-400/50 animate-spin" />
                                     <ThemedEmblemIcon theme="cyberpunk" />
                                 </div>
@@ -1252,7 +1252,7 @@ export function RandomizerClient({
                         <div className="flex w-full flex-col items-center gap-4">
                             <span
                                 className={cn(
-                                    "text-xs font-black tracking-widest uppercase",
+                                    "text-xs font-black tracking-widest uppercase px-2",
                                     equippedTheme === "theme-medieval"
                                         ? "font-serif text-amber-400"
                                         : equippedTheme === "theme-space"
@@ -1271,10 +1271,10 @@ export function RandomizerClient({
                                     : "👾 NETRUNNER PROTOCOL: EXECUTING HOLO-ROULETTE..."}
                             </span>
 
-                            <div className="glass-card border border-theme bg-theme-card relative w-full overflow-hidden rounded-2xl px-8 py-6 shadow-2xl backdrop-blur-xl">
+                            <div className="glass-card border border-theme bg-theme-card relative w-full overflow-hidden rounded-2xl px-4 py-4 sm:px-8 sm:py-6 shadow-2xl backdrop-blur-xl">
                                 <span
                                     className={cn(
-                                        "block truncate text-3xl font-black tracking-wide drop-shadow-lg md:text-4xl lg:text-5xl",
+                                        "block truncate text-xl sm:text-3xl font-black tracking-wide drop-shadow-lg md:text-4xl lg:text-5xl",
                                         equippedTheme === "theme-medieval"
                                             ? "font-serif text-amber-300"
                                             : equippedTheme === "theme-space"

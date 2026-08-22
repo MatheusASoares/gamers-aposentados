@@ -1,7 +1,7 @@
 "use client";
 import { useState } from "react";
 import Link from "next/link";
-import { Gamepad2, CheckCircle, XCircle, RefreshCw, Swords } from "lucide-react";
+import { Gamepad2, CheckCircle, XCircle, RefreshCw, Swords, Scroll } from "lucide-react";
 import { updateQuestProgress, completeQuest, dropQuest, joinQuest } from "@/app/lib/quest-actions";
 import { useRouter } from "next/navigation";
 import { UserLink } from "@/components/ui/user-link";
@@ -106,7 +106,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
             />
 
             {/* Cover Image Side (Top Banner) */}
-            <div className="relative flex h-64 w-full flex-shrink-0 items-end overflow-hidden sm:h-80">
+            <div className="relative flex min-h-[16rem] sm:min-h-[20rem] w-full flex-shrink-0 items-end overflow-hidden">
                 {game.cover_url ? (
                     <>
                         {/* Enlarged Blurred Background Image */}
@@ -124,9 +124,9 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                         <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
 
                         {/* Content overlapping the banner */}
-                        <div className="relative z-10 flex w-full flex-row items-end gap-6 p-6 sm:p-8">
+                        <div className="relative z-10 flex w-full flex-row items-end gap-4 p-4 sm:gap-6 sm:p-8">
                             {/* Crisp Box Art */}
-                            <div className="relative h-44 w-32 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
+                            <div className="relative h-36 w-28 flex-shrink-0 overflow-hidden rounded-xl border border-white/10 shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-500 group-hover:scale-105 sm:h-56 sm:w-40">
                                 <Image
                                     alt={game.title}
                                     className="object-cover"
@@ -138,19 +138,19 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                             </div>
 
                             {/* Title Block */}
-                            <div className="flex h-44 sm:h-56 flex-col justify-start pb-2">
-                                <div className="mb-3 flex items-center gap-2">
+                            <div className="flex min-h-[9rem] sm:h-56 flex-col justify-start pb-1 sm:pb-2 min-w-0 flex-1">
+                                <div className="mb-2 sm:mb-3 flex items-center gap-2 flex-wrap">
                                     <span
-                                        className="relative z-10 flex cursor-default select-none items-center gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-4 py-1.5 text-sm font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.15)] ring-1 ring-amber-400/20"
+                                        className="relative z-10 flex cursor-default select-none items-center gap-1.5 sm:gap-2 rounded-full border border-amber-400/30 bg-amber-400/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.15)] ring-1 ring-amber-400/20"
                                     >
-                                        <Swords className="h-4 w-4" />
+                                        <Swords className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                         Main Quest
                                     </span>
                                 </div>
-                                <h2 className="text-4xl leading-[1.1] font-black tracking-tighter text-white drop-shadow-md sm:text-5xl">
+                                <h2 className="text-2xl leading-[1.15] font-black tracking-tighter text-white drop-shadow-md sm:text-4xl md:text-5xl line-clamp-2">
                                     {game.title}
                                 </h2>
-                                <p className="mt-auto text-sm font-medium text-zinc-400 pb-1">
+                                <p className="mt-auto text-xs sm:text-sm font-medium text-zinc-400 pb-1 truncate">
                                     Indicado por:{" "}
                                     {game.nominator ? (
                                         <span className="font-bold text-white transition-colors hover:text-[#bd0df2]">
@@ -351,12 +351,19 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                                         }
                                         setIsLoading(false);
                                     }}
-                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 py-3 text-sm font-bold text-red-500 transition-all hover:border-red-500/40 hover:bg-red-500/20 disabled:opacity-50"
+                                    className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-red-500/20 bg-red-500/10 py-3 text-sm font-bold text-red-500 transition-all hover:border-red-500/40 hover:bg-red-500/20 disabled:opacity-50 min-h-[44px]"
                                 >
                                     <XCircle className="h-5 w-5" />
                                     DROPAR
                                 </button>
                             </div>
+                            <Link
+                                href="/board"
+                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-zinc-900/60 py-2.5 text-xs font-black tracking-widest text-zinc-400 uppercase transition-all hover:bg-theme-primary/10 hover:border-theme-primary/40 hover:text-theme-primary min-h-[40px] active:scale-98"
+                            >
+                                <Scroll className="h-4 w-4 text-rose-400" />
+                                <span>Ver Mural de Contratos</span>
+                            </Link>
                         </>
                     )}
                 </div>

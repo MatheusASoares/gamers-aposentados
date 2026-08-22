@@ -32,7 +32,7 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
   if (!activeEffect) return null;
 
   return (
-    <div className={`pointer-events-none absolute inset-0 z-10 overflow-hidden ${className}`}>
+    <div className={`pointer-events-none absolute inset-0 z-10 overflow-hidden contain-paint will-change-transform ${className}`}>
       {/* 1. RETRO SCANLINE EFFECT */}
       {activeEffect === "scanline" && (
         <div className="relative h-full w-full">
@@ -60,12 +60,12 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
           <div className="absolute top-0 right-1/4 h-56 w-56 rounded-full bg-rose-600/30 blur-3xl animate-pulse" />
           <div className="absolute bottom-0 left-0 h-40 w-40 rounded-full bg-amber-500/20 blur-2xl" />
 
-          {/* Ember Particles Ascending */}
+          {/* Ember Particles Ascending (Throttled for mobile battery / Full on desktop) */}
           <div className="absolute inset-0 opacity-80">
             <div className="absolute bottom-4 left-1/4 h-2 w-2 rounded-full bg-amber-400 shadow-[0_0_12px_#fbbf24] animate-ping" />
             <div className="absolute bottom-8 left-1/2 h-1.5 w-1.5 rounded-full bg-orange-500 shadow-[0_0_10px_#f97316] animate-pulse" />
-            <div className="absolute bottom-12 left-3/4 h-2 w-2 rounded-full bg-red-500 shadow-[0_0_14px_#ef4444] animate-ping" />
-            <div className="absolute bottom-16 left-1/3 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#fde047] animate-pulse" />
+            <div className="hidden sm:block absolute bottom-12 left-3/4 h-2 w-2 rounded-full bg-red-500 shadow-[0_0_14px_#ef4444] animate-ping" />
+            <div className="hidden sm:block absolute bottom-16 left-1/3 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_8px_#fde047] animate-pulse" />
           </div>
 
           {/* Gold Nordic Rune Border Accent */}
@@ -84,7 +84,7 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
           <div className="absolute inset-0 opacity-85">
             <div className="absolute top-1/3 left-1/4 h-2.5 w-2.5 rounded-full bg-cyan-200 shadow-[0_0_15px_#a5f3fc] animate-ping" />
             <div className="absolute top-1/2 left-3/4 h-3 w-3 rounded-full bg-purple-300 shadow-[0_0_18px_#d8b4fe] animate-pulse" />
-            <div className="absolute bottom-1/4 left-1/2 h-2 w-2 rounded-full bg-white shadow-[0_0_12px_#ffffff] animate-ping" />
+            <div className="hidden sm:block absolute bottom-1/4 left-1/2 h-2 w-2 rounded-full bg-white shadow-[0_0_12px_#ffffff] animate-ping" />
           </div>
 
           {/* Celestial Holographic Border */}
@@ -103,8 +103,8 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
           <div className="absolute inset-0 opacity-70">
             <div className="absolute top-1/4 left-1/5 h-1.5 w-1.5 rounded-full bg-cyan-300 shadow-[0_0_8px_#67e8f9] animate-ping" />
             <div className="absolute top-2/3 left-3/4 h-2 w-2 rounded-full bg-purple-300 shadow-[0_0_10px_#d8b4fe] animate-pulse" />
-            <div className="absolute top-1/3 left-2/3 h-1 w-1 rounded-full bg-white shadow-[0_0_6px_#ffffff] animate-ping" />
-            <div className="absolute top-3/4 left-1/4 h-1.5 w-1.5 rounded-full bg-amber-200 shadow-[0_0_8px_#fde68a] animate-pulse" />
+            <div className="hidden sm:block absolute top-1/3 left-2/3 h-1 w-1 rounded-full bg-white shadow-[0_0_6px_#ffffff] animate-ping" />
+            <div className="hidden sm:block absolute top-3/4 left-1/4 h-1.5 w-1.5 rounded-full bg-amber-200 shadow-[0_0_8px_#fde68a] animate-pulse" />
           </div>
         </div>
       )}
@@ -138,9 +138,9 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
           <div className="absolute inset-0 opacity-80">
             <div className="absolute top-1/4 left-1/6 h-2 w-2 rounded-full bg-pink-300 shadow-[0_0_10px_#f472b6] animate-ping" />
             <div className="absolute bottom-1/3 left-1/3 h-1.5 w-1.5 rounded-full bg-amber-300 shadow-[0_0_12px_#fde047] animate-pulse" />
-            <div className="absolute top-1/3 right-1/4 h-2 w-2 rounded-full bg-pink-200 shadow-[0_0_12px_#fbcfe8] animate-pulse" />
-            <div className="absolute bottom-1/4 right-1/3 h-1.5 w-1.5 rounded-full bg-yellow-400 shadow-[0_0_14px_#facc15] animate-ping" />
-            <div className="absolute top-1/2 left-2/3 h-1 w-1 rounded-full bg-white shadow-[0_0_8px_#ffffff] animate-ping" />
+            <div className="hidden sm:block absolute top-1/3 right-1/4 h-2 w-2 rounded-full bg-pink-200 shadow-[0_0_12px_#fbcfe8] animate-pulse" />
+            <div className="hidden sm:block absolute bottom-1/4 right-1/3 h-1.5 w-1.5 rounded-full bg-yellow-400 shadow-[0_0_14px_#facc15] animate-ping" />
+            <div className="hidden sm:block absolute top-1/2 left-2/3 h-1 w-1 rounded-full bg-white shadow-[0_0_8px_#ffffff] animate-ping" />
           </div>
 
           {/* Cherry Blossom & Japanese Gold Border Accent */}

@@ -102,7 +102,7 @@ export function FavoriteGamesModule({
 
     return (
         <div
-            className={`glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[1.5rem] p-6 shadow-2xl backdrop-blur-md transition-colors ${
+            className={`glass-card border border-theme bg-theme-card relative flex flex-col overflow-hidden rounded-[1.5rem] p-3.5 sm:p-6 shadow-2xl backdrop-blur-md transition-colors w-full min-w-0 ${
                 isEditing ? "z-50" : "z-10"
             }`}
         >
