@@ -82,23 +82,23 @@ export function TopDealsCarousel({
     }> = [
         {
             id: "best_savings",
-            label: "Vantagem Cambial",
-            icon: <Flame className="h-3.5 w-3.5 text-orange-400" />,
+            label: "Vantagem BR",
+            icon: <Flame className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />,
         },
         {
             id: "historical_low",
-            label: "Recordes Históricos",
-            icon: <Trophy className="h-3.5 w-3.5 text-amber-400" />,
+            label: "Recordes",
+            icon: <Trophy className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />,
         },
         {
             id: "curated_specials",
-            label: "Grandes Sucessos",
-            icon: <Sparkles className="h-3.5 w-3.5 text-fuchsia-400" />,
+            label: "Destaques AAA",
+            icon: <Sparkles className="h-3.5 w-3.5 text-fuchsia-400 flex-shrink-0" />,
         },
         {
             id: "monitored",
-            label: "Meus Monitorados",
-            icon: <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400/30" />,
+            label: "Favoritos",
+            icon: <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400/30 flex-shrink-0" />,
             badge: monitoredCount,
         },
     ];
@@ -106,7 +106,6 @@ export function TopDealsCarousel({
     const storeOptions: Array<{ id: StoreFilterType; label: string; icon: React.ReactNode }> = [
         { id: "all", label: "Todas as Lojas", icon: <ShoppingBag className="h-3 w-3" /> },
         { id: "steam", label: "Só Steam", icon: <Gamepad2 className="h-3 w-3 text-cyan-400" /> },
-        { id: "nuuvem", label: "Nuuvem (PIX)", icon: <Store className="h-3 w-3 text-emerald-400" /> },
     ];
 
     const isMonitoredTab = activeFilter === "monitored";
@@ -133,27 +132,22 @@ export function TopDealsCarousel({
             {/* Header with Title and Filter Tabs */}
             <div className="flex flex-col gap-4 border-b border-theme/20 pb-4 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-md">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500/20 text-orange-400 border border-orange-500/30 shadow-md flex-shrink-0">
                         <Flame className="h-5 w-5 fill-orange-400" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black tracking-tight text-white uppercase flex items-center gap-2.5">
+                        <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase flex items-center gap-2.5">
                             Vitrine de Deals
                             <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
-                                {totalDeals} {isMonitoredTab ? "Monitorados" : "Ofertas"}
+                                {totalDeals} {isMonitoredTab ? "Favoritos" : "Ofertas"}
                             </span>
                         </h3>
-                        <p className="text-xs font-medium text-zinc-400">
-                            {isMonitoredTab
-                                ? "Seus jogos favoritos salvos com alerta e radar de preços em tempo real"
-                                : "Apenas jogos base e títulos consagrados com vantagens reais na Steam Family"}
-                        </p>
                     </div>
                 </div>
 
-                {/* 4 Main Filter Pills */}
+                {/* 4 Main Filter Pills (2x2 Grid) */}
                 {onFilterChange && (
-                    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-theme/30 bg-zinc-900/60 p-1.5 shadow-xl backdrop-blur-md">
+                    <div className="grid grid-cols-2 gap-2 rounded-2xl border border-theme/30 bg-zinc-900/60 p-1.5 shadow-xl backdrop-blur-md w-full sm:w-auto">
                         {filterOptions.map((opt) => {
                             const isActive = activeFilter === opt.id;
                             return (
@@ -163,14 +157,14 @@ export function TopDealsCarousel({
                                     onClick={() => onFilterChange(opt.id)}
                                     disabled={isLoading}
                                     className={cn(
-                                        "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all duration-300",
+                                        "flex items-center justify-center sm:justify-start gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-300 whitespace-nowrap",
                                         isActive
                                             ? "border border-theme-primary bg-theme-primary/20 text-white shadow-[0_0_15px_var(--theme-glow)]"
                                             : "border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/40",
                                     )}
                                 >
                                     {opt.icon}
-                                    <span>{opt.label}</span>
+                                    <span className="whitespace-nowrap">{opt.label}</span>
                                     {opt.badge !== undefined && opt.badge > 0 && (
                                         <span className={cn(
                                             "ml-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-black",
@@ -188,11 +182,11 @@ export function TopDealsCarousel({
 
             {/* Store Micro-Filters (Only shown on deals tabs, not on monitored tab) */}
             {!isMonitoredTab && onStoreFilterChange && (
-                <div className="flex items-center justify-between gap-2 pt-1">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
                     <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
                         Filtrar Loja / Ativação:
                     </span>
-                    <div className="flex items-center gap-1.5">
+                    <div className="flex flex-wrap items-center gap-1.5">
                         {storeOptions.map((storeOpt) => {
                             const isStoreActive = storeFilter === storeOpt.id;
                             return (
@@ -218,7 +212,7 @@ export function TopDealsCarousel({
 
             {/* Empty State */}
             {(!currentList || currentList.length === 0) && (
-                <div className="glass-card border border-theme bg-theme-card flex flex-col items-center justify-center rounded-2xl p-12 text-center">
+                <div className="glass-card border border-theme bg-theme-card flex flex-col items-center justify-center rounded-2xl p-8 sm:p-12 text-center">
                     {isMonitoredTab ? (
                         <>
                             <Star className="h-10 w-10 text-yellow-400/60 mb-2.5 animate-pulse" />
@@ -234,7 +228,7 @@ export function TopDealsCarousel({
                                 Nenhum deal encontrado para este filtro no momento.
                             </p>
                             <p className="text-xs text-zinc-500 mt-1">
-                                Tente alternar para a aba &quot;Vantagem Cambial&quot; ou remover os filtros de loja.
+                                Tente alternar para a aba &quot;Vantagem BR&quot; ou alterar os filtros de loja.
                             </p>
                         </>
                     )}
@@ -311,13 +305,13 @@ export function TopDealsCarousel({
                                                 }}
                                                 title={tracked ? "Remover dos monitorados" : "Monitorar este jogo"}
                                                 className={cn(
-                                                    "flex h-7 w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
+                                                    "flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
                                                     tracked
                                                         ? "border-pink-500/60 bg-pink-950/80 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.4)]"
                                                         : "border-white/10 bg-black/60 text-zinc-400 hover:text-pink-400 hover:border-pink-400/40",
                                                 )}
                                             >
-                                                <Heart className={cn("h-3.5 w-3.5", tracked && "fill-pink-500")} />
+                                                <Heart className={cn("h-4 w-4 sm:h-3.5 sm:w-3.5", tracked && "fill-pink-500")} />
                                             </button>
                                         )}
 

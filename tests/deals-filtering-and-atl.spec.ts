@@ -137,6 +137,52 @@ test.describe("Deals Filtering, Normalization and ATL Logic", () => {
         expect(result.every((i) => i.storeBR.toLowerCase().includes("nuuvem") || i.storeUS.toLowerCase().includes("nuuvem"))).toBe(true);
     });
 
+    test("filters out meme and shovelware titles", () => {
+        const listWithMemes: FeaturedDealItem[] = [
+            ...mockDeals,
+            {
+                id: "meme-1",
+                title: "Hentai Waifu Puzzle 2024",
+                slug: "hentai-waifu-puzzle",
+                steamAppId: 9999,
+                discountPercent: 90,
+                priceUS: 0.99,
+                priceBR: 2.0,
+                convertedBRInUSD: 0,
+                winningRegion: "EQUAL",
+                savingsPercent: 50,
+                storeUS: "Steam",
+                storeBR: "Steam",
+                isAllTimeLow: true,
+            },
+            {
+                id: "meme-2",
+                title: "Anime Girl Clicker Simulator",
+                slug: "anime-girl-clicker",
+                steamAppId: 9998,
+                discountPercent: 95,
+                priceUS: 0.49,
+                priceBR: 1.5,
+                convertedBRInUSD: 0,
+                winningRegion: "EQUAL",
+                savingsPercent: 40,
+                storeUS: "Steam",
+                storeBR: "Steam",
+                isAllTimeLow: true,
+            },
+        ];
+
+        const result = DealComparator.normalizeFeaturedDeals(
+            listWithMemes,
+            mockCurrencyRate,
+            "historical_low",
+            "all",
+        );
+
+        expect(result.some((i) => i.title.toLowerCase().includes("hentai"))).toBe(false);
+        expect(result.some((i) => i.title.toLowerCase().includes("clicker"))).toBe(false);
+    });
+
     test("deduplicates identical games by title or steamAppId", () => {
         const duplicateList: FeaturedDealItem[] = [
             ...mockDeals,

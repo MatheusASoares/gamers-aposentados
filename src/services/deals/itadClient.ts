@@ -24,9 +24,15 @@ const OFFICIAL_STORE_IDENTIFIERS: Record<string, { id: StoreId; name: string }> 
     "fanatical": { id: "other", name: "Fanatical" },
 };
 
+import { CURATED_GAMES_POOL } from "./curatedGames";
+
 // Regex to filter out redundant editions, DLCs, soundtracks, packs and passes
 export const EDITION_EXCLUDE_REGEX =
     /\b(deluxe|ultimate|gold edition|collector'?s?|bundle|soundtrack|artbook|pass|dlc|expansion|season pass|costume|skin|upgrade pack|starter pack|edition upgrade|platinum edition|supporter pack)\b/i;
+
+// Regex to filter out meme games, asset flips, hentai/puzzle shovelware
+export const SHOVELWARE_EXCLUDE_REGEX =
+    /\b(hentai|waifu|anime girl|ecchi|furry|sexy|puzzle girl|sex with|simulator 202|clicker|achievement hunter|idle|runner 3d|zombie survival craft|hot girl|strip|succubus|nsfw|dating sim|boobs|nude|milf)\b/i;
 
 interface ItadDealItemRaw {
     id: string;
@@ -218,8 +224,8 @@ export class ItadClient {
             cacheKey,
             async () => {
                 try {
-                    const limit = filter === "historical_low" ? "120" : filter === "best_savings" ? "120" : "80";
-                    const sortParam = filter === "historical_low" ? "-cut" : "-trending";
+                    const limit = "150";
+                    const sortParam = "-trending";
 
                     const urlBR = new URL(`${ITAD_API_BASE}/deals/v2`);
                     urlBR.searchParams.set("key", apiKey);
@@ -296,9 +302,19 @@ export class ItadClient {
                         if (item.type && item.type !== "game") continue;
                         // Filter editions & DLCs
                         if (EDITION_EXCLUDE_REGEX.test(item.title)) continue;
-                        // Filter low-value shovelware
+                        // Filter meme games and shovelware
+                        if (SHOVELWARE_EXCLUDE_REGEX.test(item.title)) continue;
+
+                        // Filter low-value shovelware (unless it is in the curated pool)
                         const regularPrice = Number(deal.regular?.amount ?? 0);
-                        if (regularPrice < 15) continue;
+                        const currentPrice = Number(deal.price?.amount ?? 0);
+                        const isCurated = CURATED_GAMES_POOL.some(
+                            (cg) => cg.slug === item.slug || item.title.toLowerCase().includes(cg.title.toLowerCase()),
+                        );
+
+                        if (!isCurated) {
+                            if (regularPrice < 35 || currentPrice < 5) continue;
+                        }
 
                         const shopId = String(deal.shop?.id || "");
                         const shopName = String(deal.shop?.name || "").toLowerCase();

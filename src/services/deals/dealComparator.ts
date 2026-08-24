@@ -10,6 +10,7 @@ import {
     WinningRegion,
 } from "@/types/deals";
 import { CurrencyService } from "./currencyService";
+import { SHOVELWARE_EXCLUDE_REGEX } from "./itadClient";
 
 export class DealComparator {
     /**
@@ -175,6 +176,7 @@ export class DealComparator {
         let normalized = uniqueItems
             .filter(
                 (item) =>
+                    !SHOVELWARE_EXCLUDE_REGEX.test(item.title) &&
                     !(item.priceUS > 0 && item.priceBR <= 0) &&
                     !(item.priceBR > 0 && item.priceUS <= 0),
             )
@@ -208,8 +210,8 @@ export class DealComparator {
                     absoluteSavingsBRL = Number((item.priceBR - convertedUSInBRL).toFixed(2));
                 }
 
-                // If item discount is high (>= 60%) or flag was set, consider it an all-time low candidate
-                const isAllTimeLow = Boolean(item.isAllTimeLow || item.discountPercent >= 65);
+                // Use strict all-time low flag from price trackers
+                const isAllTimeLow = Boolean(item.isAllTimeLow);
 
                 return {
                     ...item,

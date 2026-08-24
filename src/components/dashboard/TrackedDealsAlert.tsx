@@ -99,10 +99,10 @@ export function TrackedDealsAlert() {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end pt-1 sm:pt-0">
                     <Link
                         href="/deals"
-                        className="flex items-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-1.5 text-xs font-black text-amber-300 transition-all hover:bg-amber-500 hover:text-black hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] active:scale-95"
+                        className="flex flex-1 sm:flex-initial items-center justify-center gap-1.5 rounded-xl border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-xs font-black text-amber-300 transition-all hover:bg-amber-500 hover:text-black hover:shadow-[0_0_15px_rgba(245,158,11,0.3)] active:scale-95 min-h-[38px]"
                     >
                         <span>Ver no Deals Tracker</span>
                         <ArrowRight className="h-3.5 w-3.5" />
@@ -111,10 +111,11 @@ export function TrackedDealsAlert() {
                     <button
                         type="button"
                         onClick={handleDismiss}
-                        className="flex h-7 w-7 items-center justify-center rounded-lg border border-white/5 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors"
+                        className="flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 text-zinc-400 hover:bg-white/10 hover:text-white transition-colors flex-shrink-0"
                         title="Fechar aviso"
+                        aria-label="Fechar aviso de recorde histórico"
                     >
-                        <X className="h-3.5 w-3.5" />
+                        <X className="h-4 w-4" />
                     </button>
                 </div>
             </div>
