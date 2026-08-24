@@ -13,58 +13,107 @@ import {
     Sparkles,
     ChevronLeft,
     ChevronRight,
+    Star,
+    Heart,
+    Trash2,
+    Store,
+    ShoppingBag,
 } from "lucide-react";
-import { FeaturedDealItem, DealFilterType } from "@/types/deals";
+import {
+    FeaturedDealItem,
+    DealFilterType,
+    StoreFilterType,
+    TrackedDealItem,
+} from "@/types/deals";
 import { cn } from "@/lib/utils";
 
 const ITEMS_PER_PAGE = 12;
 
 interface TopDealsCarouselProps {
     deals: FeaturedDealItem[];
-    onSelectDeal: (deal: FeaturedDealItem) => void;
+    trackedDeals?: TrackedDealItem[];
+    onSelectDeal: (deal: FeaturedDealItem | TrackedDealItem) => void;
     selectedId?: string | null;
     activeFilter?: DealFilterType;
     onFilterChange?: (filter: DealFilterType) => void;
+    storeFilter?: StoreFilterType;
+    onStoreFilterChange?: (store: StoreFilterType) => void;
+    onToggleTrack?: (game: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => void;
+    isTracked?: (idOrAppId: string | number) => boolean;
+    monitoredCount?: number;
     isLoading?: boolean;
 }
 
 export function TopDealsCarousel({
     deals,
+    trackedDeals = [],
     onSelectDeal,
     selectedId,
     activeFilter = "best_savings",
     onFilterChange,
+    storeFilter = "all",
+    onStoreFilterChange,
+    onToggleTrack,
+    isTracked = () => false,
+    monitoredCount = 0,
     isLoading = false,
 }: TopDealsCarouselProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [prevFilter, setPrevFilter] = useState(activeFilter);
+    const [prevStore, setPrevStore] = useState(storeFilter);
 
-    if (prevFilter !== activeFilter) {
+    if (prevFilter !== activeFilter || prevStore !== storeFilter) {
         setPrevFilter(activeFilter);
+        setPrevStore(storeFilter);
         setCurrentPage(1);
     }
 
-    const filterOptions: Array<{ id: DealFilterType; label: string; icon: React.ReactNode }> = [
+    const filterOptions: Array<{
+        id: DealFilterType;
+        label: string;
+        icon: React.ReactNode;
+        badge?: number;
+    }> = [
         {
             id: "best_savings",
-            label: "Melhores Deals (US x BR)",
-            icon: <Flame className="h-3.5 w-3.5" />,
+            label: "Vantagem Cambial",
+            icon: <Flame className="h-3.5 w-3.5 text-orange-400" />,
         },
         {
             id: "historical_low",
-            label: "Menor Preço Histórico",
+            label: "Recordes Históricos",
             icon: <Trophy className="h-3.5 w-3.5 text-amber-400" />,
         },
         {
-            id: "steam_only",
-            label: "Só na Steam",
-            icon: <Gamepad2 className="h-3.5 w-3.5 text-cyan-400" />,
+            id: "curated_specials",
+            label: "Grandes Sucessos",
+            icon: <Sparkles className="h-3.5 w-3.5 text-fuchsia-400" />,
+        },
+        {
+            id: "monitored",
+            label: "Meus Monitorados",
+            icon: <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400/30" />,
+            badge: monitoredCount,
         },
     ];
 
-    const totalDeals = deals.length;
+    const storeOptions: Array<{ id: StoreFilterType; label: string; icon: React.ReactNode }> = [
+        { id: "all", label: "Todas as Lojas", icon: <ShoppingBag className="h-3 w-3" /> },
+        { id: "steam", label: "Só Steam", icon: <Gamepad2 className="h-3 w-3 text-cyan-400" /> },
+        { id: "nuuvem", label: "Nuuvem (PIX)", icon: <Store className="h-3 w-3 text-emerald-400" /> },
+    ];
+
+    const isMonitoredTab = activeFilter === "monitored";
+    const currentList = isMonitoredTab ? trackedDeals : deals;
+    const totalDeals = currentList.length;
     const totalPages = Math.max(1, Math.ceil(totalDeals / ITEMS_PER_PAGE));
-    const paginatedDeals = deals.slice(
+    const paginatedDeals = currentList.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE,
     );
@@ -91,18 +140,20 @@ export function TopDealsCarousel({
                         <h3 className="text-xl font-black tracking-tight text-white uppercase flex items-center gap-2.5">
                             Vitrine de Deals
                             <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
-                                {totalDeals} Jogos Curados
+                                {totalDeals} {isMonitoredTab ? "Monitorados" : "Ofertas"}
                             </span>
                         </h3>
                         <p className="text-xs font-medium text-zinc-400">
-                            Apenas jogos base e títulos aclamados ordenados por vantagem cambial
+                            {isMonitoredTab
+                                ? "Seus jogos favoritos salvos com alerta e radar de preços em tempo real"
+                                : "Apenas jogos base e títulos consagrados com vantagens reais na Steam Family"}
                         </p>
                     </div>
                 </div>
 
-                {/* Filter Pills */}
+                {/* 4 Main Filter Pills */}
                 {onFilterChange && (
-                    <div className="flex flex-wrap items-center gap-2 rounded-2xl border border-theme/30 bg-zinc-900/60 p-1.5 shadow-xl backdrop-blur-md">
+                    <div className="flex flex-wrap items-center gap-1.5 rounded-2xl border border-theme/30 bg-zinc-900/60 p-1.5 shadow-xl backdrop-blur-md">
                         {filterOptions.map((opt) => {
                             const isActive = activeFilter === opt.id;
                             return (
@@ -112,7 +163,7 @@ export function TopDealsCarousel({
                                     onClick={() => onFilterChange(opt.id)}
                                     disabled={isLoading}
                                     className={cn(
-                                        "flex items-center gap-2 rounded-xl px-3.5 py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all duration-300",
+                                        "flex items-center gap-1.5 rounded-xl px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all duration-300",
                                         isActive
                                             ? "border border-theme-primary bg-theme-primary/20 text-white shadow-[0_0_15px_var(--theme-glow)]"
                                             : "border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/40",
@@ -120,6 +171,14 @@ export function TopDealsCarousel({
                                 >
                                     {opt.icon}
                                     <span>{opt.label}</span>
+                                    {opt.badge !== undefined && opt.badge > 0 && (
+                                        <span className={cn(
+                                            "ml-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-black",
+                                            isActive ? "bg-theme-primary text-black" : "bg-zinc-800 text-yellow-400 border border-yellow-400/30",
+                                        )}>
+                                            {opt.badge}
+                                        </span>
+                                    )}
                                 </button>
                             );
                         })}
@@ -127,16 +186,58 @@ export function TopDealsCarousel({
                 )}
             </div>
 
+            {/* Store Micro-Filters (Only shown on deals tabs, not on monitored tab) */}
+            {!isMonitoredTab && onStoreFilterChange && (
+                <div className="flex items-center justify-between gap-2 pt-1">
+                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                        Filtrar Loja / Ativação:
+                    </span>
+                    <div className="flex items-center gap-1.5">
+                        {storeOptions.map((storeOpt) => {
+                            const isStoreActive = storeFilter === storeOpt.id;
+                            return (
+                                <button
+                                    key={storeOpt.id}
+                                    type="button"
+                                    onClick={() => onStoreFilterChange(storeOpt.id)}
+                                    className={cn(
+                                        "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all",
+                                        isStoreActive
+                                            ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
+                                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60 border border-transparent",
+                                    )}
+                                >
+                                    {storeOpt.icon}
+                                    <span>{storeOpt.label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
+
             {/* Empty State */}
-            {(!deals || deals.length === 0) && (
-                <div className="glass-card border border-theme bg-theme-card flex flex-col items-center justify-center rounded-2xl p-10 text-center">
-                    <Sparkles className="h-8 w-8 text-theme-primary mb-2" />
-                    <p className="text-sm font-bold text-zinc-300">
-                        Nenhum deal encontrado para este filtro no momento.
-                    </p>
-                    <p className="text-xs text-zinc-500 mt-1">
-                        Tente alternar para a aba de &quot;Melhores Deals&quot;.
-                    </p>
+            {(!currentList || currentList.length === 0) && (
+                <div className="glass-card border border-theme bg-theme-card flex flex-col items-center justify-center rounded-2xl p-12 text-center">
+                    {isMonitoredTab ? (
+                        <>
+                            <Star className="h-10 w-10 text-yellow-400/60 mb-2.5 animate-pulse" />
+                            <h4 className="text-base font-extrabold text-white">Nenhum jogo monitorado ainda</h4>
+                            <p className="max-w-md text-xs text-zinc-400 mt-1">
+                                Clique no ícone de <strong className="text-theme-primary">coração ❤️</strong> em qualquer jogo da vitrine ou no comparador para monitorá-lo. Avisaremos você quando ele atingir o <strong className="text-amber-400">Menor Preço Histórico</strong>!
+                            </p>
+                        </>
+                    ) : (
+                        <>
+                            <Sparkles className="h-8 w-8 text-theme-primary mb-2" />
+                            <p className="text-sm font-bold text-zinc-300">
+                                Nenhum deal encontrado para este filtro no momento.
+                            </p>
+                            <p className="text-xs text-zinc-500 mt-1">
+                                Tente alternar para a aba &quot;Vantagem Cambial&quot; ou remover os filtros de loja.
+                            </p>
+                        </>
+                    )}
                 </div>
             )}
 
@@ -144,9 +245,14 @@ export function TopDealsCarousel({
             {paginatedDeals && paginatedDeals.length > 0 && (
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                     {paginatedDeals.map((deal) => {
-                        const isSelected = selectedId === deal.id || selectedId === String(deal.steamAppId);
+                        const isSelected = selectedId === deal.id || (deal.steamAppId && selectedId === String(deal.steamAppId));
                         const isBrWinner = deal.winningRegion === "BR";
                         const isUsWinner = deal.winningRegion === "US";
+                        const tracked = isTracked(deal.steamAppId || deal.id);
+                        const priceBR = "priceBR" in deal ? deal.priceBR : (deal as TrackedDealItem).currentPriceBR ?? 0;
+                        const priceUS = "priceUS" in deal ? deal.priceUS : (deal as TrackedDealItem).currentPriceUS ?? 0;
+                        const discountPercent = deal.discountPercent ?? 0;
+                        const savingsPercent = deal.savingsPercent ?? 0;
 
                         return (
                             <div
@@ -180,23 +286,49 @@ export function TopDealsCarousel({
                                     )}
 
                                     {/* Top-Left: Store Discount badge */}
-                                    {deal.discountPercent > 0 && (
+                                    {discountPercent > 0 && (
                                         <div className="absolute top-2 left-2 flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2 py-0.5 text-xs font-black text-black shadow-lg backdrop-blur-sm">
                                             <TrendingDown className="h-3 w-3 stroke-[3]" />
-                                            -{deal.discountPercent}%
+                                            -{discountPercent}%
                                         </div>
                                     )}
 
-                                    {/* Top-Right: Regional Economy or ATL Badge */}
+                                    {/* Top-Right: Favorite Button + Regional Economy or ATL Badge */}
                                     <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
-                                        {isBrWinner && deal.savingsPercent > 0 && (
+                                        {/* Heart/Track button */}
+                                        {onToggleTrack && (
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    onToggleTrack({
+                                                        id: deal.id,
+                                                        title: deal.title,
+                                                        steamAppId: deal.steamAppId,
+                                                        slug: deal.slug,
+                                                        coverImage: deal.coverImage,
+                                                    });
+                                                }}
+                                                title={tracked ? "Remover dos monitorados" : "Monitorar este jogo"}
+                                                className={cn(
+                                                    "flex h-7 w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
+                                                    tracked
+                                                        ? "border-pink-500/60 bg-pink-950/80 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.4)]"
+                                                        : "border-white/10 bg-black/60 text-zinc-400 hover:text-pink-400 hover:border-pink-400/40",
+                                                )}
+                                            >
+                                                <Heart className={cn("h-3.5 w-3.5", tracked && "fill-pink-500")} />
+                                            </button>
+                                        )}
+
+                                        {isBrWinner && savingsPercent > 0 && (
                                             <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-[10px] font-black text-emerald-400 border border-emerald-500/40 backdrop-blur-md shadow-md">
-                                                🇧🇷 -{deal.savingsPercent}% Econ.
+                                                🇧🇷 -{savingsPercent}% Econ.
                                             </span>
                                         )}
-                                        {isUsWinner && deal.savingsPercent > 0 && (
+                                        {isUsWinner && savingsPercent > 0 && (
                                             <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-[10px] font-black text-cyan-400 border border-cyan-500/40 backdrop-blur-md shadow-md">
-                                                🇺🇸 -{deal.savingsPercent}% Econ.
+                                                🇺🇸 -{savingsPercent}% Econ.
                                             </span>
                                         )}
 
@@ -220,7 +352,7 @@ export function TopDealsCarousel({
                                                 EUA (USD)
                                             </span>
                                             <span className="text-xs font-black text-white">
-                                                ${deal.priceUS.toFixed(2)}
+                                                ${priceUS > 0 ? priceUS.toFixed(2) : "--"}
                                             </span>
                                         </div>
 
@@ -229,7 +361,7 @@ export function TopDealsCarousel({
                                                 Brasil (BRL)
                                             </span>
                                             <span className="text-xs font-black text-emerald-400">
-                                                R$ {deal.priceBR.toFixed(2)}
+                                                R$ {priceBR > 0 ? priceBR.toFixed(2) : "--"}
                                             </span>
                                         </div>
                                     </div>
@@ -237,7 +369,7 @@ export function TopDealsCarousel({
 
                                 {/* Action CTA footer */}
                                 <div className="mt-2.5 flex items-center justify-between border-t border-theme/20 pt-2 text-[10px]">
-                                    <span className="text-zinc-500 font-medium truncate max-w-[90px]">
+                                    <span className="text-zinc-500 font-medium truncate max-w-[100px]">
                                         Loja: <strong className="text-zinc-300">{deal.storeBR || "Steam"}</strong>
                                     </span>
                                     <span className="flex items-center gap-0.5 font-bold text-theme-primary group-hover:translate-x-0.5 transition-transform">
@@ -258,7 +390,7 @@ export function TopDealsCarousel({
                         <strong className="text-white">
                             {Math.min(currentPage * ITEMS_PER_PAGE, totalDeals)}
                         </strong>{" "}
-                        de <strong className="text-white">{totalDeals}</strong> ofertas
+                        de <strong className="text-white">{totalDeals}</strong> {isMonitoredTab ? "jogos" : "ofertas"}
                     </span>
 
                     <div className="flex items-center gap-1.5">

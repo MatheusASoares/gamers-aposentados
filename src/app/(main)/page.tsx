@@ -7,6 +7,7 @@ import { RecentActivity, ActivityEvent } from "@/components/dashboard/RecentGame
 import { UserProfileWidget } from "@/components/dashboard/UserProfileWidget";
 import { Leaderboard, PlayerStats } from "@/components/dashboard/Leaderboard";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
+import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -324,6 +325,9 @@ export default async function DashboardPage() {
 
     return (
         <div className="mx-auto w-full max-w-[1920px] space-y-6 sm:space-y-8 px-2 sm:px-6 py-3 sm:py-8 md:px-8 lg:px-12 lg:py-12">
+            {/* Deals Tracker Subtle All-Time Low Alert */}
+            <TrackedDealsAlert />
+
             {/* Gamification Profile Banner */}
             {userWidgetData && (
                 <div className="w-full">

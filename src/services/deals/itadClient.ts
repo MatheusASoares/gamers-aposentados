@@ -218,17 +218,20 @@ export class ItadClient {
             cacheKey,
             async () => {
                 try {
+                    const limit = filter === "historical_low" ? "120" : filter === "best_savings" ? "120" : "80";
+                    const sortParam = filter === "historical_low" ? "-cut" : "-trending";
+
                     const urlBR = new URL(`${ITAD_API_BASE}/deals/v2`);
                     urlBR.searchParams.set("key", apiKey);
                     urlBR.searchParams.set("country", "BR");
-                    urlBR.searchParams.set("limit", "70");
-                    urlBR.searchParams.set("sort", "-trending");
+                    urlBR.searchParams.set("limit", limit);
+                    urlBR.searchParams.set("sort", sortParam);
 
                     const urlUS = new URL(`${ITAD_API_BASE}/deals/v2`);
                     urlUS.searchParams.set("key", apiKey);
                     urlUS.searchParams.set("country", "US");
-                    urlUS.searchParams.set("limit", "70");
-                    urlUS.searchParams.set("sort", "-trending");
+                    urlUS.searchParams.set("limit", limit);
+                    urlUS.searchParams.set("sort", sortParam);
 
                     const [resBR, resUS] = await Promise.all([
                         fetch(urlBR.toString(), {

@@ -7,12 +7,16 @@ import {
     StorePrice,
     CurrencyRate,
     DealFilterType,
+    StoreFilterType,
+    TrackedDealItem,
+    TrackedDealsResponse,
 } from "@/types/deals";
 import { CurrencyService } from "./currencyService";
 import { ItadClient } from "./itadClient";
 import { SteamStoreClient } from "./steamStoreClient";
 import { DealComparator } from "./dealComparator";
 import { dealsCache, CACHE_TTL } from "./dealsCache";
+import { CURATED_GAMES_POOL } from "./curatedGames";
 
 export class DealsService {
     /**
@@ -168,21 +172,77 @@ export class DealsService {
     }
 
     /**
+     * Resolves prices for a subset of the curated pool in parallel.
+     */
+    private static async getCuratedPoolDeals(): Promise<FeaturedDealItem[]> {
+        const cacheKey = "deals:curated_pool_specials";
+
+        return dealsCache.getOrSet(
+            cacheKey,
+            async () => {
+                const sampleGames = CURATED_GAMES_POOL.slice(0, 25);
+                const results = await Promise.all(
+                    sampleGames.map(async (game): Promise<FeaturedDealItem | null> => {
+                        try {
+                            const [pUS, pBR] = await Promise.all([
+                                SteamStoreClient.getAppPrice(game.steamAppId, "US"),
+                                SteamStoreClient.getAppPrice(game.steamAppId, "BR"),
+                            ]);
+
+                            if (!pUS || !pBR || pUS.currentPrice <= 0 || pBR.currentPrice <= 0) {
+                                return null;
+                            }
+
+                            const discount = Math.max(pUS.discountPercent, pBR.discountPercent);
+
+                            return {
+                                id: `steam-${game.steamAppId}`,
+                                title: game.title,
+                                slug: game.slug,
+                                steamAppId: game.steamAppId,
+                                coverImage: `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${game.steamAppId}/header.jpg`,
+                                discountPercent: discount,
+                                priceUS: pUS.currentPrice,
+                                priceBR: pBR.currentPrice,
+                                convertedBRInUSD: 0,
+                                winningRegion: "EQUAL",
+                                savingsPercent: 0,
+                                storeUS: "Steam",
+                                storeBR: "Steam",
+                                isAllTimeLow: discount >= 50,
+                                dealUrlUS: `https://store.steampowered.com/app/${game.steamAppId}`,
+                                dealUrlBR: `https://store.steampowered.com/app/${game.steamAppId}`,
+                            };
+                        } catch {
+                            return null;
+                        }
+                    }),
+                );
+
+                return results.filter((item): item is FeaturedDealItem => item !== null);
+            },
+            CACHE_TTL.FEATURED_DEALS,
+        );
+    }
+
+    /**
      * Gets Top Deals / Featured Specials prioritizing IsThereAnyDeal, sorted by filter.
      */
     static async getFeaturedDeals(
         filter: DealFilterType = "best_savings",
         forceRefresh = false,
+        storeFilter: StoreFilterType = "all",
     ): Promise<{
         deals: FeaturedDealItem[];
         currencyRate: CurrencyRate;
     }> {
-        const cacheKey = `deals:featured_list:${filter}`;
+        const cacheKey = `deals:featured_list:${filter}:${storeFilter}`;
 
         if (forceRefresh) {
             dealsCache.deletePattern("deals:featured_list:");
             dealsCache.deletePattern("steam:featured_specials");
             dealsCache.deletePattern("itad:top_deals_curated_v2:");
+            dealsCache.deletePattern("deals:curated_pool_specials");
         }
 
         return dealsCache.getOrSet(
@@ -191,20 +251,36 @@ export class DealsService {
                 const currencyRate = await CurrencyService.getUsdBrlRate(forceRefresh);
                 let deals: FeaturedDealItem[] = [];
 
-                // 1. If steam_only filter is requested, fetch directly from Steam Store API
-                if (filter === "steam_only") {
+                // 1. Fetch based on filter
+                if (filter === "curated_specials") {
+                    const [curatedDeals, steamSpecials] = await Promise.all([
+                        DealsService.getCuratedPoolDeals(),
+                        SteamStoreClient.getFeaturedSpecials(),
+                    ]);
+                    deals = [...curatedDeals, ...steamSpecials];
+                } else if (filter === "steam_only") {
                     deals = await SteamStoreClient.getFeaturedSpecials();
                 } else if (ItadClient.isConfigured()) {
-                    // 2. Otherwise try IsThereAnyDeal API first
                     deals = await ItadClient.getTopDeals(filter);
                 }
 
-                // 3. Fallback to Steam Store specials if ITAD not configured or returned no deals
+                // 2. Fallback to Steam Store specials if ITAD not configured or returned no deals
                 if (deals.length === 0) {
                     deals = await SteamStoreClient.getFeaturedSpecials();
                 }
 
-                // 3. Fallback to curated high-value list if external stores are down
+                // 3. Merge curated pool deals into best_savings and historical_low to guarantee evergreen AAA titles
+                if (filter === "best_savings" || filter === "historical_low") {
+                    try {
+                        const curated = await DealsService.getCuratedPoolDeals();
+                        const discountedCurated = curated.filter((c) => c.discountPercent > 0);
+                        deals = [...deals, ...discountedCurated];
+                    } catch (err) {
+                        console.warn("[DealsService] Failed to merge curated deals:", err);
+                    }
+                }
+
+                // 4. Fallback baseline if external services are down
                 if (deals.length === 0) {
                     deals = [
                         {
@@ -264,29 +340,10 @@ export class DealsService {
                             dealUrlUS: "https://store.steampowered.com/app/1091500",
                             dealUrlBR: "https://store.steampowered.com/app/1091500",
                         },
-                        {
-                            id: "steam-1145360",
-                            title: "Hades",
-                            slug: "hades",
-                            steamAppId: 1145360,
-                            coverImage:
-                                "https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/1145360/header.jpg",
-                            discountPercent: 66,
-                            priceUS: 8.49,
-                            priceBR: 25.15,
-                            convertedBRInUSD: 0,
-                            winningRegion: "BR",
-                            savingsPercent: 45,
-                            storeUS: "Steam",
-                            storeBR: "Steam",
-                            isAllTimeLow: true,
-                            dealUrlUS: "https://store.steampowered.com/app/1145360",
-                            dealUrlBR: "https://store.steampowered.com/app/1145360",
-                        },
                     ];
                 }
 
-                // 4. Resolve any missing cover images using Steam Store in parallel
+                // 5. Resolve any missing cover images using Steam Store in parallel
                 const missingCoverDeals = deals.filter((d) => !d.coverImage);
                 if (missingCoverDeals.length > 0) {
                     await Promise.allSettled(
@@ -306,11 +363,12 @@ export class DealsService {
                     );
                 }
 
-                // 5. Normalize and Sort by Best Regional Advantage / ATL / Highest Cut
+                // 6. Normalize and Sort by Filter & Store
                 const normalized = DealComparator.normalizeFeaturedDeals(
                     deals,
                     currencyRate,
                     filter,
+                    storeFilter,
                 );
 
                 return {
@@ -320,5 +378,121 @@ export class DealsService {
             },
             CACHE_TTL.FEATURED_DEALS,
         );
+    }
+
+    /**
+     * Resolves live prices and ATL status for a list of tracked/favorite games.
+     */
+    static async getTrackedDealsStatus(
+        items: Array<{
+            id: string;
+            title: string;
+            steamAppId?: number | null;
+            slug?: string;
+            coverImage?: string | null;
+            addedAt?: string;
+        }>,
+    ): Promise<TrackedDealsResponse> {
+        if (!items || items.length === 0) {
+            return {
+                items: [],
+                hasAllTimeLow: false,
+                allTimeLowCount: 0,
+            };
+        }
+
+        const currencyRate = await CurrencyService.getUsdBrlRate();
+
+        const resolvedTracked: TrackedDealItem[] = await Promise.all(
+            items.map(async (item) => {
+                const appId = item.steamAppId;
+                let priceUS = 0;
+                let priceBR = 0;
+                let discountPercent = 0;
+                let isAllTimeLow = false;
+                let storeBR = "Steam";
+                let storeUS = "Steam";
+                let coverImage = item.coverImage || null;
+
+                if (appId) {
+                    if (!coverImage) {
+                        coverImage = `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appId}/header.jpg`;
+                    }
+                    const [pUS, pBR] = await Promise.all([
+                        SteamStoreClient.getAppPrice(appId, "US"),
+                        SteamStoreClient.getAppPrice(appId, "BR"),
+                    ]);
+
+                    if (pUS) {
+                        priceUS = pUS.currentPrice;
+                        discountPercent = Math.max(discountPercent, pUS.discountPercent);
+                        storeUS = pUS.storeName;
+                    }
+                    if (pBR) {
+                        priceBR = pBR.currentPrice;
+                        discountPercent = Math.max(discountPercent, pBR.discountPercent);
+                        storeBR = pBR.storeName;
+                    }
+                    if (discountPercent >= 60) {
+                        isAllTimeLow = true;
+                    }
+                } else {
+                    // Try ITAD or search
+                    const comparison = await DealsService.compareGame({ title: item.title, gameId: item.id });
+                    if (comparison) {
+                        priceUS = comparison.usDeal?.bestStore.currentPrice || 0;
+                        priceBR = comparison.brDeal?.bestStore.currentPrice || 0;
+                        storeUS = comparison.usDeal?.bestStore.storeName || "Steam";
+                        storeBR = comparison.brDeal?.bestStore.storeName || "Steam";
+                        discountPercent = Math.max(
+                            comparison.usDeal?.bestStore.discountPercent || 0,
+                            comparison.brDeal?.bestStore.discountPercent || 0,
+                        );
+                        isAllTimeLow = Boolean(comparison.isAllTimeLow);
+                        if (comparison.coverImage) coverImage = comparison.coverImage;
+                    }
+                }
+
+                const convertedBRInUSD = CurrencyService.convertBrlToUsd(priceBR, currencyRate.rate);
+                let savingsPercent = 0;
+                let winningRegion: "US" | "BR" | "EQUAL" = "EQUAL";
+
+                if (priceUS > 0 && convertedBRInUSD < priceUS) {
+                    winningRegion = "BR";
+                    savingsPercent = Math.round(((priceUS - convertedBRInUSD) / priceUS) * 100);
+                } else if (convertedBRInUSD > priceUS && priceUS > 0) {
+                    winningRegion = "US";
+                    savingsPercent = Math.round(((convertedBRInUSD - priceUS) / convertedBRInUSD) * 100);
+                }
+
+                return {
+                    id: item.id,
+                    title: item.title,
+                    slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    steamAppId: item.steamAppId || null,
+                    coverImage,
+                    addedAt: item.addedAt || new Date().toISOString(),
+                    currentPriceBR: priceBR,
+                    currentPriceUS: priceUS,
+                    discountPercent,
+                    isAllTimeLow,
+                    storeBR,
+                    storeUS,
+                    savingsPercent,
+                    winningRegion,
+                    dealUrlBR: appId ? `https://store.steampowered.com/app/${appId}` : undefined,
+                    dealUrlUS: appId ? `https://store.steampowered.com/app/${appId}` : undefined,
+                };
+            }),
+        );
+
+        const atlItems = resolvedTracked.filter((item) => item.isAllTimeLow);
+
+        return {
+            items: resolvedTracked,
+            hasAllTimeLow: atlItems.length > 0,
+            allTimeLowCount: atlItems.length,
+            currencyRate,
+        };
     }
 }

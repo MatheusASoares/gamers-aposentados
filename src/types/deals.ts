@@ -4,7 +4,15 @@ export type Region = "US" | "BR";
 
 export type WinningRegion = "US" | "BR" | "EQUAL";
 
-export type DealFilterType = "best_savings" | "historical_low" | "steam_only" | "highest_cut";
+export type DealFilterType =
+    | "best_savings"
+    | "historical_low"
+    | "curated_specials"
+    | "steam_only"
+    | "monitored"
+    | "highest_cut";
+
+export type StoreFilterType = "all" | "steam" | "nuuvem";
 
 export interface CurrencyRate {
     code: string; // "USD"
@@ -94,4 +102,42 @@ export interface FeaturedDealItem {
     isAllTimeLow?: boolean;
     dealUrlUS?: string;
     dealUrlBR?: string;
+    absoluteSavingsBRL?: number;
+}
+
+export interface TrackedDealItem {
+    id: string; // ITAD ID or Steam AppID
+    title: string;
+    slug: string;
+    steamAppId?: number | null;
+    coverImage?: string | null;
+    addedAt: string;
+    currentPriceBR?: number;
+    currentPriceUS?: number;
+    discountPercent?: number;
+    isAllTimeLow?: boolean;
+    storeBR?: string;
+    storeUS?: string;
+    savingsPercent?: number;
+    dealUrlBR?: string;
+    dealUrlUS?: string;
+    winningRegion?: WinningRegion;
+}
+
+export interface TrackedDealsBatchRequest {
+    items: Array<{
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+        addedAt?: string;
+    }>;
+}
+
+export interface TrackedDealsResponse {
+    items: TrackedDealItem[];
+    hasAllTimeLow: boolean;
+    allTimeLowCount: number;
+    currencyRate?: CurrencyRate;
 }

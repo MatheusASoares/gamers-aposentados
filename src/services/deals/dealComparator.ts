@@ -159,10 +159,20 @@ export class DealComparator {
         items: FeaturedDealItem[],
         currencyRate: CurrencyRate,
         filter: DealFilterType = "best_savings",
+        storeFilter: "all" | "steam" | "nuuvem" = "all",
     ): FeaturedDealItem[] {
         const rate = currencyRate.rate;
 
-        const normalized = items
+        // 1. Deduplicate by title / appId
+        const seenKeys = new Set<string>();
+        const uniqueItems = items.filter((item) => {
+            const key = (item.steamAppId ? `app-${item.steamAppId}` : item.title.toLowerCase().trim());
+            if (seenKeys.has(key)) return false;
+            seenKeys.add(key);
+            return true;
+        });
+
+        let normalized = uniqueItems
             .filter(
                 (item) =>
                     !(item.priceUS > 0 && item.priceBR <= 0) &&
@@ -211,11 +221,35 @@ export class DealComparator {
                 };
             });
 
-        // Filter and Sort based on selected Tab/Filter
+        // 2. Apply store filter if specified
+        if (storeFilter === "steam") {
+            normalized = normalized.filter(
+                (item) =>
+                    item.storeBR.toLowerCase().includes("steam") ||
+                    item.storeUS.toLowerCase().includes("steam"),
+            );
+        } else if (storeFilter === "nuuvem") {
+            normalized = normalized.filter(
+                (item) =>
+                    item.storeBR.toLowerCase().includes("nuuvem") ||
+                    item.storeUS.toLowerCase().includes("nuuvem"),
+            );
+        }
+
+        // 3. Filter and Sort based on selected Tab/Filter
         if (filter === "historical_low") {
             return normalized
                 .filter((item) => item.isAllTimeLow)
                 .sort((a, b) => b.savingsPercent - a.savingsPercent || b.discountPercent - a.discountPercent);
+        }
+
+        if (filter === "curated_specials") {
+            return normalized.sort((a, b) => {
+                if (b.discountPercent !== a.discountPercent) {
+                    return b.discountPercent - a.discountPercent;
+                }
+                return b.savingsPercent - a.savingsPercent;
+            });
         }
 
         if (filter === "steam_only") {

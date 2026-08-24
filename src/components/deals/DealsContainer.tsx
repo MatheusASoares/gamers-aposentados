@@ -9,6 +9,8 @@ import {
     SearchGameItem,
     CurrencyRate,
     DealFilterType,
+    StoreFilterType,
+    TrackedDealItem,
 } from "@/types/deals";
 import { DealsSearch } from "./DealsSearch";
 import { TopDealsCarousel } from "./TopDealsCarousel";
@@ -27,11 +29,15 @@ const QUICK_SUGGESTIONS = [
     { title: "Monster Hunter: World", steamAppId: 582010 },
 ];
 
+const LOCAL_STORAGE_TRACKED_KEY = "ga_tracked_deals";
+
 export function DealsContainer() {
     const [comparison, setComparison] = useState<DealComparisonResult | null>(null);
     const [featuredDeals, setFeaturedDeals] = useState<FeaturedDealItem[]>([]);
+    const [trackedDeals, setTrackedDeals] = useState<TrackedDealItem[]>([]);
     const [currencyRate, setCurrencyRate] = useState<CurrencyRate | null>(null);
     const [activeFilter, setActiveFilter] = useState<DealFilterType>("best_savings");
+    const [storeFilter, setStoreFilter] = useState<StoreFilterType>("all");
 
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
@@ -40,6 +46,45 @@ export function DealsContainer() {
     const [justUpdated, setJustUpdated] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [, startTransition] = useTransition();
+
+    // 1. Load tracked deals from localStorage on initial mount
+    useEffect(() => {
+        try {
+            const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    setTrackedDeals(parsed);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to load tracked deals from storage:", err);
+        }
+    }, []);
+
+    // 2. Fetch live price status for tracked games
+    const syncTrackedDeals = useCallback(async (currentTracked: TrackedDealItem[]) => {
+        if (!currentTracked || currentTracked.length === 0) return;
+        try {
+            const res = await fetch("/api/deals/tracked", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ items: currentTracked }),
+            });
+            if (res.ok) {
+                const data = await res.json();
+                if (data.items) {
+                    setTrackedDeals(data.items);
+                    localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(data.items));
+                    if (data.currencyRate) {
+                        setCurrencyRate(data.currencyRate);
+                    }
+                }
+            }
+        } catch (err) {
+            console.error("Failed to sync tracked deals:", err);
+        }
+    }, []);
 
     // Cooldown countdown timer
     useEffect(() => {
@@ -50,15 +95,32 @@ export function DealsContainer() {
         return () => clearInterval(timer);
     }, [cooldown]);
 
-    // Fetch featured deals with filter support and optional cache bypass
+    // Fetch featured deals with filter & store support
     const loadFeaturedDeals = useCallback(
-        async (filter: DealFilterType = "best_savings", forceRefresh = false) => {
+        async (
+            filter: DealFilterType = "best_savings",
+            store: StoreFilterType = "all",
+            forceRefresh = false,
+        ) => {
+            if (filter === "monitored") {
+                // For monitored tab, sync tracked deals
+                try {
+                    const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
+                    const parsed: TrackedDealItem[] = raw ? JSON.parse(raw) : [];
+                    await syncTrackedDeals(parsed);
+                } catch (e) {
+                    console.error(e);
+                }
+                setIsLoadingFeatured(false);
+                return;
+            }
+
             if (!forceRefresh) {
                 setIsLoadingFeatured(true);
             }
             try {
                 const res = await fetch(
-                    `/api/deals/featured?filter=${filter}${forceRefresh ? "&refresh=true" : ""}`,
+                    `/api/deals/featured?filter=${filter}&store=${store}${forceRefresh ? "&refresh=true" : ""}`,
                     forceRefresh ? { cache: "no-store" } : undefined,
                 );
                 if (res.ok) {
@@ -76,18 +138,67 @@ export function DealsContainer() {
                 setIsLoadingFeatured(false);
             }
         },
-        [],
+        [syncTrackedDeals],
     );
 
     useEffect(() => {
-        loadFeaturedDeals(activeFilter);
-    }, [loadFeaturedDeals, activeFilter]);
+        loadFeaturedDeals(activeFilter, storeFilter);
+    }, [loadFeaturedDeals, activeFilter, storeFilter]);
 
     const handleFilterChange = (newFilter: DealFilterType) => {
         setActiveFilter(newFilter);
     };
 
-    // Manual Refresh button handler (bypasses cache for featured deals and currency rate)
+    const handleStoreFilterChange = (newStore: StoreFilterType) => {
+        setStoreFilter(newStore);
+    };
+
+    // Toggle track game
+    const handleToggleTrack = (game: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => {
+        setTrackedDeals((prev) => {
+            const exists = prev.some(
+                (p) => p.id === game.id || (game.steamAppId && p.steamAppId === game.steamAppId),
+            );
+            let updated: TrackedDealItem[];
+            if (exists) {
+                updated = prev.filter(
+                    (p) => p.id !== game.id && (!game.steamAppId || p.steamAppId !== game.steamAppId),
+                );
+            } else {
+                const newItem: TrackedDealItem = {
+                    id: game.id,
+                    title: game.title,
+                    slug: game.slug || game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    steamAppId: game.steamAppId || null,
+                    coverImage: game.coverImage || null,
+                    addedAt: new Date().toISOString(),
+                };
+                updated = [newItem, ...prev];
+                // Immediately check status for the new item
+                syncTrackedDeals(updated);
+            }
+            try {
+                localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(updated));
+            } catch (err) {
+                console.error("Failed to save tracked deals:", err);
+            }
+            return updated;
+        });
+    };
+
+    const isTracked = (idOrAppId: string | number) => {
+        return trackedDeals.some(
+            (p) => p.id === String(idOrAppId) || (p.steamAppId && p.steamAppId === Number(idOrAppId)),
+        );
+    };
+
+    // Manual Refresh button handler
     const handleManualRefresh = async () => {
         if (isRefreshing || cooldown > 0) return;
         setIsRefreshing(true);
@@ -95,8 +206,12 @@ export function DealsContainer() {
 
         try {
             const refreshPromises: Promise<unknown>[] = [
-                loadFeaturedDeals(activeFilter, true),
+                loadFeaturedDeals(activeFilter, storeFilter, true),
             ];
+
+            if (trackedDeals.length > 0) {
+                refreshPromises.push(syncTrackedDeals(trackedDeals));
+            }
 
             // If there's an active comparison, refresh it simultaneously
             if (comparison) {
@@ -195,7 +310,7 @@ export function DealsContainer() {
         });
     };
 
-    const handleSelectFeatured = (deal: FeaturedDealItem) => {
+    const handleSelectFeatured = (deal: FeaturedDealItem | TrackedDealItem) => {
         handleCompare({
             title: deal.title,
             gameId: deal.id,
@@ -354,6 +469,8 @@ export function DealsContainer() {
                                         })
                                     }
                                     isRefreshing={isSearching}
+                                    onToggleTrack={handleToggleTrack}
+                                    isTracked={isTracked(comparison.steamAppId || comparison.id)}
                                 />
                             </div>
                         )
@@ -367,10 +484,16 @@ export function DealsContainer() {
                     ) : (
                         <TopDealsCarousel
                             deals={featuredDeals}
+                            trackedDeals={trackedDeals}
                             onSelectDeal={handleSelectFeatured}
                             selectedId={comparison?.id}
                             activeFilter={activeFilter}
                             onFilterChange={handleFilterChange}
+                            storeFilter={storeFilter}
+                            onStoreFilterChange={handleStoreFilterChange}
+                            onToggleTrack={handleToggleTrack}
+                            isTracked={isTracked}
+                            monitoredCount={trackedDeals.length}
                             isLoading={isLoadingFeatured}
                         />
                     )}

@@ -16,6 +16,7 @@ import {
     ShieldCheck,
     RefreshCw,
     Info,
+    Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -24,12 +25,22 @@ interface DealComparisonCardProps {
     comparison: DealComparisonResult;
     onRefresh?: () => void;
     isRefreshing?: boolean;
+    onToggleTrack?: (game: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => void;
+    isTracked?: boolean;
 }
 
 export function DealComparisonCard({
     comparison,
     onRefresh,
     isRefreshing = false,
+    onToggleTrack,
+    isTracked = false,
 }: DealComparisonCardProps) {
     const {
         title,
@@ -262,7 +273,31 @@ export function DealComparisonCard({
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3">
+                <div className="flex flex-wrap items-center gap-2.5">
+                    {onToggleTrack && (
+                        <button
+                            type="button"
+                            onClick={() =>
+                                onToggleTrack({
+                                    id: comparison.id,
+                                    title: comparison.title,
+                                    steamAppId: comparison.steamAppId,
+                                    slug: comparison.slug,
+                                    coverImage: comparison.coverImage,
+                                })
+                            }
+                            className={cn(
+                                "flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all shadow-md active:scale-95",
+                                isTracked
+                                    ? "border-pink-500/60 bg-pink-950/60 text-pink-300 shadow-[0_0_15px_rgba(236,72,153,0.3)]"
+                                    : "border-theme/30 bg-zinc-900/80 text-zinc-300 hover:border-pink-400/60 hover:text-pink-300",
+                            )}
+                        >
+                            <Heart className={cn("h-4 w-4", isTracked && "fill-pink-500 text-pink-500")} />
+                            <span>{isTracked ? "Monitorando" : "Monitorar Preço"}</span>
+                        </button>
+                    )}
+
                     <div className="rounded-xl border border-theme/30 bg-zinc-900/80 px-3.5 py-1.5 text-right">
                         <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">
                             Câmbio Comercial
