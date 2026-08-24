@@ -23,6 +23,7 @@ import {
     FeaturedDealItem,
     DealFilterType,
     StoreFilterType,
+    RegionAdvantageFilterType,
     TrackedDealItem,
 } from "@/types/deals";
 import { cn } from "@/lib/utils";
@@ -38,6 +39,8 @@ interface TopDealsCarouselProps {
     onFilterChange?: (filter: DealFilterType) => void;
     storeFilter?: StoreFilterType;
     onStoreFilterChange?: (store: StoreFilterType) => void;
+    regionFilter?: RegionAdvantageFilterType;
+    onRegionFilterChange?: (region: RegionAdvantageFilterType) => void;
     onToggleTrack?: (game: {
         id: string;
         title: string;
@@ -59,6 +62,8 @@ export function TopDealsCarousel({
     onFilterChange,
     storeFilter = "all",
     onStoreFilterChange,
+    regionFilter = "all",
+    onRegionFilterChange,
     onToggleTrack,
     isTracked = () => false,
     monitoredCount = 0,
@@ -67,10 +72,12 @@ export function TopDealsCarousel({
     const [currentPage, setCurrentPage] = useState(1);
     const [prevFilter, setPrevFilter] = useState(activeFilter);
     const [prevStore, setPrevStore] = useState(storeFilter);
+    const [prevRegion, setPrevRegion] = useState(regionFilter);
 
-    if (prevFilter !== activeFilter || prevStore !== storeFilter) {
+    if (prevFilter !== activeFilter || prevStore !== storeFilter || prevRegion !== regionFilter) {
         setPrevFilter(activeFilter);
         setPrevStore(storeFilter);
+        setPrevRegion(regionFilter);
         setCurrentPage(1);
     }
 
@@ -82,7 +89,7 @@ export function TopDealsCarousel({
     }> = [
         {
             id: "best_savings",
-            label: "Vantagem BR",
+            label: "Câmbio US/BR",
             icon: <Flame className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />,
         },
         {
@@ -180,33 +187,81 @@ export function TopDealsCarousel({
                 )}
             </div>
 
-            {/* Store Micro-Filters (Only shown on deals tabs, not on monitored tab) */}
-            {!isMonitoredTab && onStoreFilterChange && (
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pt-1">
-                    <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
-                        Filtrar Loja / Ativação:
-                    </span>
-                    <div className="flex flex-wrap items-center gap-1.5">
-                        {storeOptions.map((storeOpt) => {
-                            const isStoreActive = storeFilter === storeOpt.id;
-                            return (
-                                <button
-                                    key={storeOpt.id}
-                                    type="button"
-                                    onClick={() => onStoreFilterChange(storeOpt.id)}
-                                    className={cn(
-                                        "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all",
-                                        isStoreActive
-                                            ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
-                                            : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60 border border-transparent",
-                                    )}
-                                >
-                                    {storeOpt.icon}
-                                    <span>{storeOpt.label}</span>
-                                </button>
-                            );
-                        })}
-                    </div>
+            {/* Store & Region Advantage Micro-Filters (Only shown on deals tabs, not on monitored tab) */}
+            {!isMonitoredTab && (
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                    {/* Region Advantage Sub-Filter (shown when in Câmbio US/BR tab) */}
+                    {activeFilter === "best_savings" && onRegionFilterChange ? (
+                        <div className="flex items-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-theme/30 w-full sm:w-auto">
+                            <span className="text-[10px] font-black uppercase text-zinc-400 px-1.5">Vantagem:</span>
+                            <button
+                                type="button"
+                                onClick={() => onRegionFilterChange("all")}
+                                className={cn(
+                                    "rounded-lg px-2.5 py-1 text-[11px] font-black transition-all",
+                                    regionFilter === "all"
+                                        ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
+                                        : "text-zinc-500 hover:text-zinc-300",
+                                )}
+                            >
+                                🌐 Todas
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onRegionFilterChange("br")}
+                                className={cn(
+                                    "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-black transition-all",
+                                    regionFilter === "br"
+                                        ? "bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 shadow-sm"
+                                        : "text-zinc-500 hover:text-zinc-300",
+                                )}
+                            >
+                                🇧🇷 No Brasil
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => onRegionFilterChange("us")}
+                                className={cn(
+                                    "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-black transition-all",
+                                    regionFilter === "us"
+                                        ? "bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm"
+                                        : "text-zinc-500 hover:text-zinc-300",
+                                )}
+                            >
+                                🇺🇸 Nos EUA
+                            </button>
+                        </div>
+                    ) : (
+                        <div />
+                    )}
+
+                    {/* Store Filter */}
+                    {onStoreFilterChange && (
+                        <div className="flex items-center gap-1.5">
+                            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline">
+                                Loja:
+                            </span>
+                            {storeOptions.map((storeOpt) => {
+                                const isStoreActive = storeFilter === storeOpt.id;
+                                return (
+                                    <button
+                                        key={storeOpt.id}
+                                        type="button"
+                                        onClick={() => onStoreFilterChange(storeOpt.id)}
+                                        className={cn(
+                                            "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all",
+                                            isStoreActive
+                                                ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
+                                                : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60 border border-transparent",
+                                        )}
+                                    >
+                                        {storeOpt.icon}
+                                        <span>{storeOpt.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -221,6 +276,14 @@ export function TopDealsCarousel({
                                 Clique no ícone de <strong className="text-theme-primary">coração ❤️</strong> em qualquer jogo da vitrine ou no comparador para monitorá-lo. Avisaremos você quando ele atingir o <strong className="text-amber-400">Menor Preço Histórico</strong>!
                             </p>
                         </>
+                    ) : regionFilter === "us" ? (
+                        <>
+                            <Sparkles className="h-8 w-8 text-cyan-400 mb-2" />
+                            <h4 className="text-sm font-extrabold text-white">Nenhum jogo mais barato nos EUA no momento</h4>
+                            <p className="max-w-md text-xs text-zinc-400 mt-1">
+                                Os preços regionais da Steam Brasil estão mais vantajosos na totalidade dos títulos em promoção neste momento.
+                            </p>
+                        </>
                     ) : (
                         <>
                             <Sparkles className="h-8 w-8 text-theme-primary mb-2" />
@@ -228,7 +291,7 @@ export function TopDealsCarousel({
                                 Nenhum deal encontrado para este filtro no momento.
                             </p>
                             <p className="text-xs text-zinc-500 mt-1">
-                                Tente alternar para a aba &quot;Vantagem BR&quot; ou alterar os filtros de loja.
+                                Tente alternar os filtros de loja ou de região.
                             </p>
                         </>
                     )}

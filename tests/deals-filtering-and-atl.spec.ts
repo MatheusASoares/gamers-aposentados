@@ -198,4 +198,29 @@ test.describe("Deals Filtering, Normalization and ATL Logic", () => {
 
         expect(result.length).toBe(mockDeals.length);
     });
+
+    test("regionFilter 'br' keeps only BR winners and 'us' keeps only US winners", () => {
+        const brResult = DealComparator.normalizeFeaturedDeals(
+            mockDeals,
+            mockCurrencyRate,
+            "best_savings",
+            "all",
+            "br",
+        );
+
+        expect(brResult.length).toBeGreaterThan(0);
+        expect(brResult.every((i) => i.winningRegion === "BR")).toBe(true);
+
+        const usResult = DealComparator.normalizeFeaturedDeals(
+            mockDeals,
+            mockCurrencyRate,
+            "best_savings",
+            "all",
+            "us",
+        );
+
+        expect(usResult.length).toBe(1);
+        expect(usResult[0].id).toBe("game-4");
+        expect(usResult[0].winningRegion).toBe("US");
+    });
 });

@@ -8,6 +8,7 @@ import {
     CurrencyRate,
     DealFilterType,
     StoreFilterType,
+    RegionAdvantageFilterType,
     TrackedDealItem,
     TrackedDealsResponse,
 } from "@/types/deals";
@@ -226,17 +227,18 @@ export class DealsService {
     }
 
     /**
-     * Gets Top Deals / Featured Specials prioritizing IsThereAnyDeal, sorted by filter.
+     * Retrieves featured/top deals comparing US vs BR stores.
      */
     static async getFeaturedDeals(
         filter: DealFilterType = "best_savings",
         forceRefresh = false,
         storeFilter: StoreFilterType = "all",
+        regionFilter: RegionAdvantageFilterType = "all",
     ): Promise<{
         deals: FeaturedDealItem[];
         currencyRate: CurrencyRate;
     }> {
-        const cacheKey = `deals:featured_list:${filter}:${storeFilter}`;
+        const cacheKey = `deals:featured_list:${filter}:${storeFilter}:${regionFilter}`;
 
         if (forceRefresh) {
             dealsCache.deletePattern("deals:featured_list:");
@@ -363,12 +365,13 @@ export class DealsService {
                     );
                 }
 
-                // 6. Normalize and Sort by Filter & Store
+                // 6. Normalize and Sort by Filter, Store & Region Advantage
                 const normalized = DealComparator.normalizeFeaturedDeals(
                     deals,
                     currencyRate,
                     filter,
                     storeFilter,
+                    regionFilter,
                 );
 
                 return {

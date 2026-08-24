@@ -14,6 +14,8 @@ export type DealFilterType =
 
 export type StoreFilterType = "all" | "steam" | "nuuvem";
 
+export type RegionAdvantageFilterType = "all" | "br" | "us";
+
 export interface CurrencyRate {
     code: string; // "USD"
     codein: string; // "BRL"

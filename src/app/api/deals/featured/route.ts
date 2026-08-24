@@ -9,6 +9,7 @@ export async function GET(request: NextRequest) {
         const { searchParams } = new URL(request.url);
         const filterParam = searchParams.get("filter") as DealFilterType | null;
         const storeParam = (searchParams.get("store") || "all") as "all" | "steam" | "nuuvem";
+        const regionParam = (searchParams.get("region") || "all") as "all" | "br" | "us";
         const validFilters: DealFilterType[] = [
             "best_savings",
             "historical_low",
@@ -21,7 +22,7 @@ export async function GET(request: NextRequest) {
             : "best_savings";
         const forceRefresh = searchParams.get("refresh") === "true";
 
-        const data = await DealsService.getFeaturedDeals(filter, forceRefresh, storeParam);
+        const data = await DealsService.getFeaturedDeals(filter, forceRefresh, storeParam, regionParam);
         return NextResponse.json(data, {
             headers: forceRefresh
                 ? {

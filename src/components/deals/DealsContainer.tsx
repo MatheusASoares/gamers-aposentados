@@ -10,6 +10,7 @@ import {
     CurrencyRate,
     DealFilterType,
     StoreFilterType,
+    RegionAdvantageFilterType,
     TrackedDealItem,
 } from "@/types/deals";
 import { DealsSearch } from "./DealsSearch";
@@ -38,6 +39,7 @@ export function DealsContainer() {
     const [currencyRate, setCurrencyRate] = useState<CurrencyRate | null>(null);
     const [activeFilter, setActiveFilter] = useState<DealFilterType>("best_savings");
     const [storeFilter, setStoreFilter] = useState<StoreFilterType>("all");
+    const [regionFilter, setRegionFilter] = useState<RegionAdvantageFilterType>("all");
 
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
@@ -95,11 +97,12 @@ export function DealsContainer() {
         return () => clearInterval(timer);
     }, [cooldown]);
 
-    // Fetch featured deals with filter & store support
+    // Fetch featured deals with filter, store & region advantage support
     const loadFeaturedDeals = useCallback(
         async (
             filter: DealFilterType = "best_savings",
             store: StoreFilterType = "all",
+            region: RegionAdvantageFilterType = "all",
             forceRefresh = false,
         ) => {
             if (filter === "monitored") {
@@ -120,7 +123,7 @@ export function DealsContainer() {
             }
             try {
                 const res = await fetch(
-                    `/api/deals/featured?filter=${filter}&store=${store}${forceRefresh ? "&refresh=true" : ""}`,
+                    `/api/deals/featured?filter=${filter}&store=${store}&region=${region}${forceRefresh ? "&refresh=true" : ""}`,
                     forceRefresh ? { cache: "no-store" } : undefined,
                 );
                 if (res.ok) {
@@ -142,8 +145,8 @@ export function DealsContainer() {
     );
 
     useEffect(() => {
-        loadFeaturedDeals(activeFilter, storeFilter);
-    }, [loadFeaturedDeals, activeFilter, storeFilter]);
+        loadFeaturedDeals(activeFilter, storeFilter, regionFilter);
+    }, [loadFeaturedDeals, activeFilter, storeFilter, regionFilter]);
 
     const handleFilterChange = (newFilter: DealFilterType) => {
         setActiveFilter(newFilter);
@@ -151,6 +154,10 @@ export function DealsContainer() {
 
     const handleStoreFilterChange = (newStore: StoreFilterType) => {
         setStoreFilter(newStore);
+    };
+
+    const handleRegionFilterChange = (newRegion: RegionAdvantageFilterType) => {
+        setRegionFilter(newRegion);
     };
 
     // Toggle track game
@@ -206,7 +213,7 @@ export function DealsContainer() {
 
         try {
             const refreshPromises: Promise<unknown>[] = [
-                loadFeaturedDeals(activeFilter, storeFilter, true),
+                loadFeaturedDeals(activeFilter, storeFilter, regionFilter, true),
             ];
 
             if (trackedDeals.length > 0) {
@@ -491,6 +498,8 @@ export function DealsContainer() {
                             onFilterChange={handleFilterChange}
                             storeFilter={storeFilter}
                             onStoreFilterChange={handleStoreFilterChange}
+                            regionFilter={regionFilter}
+                            onRegionFilterChange={handleRegionFilterChange}
                             onToggleTrack={handleToggleTrack}
                             isTracked={isTracked}
                             monitoredCount={trackedDeals.length}

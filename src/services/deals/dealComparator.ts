@@ -5,6 +5,7 @@ import {
     DealComparisonResult,
     DealFilterType,
     FeaturedDealItem,
+    RegionAdvantageFilterType,
     RegionDeal,
     StorePrice,
     WinningRegion,
@@ -161,6 +162,7 @@ export class DealComparator {
         currencyRate: CurrencyRate,
         filter: DealFilterType = "best_savings",
         storeFilter: "all" | "steam" | "nuuvem" = "all",
+        regionFilter: RegionAdvantageFilterType = "all",
     ): FeaturedDealItem[] {
         const rate = currencyRate.rate;
 
@@ -236,6 +238,13 @@ export class DealComparator {
                     item.storeBR.toLowerCase().includes("nuuvem") ||
                     item.storeUS.toLowerCase().includes("nuuvem"),
             );
+        }
+
+        // 2.5 Apply region advantage filter if specified (e.g. BR winner vs US winner)
+        if (regionFilter === "br") {
+            normalized = normalized.filter((item) => item.winningRegion === "BR");
+        } else if (regionFilter === "us") {
+            normalized = normalized.filter((item) => item.winningRegion === "US");
         }
 
         // 3. Filter and Sort based on selected Tab/Filter
