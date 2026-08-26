@@ -109,7 +109,7 @@ export function DealComparisonCard({
                 {isWinner && (
                     <div
                         className={cn(
-                            "absolute top-0 right-0 rounded-bl-xl px-3 py-1 text-[10px] font-black uppercase tracking-wider shadow-md",
+                            "absolute top-0 right-0 rounded-bl-xl px-3 py-1 text-xs font-black uppercase tracking-wider shadow-md",
                             isUS ? "bg-cyan-500 text-black" : "bg-theme-primary text-white",
                         )}
                     >
@@ -135,8 +135,8 @@ export function DealComparisonCard({
                             </div>
                         </div>
 
-                        <div className="flex items-center gap-1 rounded-full bg-zinc-900/90 px-2.5 py-1 text-[11px] font-bold text-emerald-400 border border-emerald-500/30">
-                            <ShieldCheck className="h-3.5 w-3.5" /> Oficial
+                        <div className="flex items-center gap-1.5 rounded-full bg-zinc-900/90 px-3 py-1 text-xs font-bold text-emerald-400 border border-emerald-500/30">
+                            <ShieldCheck className="h-4 w-4" /> Oficial
                         </div>
                     </div>
 
@@ -163,7 +163,7 @@ export function DealComparisonCard({
 
                         {/* Converted Equivalent Price */}
                         <div className="rounded-xl bg-zinc-900/70 p-2.5 border border-theme/20 flex items-center justify-between">
-                            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider">
                                 Equivalente em {oppositeCode}:
                             </span>
                             <span className="text-xs font-black text-theme-secondary">
@@ -172,7 +172,7 @@ export function DealComparisonCard({
                         </div>
 
                         {bestStore.voucher && (
-                            <div className="rounded-lg bg-amber-500/10 px-2.5 py-1 text-[11px] text-amber-400 border border-amber-500/30">
+                            <div className="rounded-lg bg-amber-500/10 px-3 py-1.5 text-xs font-bold text-amber-400 border border-amber-500/30">
                                 Cupom: <strong>{bestStore.voucher}</strong>
                             </div>
                         )}
@@ -337,20 +337,20 @@ export function DealComparisonCard({
                                     <Trophy className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-emerald-400">
+                                    <span className="text-xs font-black uppercase tracking-wider text-emerald-400">
                                         Vencedor do Confronto Regional
                                     </span>
-                                    <h4 className="text-base font-black text-white flex items-center gap-2">
+                                    <h4 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
                                         🇧🇷 Melhor Comprar no Brasil!
                                     </h4>
                                 </div>
                             </div>
 
                             <div className="rounded-xl bg-black/50 px-3.5 py-1.5 text-right border border-emerald-500/30">
-                                <span className="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block">
+                                <span className="text-xs font-bold text-emerald-400 uppercase tracking-wider block">
                                     Economia Estimada
                                 </span>
-                                <span className="text-sm font-black text-white">
+                                <span className="text-sm sm:text-base font-black text-white">
                                     R$ {savingsInBRL.toFixed(2)}{" "}
                                     <span className="text-xs text-zinc-400 font-normal">
                                         (${savingsInUSD.toFixed(2)} USD)
@@ -372,20 +372,20 @@ export function DealComparisonCard({
                                     <Trophy className="h-5 w-5" />
                                 </div>
                                 <div>
-                                    <span className="text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                                    <span className="text-xs font-black uppercase tracking-wider text-cyan-400">
                                         Vencedor do Confronto Regional
                                     </span>
-                                    <h4 className="text-base font-black text-white flex items-center gap-2">
+                                    <h4 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
                                         🇺🇸 Melhor Comprar nos EUA!
                                     </h4>
                                 </div>
                             </div>
 
                             <div className="rounded-xl bg-black/50 px-3.5 py-1.5 text-right border border-cyan-500/30">
-                                <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider block">
+                                <span className="text-xs font-bold text-cyan-400 uppercase tracking-wider block">
                                     Economia Estimada
                                 </span>
-                                <span className="text-sm font-black text-white">
+                                <span className="text-sm sm:text-base font-black text-white">
                                     ${savingsInUSD.toFixed(2)} USD{" "}
                                     <span className="text-xs text-zinc-400 font-normal">
                                         (R$ {savingsInBRL.toFixed(2)})
@@ -401,10 +401,10 @@ export function DealComparisonCard({
 
                 {isEqual && (
                     <div className="rounded-2xl border border-theme/20 bg-zinc-900/60 p-3 text-center">
-                        <h4 className="text-xs font-bold text-zinc-200 flex items-center justify-center gap-2">
+                        <h4 className="text-sm font-bold text-zinc-200 flex items-center justify-center gap-2">
                             🤝 Preços Praticamente Idênticos nas Duas Regiões
                         </h4>
-                        <p className="text-[11px] text-zinc-400 mt-0.5">
+                        <p className="text-xs text-zinc-400 mt-0.5">
                             A diferença cambial é menor que US$ 0.05. Compre na conta que preferir!
                         </p>
                     </div>
@@ -420,13 +420,13 @@ export function DealComparisonCard({
             {/* Steam Family Tip */}
             <div className="mt-6 flex items-start gap-3 rounded-xl border border-theme/20 bg-theme-primary/5 p-3.5 text-xs text-zinc-300">
                 <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-md bg-theme-primary/20 text-theme-primary mt-0.5">
-                    <Info className="h-3.5 w-3.5" />
+                    <Info className="h-4 w-4" />
                 </div>
                 <div className="space-y-0.5">
-                    <p className="font-bold text-white">
+                    <p className="font-bold text-white text-xs sm:text-sm">
                         Dica Steam Family:
                     </p>
-                    <p className="text-zinc-400 text-[11px]">
+                    <p className="text-zinc-400 text-xs">
                         Comprando na região vencedora ({isBrWinner ? "Brasil 🇧🇷" : isUsWinner ? "EUA 🇺🇸" : "Qualquer uma"}), o jogo fica imediatamente disponível na biblioteca compartilhada de todos os membros da família.
                     </p>
                 </div>

@@ -145,16 +145,16 @@ export function TopDealsCarousel({
                     <div>
                         <h3 className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase flex items-center gap-2.5">
                             Vitrine de Deals
-                            <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400 border border-emerald-500/30">
+                            <span className="rounded-full bg-emerald-500/20 px-2.5 py-0.5 text-xs font-bold text-emerald-400 border border-emerald-500/30">
                                 {totalDeals} {isMonitoredTab ? "Favoritos" : "Ofertas"}
                             </span>
                         </h3>
                     </div>
                 </div>
 
-                {/* 4 Main Filter Pills (2x2 Grid) */}
+                {/* 4 Main Filter Pills: 2x2 on mobile, 4x1 on desktop */}
                 {onFilterChange && (
-                    <div className="grid grid-cols-2 gap-2 rounded-2xl border border-theme/30 bg-zinc-900/60 p-1.5 shadow-xl backdrop-blur-md w-full sm:w-auto">
+                    <div className="grid grid-cols-2 lg:flex lg:flex-row lg:items-center gap-1.5 sm:gap-2 rounded-2xl border border-theme/30 bg-zinc-900/60 p-1.5 shadow-xl backdrop-blur-md w-full lg:w-auto">
                         {filterOptions.map((opt) => {
                             const isActive = activeFilter === opt.id;
                             return (
@@ -164,7 +164,7 @@ export function TopDealsCarousel({
                                     onClick={() => onFilterChange(opt.id)}
                                     disabled={isLoading}
                                     className={cn(
-                                        "flex items-center justify-center sm:justify-start gap-2 rounded-xl px-3 sm:px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-300 whitespace-nowrap",
+                                        "flex items-center justify-center lg:justify-start gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 whitespace-nowrap",
                                         isActive
                                             ? "border border-theme-primary bg-theme-primary/20 text-white shadow-[0_0_15px_var(--theme-glow)]"
                                             : "border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/40",
@@ -174,7 +174,7 @@ export function TopDealsCarousel({
                                     <span className="whitespace-nowrap">{opt.label}</span>
                                     {opt.badge !== undefined && opt.badge > 0 && (
                                         <span className={cn(
-                                            "ml-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1 text-[10px] font-black",
+                                            "ml-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1.5 text-[10px] sm:text-xs font-black",
                                             isActive ? "bg-theme-primary text-black" : "bg-zinc-800 text-yellow-400 border border-yellow-400/30",
                                         )}>
                                             {opt.badge}
@@ -192,13 +192,13 @@ export function TopDealsCarousel({
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
                     {/* Region Advantage Sub-Filter (shown when in Câmbio US/BR tab) */}
                     {activeFilter === "best_savings" && onRegionFilterChange ? (
-                        <div className="flex items-center gap-1.5 bg-zinc-950/80 p-1 rounded-xl border border-theme/30 w-full sm:w-auto">
-                            <span className="text-[10px] font-black uppercase text-zinc-400 px-1.5">Vantagem:</span>
+                        <div className="flex flex-wrap items-center gap-1.5 bg-zinc-950/80 p-1.5 rounded-xl border border-theme/30 w-full sm:w-auto">
+                            <span className="text-xs font-black uppercase text-zinc-400 px-1.5">Vantagem:</span>
                             <button
                                 type="button"
                                 onClick={() => onRegionFilterChange("all")}
                                 className={cn(
-                                    "rounded-lg px-2.5 py-1 text-[11px] font-black transition-all",
+                                    "rounded-lg px-3 py-1.5 text-xs font-black transition-all",
                                     regionFilter === "all"
                                         ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
                                         : "text-zinc-500 hover:text-zinc-300",
@@ -210,7 +210,7 @@ export function TopDealsCarousel({
                                 type="button"
                                 onClick={() => onRegionFilterChange("br")}
                                 className={cn(
-                                    "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-black transition-all",
+                                    "flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-black transition-all",
                                     regionFilter === "br"
                                         ? "bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 shadow-sm"
                                         : "text-zinc-500 hover:text-zinc-300",
@@ -222,7 +222,7 @@ export function TopDealsCarousel({
                                 type="button"
                                 onClick={() => onRegionFilterChange("us")}
                                 className={cn(
-                                    "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-black transition-all",
+                                    "flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-black transition-all",
                                     regionFilter === "us"
                                         ? "bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm"
                                         : "text-zinc-500 hover:text-zinc-300",
@@ -237,8 +237,8 @@ export function TopDealsCarousel({
 
                     {/* Store Filter */}
                     {onStoreFilterChange && (
-                        <div className="flex items-center gap-1.5">
-                            <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline">
+                        <div className="flex items-center gap-1.5 bg-zinc-950/80 p-1.5 rounded-xl border border-theme/30 sm:border-transparent sm:bg-transparent sm:p-0">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline px-1">
                                 Loja:
                             </span>
                             {storeOptions.map((storeOpt) => {
@@ -249,7 +249,7 @@ export function TopDealsCarousel({
                                         type="button"
                                         onClick={() => onStoreFilterChange(storeOpt.id)}
                                         className={cn(
-                                            "flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-[11px] font-bold transition-all",
+                                            "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all",
                                             isStoreActive
                                                 ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
                                                 : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60 border border-transparent",
@@ -336,7 +336,7 @@ export function TopDealsCarousel({
                                     ) : (
                                         <div className="flex h-full w-full flex-col items-center justify-center bg-gradient-to-br from-zinc-900 via-zinc-950 to-purple-950/20 p-3 text-center">
                                             <Gamepad2 className="h-6 w-6 text-theme-primary/60 mb-1" />
-                                            <span className="text-[10px] font-extrabold uppercase tracking-wider text-zinc-400 line-clamp-1">
+                                            <span className="text-xs font-extrabold uppercase tracking-wider text-zinc-400 line-clamp-1">
                                                 {deal.title}
                                             </span>
                                         </div>
@@ -345,7 +345,7 @@ export function TopDealsCarousel({
                                     {/* Top-Left: Store Discount badge */}
                                     {discountPercent > 0 && (
                                         <div className="absolute top-2 left-2 flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2 py-0.5 text-xs font-black text-black shadow-lg backdrop-blur-sm">
-                                            <TrendingDown className="h-3 w-3 stroke-[3]" />
+                                            <TrendingDown className="h-3.5 w-3.5 stroke-[3]" />
                                             -{discountPercent}%
                                         </div>
                                     )}
@@ -379,45 +379,45 @@ export function TopDealsCarousel({
                                         )}
 
                                         {isBrWinner && savingsPercent > 0 && (
-                                            <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-[10px] font-black text-emerald-400 border border-emerald-500/40 backdrop-blur-md shadow-md">
+                                            <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-xs font-black text-emerald-400 border border-emerald-500/40 backdrop-blur-md shadow-md">
                                                 🇧🇷 -{savingsPercent}% Econ.
                                             </span>
                                         )}
                                         {isUsWinner && savingsPercent > 0 && (
-                                            <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-[10px] font-black text-cyan-400 border border-cyan-500/40 backdrop-blur-md shadow-md">
+                                            <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-xs font-black text-cyan-400 border border-cyan-500/40 backdrop-blur-md shadow-md">
                                                 🇺🇸 -{savingsPercent}% Econ.
                                             </span>
                                         )}
 
                                         {deal.isAllTimeLow && (
-                                            <span className="flex items-center gap-1 rounded-lg bg-amber-500/90 px-2 py-0.5 text-[9px] font-black text-black shadow-md backdrop-blur-sm">
-                                                <Trophy className="h-2.5 w-2.5" /> Recorde
+                                            <span className="flex items-center gap-1 rounded-lg bg-amber-500/90 px-2 py-0.5 text-[10px] sm:text-xs font-black text-black shadow-md backdrop-blur-sm">
+                                                <Trophy className="h-3 w-3" /> Recorde
                                             </span>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Info */}
-                                <div className="mt-2.5 flex-1 space-y-1.5">
-                                    <h4 className="truncate text-xs font-bold text-white group-hover:text-theme-primary transition-colors" title={deal.title}>
+                                <div className="mt-2.5 flex-1 space-y-2">
+                                    <h4 className="truncate text-sm sm:text-base font-bold text-white group-hover:text-theme-primary transition-colors" title={deal.title}>
                                         {deal.title}
                                     </h4>
 
-                                    <div className="grid grid-cols-2 gap-1.5 rounded-xl bg-zinc-900/60 p-1.5 border border-theme/20">
+                                    <div className="grid grid-cols-2 gap-2 rounded-xl bg-zinc-900/70 p-2 border border-theme/20">
                                         <div>
-                                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
                                                 EUA (USD)
                                             </span>
-                                            <span className="text-xs font-black text-white">
+                                            <span className="text-sm sm:text-base font-black text-zinc-200">
                                                 ${priceUS > 0 ? priceUS.toFixed(2) : "--"}
                                             </span>
                                         </div>
 
                                         <div className="text-right">
-                                            <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-wider block">
+                                            <span className="text-[10px] sm:text-[11px] font-bold text-zinc-400 uppercase tracking-wider block">
                                                 Brasil (BRL)
                                             </span>
-                                            <span className="text-xs font-black text-emerald-400">
+                                            <span className="text-sm sm:text-base font-black text-emerald-400">
                                                 R$ {priceBR > 0 ? priceBR.toFixed(2) : "--"}
                                             </span>
                                         </div>
@@ -425,12 +425,12 @@ export function TopDealsCarousel({
                                 </div>
 
                                 {/* Action CTA footer */}
-                                <div className="mt-2.5 flex items-center justify-between border-t border-theme/20 pt-2 text-[10px]">
-                                    <span className="text-zinc-500 font-medium truncate max-w-[100px]">
-                                        Loja: <strong className="text-zinc-300">{deal.storeBR || "Steam"}</strong>
+                                <div className="mt-2.5 flex items-center justify-between border-t border-theme/20 pt-2 text-xs">
+                                    <span className="text-zinc-400 font-medium truncate max-w-[120px]">
+                                        Loja: <strong className="text-zinc-200">{deal.storeBR || "Steam"}</strong>
                                     </span>
-                                    <span className="flex items-center gap-0.5 font-bold text-theme-primary group-hover:translate-x-0.5 transition-transform">
-                                        Comparar <ArrowUpRight className="h-3 w-3" />
+                                    <span className="flex items-center gap-1 font-bold text-theme-primary group-hover:translate-x-0.5 transition-transform">
+                                        Comparar <ArrowUpRight className="h-3.5 w-3.5" />
                                     </span>
                                 </div>
                             </div>
