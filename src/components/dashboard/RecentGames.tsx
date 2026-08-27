@@ -1,6 +1,7 @@
 import Image from "next/image";
-import { Clock, Star, TrendingUp, Trophy, Dices, Gamepad2, Moon, PlusCircle } from "lucide-react";
+import { Clock, Star, TrendingUp, Trophy, Dices, Gamepad2, Moon, PlusCircle, Sparkles } from "lucide-react";
 import { UserLink } from "@/components/ui/user-link";
+import { SpecialReleaseBadge } from "@/components/game/SpecialReleaseBadge";
 
 // ---- Tipos de evento -----------------------------------------------------
 
@@ -9,6 +10,7 @@ interface GameInfo {
     title: string;
     cover_url: string | null;
     quest_type: string;
+    is_special_release?: boolean;
 }
 
 interface UserInfo {
@@ -22,6 +24,7 @@ export interface RaffleEvent {
     date: Date;
     game: GameInfo;
     poolType: string; // "MAIN_QUEST" | "SIDE_QUEST"
+    is_special?: boolean;
 }
 
 export interface ReviewEvent {
@@ -120,14 +123,16 @@ function getRatingColor(rating: number) {
 function EventDescription({ event }: { event: ActivityEvent }) {
     switch (event.kind) {
         case "RAFFLE":
+            const isSpecial = event.is_special || event.game.is_special_release;
             return (
-                <p className="text-sm text-zinc-300">
-                    Sorteio realizado:{" "}
+                <div className="flex flex-wrap items-center gap-1.5 text-sm text-zinc-300">
+                    <span>{isSpecial ? "Pausa Ativa iniciada:" : "Sorteio realizado:"}</span>
                     <span className="font-bold text-white">{event.game.title}</span>
-                    <span className="ml-1.5 text-xs text-zinc-500">
+                    <span className="text-xs text-zinc-500">
                         ({event.poolType === "MAIN_QUEST" ? "Main Quest" : "Side Quest"})
                     </span>
-                </p>
+                    {isSpecial && <SpecialReleaseBadge variant="subtle" label="Special Release" />}
+                </div>
             );
         case "REVIEW":
             return (

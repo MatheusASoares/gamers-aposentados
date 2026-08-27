@@ -18,6 +18,12 @@ import {
     getPastIncompleteGames,
     insertSpecialGame,
 } from "@/app/lib/pool-actions";
+import {
+    proposeSpecialGame,
+    getPendingSpecialGameProposals,
+    SpecialProposalDTO,
+} from "@/app/lib/special-game-actions";
+import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { cn } from "@/lib/utils";
 import { HltbAiResponse, HltbAiResult } from "@/types/api";
 
@@ -104,6 +110,7 @@ export function RandomizerClient({
     const [isInsertingSpecial, setIsInsertingSpecial] = useState(false);
     const [specialGameSearchOpen, setSpecialGameSearchOpen] = useState(false);
     const [selectedSearchedGame, setSelectedSearchedGame] = useState<GameSearchResult | null>(null);
+    const [pendingProposals, setPendingProposals] = useState<SpecialProposalDTO[]>([]);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
@@ -132,16 +139,16 @@ export function RandomizerClient({
                 if (pool) {
                     setPoolId(pool.poolId);
 
-                    // Split entries: mine vs others
                     const mine = pool.entries
                         .filter((e) => e.userId === currentUserId)
                         .map((e) => ({
                             id: e.gameIgdbId,
                             nome: e.gameTitle,
                             imageUrl: e.gameImageUrl,
-                            nominator: currentUserName,
+                            nominator: e.userName,
                             entryId: e.id,
                         }));
+
                     const others = pool.entries.filter((e) => e.userId !== currentUserId);
 
                     // Update HLTB times from pool data
@@ -158,19 +165,40 @@ export function RandomizerClient({
                     setMySelections(mine);
                     setSavedSnapshot(mine);
                     setOtherSelections(others);
+
+                    // Check for winner
+                    if (pool.winnerId && pool.winnerTitle) {
+                        setWinner({
+                            title: pool.winnerTitle,
+                            imageUrl: pool.winnerImageUrl,
+                        });
+                    } else {
+                        setWinner(null);
+                    }
                 } else {
                     setPoolId(null);
                     setMySelections([]);
                     setSavedSnapshot([]);
                     setOtherSelections([]);
+                    setWinner(null);
                 }
+
+                // Check lock status
+                const status = await getRandomizerStatus(
+                    type === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST",
+                );
+                setLockStatus(status);
+
+                // Fetch active pause pending proposals
+                const proposals = await getPendingSpecialGameProposals(type);
+                setPendingProposals(proposals);
             } catch (err) {
                 console.error("Error loading pool:", err);
             } finally {
                 if (!silent) setIsLoading(false);
             }
         },
-        [currentUserId, currentUserName],
+        [currentUserId],
     );
 
     const handleRefreshHltb = async (title: string) => {
@@ -210,17 +238,13 @@ export function RandomizerClient({
         }
     };
 
+    // Load initial data on mount and on questType change
     useEffect(() => {
-        setWinner(null);
-        setSaveStatus(null);
         setIsEditing(false);
-        setAddingGame(false);
-
-        // Fetch lock status
-        getRandomizerStatus(questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST").then((res) => {
-            setLockStatus(res);
-        });
-
+        setSaveStatus(null);
+        setSelectedPastGameId("");
+        setSelectedSearchedGame(null);
+        setSpecialGameSearchOpen(false);
         loadPool(questType);
 
         // Fetch past incomplete games on load
@@ -228,6 +252,11 @@ export function RandomizerClient({
             if (res.success && res.games) {
                 setPastIncompleteGames(res.games);
             }
+        });
+
+        // Fetch pending proposals
+        getPendingSpecialGameProposals(questType).then((proposals) => {
+            setPendingProposals(proposals);
         });
     }, [questType, loadPool]);
 
@@ -240,27 +269,25 @@ export function RandomizerClient({
         setIsInsertingSpecial(true);
         setSaveStatus(null);
         try {
-            const res = await insertSpecialGame(questType, gameToInsert);
+            const res = await proposeSpecialGame(questType, gameToInsert);
             if (res.success) {
                 setSaveStatus({
                     success: true,
-                    message: `Pausa ativa! Jogo "${gameToInsert.nome}" inserido com sucesso.`,
+                    message: res.message || `Proposta de Pausa Ativa enviada para "${gameToInsert.nome}". Aguardando confirmação do outro jogador.`,
                 });
-                setWinner({
-                    title: gameToInsert.nome,
-                    imageUrl: gameToInsert.imageUrl?.replace("t_cover_big", "t_1080p") || null,
-                });
-                await loadPool(questType);
+                const proposals = await getPendingSpecialGameProposals(questType);
+                setPendingProposals(proposals);
                 setSelectedPastGameId("");
+                setSelectedSearchedGame(null);
                 setSpecialGameSearchOpen(false);
             } else {
                 setSaveStatus({
                     success: false,
-                    message: res.error || "Erro ao inserir jogo especial.",
+                    message: res.error || "Erro ao propor jogo especial.",
                 });
             }
         } catch (err) {
-            console.error("Error inserting special game:", err);
+            console.error("Error proposing special game:", err);
             setSaveStatus({ success: false, message: "Erro de conexão ao servidor." });
         } finally {
             setIsInsertingSpecial(false);
@@ -821,239 +848,244 @@ export function RandomizerClient({
                                 )}
                             </div>
 
-                            {/* Special Break Card (Month 6/12 Pause) */}
-                            {questType === "SIDE" && (
-                                <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
-                                    <div className="mb-2">
-                                        <span className="text-sm font-black tracking-widest text-amber-400 uppercase drop-shadow-[0_0_8px_rgba(251,191,36,0.3)]">
-                                            Pausa da Side Quest
-                                        </span>
-                                        <p className="mt-1 text-xs text-zinc-400">
-                                            Insira manualmente o jogo escolhido para o mês de pausa,
-                                            pulando a votação.
+                            {/* Special Break Card / Pausa Ativa */}
+                            <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+                                <div className="mb-2">
+                                    <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
+                                        Pausa Ativa / Special Release ({questType === "MAIN" ? "Main Quest" : "Side Quest"})
+                                    </span>
+                                    <p className="mt-1 text-xs text-zinc-400">
+                                        Proponha um jogo especial fora do sorteio tradicional. Requer aprovação mútua (Quórum 2/2) para se tornar a Quest Ativa.
+                                    </p>
+                                </div>
+
+                                {/* Active Voting Proposals */}
+                                {pendingProposals.length > 0 && (
+                                    <div className="my-1">
+                                        <ActivePauseVotingBanner
+                                            proposals={pendingProposals}
+                                            currentUserId={currentUserId}
+                                            currentUserEmail={currentUserEmail}
+                                        />
+                                    </div>
+                                )}
+
+                                {lockStatus.locked ? (
+                                    <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">
+                                        <p className="text-xs font-black tracking-wider text-red-400 uppercase">
+                                            Pausa Bloqueada
+                                        </p>
+                                        <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
+                                            {lockStatus.message || "Já existe um jogo ativo para esta quest."}
                                         </p>
                                     </div>
-
-                                    {lockStatus.locked ? (
-                                        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 text-center">
-                                            <p className="text-xs font-black tracking-wider text-red-400 uppercase">
-                                                Pausa Bloqueada
-                                            </p>
-                                            <p className="mt-1.5 text-xs leading-relaxed text-zinc-400">
-                                                {lockStatus.message || "Já existe um jogo ativo para esta quest."}
-                                            </p>
+                                ) : (
+                                    <>
+                                        {/* Action Buttons */}
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <button
+                                                onClick={() => {
+                                                    setSpecialGameSearchOpen(false);
+                                                    if (pastIncompleteGames.length === 0) {
+                                                        getPastIncompleteGames().then((res) => {
+                                                            if (res.success && res.games) {
+                                                                setPastIncompleteGames(res.games);
+                                                            }
+                                                        });
+                                                    }
+                                                }}
+                                                className={cn(
+                                                    "rounded-xl border py-3.5 text-xs font-black tracking-widest uppercase transition-all duration-300",
+                                                    !specialGameSearchOpen
+                                                        ? "border-[#bd0df2]/50 bg-[#bd0df2]/20 text-white shadow-[0_0_15px_rgba(189,13,242,0.25)]"
+                                                        : "border-white/5 bg-zinc-950/30 text-zinc-400 hover:text-white",
+                                                )}
+                                            >
+                                                Jogos Incompletos
+                                            </button>
+                                            <button
+                                                onClick={() => {
+                                                    setSpecialGameSearchOpen(true);
+                                                    setSelectedPastGameId("");
+                                                }}
+                                                className={cn(
+                                                    "rounded-xl border py-3.5 text-xs font-black tracking-widest uppercase transition-all duration-300",
+                                                    specialGameSearchOpen
+                                                        ? "border-[#bd0df2]/50 bg-[#bd0df2]/20 text-white shadow-[0_0_15px_rgba(189,13,242,0.25)]"
+                                                        : "border-white/5 bg-zinc-950/30 text-zinc-400 hover:text-white",
+                                                )}
+                                            >
+                                                Buscar Novo (IGDB)
+                                            </button>
                                         </div>
-                                    ) : (
-                                        <>
-                                            {/* Action Buttons */}
-                                            <div className="grid grid-cols-2 gap-3">
-                                                <button
-                                                    onClick={() => {
-                                                        setSpecialGameSearchOpen(false);
-                                                        // Load past games if empty
-                                                        if (pastIncompleteGames.length === 0) {
-                                                            getPastIncompleteGames().then((res) => {
-                                                                if (res.success && res.games) {
-                                                                    setPastIncompleteGames(res.games);
-                                                                }
-                                                            });
-                                                        }
-                                                    }}
-                                                    className={cn(
-                                                        "rounded-xl border py-3.5 text-xs font-black tracking-widest uppercase transition-all duration-300",
-                                                        !specialGameSearchOpen
-                                                            ? "border-amber-400/40 bg-amber-400/20 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]"
-                                                            : "border-white/5 bg-zinc-950/30 text-zinc-400 hover:text-white",
-                                                    )}
-                                                >
-                                                    Jogos Incompletos
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setSpecialGameSearchOpen(true);
-                                                        setSelectedPastGameId("");
-                                                    }}
-                                                    className={cn(
-                                                        "rounded-xl border py-3.5 text-xs font-black tracking-widest uppercase transition-all duration-300",
-                                                        specialGameSearchOpen
-                                                            ? "border-amber-400/40 bg-amber-400/20 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]"
-                                                            : "border-white/5 bg-zinc-950/30 text-zinc-400 hover:text-white",
-                                                    )}
-                                                >
-                                                    Buscar Novo (IGDB)
-                                                </button>
-                                            </div>
 
-                                            {/* Dynamic content */}
-                                            {specialGameSearchOpen ? (
-                                                <div className="mt-2 flex flex-col gap-3">
-                                                    {!selectedSearchedGame ? (
-                                                        <GameAutocomplete
-                                                            onSelect={(game) => {
-                                                                setSelectedSearchedGame(game);
-                                                            }}
-                                                            onCancel={() => {
-                                                                setSpecialGameSearchOpen(false);
-                                                                setSelectedSearchedGame(null);
-                                                            }}
-                                                        />
-                                                    ) : (
-                                                        <div className="flex flex-col gap-3">
-                                                            <div className="flex items-center rounded-xl border border-white/5 bg-zinc-950/50 p-3">
-                                                                <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
-                                                                    {selectedSearchedGame.imageUrl && (
-                                                                        <Image
-                                                                            src={selectedSearchedGame.imageUrl}
-                                                                            alt={selectedSearchedGame.nome}
-                                                                            fill
-                                                                            sizes="48px"
-                                                                            unoptimized
-                                                                            className="object-cover"
-                                                                        />
-                                                                    )}
-                                                                </div>
-                                                                <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white">
-                                                                    {selectedSearchedGame.nome}
-                                                                </h4>
-                                                                <button
-                                                                    onClick={() => setSelectedSearchedGame(null)}
-                                                                    className="p-1 text-zinc-500 hover:text-white"
-                                                                >
-                                                                    <X className="h-5 w-5" />
-                                                                </button>
+                                        {/* Dynamic content */}
+                                        {specialGameSearchOpen ? (
+                                            <div className="mt-2 flex flex-col gap-3">
+                                                {!selectedSearchedGame ? (
+                                                    <GameAutocomplete
+                                                        onSelect={(game) => {
+                                                            setSelectedSearchedGame(game);
+                                                        }}
+                                                        onCancel={() => {
+                                                            setSpecialGameSearchOpen(false);
+                                                            setSelectedSearchedGame(null);
+                                                        }}
+                                                    />
+                                                ) : (
+                                                    <div className="flex flex-col gap-3">
+                                                        <div className="flex items-center rounded-xl border border-white/5 bg-zinc-950/50 p-3">
+                                                            <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
+                                                                {selectedSearchedGame.imageUrl && (
+                                                                    <Image
+                                                                        src={selectedSearchedGame.imageUrl}
+                                                                        alt={selectedSearchedGame.nome}
+                                                                        fill
+                                                                        sizes="48px"
+                                                                        unoptimized
+                                                                        className="object-cover"
+                                                                    />
+                                                                )}
                                                             </div>
+                                                            <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white">
+                                                                {selectedSearchedGame.nome}
+                                                            </h4>
+                                                            <button
+                                                                onClick={() => setSelectedSearchedGame(null)}
+                                                                className="p-1 text-zinc-500 hover:text-white"
+                                                            >
+                                                                <X className="h-5 w-5" />
+                                                            </button>
+                                                        </div>
 
+                                                        <button
+                                                            onClick={() => {
+                                                                handleInsertSpecialGame({
+                                                                    igdbId: selectedSearchedGame.id,
+                                                                    nome: selectedSearchedGame.nome,
+                                                                    imageUrl: selectedSearchedGame.imageUrl,
+                                                                });
+                                                            }}
+                                                            disabled={isInsertingSpecial || lockStatus?.locked}
+                                                            className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#bd0df2]/60 bg-[#bd0df2] py-3.5 text-xs sm:text-sm font-black tracking-widest text-white uppercase shadow-[0_0_20px_rgba(189,13,242,0.4)] hover:bg-[#bd0df2]/90 disabled:opacity-50 transition-all hover:scale-[1.01] active:scale-95"
+                                                        >
+                                                            {isInsertingSpecial ? (
+                                                                <>
+                                                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                                                    Enviando Proposta...
+                                                                </>
+                                                            ) : (
+                                                                "Propor Pausa Ativa (Votação 2/2)"
+                                                            )}
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ) : (
+                                            <div className="mt-2 flex flex-col gap-3">
+                                                {pastIncompleteGames.length === 0 ? (
+                                                    <button
+                                                        onClick={async () => {
+                                                            const res = await getPastIncompleteGames();
+                                                            if (res.success && res.games) {
+                                                                setPastIncompleteGames(res.games);
+                                                            }
+                                                        }}
+                                                        className="w-full rounded-xl border border-dashed border-white/10 py-3 text-xs font-bold text-zinc-500 hover:text-zinc-300"
+                                                    >
+                                                        Carregar Jogos Passados Dropados/Incompletos
+                                                    </button>
+                                                ) : (
+                                                    <div className="relative flex flex-col gap-3">
+                                                        {/* Custom dropdown trigger */}
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setIsPastDropdownOpen(!isPastDropdownOpen)}
+                                                            className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-zinc-950 p-3 text-left text-sm font-bold text-white outline-hidden focus:border-[#bd0df2]"
+                                                        >
+                                                            <span>
+                                                                {selectedPastGameId 
+                                                                    ? pastIncompleteGames.find(g => g.id === selectedPastGameId)?.title 
+                                                                    : "-- Selecione um Jogo --"}
+                                                            </span>
+                                                            <span className="ml-2 text-xs text-zinc-500">▼</span>
+                                                        </button>
+
+                                                        {isPastDropdownOpen && (
+                                                            <>
+                                                                <div 
+                                                                    className="fixed inset-0 z-40 bg-transparent" 
+                                                                    onClick={() => setIsPastDropdownOpen(false)}
+                                                                />
+                                                                <div className="custom-scrollbar absolute top-full left-0 z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-white/10 bg-zinc-950 p-1 shadow-2xl">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => {
+                                                                            setSelectedPastGameId("");
+                                                                            setIsPastDropdownOpen(false);
+                                                                        }}
+                                                                        className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-zinc-500 hover:bg-zinc-900 hover:text-white"
+                                                                    >
+                                                                        -- Selecione um Jogo --
+                                                                    </button>
+                                                                    {pastIncompleteGames.map((game) => (
+                                                                        <button
+                                                                            key={game.id}
+                                                                            type="button"
+                                                                            onClick={() => {
+                                                                                setSelectedPastGameId(game.id);
+                                                                                setIsPastDropdownOpen(false);
+                                                                            }}
+                                                                            className={cn(
+                                                                                "w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-white hover:bg-zinc-900",
+                                                                                selectedPastGameId === game.id && "bg-[#bd0df2]/20 text-[#bd0df2]"
+                                                                            )}
+                                                                        >
+                                                                            {game.title}
+                                                                        </button>
+                                                                    ))}
+                                                                </div>
+                                                            </>
+                                                        )}
+
+                                                        {selectedPastGameId && (
                                                             <button
                                                                 onClick={() => {
-                                                                    handleInsertSpecialGame({
-                                                                        igdbId: selectedSearchedGame.id,
-                                                                        nome: selectedSearchedGame.nome,
-                                                                        imageUrl: selectedSearchedGame.imageUrl,
-                                                                    });
-                                                                    setSelectedSearchedGame(null);
+                                                                    const game =
+                                                                        pastIncompleteGames.find(
+                                                                            (g) =>
+                                                                                g.id ===
+                                                                                selectedPastGameId,
+                                                                        );
+                                                                    if (game) {
+                                                                        handleInsertSpecialGame({
+                                                                            id: game.id,
+                                                                            igdbId: game.igdb_id,
+                                                                            nome: game.title,
+                                                                            imageUrl: game.cover_url,
+                                                                        });
+                                                                    }
                                                                 }}
                                                                 disabled={isInsertingSpecial || lockStatus?.locked}
-                                                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/20 py-3.5 text-xs font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:bg-amber-400/30 disabled:opacity-50"
+                                                                className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#bd0df2]/60 bg-[#bd0df2] py-3.5 text-xs sm:text-sm font-black tracking-widest text-white uppercase shadow-[0_0_20px_rgba(189,13,242,0.4)] hover:bg-[#bd0df2]/90 disabled:opacity-50 transition-all hover:scale-[1.01] active:scale-95"
                                                             >
                                                                 {isInsertingSpecial ? (
                                                                     <>
                                                                         <Loader2 className="h-4 w-4 animate-spin" />
-                                                                        Ativando...
+                                                                        Enviando Proposta...
                                                                     </>
                                                                 ) : (
-                                                                    "Confirmar e Ativar Jogo do Mês"
+                                                                    "Propor Jogo Passado (Votação 2/2)"
                                                                 )}
                                                             </button>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            ) : (
-                                                <div className="mt-2 flex flex-col gap-3">
-                                                    {pastIncompleteGames.length === 0 ? (
-                                                        <button
-                                                            onClick={async () => {
-                                                                const res = await getPastIncompleteGames();
-                                                                if (res.success && res.games) {
-                                                                    setPastIncompleteGames(res.games);
-                                                                }
-                                                            }}
-                                                            className="w-full rounded-xl border border-dashed border-white/10 py-3 text-xs font-bold text-zinc-500 hover:text-zinc-300"
-                                                        >
-                                                            Carregar Jogos Passados Dropados/Incompletos
-                                                        </button>
-                                                    ) : (
-                                                        <div className="relative flex flex-col gap-3">
-                                                            {/* Custom dropdown trigger */}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => setIsPastDropdownOpen(!isPastDropdownOpen)}
-                                                                className="flex w-full items-center justify-between rounded-xl border border-white/10 bg-zinc-950 p-3 text-left text-sm font-bold text-white outline-hidden focus:border-amber-400"
-                                                            >
-                                                                <span>
-                                                                    {selectedPastGameId 
-                                                                        ? pastIncompleteGames.find(g => g.id === selectedPastGameId)?.title 
-                                                                        : "-- Selecione um Jogo --"}
-                                                                </span>
-                                                                <span className="ml-2 text-xs text-zinc-500">▼</span>
-                                                            </button>
-
-                                                            {isPastDropdownOpen && (
-                                                                <>
-                                                                    {/* Overlay to close the dropdown on click outside */}
-                                                                    <div 
-                                                                        className="fixed inset-0 z-40 bg-transparent" 
-                                                                        onClick={() => setIsPastDropdownOpen(false)}
-                                                                    />
-                                                                    <div className="custom-scrollbar absolute top-full left-0 z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-xl border border-white/10 bg-zinc-950 p-1 shadow-2xl">
-                                                                        <button
-                                                                            type="button"
-                                                                            onClick={() => {
-                                                                                setSelectedPastGameId("");
-                                                                                setIsPastDropdownOpen(false);
-                                                                            }}
-                                                                            className="w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-zinc-500 hover:bg-zinc-900 hover:text-white"
-                                                                        >
-                                                                            -- Selecione um Jogo --
-                                                                        </button>
-                                                                        {pastIncompleteGames.map((game) => (
-                                                                            <button
-                                                                                key={game.id}
-                                                                                type="button"
-                                                                                onClick={() => {
-                                                                                    setSelectedPastGameId(game.id);
-                                                                                    setIsPastDropdownOpen(false);
-                                                                                }}
-                                                                                className={cn(
-                                                                                    "w-full rounded-lg px-3 py-2.5 text-left text-sm font-bold text-white hover:bg-zinc-900",
-                                                                                    selectedPastGameId === game.id && "bg-[#bd0df2]/20 text-[#bd0df2]"
-                                                                                )}
-                                                                            >
-                                                                                {game.title}
-                                                                            </button>
-                                                                        ))}
-                                                                    </div>
-                                                                </>
-                                                            )}
-
-                                                            {selectedPastGameId && (
-                                                                <button
-                                                                    onClick={() => {
-                                                                        const game =
-                                                                            pastIncompleteGames.find(
-                                                                                (g) =>
-                                                                                    g.id ===
-                                                                                    selectedPastGameId,
-                                                                            );
-                                                                        if (game) {
-                                                                            handleInsertSpecialGame({
-                                                                                id: game.id,
-                                                                                igdbId: game.igdb_id,
-                                                                                nome: game.title,
-                                                                                imageUrl: game.cover_url,
-                                                                            });
-                                                                        }
-                                                                    }}
-                                                                    disabled={isInsertingSpecial || lockStatus?.locked}
-                                                                    className="flex w-full items-center justify-center gap-2 rounded-xl border border-amber-400/40 bg-amber-400/20 py-3.5 text-xs font-black tracking-widest text-amber-400 uppercase shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:bg-amber-400/30 disabled:opacity-50"
-                                                                >
-                                                                    {isInsertingSpecial ? (
-                                                                        <>
-                                                                            <Loader2 className="h-4 w-4 animate-spin" />
-                                                                            Ativando...
-                                                                        </>
-                                                                    ) : (
-                                                                        "Ativar como Jogo do Mês"
-                                                                    )}
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            )}
-                                        </>
-                                    )}
-                                </div>
-                            )}
+                                                        )}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
                         </div>
 
                         {/* Right Column: Randomizer Tool Area */}

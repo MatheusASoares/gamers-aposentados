@@ -28,6 +28,8 @@ export interface QuestHistoryData {
     winnerTitle: string | null;
     winnerImageUrl: string | null;
     winnerArtworkUrl: string | null;
+    isSpecial?: boolean;
+    isSpecialRelease?: boolean;
     candidates: HistoryCandidate[];
     progress: PlayerProgress[];
 }
@@ -95,6 +97,8 @@ export async function getQuestHistoryByYear(
                 winnerTitle: winner?.title || "Unknown",
                 winnerImageUrl: winner?.cover_url || null,
                 winnerArtworkUrl: winner?.artwork_url || null,
+                isSpecial: pool.is_special,
+                isSpecialRelease: winner?.is_special_release,
                 candidates: pool.entries.map((e) => ({
                     id: e.id,
                     gameTitle: e.game.title,

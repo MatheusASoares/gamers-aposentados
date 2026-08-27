@@ -115,6 +115,18 @@ Triggered by: "son kontrolleri yap", "final checks", "çalıştır tüm testleri
 > 💜 **Project Brand Exception (Gamers Aposentados):**
 > O tom `#bd0df2` (Neon Purple/Cyber Magenta) e a estética Cyberpunk Neon da aplicação possuem **autorização explícita e exceção de marca aprovada** para utilização em toda a interface.
 
+### 📱💻 DIRETRIZ RESPONSIVA DUAL-PARADIGM (Desktop vs Mobile Friendly)
+> 🚨 **REGRA OBRIGATÓRIA:** O design desktop e mobile devem ser tratados como experiências distintas de primeira classe, nunca como mero encolhimento de tela.
+
+1. **Separação de Layouts por Viewport**:
+   - **Desktop (`lg` / `xl`)**: Aproveitamento inteligente do espaço horizontal. Grupos de 4 ações/filtros DEVEM ficar alinhados em linha contínua **4x1** (`lg:flex lg:flex-row` ou `grid lg:grid-cols-4`). Subfiltros e barras de controle devem se posicionar em linha única sem quebras verticais desnecessárias.
+   - **Mobile (`< sm` / `sm`)**: Foco em usabilidade tátil (polegar). Filtros podem ser organizados em **2x2** ou carrossel horizontal deslizável, com botões amplos para toque seguro.
+2. **Padrão Tipográfico & Política Anti-Microtexto**:
+   - **Títulos e Headings**: Mínimo `text-sm sm:text-base font-bold` (proibido usar `text-xs` para nomes e títulos principais).
+   - **Preços e Métricas**: Mínimo `text-sm sm:text-base font-black` com alto contraste visual e destaque na moeda local (BRL).
+   - **Labels, Badges e Tags**: Mínimo `text-xs font-bold` (PROIBIDO o uso de fontes ilegíveis como `text-[9px]` ou `text-[10px]` para dados informativos).
+   - **Interatividade & Botões**: Padding mínimo de `px-3 py-1.5` ou `px-3.5 py-2`, garantindo legibilidade e feedback tátil em qualquer densidade de tela.
+
 - **Web UI/UX:** Read `.agent/frontend-specialist.md`
 - **Mobile UI/UX:** Read `.agent/mobile-developer.md`
 

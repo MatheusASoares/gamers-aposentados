@@ -28,6 +28,13 @@ enum PoolStatus {
   CLOSED
 }
 
+enum ProposalStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  CANCELLED
+}
+
 // --- MODELS (As Tabelas do seu Diagrama) ---
 
 model User {
@@ -44,13 +51,15 @@ model User {
   sessions Session[]
 
   // Relações (O User tem vários...)
-  nominations        Game[]                     @relation("Nominator") // Jogos que indicou
-  reviews            Review[] // Reviews que fez
-  poolEntries        PoolEntry[] // Entradas no sorteio
-  gameProgress       GameProgress[] // Progresso nos jogos
-  favoriteGames      Game[]                     @relation("UserFavorites") // Jogos favoritos
-  favoriteGamesYear  Game[]                     @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
-  contractProgresses CampaignContractProgress[]
+  nominations          Game[]                     @relation("Nominator") // Jogos que indicou
+  reviews              Review[] // Reviews que fez
+  poolEntries          PoolEntry[] // Entradas no sorteio
+  gameProgress         GameProgress[] // Progresso nos jogos
+  favoriteGames        Game[]                     @relation("UserFavorites") // Jogos favoritos
+  favoriteGamesYear    Game[]                     @relation("UserFavoritesYear") // Jogos favoritos do Ano Atual
+  contractProgresses   CampaignContractProgress[]
+  proposedSpecialGames SpecialGameProposal[]      @relation("ProposedSpecialGames")
+  specialGameVotes     SpecialGameVote[]
 
   xp_points       Int     @default(0)
   level           Int     @default(1)
@@ -114,13 +123,15 @@ model Game {
   created_at DateTime @default(now())
 
   // Relações
-  reviews         Review[]
-  poolEntries     PoolEntry[] // Participações em sorteios
-  wonPools        Pool[]             @relation("WinnerGame") // Potes que esse jogo venceu
-  progress        GameProgress[]
-  favoritedBy     User[]             @relation("UserFavorites") // Usuários que favoritararam
-  favoritedByYear User[]             @relation("UserFavoritesYear") // Usuários que favoritararam pro Ano Atual
-  contracts       CampaignContract[]
+  reviews            Review[]
+  poolEntries        PoolEntry[] // Participações em sorteios
+  wonPools           Pool[]                @relation("WinnerGame") // Potes que esse jogo venceu
+  progress           GameProgress[]
+  favoritedBy        User[]                @relation("UserFavorites") // Usuários que favoritararam
+  favoritedByYear    User[]                @relation("UserFavoritesYear") // Usuários que favoritararam pro Ano Atual
+  contracts          CampaignContract[]
+  is_special_release Boolean               @default(false)
+  specialProposals   SpecialGameProposal[]
 
   @@index([title])
   @@index([created_at])
@@ -194,7 +205,8 @@ model Pool {
   winner_game    Game?   @relation("WinnerGame", fields: [winner_game_id], references: [id], onDelete: SetNull)
 
   // Os jogos que estão concorrendo neste pote
-  entries PoolEntry[]
+  entries    PoolEntry[]
+  is_special Boolean     @default(false)
 
   created_at DateTime @default(now())
 
@@ -263,3 +275,44 @@ model CampaignContractProgress {
   @@unique([user_id, contract_id])
   @@map("campaign_contract_progress")
 }
+
+// --- Votação de Pausa Ativa & Special Release ---
+
+model SpecialGameProposal {
+  id               String         @id @default(uuid())
+  quest_type       QuestType
+  status           ProposalStatus @default(PENDING)
+
+  igdb_id          String?
+  game_title       String
+  game_cover_url   String?
+  existing_game_id String?
+  existing_game    Game?          @relation(fields: [existing_game_id], references: [id], onDelete: SetNull)
+
+  proposer_id      String
+  proposer         User           @relation("ProposedSpecialGames", fields: [proposer_id], references: [id], onDelete: Cascade)
+
+  votes            SpecialGameVote[]
+
+  created_at       DateTime       @default(now())
+  updated_at       DateTime       @updatedAt
+
+  @@index([quest_type, status])
+  @@map("special_game_proposals")
+}
+
+model SpecialGameVote {
+  id          String              @id @default(uuid())
+  proposal_id String
+  proposal    SpecialGameProposal @relation(fields: [proposal_id], references: [id], onDelete: Cascade)
+
+  user_id     String
+  user        User                @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  approved    Boolean // true = Aceito, false = Rejeitado
+  created_at  DateTime            @default(now())
+
+  @@unique([proposal_id, user_id])
+  @@map("special_game_votes")
+}
+

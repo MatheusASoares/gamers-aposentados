@@ -49,6 +49,10 @@ next-env.d.ts
 # Historical data (CSVs with personal info)
 /data/historical/
 
+# Temporary / Scratch scripts and dumps
+/scratch/
+*.sql
+
 # Antigravity Kit & Stitch
 /.agent/
 /.agents/

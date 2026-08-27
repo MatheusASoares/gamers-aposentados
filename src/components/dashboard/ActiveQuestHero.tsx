@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { UserLink } from "@/components/ui/user-link";
 import Image from "next/image";
 import { HltbBadge } from "@/components/game/HltbBadge";
+import { SpecialReleaseBadge } from "@/components/game/SpecialReleaseBadge";
 
 interface ActiveQuestHeroProps {
     progress: {
@@ -18,15 +19,18 @@ interface ActiveQuestHeroProps {
             cover_url: string | null;
             hltb_time: number | null;
             nominator: { id: string; name: string | null; username: string | null } | null;
+            is_special_release?: boolean;
         };
     } | null;
     activePool?: {
+        is_special?: boolean;
         winner_game: null | {
             id: string;
             title: string;
             cover_url: string | null;
             hltb_time: number | null;
             nominator: { id: string; name: string | null; username: string | null } | null;
+            is_special_release?: boolean;
         };
     } | null;
     userName: string;
@@ -146,6 +150,9 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                                         <Swords className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                         Main Quest
                                     </span>
+                                    {(game.is_special_release || activePool?.is_special) && (
+                                        <SpecialReleaseBadge variant="hero" label="Special Release" />
+                                    )}
                                 </div>
                                 <h2 className="text-2xl leading-[1.15] font-black tracking-tighter text-white drop-shadow-md sm:text-4xl md:text-5xl line-clamp-2">
                                     {game.title}

@@ -18,6 +18,7 @@ import {
 import { cn } from "@/lib/utils";
 import type { QuestHistoryData } from "@/app/lib/history-actions";
 import { completeQuest, updateQuestProgress, resumeDroppedQuest } from "@/app/lib/quest-actions";
+import { SpecialReleaseBadge } from "@/components/game/SpecialReleaseBadge";
 
 interface QuestHistoryCardProps {
     data: QuestHistoryData;
@@ -136,6 +137,9 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                     )}
                                     {isMainQuest ? "Main Quest" : "Side Quest"}
                                 </span>
+                                {(data.isSpecial || data.isSpecialRelease) && (
+                                    <SpecialReleaseBadge variant="compact" label="Special Release" />
+                                )}
                             </div>
                             <h2 className="text-shadow-glow text-3xl leading-[1.1] font-black tracking-tighter text-white uppercase sm:text-4xl">
                                 {data.winnerTitle}
@@ -195,6 +199,9 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                     )}
                                     {isMainQuest ? "Main Quest" : "Side Quest"}
                                 </span>
+                                {(data.isSpecial || data.isSpecialRelease) && (
+                                    <SpecialReleaseBadge variant="compact" label="Special Release" />
+                                )}
                                 <span className="text-sm font-bold tracking-widest text-zinc-400 uppercase">
                                     {title}
                                 </span>

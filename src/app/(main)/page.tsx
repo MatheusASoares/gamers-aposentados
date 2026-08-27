@@ -8,6 +8,9 @@ import { UserProfileWidget } from "@/components/dashboard/UserProfileWidget";
 import { Leaderboard, PlayerStats } from "@/components/dashboard/Leaderboard";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
+import { getPendingSpecialGameProposals } from "@/app/lib/special-game-actions";
+import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
+import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -36,6 +39,7 @@ export default async function DashboardPage() {
         recentNominations,
         completedProgresses,
         activeUsers,
+        pendingProposals,
     ] = await Promise.all([
         // Active Main Quest
         prisma.pool.findFirst({
@@ -108,6 +112,8 @@ export default async function DashboardPage() {
         prisma.user.findMany({
             where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
         }),
+        // Fetch pending special game proposals for active pause voting
+        getPendingSpecialGameProposals(),
     ]);
 
     // --- Block 2: Dependent Data Fetching (Parallel) ---
@@ -187,8 +193,10 @@ export default async function DashboardPage() {
                     title: p.winner_game!.title,
                     cover_url: p.winner_game!.cover_url,
                     quest_type: p.type,
+                    is_special_release: p.winner_game!.is_special_release,
                 },
                 poolType: p.type,
+                is_special: p.is_special,
             })),
         ...recentReviews.map((r) => ({
             kind: "REVIEW" as const,
@@ -325,6 +333,19 @@ export default async function DashboardPage() {
 
     return (
         <div className="mx-auto w-full max-w-[1920px] space-y-6 sm:space-y-8 px-2 sm:px-6 py-3 sm:py-8 md:px-8 lg:px-12 lg:py-12">
+            {/* Active Pause Quorum Voting Banner */}
+            <ActivePauseVotingBanner
+                proposals={pendingProposals}
+                currentUserId={userId}
+                currentUserEmail={session?.user?.email || undefined}
+            />
+
+            {/* Active Pause Quorum Floating Toast Notification */}
+            <ActivePauseVotingToast
+                proposals={pendingProposals}
+                currentUserId={userId}
+            />
+
             {/* Deals Tracker Subtle All-Time Low Alert */}
             <TrackedDealsAlert />
 
