@@ -35,6 +35,23 @@ const contractSchema = {
     },
 };
 
+let dailySearchCount = 0;
+let currentDay = new Date().toDateString();
+
+function canExecuteWebSearch(): boolean {
+    const today = new Date().toDateString();
+    if (today !== currentDay) {
+        currentDay = today;
+        dailySearchCount = 0;
+    }
+    if (dailySearchCount >= 15) {
+        console.warn("[NoticeBoardService] Limite diário de 15 buscas com Search Grounding atingido. Utilizando modo econômico.");
+        return false;
+    }
+    dailySearchCount++;
+    return true;
+}
+
 export async function generateContractsForGame(game: {
     title: string;
     quest_type: string;
@@ -59,24 +76,28 @@ export async function generateContractsForGame(game: {
         console.error(`[NoticeBoardService] Erro ao buscar contexto no IGDB para ${title}:`, err);
     }
 
-    // 2. Sempre fazer busca na web via Gemini Search Grounding para obter a estrutura específica da campanha (chefes, fases, setlists, etc.)
+    // 2. Busca na web via Gemini Search Grounding respeitando o Circuit Breaker diário
     let searchContext = "";
-    console.log(`[NoticeBoardService] Iniciando busca na web com Gemini para enriquecer "${title}".`);
-    try {
-        const searchResponse = await ai.models.generateContent({
-            model: "gemini-2.5-flash",
-            contents: `Pesquise a estrutura de campanha/modo carreira do jogo "${title}". Liste em detalhes: os nomes reais de todos os capítulos, atos, fases ou tiers (com exemplos de músicas, fases ou metas marcantes de cada um), nomes dos chefes reais de cada fase, e a ordem de progressão linear oficial da história.`,
-            config: {
-                tools: [{ googleSearch: {} }],
-                temperature: 0.2,
+    if (canExecuteWebSearch()) {
+        console.log(`[NoticeBoardService] Iniciando busca na web com Gemini para enriquecer "${title}".`);
+        try {
+            const searchResponse = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: `Pesquise a estrutura de campanha/modo carreira do jogo "${title}". Liste em detalhes: os nomes reais de todos os capítulos, atos, fases ou tiers (com exemplos de músicas, fases ou metas marcantes de cada um), nomes dos chefes reais de cada fase, e a ordem de progressão linear oficial da história.`,
+                config: {
+                    tools: [{ googleSearch: {} }],
+                    temperature: 0.2,
+                }
+            });
+            if (searchResponse.text) {
+                searchContext = searchResponse.text;
+                console.log(`[NoticeBoardService] Busca na web para "${title}" concluída com sucesso.`);
             }
-        });
-        if (searchResponse.text) {
-            searchContext = searchResponse.text;
-            console.log(`[NoticeBoardService] Busca na web para "${title}" concluída com sucesso.`);
+        } catch (searchErr) {
+            console.error(`[NoticeBoardService] Erro ao executar busca na web para ${title}:`, searchErr);
         }
-    } catch (searchErr) {
-        console.error(`[NoticeBoardService] Erro ao executar busca na web para ${title}:`, searchErr);
+    } else {
+        console.log(`[NoticeBoardService] Modo econômico ativado para "${title}".`);
     }
 
     const combinedContext = `${igdbContext}\n--- Detalhes de Pesquisa na Web ---\n${searchContext}`;

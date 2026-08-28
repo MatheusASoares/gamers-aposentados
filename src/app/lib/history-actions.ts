@@ -35,21 +35,35 @@ export interface QuestHistoryData {
 }
 
 export async function getQuestHistoryByYear(
-    year: number,
-    questType: "MAIN" | "SIDE"
+    year: number | "ALL",
+    questType: "ALL" | "MAIN" | "SIDE" = "ALL"
 ): Promise<QuestHistoryData[]> {
-    const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
+    const typeEnum = questType === "ALL" ? undefined : questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
     try {
+        const whereClause: {
+            status: "CLOSED";
+            year?: number;
+            type?: "MAIN_QUEST" | "SIDE_QUEST";
+            winner_game_id: { not: null };
+        } = {
+            status: "CLOSED",
+            winner_game_id: { not: null },
+        };
+
+        if (year !== "ALL") {
+            whereClause.year = year;
+        }
+        if (typeEnum) {
+            whereClause.type = typeEnum;
+        }
+
         const pools = await prisma.pool.findMany({
-            where: {
-                year: year,
-                type: typeEnum,
-                status: "CLOSED",
-            },
-            orderBy: {
-                month: "desc", // Latest month first
-            },
+            where: whereClause,
+            orderBy: [
+                { year: "desc" },
+                { month: "desc" },
+            ],
             include: {
                 winner_game: {
                     include: {
@@ -90,7 +104,7 @@ export async function getQuestHistoryByYear(
 
             return {
                 poolId: pool.id,
-                questType,
+                questType: pool.type === "MAIN_QUEST" ? "MAIN" : "SIDE",
                 month: pool.month,
                 year: pool.year,
                 winnerId: winner?.id || null,
@@ -130,5 +144,62 @@ export async function getAvailableYears(): Promise<number[]> {
     } catch (error) {
         console.error("Error fetching available years:", error);
         return [new Date().getFullYear()]; // Fallback
+    }
+}
+
+export interface PersonalQuestHistoryItem {
+    id: string;
+    gameId: string;
+    title: string;
+    coverUrl: string | null;
+    artworkUrl: string | null;
+    questType: "MAIN_QUEST" | "SIDE_QUEST";
+    status: string; // COMPLETED, DROPPED, ACTIVE
+    progress_percentage: number;
+    hltbTime: number | null;
+    isPlatinum: boolean;
+    startDate: Date | null;
+    endDate: Date | null;
+    reviewRating?: number | null;
+}
+
+export async function getUserPersonalQuestHistory(userId: string): Promise<PersonalQuestHistoryItem[]> {
+    if (!userId) return [];
+    try {
+        const progresses = await prisma.gameProgress.findMany({
+            where: {
+                user_id: userId,
+                status: { in: ["COMPLETED", "DROPPED", "ACTIVE"] },
+            },
+            include: {
+                game: {
+                    include: {
+                        reviews: {
+                            where: { user_id: userId },
+                        },
+                    },
+                },
+            },
+            orderBy: { updated_at: "desc" },
+        });
+
+        return progresses.map((p) => ({
+            id: p.id,
+            gameId: p.game_id,
+            title: p.game.title,
+            coverUrl: p.game.cover_url,
+            artworkUrl: p.game.artwork_url,
+            questType: p.game.quest_type,
+            status: p.status,
+            progress_percentage: p.progress_percentage,
+            hltbTime: p.game.hltb_time,
+            isPlatinum: p.is_platinum,
+            startDate: p.start_date,
+            endDate: p.end_date,
+            reviewRating: p.game.reviews[0]?.rating || null,
+        }));
+    } catch (error) {
+        console.error("Error fetching personal quest history:", error);
+        return [];
     }
 }

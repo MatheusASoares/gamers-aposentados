@@ -74,6 +74,10 @@ test.describe("Quest Eligibility and Concurrency Rules", () => {
         await page.getByRole("button", { name: "Register" }).click();
 
         await page.waitForURL(/.*\/login/);
+        await prisma.user.update({
+            where: { email: testUserEmail },
+            data: { role: "GUILD_MASTER" },
+        });
         await page.getByLabel("Email").fill(testUserEmail);
         await page.getByLabel("Password").fill("testpass123");
         await page.getByRole("button", { name: "Log in" }).click();
@@ -156,6 +160,10 @@ test.describe("Quest Eligibility and Concurrency Rules", () => {
         await page.getByRole("button", { name: "Register" }).click();
 
         await page.waitForURL(/.*\/login/);
+        await prisma.user.update({
+            where: { email: testUserEmail },
+            data: { role: "GUILD_MASTER" },
+        });
         await page.getByLabel("Email").fill(testUserEmail);
         await page.getByLabel("Password").fill("testpass123");
         await page.getByRole("button", { name: "Log in" }).click();

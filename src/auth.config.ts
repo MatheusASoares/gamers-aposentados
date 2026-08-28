@@ -38,6 +38,9 @@ export const authConfig = {
             if (token.sub && session.user) {
                 session.user.id = token.sub;
                 session.user.username = token.username as string;
+                session.user.role = (token.role as "GUILD_MASTER" | "MEMBER") || "MEMBER";
+                session.user.notice_board_tokens = typeof token.notice_board_tokens === "number" ? token.notice_board_tokens : 2;
+                session.user.ai_cooldown_until = token.ai_cooldown_until as string | Date | null;
                 session.user.image = (token.image as string) ?? session.user.image;
                 session.user.email = (token.email as string) ?? session.user.email;
                 session.user.equipped_frame = token.equipped_frame as string | null;
@@ -51,6 +54,9 @@ export const authConfig = {
             if (user) {
                 token.sub = user.id;
                 token.username = user.username;
+                token.role = user.role || "MEMBER";
+                token.notice_board_tokens = typeof user.notice_board_tokens === "number" ? user.notice_board_tokens : 2;
+                token.ai_cooldown_until = user.ai_cooldown_until || null;
                 token.image = user.image;
                 token.email = user.email;
                 token.equipped_frame = user.equipped_frame || null;
@@ -60,6 +66,9 @@ export const authConfig = {
             }
             if (trigger === "update") {
                 if (session?.username) token.username = session.username;
+                if (session?.role) token.role = session.role;
+                if (session?.notice_board_tokens !== undefined) token.notice_board_tokens = session.notice_board_tokens;
+                if (session?.ai_cooldown_until !== undefined) token.ai_cooldown_until = session.ai_cooldown_until;
                 if (session?.image) token.image = session.image;
                 if (session?.equipped_frame !== undefined) token.equipped_frame = session.equipped_frame;
                 if (session?.equipped_title !== undefined) token.equipped_title = session.equipped_title;

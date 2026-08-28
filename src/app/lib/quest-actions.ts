@@ -138,12 +138,18 @@ export async function completeQuest(gameId: string): Promise<{ success: boolean;
     }
 }
 
+import { isGuildMaster } from "@/lib/permissions";
+
 export async function dropQuest(gameId: string): Promise<{ success: boolean; error?: string }> {
     const session = await auth();
     if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
     try {
         const result = await prisma.$transaction(async (tx) => {
+            const user = await tx.user.findUnique({
+                where: { id: session.user.id },
+            });
+
             const existing = await tx.gameProgress.findUnique({
                 where: {
                     user_id_game_id: {
@@ -152,6 +158,8 @@ export async function dropQuest(gameId: string): Promise<{ success: boolean; err
                     },
                 },
             });
+
+            const progressPct = existing ? existing.progress_percentage : 0;
 
             if (existing) {
                 if (existing.status === "DROPPED") {
@@ -175,6 +183,18 @@ export async function dropQuest(gameId: string): Promise<{ success: boolean; err
                     },
                 });
             }
+
+            // Se for MEMBER e abandonar com progresso menor que 20%, aplicar penalidade de 7 dias de cooldown para IA
+            if (user && !isGuildMaster(user) && progressPct < 20) {
+                const cooldownDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
+                await tx.user.update({
+                    where: { id: user.id },
+                    data: {
+                        ai_cooldown_until: cooldownDate,
+                    },
+                });
+            }
+
             return { success: true };
         });
 

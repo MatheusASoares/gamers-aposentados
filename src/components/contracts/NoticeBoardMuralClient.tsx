@@ -3,8 +3,8 @@
 import { useTransition, useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CampaignContract, CampaignContractProgress, Game } from "@prisma/client";
-import { Scroll, Lock, CheckCircle2, Swords, Loader2, Compass, RotateCcw } from "lucide-react";
-import { generateNoticeBoardAction, completeContractAction, uncompleteContractAction, clearNoticeBoardAction } from "@/app/lib/notice-board-actions";
+import { Scroll, Lock, CheckCircle2, Swords, Loader2, Compass, RotateCcw, Sparkles, Zap } from "lucide-react";
+import { generateNoticeBoardAction, generateManualNoticeBoardAction, completeContractAction, uncompleteContractAction, clearNoticeBoardAction } from "@/app/lib/notice-board-actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -98,34 +98,31 @@ export function NoticeBoardMuralClient({
 
     useEffect(() => {
         // Função auxiliar para rolar horizontalmente de forma segura e centrada
-        const scrollActiveContractIntoView = (container: HTMLDivElement | null) => {
-            if (!container) return;
+        const centerActiveCard = (ref: React.RefObject<HTMLDivElement | null>) => {
+            if (!ref.current) return;
+            const container = ref.current;
+            const activeCard = container.querySelector('[data-active-card="true"]') as HTMLElement | null;
 
-            const activeChild = container.querySelector('[data-active="true"]') as HTMLElement;
-            if (activeChild) {
-                const containerRect = container.getBoundingClientRect();
-                const childRect = activeChild.getBoundingClientRect();
+            if (activeCard) {
+                const containerWidth = container.clientWidth;
+                const cardLeft = activeCard.offsetLeft;
+                const cardWidth = activeCard.clientWidth;
 
-                // Calcula a posição do filho relativa ao container
-                const relativeLeft = childRect.left - containerRect.left;
-
-                // Centraliza o card de contrato ativo na raia
-                const targetScrollLeft =
-                    container.scrollLeft +
-                    relativeLeft -
-                    containerRect.width / 2 +
-                    childRect.width / 2;
-
+                const scrollTarget = cardLeft - containerWidth / 2 + cardWidth / 2;
                 container.scrollTo({
-                    left: targetScrollLeft,
+                    left: Math.max(0, scrollTarget),
                     behavior: "smooth",
                 });
             }
         };
 
-        scrollActiveContractIntoView(mainLaneDrag.ref.current);
-        scrollActiveContractIntoView(sideLaneDrag.ref.current);
-    }, [mainContracts, sideContracts, mainLaneDrag.ref, sideLaneDrag.ref]);
+        const timeout = setTimeout(() => {
+            centerActiveCard(mainLaneDrag.ref);
+            centerActiveCard(sideLaneDrag.ref);
+        }, 300);
+
+        return () => clearTimeout(timeout);
+    }, [mainContracts, sideContracts]);
 
     const handleGenerateBoard = (gameId: string) => {
         setTargetGameId(gameId);
@@ -141,6 +138,20 @@ export function NoticeBoardMuralClient({
                 router.refresh();
             } else {
                 const errorMsg = "error" in res ? res.error : "Erro ao gerar contratos.";
+                alert(errorMsg);
+            }
+        });
+    };
+
+    const confirmGenerateManualBoard = () => {
+        if (!targetGameId) return;
+        setIsConfirmOpen(false);
+        startTransition(async () => {
+            const res = await generateManualNoticeBoardAction(targetGameId);
+            if (res.success) {
+                router.refresh();
+            } else {
+                const errorMsg = "error" in res ? res.error : "Erro ao criar trilha manual.";
                 alert(errorMsg);
             }
         });
@@ -573,32 +584,97 @@ export function NoticeBoardMuralClient({
                     sideLaneDrag,
                 )}
 
-                {/* Confirmation Modal */}
+                {/* Confirmation Modal - Dual-Option Card Layout */}
                 <Dialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
-                    <DialogContent className="rounded-2xl border border-white/5 bg-zinc-950 p-6 sm:max-w-md">
-                        <DialogHeader className="space-y-1">
-                            <DialogTitle className="text-xl font-black tracking-tight text-white uppercase">
-                                Summon contracts for this campaign?
+                    <DialogContent className="rounded-3xl border border-zinc-800/90 bg-zinc-950/98 p-6 sm:p-8 sm:max-w-xl shadow-[0_0_50px_rgba(0,0,0,0.9)] backdrop-blur-2xl">
+                        <DialogHeader className="space-y-2 text-left">
+                            <div className="flex items-center gap-2">
+                                <span className="h-2 w-2 rounded-full bg-[#bd0df2] animate-pulse" />
+                                <span className="text-xs font-black tracking-widest text-[#bd0df2] uppercase">
+                                    Notice Board Generator
+                                </span>
+                            </div>
+                            <DialogTitle className="text-xl sm:text-2xl font-black tracking-tight text-white uppercase">
+                                Como deseja gerar os contratos?
                             </DialogTitle>
-                            <DialogDescription className="sr-only">
-                                Summon contracts confirmation dialog.
+                            <DialogDescription className="text-xs sm:text-sm text-zinc-400 font-medium">
+                                Escolha o modo de criação da sua trilha de progresso para a campanha.
                             </DialogDescription>
                         </DialogHeader>
-                        <DialogFooter className="mt-6 flex flex-row justify-end gap-3">
+
+                        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            {/* Option 1: IA Avançada */}
+                            <button
+                                type="button"
+                                onClick={confirmGenerateBoard}
+                                className="group relative flex flex-col justify-between rounded-2xl border border-purple-500/40 bg-purple-950/20 p-5 text-left transition-all hover:border-[#bd0df2] hover:bg-purple-950/40 hover:shadow-[0_0_25px_rgba(189,13,242,0.25)] hover:scale-[1.02] active:scale-95 min-h-[160px]"
+                            >
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/40 shadow-inner">
+                                            <Sparkles className="h-5 w-5" />
+                                        </div>
+                                        <span className="rounded-full bg-[#bd0df2]/20 border border-[#bd0df2]/40 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-[#bd0df2]">
+                                            ✦ IA Gemini
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-white uppercase tracking-wider group-hover:text-[#bd0df2] transition-colors">
+                                            Invocar com IA
+                                        </h4>
+                                        <p className="mt-1 text-xs text-zinc-400 leading-relaxed font-medium">
+                                            Gera capítulos e chefes reais baseados na história autêntica do jogo.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 flex items-center gap-1.5 text-xs font-black uppercase text-[#bd0df2] tracking-wider">
+                                    <span>Gerar Trilha</span>
+                                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                                </div>
+                            </button>
+
+                            {/* Option 2: Trilha Manual */}
+                            <button
+                                type="button"
+                                onClick={confirmGenerateManualBoard}
+                                className="group relative flex flex-col justify-between rounded-2xl border border-zinc-800 bg-zinc-900/40 p-5 text-left transition-all hover:border-cyan-500/50 hover:bg-cyan-950/20 hover:shadow-[0_0_25px_rgba(6,182,212,0.2)] hover:scale-[1.02] active:scale-95 min-h-[160px]"
+                            >
+                                <div className="space-y-3">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30 shadow-inner">
+                                            <Zap className="h-5 w-5" />
+                                        </div>
+                                        <span className="rounded-full bg-zinc-800/80 border border-zinc-700 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-cyan-400">
+                                            0 Tokens
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h4 className="text-sm font-black text-white uppercase tracking-wider group-hover:text-cyan-400 transition-colors">
+                                            Trilha Clássica
+                                        </h4>
+                                        <p className="mt-1 text-xs text-zinc-400 leading-relaxed font-medium">
+                                            4 marcos balanceados de 25% a 100% para progressão ágil.
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-4 flex items-center gap-1.5 text-xs font-black uppercase text-cyan-400 tracking-wider">
+                                    <span>Criar Manual</span>
+                                    <span className="transition-transform group-hover:translate-x-1">→</span>
+                                </div>
+                            </button>
+                        </div>
+
+                        <div className="mt-6 flex justify-end">
                             <Button
                                 variant="ghost"
                                 onClick={() => setIsConfirmOpen(false)}
-                                className="h-12 rounded-xl border border-white/5 bg-zinc-900 px-6 py-3 text-sm font-black tracking-wider text-zinc-400 uppercase hover:bg-zinc-800/80 hover:text-white"
+                                className="h-10 rounded-xl border border-zinc-800 bg-zinc-900/80 px-5 text-xs font-black tracking-wider text-zinc-400 uppercase hover:bg-zinc-800 hover:text-white min-h-[40px]"
                             >
-                                Cancel
+                                Cancelar
                             </Button>
-                            <Button
-                                onClick={confirmGenerateBoard}
-                                className="h-12 rounded-xl bg-gradient-to-r from-[#bd0df2] to-[#d946ef] px-6 py-3 text-sm font-black tracking-wider text-white uppercase shadow-[0_0_15px_rgba(189,13,242,0.3)] transition-all hover:scale-[1.03] active:scale-95"
-                            >
-                                Summon
-                            </Button>
-                        </DialogFooter>
+                        </div>
                     </DialogContent>
                 </Dialog>
 

@@ -11,15 +11,29 @@ test.describe("Randomizer Flow", () => {
                 },
             },
         });
+        await prisma.poolEntry.deleteMany({
+            where: {
+                game: {
+                    title: { startsWith: "Mock" },
+                },
+            },
+        });
+        await prisma.pool.deleteMany({
+            where: {
+                entries: {
+                    some: {
+                        game: {
+                            title: { startsWith: "Mock" },
+                        },
+                    },
+                },
+            },
+        });
         await prisma.game.deleteMany({
             where: {
                 title: { startsWith: "Mock" },
             },
         });
-
-        // Limpar pools e entradas anteriores para isolar o teste
-        await prisma.poolEntry.deleteMany({});
-        await prisma.pool.deleteMany({});
     });
 
     test("Adding games and rolling the dice", async ({ page }) => {

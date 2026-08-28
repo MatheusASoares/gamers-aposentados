@@ -33,9 +33,12 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
             },
         });
 
-        // Limpar qualquer progresso anterior do Matheus para isolamento completo dos testes
+        // Limpar apenas progressos de jogos de teste
         await prisma.gameProgress.deleteMany({
-            where: { user_id: matheusUser.id },
+            where: {
+                user_id: matheusUser.id,
+                game: { title: { startsWith: "ResumeTestGame" } },
+            },
         });
     });
 

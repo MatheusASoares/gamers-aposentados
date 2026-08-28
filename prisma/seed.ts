@@ -862,43 +862,55 @@ const allReviews: ReviewData[] = [
 // MAIN SEED FUNCTION
 // ============================================================
 async function main() {
-    console.log("🧹 Clearing existing data...");
+    console.log("🧹 Clearing existing games, pools and reviews...");
+    await prisma.campaignContractProgress.deleteMany();
+    await prisma.campaignContract.deleteMany();
+    await prisma.specialGameVote.deleteMany();
+    await prisma.specialGameProposal.deleteMany();
     await prisma.poolEntry.deleteMany();
     await prisma.pool.deleteMany();
     await prisma.review.deleteMany();
     await prisma.gameProgress.deleteMany();
     await prisma.game.deleteMany();
-    // Don't delete accounts/sessions to protect OAuth data
-    await prisma.user.deleteMany();
 
     // ----------------------------------------------------------
-    // 1. CREATE USERS
+    // 1. UPSERT USERS (Preserves passwords and accounts)
     // ----------------------------------------------------------
-    console.log("👤 Creating users...");
-    const matheus = await prisma.user.create({
-        data: {
+    console.log("👤 Ensuring primary guild users exist...");
+    const matheus = await prisma.user.upsert({
+        where: { email: "matheus31also@gmail.com" },
+        update: { role: "GUILD_MASTER" },
+        create: {
             username: "matheus",
             email: "matheus31also@gmail.com",
             name: "Matheus",
+            role: "GUILD_MASTER",
         },
     });
-    const lucas = await prisma.user.create({
-        data: {
+    const lucas = await prisma.user.upsert({
+        where: { email: "lucasedu17gomes@gmail.com" },
+        update: { role: "GUILD_MASTER" },
+        create: {
             username: "oCobralJhonson",
             email: "lucasedu17gomes@gmail.com",
             name: "Lucas",
+            role: "GUILD_MASTER",
         },
     });
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const leticia = await prisma.user.create({
-        data: {
+    const leticia = await prisma.user.upsert({
+        where: { email: "lsoares.english@gmail.com" },
+        update: {},
+        create: {
             username: "lele",
             email: "lsoares.english@gmail.com",
             name: "Letícia Soares",
         },
     });
-    const ygnos = await prisma.user.create({
-        data: {
+    const ygnos = await prisma.user.upsert({
+        where: { email: "yanhyuuga@gmail.com" },
+        update: {},
+        create: {
             username: "ygnos",
             email: "yanhyuuga@gmail.com",
             name: "Ygnos, The Mage",

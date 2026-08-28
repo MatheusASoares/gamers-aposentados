@@ -26,6 +26,7 @@ import {
 import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { cn } from "@/lib/utils";
 import { HltbAiResponse, HltbAiResult } from "@/types/api";
+import { PersonalQuestHub } from "@/components/game/PersonalQuestHub";
 
 type QuestType = "MAIN" | "SIDE";
 
@@ -82,6 +83,15 @@ export function RandomizerClient({
     canAddGames: boolean;
     otherPlayerName: string;
 }) {
+    if (!canAddGames) {
+        return (
+            <PersonalQuestHub
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+            />
+        );
+    }
+
     const { data: session } = useSession();
     const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
 

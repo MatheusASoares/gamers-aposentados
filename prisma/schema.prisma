@@ -35,6 +35,11 @@ enum ProposalStatus {
   CANCELLED
 }
 
+enum UserRole {
+  GUILD_MASTER
+  MEMBER
+}
+
 // --- MODELS (As Tabelas do seu Diagrama) ---
 
 model User {
@@ -46,6 +51,11 @@ model User {
   image         String?
   name          String?
   created_at    DateTime  @default(now())
+
+  role                 UserRole                   @default(MEMBER)
+  notice_board_tokens  Int                        @default(2)
+  last_token_reset     DateTime                   @default(now())
+  ai_cooldown_until    DateTime?
 
   accounts Account[]
   sessions Session[]

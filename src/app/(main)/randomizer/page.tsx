@@ -3,6 +3,7 @@ import { RandomizerClient } from "@/components/game/RandomizerClient";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { isRandomizerPlayer, getOtherPlayerName } from "@/lib/randomizer-players";
+import { isGuildMaster } from "@/lib/permissions";
 
 export const metadata: Metadata = {
     title: "Randomizer | Gamers Aposentados",
@@ -16,7 +17,7 @@ export default async function RandomizerPage() {
         redirect("/login");
     }
 
-    const canAddGames = isRandomizerPlayer(session.user.email);
+    const canAddGames = isGuildMaster(session.user);
     const otherPlayerName = getOtherPlayerName(session.user.email);
 
     return (

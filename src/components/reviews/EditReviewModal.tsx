@@ -1,10 +1,23 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Loader2, Edit, ImagePlus, X, Sparkles, Star, Flame, Clock, Gamepad2, Award, CheckCircle2, ShieldAlert } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import {
+    Edit,
+    Loader2,
+    ImagePlus,
+    X,
+    Sparkles,
+    Star,
+    Flame,
+    Clock,
+    Gamepad2,
+    Award,
+    CheckCircle2,
+    ShieldAlert,
+} from "lucide-react";
 import { updateReview } from "@/app/lib/review-actions";
 import { compressImage } from "@/lib/image-compressor";
-import { useRouter } from "next/navigation";
 import {
     Dialog,
     DialogContent,
@@ -21,10 +34,11 @@ export interface EditReviewModalProps {
         difficulty?: number | null;
         hours_played?: number | null;
         review_text: string | null;
-        screenshots?: string[];
+        screenshots?: (string | { id?: string; image_url: string })[];
         game: {
+            id?: string;
             title: string;
-            cover_url?: string | null;
+            cover_url: string | null;
         };
     };
     trigger?: React.ReactNode;
@@ -48,6 +62,13 @@ const getRatingColor = (val: number) => {
     return { bg: "bg-rose-500 text-white border-rose-400 shadow-[0_0_12px_rgba(244,63,94,0.5)]", label: "Ruim" };
 };
 
+interface ScreenshotItem {
+    id?: string;
+    file?: File;
+    previewUrl: string;
+    uploadedUrl?: string;
+}
+
 export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     const router = useRouter();
     const [open, setOpen] = useState(false);
@@ -58,20 +79,30 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
     // Form state initialized with existing review data
     const [rating, setRating] = useState(review.rating);
     const [difficulty, setDifficulty] = useState(review.difficulty || 3);
-    const [hoursPlayed, setHoursPlayed] = useState(review.hours_played?.toString() || "");
+    const [hoursPlayed, setHoursPlayed] = useState(review.hours_played ? review.hours_played.toString() : "");
     const [reviewText, setReviewText] = useState(review.review_text || "");
 
-    // Screenshots state
-    const [screenshots, setScreenshots] = useState<{ file?: File; previewUrl: string; uploadedUrl?: string }[]>(
-        (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
-    );
+    // Screenshots initialized with existing ones
+    const initialScreenshots: ScreenshotItem[] = useMemo(() => {
+        return (review.screenshots || []).map((s, idx) => {
+            const url = typeof s === "string" ? s : s.image_url;
+            const id = typeof s === "string" ? `screen-${idx}` : s.id;
+            return {
+                id,
+                previewUrl: url,
+                uploadedUrl: url,
+            };
+        });
+    }, [review.screenshots]);
+
+    const [screenshots, setScreenshots] = useState<ScreenshotItem[]>(initialScreenshots);
     const screenshotsRef = useRef(screenshots);
 
     useEffect(() => {
         screenshotsRef.current = screenshots;
     }, [screenshots]);
 
-    const cleanupBlobScreenshots = (items: { previewUrl: string }[]) => {
+    const cleanupBlobScreenshots = (items: ScreenshotItem[]) => {
         items.forEach((item) => {
             if (item.previewUrl?.startsWith("blob:")) {
                 URL.revokeObjectURL(item.previewUrl);
@@ -86,35 +117,19 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
         };
     }, []);
 
-    // Sync state with review props when opened or when review data changes
-    useEffect(() => {
-        if (open) {
-            setRating(review.rating);
-            setDifficulty(review.difficulty || 3);
-            setHoursPlayed(review.hours_played?.toString() || "");
-            setReviewText(review.review_text || "");
-            setScreenshots(
-                (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
-            );
-            setError(null);
-        }
-    }, [
-        open,
-        review.id,
-        review.rating,
-        review.difficulty,
-        review.hours_played,
-        review.review_text,
-        review.screenshots,
-    ]);
+    const resetForm = () => {
+        setRating(review.rating);
+        setDifficulty(review.difficulty || 3);
+        setHoursPlayed(review.hours_played ? review.hours_played.toString() : "");
+        setReviewText(review.review_text || "");
+        cleanupBlobScreenshots(screenshots);
+        setScreenshots(initialScreenshots);
+        setError(null);
+    };
 
     const handleOpenChange = (newOpen: boolean) => {
         if (!newOpen) {
-            cleanupBlobScreenshots(screenshots);
-            setScreenshots(
-                (review.screenshots || []).map((url) => ({ previewUrl: url, uploadedUrl: url }))
-            );
-            setError(null);
+            resetForm();
         }
         setOpen(newOpen);
     };
@@ -129,7 +144,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
         if (!files.length) return;
 
         if (screenshots.length + files.length > MAX_SCREENSHOTS) {
-            setError(`Você pode anexar no máximo ${MAX_SCREENSHOTS} screenshots por review.`);
+            setError(`Você pode ter no máximo ${MAX_SCREENSHOTS} screenshots.`);
             return;
         }
 
@@ -137,20 +152,21 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
         setUploadingImages(true);
 
         try {
-            const newScreenshots = await Promise.all(
-                files.map(async (rawFile) => {
-                    const compressed = await compressImage(rawFile);
-                    const previewUrl = URL.createObjectURL(compressed);
-                    return { file: compressed, previewUrl };
-                })
-            );
+            const processedFiles: ScreenshotItem[] = [];
 
-            setScreenshots((prev) => [...prev, ...newScreenshots].slice(0, MAX_SCREENSHOTS));
+            for (const file of files) {
+                const compressed = await compressImage(file, 1920, 0.85);
+                const previewUrl = URL.createObjectURL(compressed);
+                processedFiles.push({ file: compressed, previewUrl });
+            }
+
+            setScreenshots((prev) => [...prev, ...processedFiles]);
         } catch (err) {
-            console.error("[EditReviewModal] Erro ao processar imagem:", err);
-            setError("Erro ao processar imagem. Tente outro arquivo.");
+            console.error("Image compression error:", err);
+            setError("Erro ao processar imagens. Tente novamente.");
         } finally {
             setUploadingImages(false);
+            if (e.target) e.target.value = "";
         }
     };
 
@@ -207,7 +223,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                 rating,
                 difficulty,
                 hoursPlayed: hoursPlayed ? parseInt(hoursPlayed) : undefined,
-                reviewText,
+                reviewText: reviewText.trim() || undefined,
                 screenshots: uploadedUrls,
             });
 
@@ -218,12 +234,11 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                 setOpen(false);
                 router.refresh();
             } else {
-                setError(res.error || "Ocorreu um erro ao atualizar a review.");
+                setError(res.error || "Erro ao atualizar review.");
             }
-        } catch (err: unknown) {
-            console.error("[EditReviewModal] Erro ao submeter:", err);
-            const msg = err instanceof Error ? err.message : "Erro ao salvar alterações.";
-            setError(msg);
+        } catch (err) {
+            console.error("Update review error:", err);
+            setError("Falha na comunicação com o servidor.");
             setLoading(false);
         }
     };
@@ -234,17 +249,17 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogTrigger asChild>
                 {trigger || (
-                    <button className="transition-colors hover:text-amber-400" title="Editar Review">
+                    <button className="transition-colors hover:text-amber-400 p-1.5 rounded-lg hover:bg-zinc-800" title="Editar Review">
                         <Edit className="h-4 w-4" />
                     </button>
                 )}
             </DialogTrigger>
-            <DialogContent className="border-zinc-800 bg-zinc-950/95 text-white sm:max-w-4xl md:max-w-5xl p-0 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl border flex flex-col md:flex-row max-h-[92vh]">
+            <DialogContent className="border-zinc-800/90 bg-zinc-950/98 text-white w-[96vw] sm:max-w-4xl md:max-w-5xl max-h-[85vh] sm:max-h-[88vh] p-0 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl border flex flex-col md:flex-row rounded-2xl md:rounded-3xl">
                 <DialogTitle className="sr-only font-bold">Editar Review</DialogTitle>
                 <DialogDescription className="sr-only">Formulário para editar review de jogo</DialogDescription>
                 
-                {/* LEFT PANEL: Game Spotlight */}
-                <div className="w-full md:w-80 shrink-0 bg-gradient-to-b from-zinc-900/90 to-zinc-950 p-6 border-b md:border-b-0 md:border-r border-zinc-800/80 flex flex-col justify-between relative overflow-hidden">
+                {/* LEFT PANEL: Game Spotlight (Desktop Viewport) */}
+                <div className="hidden md:flex w-72 lg:w-80 shrink-0 bg-gradient-to-b from-zinc-900/95 to-zinc-950 p-5 lg:p-6 border-r border-zinc-800/80 flex-col justify-between relative overflow-y-auto custom-scrollbar">
                     
                     {coverUrl && (
                         <div
@@ -253,7 +268,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                         />
                     )}
 
-                    <div className="relative z-10 space-y-5">
+                    <div className="relative z-10 space-y-4">
                         <div className="flex items-center gap-2">
                             <span className="h-2 w-2 rounded-full bg-amber-400 animate-pulse" />
                             <span className="text-xs font-black tracking-widest text-amber-400 uppercase">
@@ -262,8 +277,8 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                         </div>
 
                         {/* Game Display */}
-                        <div className="space-y-3">
-                            <div className="relative aspect-3/4 w-full overflow-hidden rounded-xl border border-zinc-700/80 shadow-[0_0_25px_rgba(0,0,0,0.8)] group">
+                        <div className="space-y-2">
+                            <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl border border-zinc-700/80 shadow-[0_0_25px_rgba(0,0,0,0.8)] group">
                                 {coverUrl ? (
                                     <img
                                         src={coverUrl}
@@ -275,12 +290,12 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                                         <Gamepad2 className="h-12 w-12 opacity-40" />
                                     </div>
                                 )}
-                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-70" />
+                                <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-80" />
                                 <div className="absolute bottom-3 left-3 right-3">
-                                    <span className="text-xs font-bold text-amber-400/90 block uppercase tracking-wider">
+                                    <span className="text-[11px] font-bold text-amber-400/90 block uppercase tracking-wider">
                                         Editando Análise
                                     </span>
-                                    <h4 className="text-lg font-black text-white leading-tight drop-shadow-md">
+                                    <h4 className="text-base font-black text-white leading-tight drop-shadow-md truncate">
                                         {review.game.title}
                                     </h4>
                                 </div>
@@ -288,12 +303,12 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                         </div>
 
                         {/* XP Status Card */}
-                        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-zinc-900/80 p-4 space-y-2 shadow-lg">
+                        <div className="rounded-xl border border-amber-500/30 bg-gradient-to-br from-amber-950/30 to-zinc-900/80 p-3.5 space-y-2 shadow-lg">
                             <div className="flex items-center justify-between">
                                 <span className="text-xs font-black tracking-wider text-amber-400 uppercase flex items-center gap-1.5">
                                     <Award className="h-4 w-4" /> XP da Análise
                                 </span>
-                                <span className="text-lg font-black text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
+                                <span className="text-base font-black text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
                                     +{calculatedXP} XP
                                 </span>
                             </div>
@@ -303,7 +318,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                                     <span className="text-zinc-300 font-bold">+100 XP</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span>Análise (≥50 caracteres):</span>
+                                    <span>Análise (≥50 chars):</span>
                                     <span className={isDetailed ? "text-emerald-400 font-bold" : "text-zinc-600"}>
                                         {isDetailed ? "+100 XP ✓" : "+0 XP"}
                                     </span>
@@ -318,229 +333,242 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                         </div>
                     </div>
 
-                    <div className="relative z-10 pt-4 text-[11px] text-zinc-500 text-center border-t border-zinc-800/60">
+                    <div className="relative z-10 pt-3 text-[10px] font-bold tracking-wider uppercase text-zinc-600 text-center border-t border-zinc-800/60">
                         Gamers Aposentados • XP System
                     </div>
                 </div>
 
                 {/* RIGHT PANEL: Form Controls */}
-                <div className="flex-1 p-6 md:p-8 overflow-y-auto max-h-[92vh] space-y-6">
-                    <DialogHeader className="p-0 space-y-1">
-                        <DialogTitle className="text-2xl md:text-3xl font-black tracking-tight text-white uppercase flex items-center gap-2">
-                            Editar Review <Sparkles className="h-5 w-5 text-amber-400" />
-                        </DialogTitle>
-                        <DialogDescription className="text-zinc-400 text-sm">
-                            Atualize sua nota, impressões e imagens de {review.game.title}.
-                        </DialogDescription>
-                    </DialogHeader>
-
-                    <form onSubmit={handleSubmit} className="space-y-6">
-                        {error && (
-                            <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-4 text-sm font-medium text-red-400 flex items-center gap-2 animate-in fade-in">
-                                <ShieldAlert className="h-5 w-5 shrink-0" />
-                                {error}
-                            </div>
-                        )}
-
-                        {/* Rating Selector (0 to 10 Pills) */}
-                        <div className="space-y-3">
-                            <div className="flex items-center justify-between">
-                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
-                                    <Star className="h-4 w-4 text-amber-400 fill-amber-400" /> Nota Final (0 - 10) *
-                                </label>
-                                <span className={`text-xs font-black px-3 py-1 rounded-full border ${getRatingColor(rating).bg}`}>
-                                    {rating}/10 — {getRatingColor(rating).label}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-11 gap-1.5 p-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70">
-                                {Array.from({ length: 11 }).map((_, i) => {
-                                    const isSelected = rating === i;
-                                    return (
-                                        <button
-                                            key={i}
-                                            type="button"
-                                            onClick={() => setRating(i)}
-                                            className={`h-11 rounded-lg font-black text-sm transition-all duration-200 ${
-                                                isSelected
-                                                    ? getRatingColor(i).bg + " scale-110 z-10"
-                                                    : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                                            }`}
-                                        >
-                                            {i}
-                                        </button>
-                                    );
-                                })}
-                            </div>
+                <div className="flex-1 flex flex-col min-h-0 bg-zinc-950 overflow-hidden">
+                    
+                    {/* Fixed Top Header (Nunca corta no topo) */}
+                    <div className="shrink-0 px-5 sm:px-6 py-3.5 sm:py-4 border-b border-zinc-800/80 bg-zinc-950/95 flex items-center justify-between gap-4">
+                        <div>
+                            <h2 className="text-lg sm:text-2xl font-black tracking-tight text-white uppercase flex items-center gap-2">
+                                Editar Review <Sparkles className="h-4 sm:h-5 w-4 sm:w-5 text-amber-400 animate-bounce" />
+                            </h2>
+                            <p className="text-zinc-400 text-xs sm:text-sm font-medium">
+                                Atualize sua nota, impressões e imagens de {review.game.title}.
+                            </p>
                         </div>
 
-                        {/* Difficulty & Hours Grid */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                            
-                            {/* Difficulty Card Picker */}
-                            <div className="space-y-2">
-                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
-                                    <Flame className="h-4 w-4 text-orange-500" /> Dificuldade
-                                </label>
-                                <div className="grid grid-cols-5 gap-1.5">
-                                    {DIFFICULTY_LEVELS.map((lvl) => {
-                                        const isSelected = difficulty === lvl.value;
+                        {/* XP Badge no Mobile */}
+                        <div className="md:hidden shrink-0 rounded-lg border border-amber-500/40 bg-amber-950/40 px-2.5 py-1 text-center">
+                            <span className="text-[10px] font-black uppercase text-amber-400 block">Recompensa</span>
+                            <span className="text-xs font-black text-amber-300">+{calculatedXP} XP</span>
+                        </div>
+                    </div>
+
+                    {/* Scrollable Form Body */}
+                    <form onSubmit={handleSubmit} className="flex-1 flex flex-col min-h-0 overflow-hidden">
+                        <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 custom-scrollbar">
+                            {error && (
+                                <div className="rounded-xl border border-red-500/50 bg-red-500/10 p-3.5 text-xs sm:text-sm font-bold text-red-400 flex items-center gap-2 animate-in fade-in">
+                                    <ShieldAlert className="h-5 w-5 shrink-0" />
+                                    {error}
+                                </div>
+                            )}
+
+                            {/* Rating Selector (0 to 10 Pills) */}
+                            <div className="space-y-2.5">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                        <Star className="h-4 w-4 text-amber-400 fill-amber-400" /> Nota Final (0 - 10) *
+                                    </label>
+                                    <span className={`text-xs font-black px-2.5 py-0.5 rounded-full border ${getRatingColor(rating).bg}`}>
+                                        {rating}/10 — {getRatingColor(rating).label}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-6 sm:grid-cols-11 gap-1.5 p-1.5 rounded-xl border border-zinc-800 bg-zinc-900/70">
+                                    {Array.from({ length: 11 }).map((_, i) => {
+                                        const isSelected = rating === i;
                                         return (
                                             <button
-                                                key={lvl.value}
+                                                key={i}
                                                 type="button"
-                                                onClick={() => setDifficulty(lvl.value)}
-                                                className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all text-center ${
+                                                onClick={() => setRating(i)}
+                                                className={`h-10 sm:h-11 rounded-lg font-black text-xs sm:text-sm transition-all duration-200 min-h-[40px] ${
                                                     isSelected
-                                                        ? `${lvl.color} border-2 font-black shadow-md scale-105`
-                                                        : "border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                                                        ? getRatingColor(i).bg + " scale-105 z-10"
+                                                        : "bg-zinc-800/60 text-zinc-400 hover:bg-zinc-800 hover:text-white"
                                                 }`}
                                             >
-                                                <span className="text-base">{lvl.icon}</span>
-                                                <span className="text-[10px] font-bold mt-1 tracking-tight">{lvl.value}</span>
+                                                {i}
                                             </button>
                                         );
                                     })}
                                 </div>
-                                <div className="text-[11px] font-semibold text-zinc-400 text-center pt-0.5">
-                                    Nível: <strong className="text-white">{DIFFICULTY_LEVELS.find(d => d.value === difficulty)?.label}</strong>
+                            </div>
+
+                            {/* Difficulty & Hours Grid */}
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+                                
+                                {/* Difficulty Card Picker */}
+                                <div className="space-y-2">
+                                    <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                        <Flame className="h-4 w-4 text-orange-500" /> Dificuldade
+                                    </label>
+                                    <div className="grid grid-cols-5 gap-1.5">
+                                        {DIFFICULTY_LEVELS.map((lvl) => {
+                                            const isSelected = difficulty === lvl.value;
+                                            return (
+                                                <button
+                                                    key={lvl.value}
+                                                    type="button"
+                                                    onClick={() => setDifficulty(lvl.value)}
+                                                    className={`flex flex-col items-center justify-center p-2 rounded-xl border transition-all text-center min-h-[44px] ${
+                                                        isSelected
+                                                            ? `${lvl.color} border-2 font-black shadow-md scale-105`
+                                                            : "border-zinc-800/80 bg-zinc-900/60 text-zinc-400 hover:bg-zinc-800 hover:text-zinc-200"
+                                                    }`}
+                                                >
+                                                    <span className="text-sm sm:text-base">{lvl.icon}</span>
+                                                    <span className="text-xs font-bold mt-0.5 tracking-tight">{lvl.value}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="text-xs font-bold text-zinc-400 text-center pt-0.5">
+                                        Nível: <strong className="text-white">{DIFFICULTY_LEVELS.find(d => d.value === difficulty)?.label}</strong>
+                                    </div>
+                                </div>
+
+                                {/* Hours Played Input */}
+                                <div className="space-y-2">
+                                    <label htmlFor="edit-review-hours-played" className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
+                                        <Clock className="h-4 w-4 text-cyan-400" /> Horas Jogadas
+                                    </label>
+                                    <div className="relative">
+                                        <input
+                                            id="edit-review-hours-played"
+                                            type="number"
+                                            aria-label="Horas jogadas"
+                                            min="0"
+                                            placeholder="ex: 45"
+                                            value={hoursPlayed}
+                                            onChange={(e) => setHoursPlayed(e.target.value)}
+                                            className="focus:border-amber-500 w-full rounded-xl border border-zinc-800 bg-zinc-900/90 p-3 text-sm sm:text-base text-white font-bold transition-colors focus:outline-none pr-14 min-h-[44px]"
+                                        />
+                                        <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-black text-zinc-500 uppercase">
+                                            horas
+                                        </span>
+                                    </div>
+                                    {/* Preset Buttons */}
+                                    <div className="flex gap-1.5 pt-0.5">
+                                        {[10, 25, 50, 100].map((preset) => (
+                                            <button
+                                                key={preset}
+                                                type="button"
+                                                onClick={() => setHoursPlayed(preset.toString())}
+                                                className="px-2.5 py-1 text-xs font-bold rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+                                            >
+                                                +{preset}h
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* Hours Played Input */}
+                            {/* Review Textarea */}
                             <div className="space-y-2">
-                                <label htmlFor="edit-review-hours-played" className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-1.5">
-                                    <Clock className="h-4 w-4 text-cyan-400" /> Horas Jogadas
-                                </label>
-                                <div className="relative">
-                                    <input
-                                        id="edit-review-hours-played"
-                                        type="number"
-                                        aria-label="Horas jogadas"
-                                        min="0"
-                                        placeholder="ex: 45"
-                                        value={hoursPlayed}
-                                        onChange={(e) => setHoursPlayed(e.target.value)}
-                                        className="focus:border-amber-500 w-full rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 text-white font-bold transition-colors focus:outline-none pr-12"
-                                    />
-                                    <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-bold text-zinc-500 uppercase">
-                                        horas
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-black tracking-widest text-zinc-300 uppercase">
+                                        Sua Análise Escrita
+                                    </label>
+                                    <span className={`text-xs font-bold ${isDetailed ? "text-emerald-400" : "text-zinc-500"}`}>
+                                        {reviewText.trim().length} / 50 caracteres {isDetailed ? "(+100 XP Ativo ✓)" : "(para +100 XP bônus)"}
                                     </span>
                                 </div>
-                                {/* Preset Buttons */}
-                                <div className="flex gap-1.5 pt-1">
-                                    {[10, 25, 50, 100].map((preset) => (
-                                        <button
-                                            key={preset}
-                                            type="button"
-                                            onClick={() => setHoursPlayed(preset.toString())}
-                                            className="px-2 py-1 text-[10px] font-bold rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
-                                        >
-                                            +{preset}h
-                                        </button>
+                                <textarea
+                                    rows={3}
+                                    placeholder="Descreva sua experiência com o jogo..."
+                                    value={reviewText}
+                                    onChange={(e) => setReviewText(e.target.value)}
+                                    className="focus:border-amber-500 w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/90 p-3.5 text-xs sm:text-sm text-white transition-colors focus:outline-none leading-relaxed"
+                                />
+                            </div>
+
+                            {/* Screenshots Upload Grid */}
+                            <div className="space-y-2.5 pt-2 border-t border-zinc-800/80">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-2">
+                                        Capturas de Tela ({screenshots.length}/{MAX_SCREENSHOTS})
+                                    </label>
+                                    <span className="text-xs font-bold text-emerald-400 flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-0.5 rounded-full">
+                                        <Sparkles className="h-3 w-3" />
+                                        {hasScreenshots ? "+50 XP Bônus Ativo!" : "+50 XP Bônus"}
+                                    </span>
+                                </div>
+
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                                    {screenshots.map((item, idx) => (
+                                        <div key={idx} className="relative group aspect-video rounded-xl overflow-hidden border border-zinc-700 bg-zinc-900 shadow-md">
+                                            <img
+                                                src={item.previewUrl}
+                                                alt={`Screenshot ${idx + 1}`}
+                                                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => handleRemoveScreenshot(idx)}
+                                                className="absolute top-1.5 right-1.5 p-1 bg-black/80 text-white rounded-full opacity-90 hover:bg-red-600 transition-colors shadow"
+                                                title="Remover imagem"
+                                            >
+                                                <X className="h-3.5 w-3.5" />
+                                            </button>
+                                        </div>
                                     ))}
+
+                                    {screenshots.length < MAX_SCREENSHOTS && (
+                                        <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-800 hover:border-amber-500 bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer transition-all group">
+                                            <input
+                                                type="file"
+                                                aria-label="Upload de screenshots do jogo"
+                                                accept="image/*"
+                                                multiple
+                                                onChange={handleFileSelect}
+                                                disabled={uploadingImages || loading}
+                                                className="hidden"
+                                            />
+                                            {uploadingImages ? (
+                                                <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
+                                            ) : (
+                                                <>
+                                                    <ImagePlus className="h-5 w-5 text-zinc-500 group-hover:text-amber-500 transition-colors mb-1" />
+                                                    <span className="text-xs font-black text-zinc-500 group-hover:text-white uppercase tracking-wider">
+                                                        Adicionar
+                                                    </span>
+                                                </>
+                                            )}
+                                        </label>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
-                        {/* Review Textarea */}
-                        <div className="space-y-2">
-                            <div className="flex items-center justify-between">
-                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase">
-                                    Sua Análise Escrita
-                                </label>
-                                <span className={`text-[11px] font-bold ${isDetailed ? "text-emerald-400" : "text-zinc-500"}`}>
-                                    {reviewText.trim().length} / 50 caracteres {isDetailed ? "(+100 XP Garanti)" : "(para +100 XP bônus)"}
-                                </span>
-                            </div>
-                            <textarea
-                                rows={4}
-                                placeholder="Descreva sua experiência com o jogo..."
-                                value={reviewText}
-                                onChange={(e) => setReviewText(e.target.value)}
-                                className="focus:border-amber-500 w-full resize-none rounded-xl border border-zinc-800 bg-zinc-900/90 p-4 text-sm text-white transition-colors focus:outline-none leading-relaxed"
-                            />
-                        </div>
-
-                        {/* Screenshots Upload Grid */}
-                        <div className="space-y-3 pt-2 border-t border-zinc-800/80">
-                            <div className="flex items-center justify-between">
-                                <label className="text-xs font-black tracking-widest text-zinc-300 uppercase flex items-center gap-2">
-                                    Capturas de Tela ({screenshots.length}/{MAX_SCREENSHOTS})
-                                </label>
-                                <span className="text-xs font-semibold text-emerald-400 flex items-center gap-1 bg-emerald-950/60 border border-emerald-500/30 px-2.5 py-1 rounded-full">
-                                    <Sparkles className="h-3 w-3" />
-                                    {hasScreenshots ? "+50 XP Bônus Ativo!" : "+50 XP Bônus"}
-                                </span>
-                            </div>
-
-                            <div className="grid grid-cols-4 gap-3">
-                                {screenshots.map((item, idx) => (
-                                    <div key={idx} className="relative group aspect-video rounded-xl overflow-hidden border border-zinc-700 bg-zinc-900 shadow-md">
-                                        <img
-                                            src={item.previewUrl}
-                                            alt={`Screenshot ${idx + 1}`}
-                                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => handleRemoveScreenshot(idx)}
-                                            className="absolute top-1.5 right-1.5 p-1 bg-black/80 text-white rounded-full opacity-90 hover:bg-red-600 transition-colors shadow"
-                                            title="Remover imagem"
-                                        >
-                                            <X className="h-3.5 w-3.5" />
-                                        </button>
-                                    </div>
-                                ))}
-
-                                {screenshots.length < MAX_SCREENSHOTS && (
-                                    <label className="flex flex-col items-center justify-center aspect-video rounded-xl border-2 border-dashed border-zinc-800 hover:border-amber-500 bg-zinc-900/50 hover:bg-zinc-900 cursor-pointer transition-all group">
-                                        <input
-                                            type="file"
-                                            aria-label="Upload de screenshots do jogo"
-                                            accept="image/*"
-                                            multiple
-                                            onChange={handleFileSelect}
-                                            disabled={uploadingImages || loading}
-                                            className="hidden"
-                                        />
-                                        {uploadingImages ? (
-                                            <Loader2 className="h-6 w-6 animate-spin text-amber-500" />
-                                        ) : (
-                                            <>
-                                                <ImagePlus className="h-6 w-6 text-zinc-500 group-hover:text-amber-500 transition-colors mb-1" />
-                                                <span className="text-[10px] font-black text-zinc-500 group-hover:text-white uppercase tracking-wider">
-                                                    Adicionar
-                                                </span>
-                                            </>
-                                        )}
-                                    </label>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Submit Button */}
-                        <div className="pt-4 flex items-center gap-4">
+                        {/* Sticky Bottom Actions */}
+                        <div className="shrink-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-zinc-800/80 bg-zinc-950/95 flex items-center justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={() => setOpen(false)}
-                                className="px-6 py-3.5 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white font-bold text-sm transition-colors uppercase tracking-wider"
+                                className="px-5 py-2.5 rounded-xl border border-zinc-800 text-zinc-400 hover:text-white font-bold text-xs sm:text-sm transition-colors uppercase tracking-wider min-h-[44px]"
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
                                 disabled={loading || uploadingImages}
-                                className="flex-1 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 flex items-center justify-center gap-2 rounded-xl py-3.5 font-black text-sm tracking-wider text-zinc-950 uppercase shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                                className="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 font-black text-xs sm:text-sm tracking-wider text-zinc-950 uppercase shadow-[0_0_25px_rgba(245,158,11,0.4)] transition-all active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50 min-h-[44px]"
                             >
                                 {loading ? (
                                     <>
-                                        <Loader2 className="h-5 w-5 animate-spin" />
+                                        <Loader2 className="h-4 w-4 animate-spin" />
                                         <span>Salvando...</span>
                                     </>
                                 ) : (
                                     <>
-                                        <CheckCircle2 className="h-5 w-5" />
+                                        <CheckCircle2 className="h-4 w-4" />
                                         <span>Salvar Alterações (+{calculatedXP} XP)</span>
                                     </>
                                 )}

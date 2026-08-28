@@ -11,8 +11,24 @@ test.describe("Randomizer IGDB ID Consistency", () => {
                 },
             },
         });
-        await prisma.poolEntry.deleteMany({});
-        await prisma.pool.deleteMany({});
+        await prisma.poolEntry.deleteMany({
+            where: {
+                game: {
+                    title: { startsWith: "IGDB-Test" },
+                },
+            },
+        });
+        await prisma.pool.deleteMany({
+            where: {
+                entries: {
+                    some: {
+                        game: {
+                            title: { startsWith: "IGDB-Test" },
+                        },
+                    },
+                },
+            },
+        });
         await prisma.game.deleteMany({
             where: {
                 title: { startsWith: "IGDB-Test" },

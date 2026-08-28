@@ -11,11 +11,14 @@ import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
 import { getPendingSpecialGameProposals } from "@/app/lib/special-game-actions";
 import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast";
+import { GuildStatusCard } from "@/components/dashboard/GuildStatusCard";
+import { isGuildMaster } from "@/lib/permissions";
 
 export default async function DashboardPage() {
     const session = await auth();
 
     const userId = session?.user?.id || "";
+    const isMaster = isGuildMaster(session?.user);
 
     interface RawReview {
         id: string;
@@ -128,6 +131,7 @@ export default async function DashboardPage() {
                       status: "ACTIVE",
                       game: { quest_type: "MAIN_QUEST" },
                   },
+                  orderBy: { updated_at: "desc" },
                   include: { game: { include: { nominator: true } } },
               })
             : null,
@@ -138,13 +142,14 @@ export default async function DashboardPage() {
                       status: "ACTIVE",
                       game: { quest_type: "SIDE_QUEST" },
                   },
+                  orderBy: { updated_at: "desc" },
                   include: { game: { include: { nominator: true } } },
               })
             : null,
     ]);
 
     const [fallbackMainProgress, fallbackSideProgress] = await Promise.all([
-        !userActiveMainProgress && latestMainPool?.winner_game_id && userId
+        isMaster && !userActiveMainProgress && latestMainPool?.winner_game_id && userId
             ? prisma.gameProgress.findUnique({
                   where: {
                       user_id_game_id: { user_id: userId, game_id: latestMainPool.winner_game_id },
@@ -152,7 +157,7 @@ export default async function DashboardPage() {
                   include: { game: { include: { nominator: true } } },
               })
             : null,
-        !userActiveSideProgress && latestSidePool?.winner_game_id && userId
+        isMaster && !userActiveSideProgress && latestSidePool?.winner_game_id && userId
             ? prisma.gameProgress.findUnique({
                   where: {
                       user_id_game_id: { user_id: userId, game_id: latestSidePool.winner_game_id },
@@ -331,6 +336,75 @@ export default async function DashboardPage() {
           }
         : null;
 
+    // Compute all members for Global Leaderboard tab
+    const allDbUsers = await prisma.user.findMany({
+        include: {
+            gameProgress: {
+                where: { status: "COMPLETED" },
+                include: { game: true },
+            },
+        },
+        orderBy: { xp_points: "desc" },
+    });
+
+    const allMembersStats = allDbUsers.map((u) => {
+        const gold = u.gameProgress.filter((p) => p.game.quest_type === "MAIN_QUEST").length;
+        const silver = u.gameProgress.filter((p) => p.game.quest_type === "SIDE_QUEST").length;
+        const platinums = u.gameProgress.filter((p) => p.is_platinum).length;
+        return {
+            id: u.id,
+            name: u.name || u.username || "Gamer",
+            username: u.username,
+            image: u.image,
+            level: u.level || 1,
+            xp_points: u.xp_points || 0,
+            goldMedals: gold,
+            silverMedals: silver,
+            platinumCount: platinums,
+        };
+    });
+
+    // Build Guild Master status data
+    const guildMainGame = latestMainPool?.winner_game
+        ? {
+              id: latestMainPool.winner_game.id,
+              title: latestMainPool.winner_game.title,
+              cover_url: latestMainPool.winner_game.cover_url,
+              artwork_url: latestMainPool.winner_game.artwork_url,
+              quest_type: "MAIN_QUEST" as const,
+              hltb_time: latestMainPool.winner_game.hltb_time,
+              playersProgress: activeUsers.map((u) => {
+                  const prog = completedProgresses.find((p) => p.user_id === u.id && p.game_id === latestMainPool.winner_game!.id)
+                      || recentProgress.find((p) => p.user_id === u.id && p.game_id === latestMainPool.winner_game!.id);
+                  return {
+                      name: u.name || u.email?.split("@")[0] || "Jogador",
+                      progress_percentage: prog?.progress_percentage ?? 0,
+                      status: prog?.status ?? "ACTIVE",
+                  };
+              }),
+          }
+        : null;
+
+    const guildSideGame = latestSidePool?.winner_game
+        ? {
+              id: latestSidePool.winner_game.id,
+              title: latestSidePool.winner_game.title,
+              cover_url: latestSidePool.winner_game.cover_url,
+              artwork_url: latestSidePool.winner_game.artwork_url,
+              quest_type: "SIDE_QUEST" as const,
+              hltb_time: latestSidePool.winner_game.hltb_time,
+              playersProgress: activeUsers.map((u) => {
+                  const prog = completedProgresses.find((p) => p.user_id === u.id && p.game_id === latestSidePool.winner_game!.id)
+                      || recentProgress.find((p) => p.user_id === u.id && p.game_id === latestSidePool.winner_game!.id);
+                  return {
+                      name: u.name || u.email?.split("@")[0] || "Jogador",
+                      progress_percentage: prog?.progress_percentage ?? 0,
+                      status: prog?.status ?? "ACTIVE",
+                  };
+              }),
+          }
+        : null;
+
     return (
         <div className="mx-auto w-full max-w-[1920px] space-y-6 sm:space-y-8 px-2 sm:px-6 py-3 sm:py-8 md:px-8 lg:px-12 lg:py-12">
             {/* Active Pause Quorum Voting Banner */}
@@ -359,12 +433,18 @@ export default async function DashboardPage() {
             {/* Row 1: Active Quests */}
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <ActiveQuestHero
-                    activePool={latestMainPool}
+                    activePool={isMaster ? latestMainPool : null}
                     progress={mainQuestProgress}
                     userName={session?.user?.name ?? "Comandante"}
                 />
-                <SideQuestBar activePool={latestSidePool} progress={sideQuestProgress} />
+                <SideQuestBar
+                    activePool={isMaster ? latestSidePool : null}
+                    progress={sideQuestProgress}
+                />
             </div>
+
+            {/* Status da Guilda Oficial dos Fundadores */}
+            <GuildStatusCard mainGame={guildMainGame} sideGame={guildSideGame} />
 
             {/* Row 3: Stats Cards Grid */}
             <StatsGrid reviews={randomReviewsForStats} />
@@ -372,7 +452,7 @@ export default async function DashboardPage() {
             {/* Row 4: Recent Activity & Fila do INSS */}
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <RecentActivity events={rawEvents} />
-                <Leaderboard players={playersStats} />
+                <Leaderboard players={playersStats} allMembers={allMembersStats} />
             </div>
         </div>
     );
