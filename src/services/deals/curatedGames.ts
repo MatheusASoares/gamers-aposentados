@@ -13,7 +13,7 @@ export interface CuratedGame {
  * they are guaranteed to appear in the Deals Showcase.
  */
 export const CURATED_GAMES_POOL: CuratedGame[] = [
-    { title: "Crimson Desert", steamAppId: 1086940, slug: "crimson-desert", priority: 10 },
+    { title: "Crimson Desert", steamAppId: 3321460, slug: "crimson-desert", priority: 10 },
     { title: "ELDEN RING", steamAppId: 1245620, slug: "elden-ring", priority: 10 },
     { title: "Baldur's Gate 3", steamAppId: 1086940, slug: "baldurs-gate-3", priority: 10 },
     { title: "Cyberpunk 2077", steamAppId: 1091500, slug: "cyberpunk-2077", priority: 10 },

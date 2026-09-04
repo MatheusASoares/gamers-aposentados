@@ -86,4 +86,5 @@ export const CACHE_TTL = {
     SEARCH_RESULTS: 60 * 60 * 6, // 6 hours
     GAME_COMPARISON: 60 * 60 * 8, // 8 hours
     FEATURED_DEALS: 60 * 60 * 24, // 24 hours
+    STEAM_REVIEWS: 60 * 60 * 12, // 12 hours
 };

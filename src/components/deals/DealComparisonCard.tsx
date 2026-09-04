@@ -17,6 +17,7 @@ import {
     RefreshCw,
     Info,
     Heart,
+    ThumbsUp,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -262,6 +263,22 @@ export function DealComparisonCard({
                             {comparison.isAllTimeLow && (
                                 <span className="flex items-center gap-1 rounded-lg bg-amber-500/90 px-2 py-0.5 text-[11px] font-black text-black shadow-md">
                                     <Trophy className="h-3 w-3" /> Recorde Histórico
+                                </span>
+                            )}
+                            {comparison.steamReviews && comparison.steamReviews.totalReviews > 0 && (
+                                <span
+                                    className={cn(
+                                        "flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-black border backdrop-blur-sm",
+                                        comparison.steamReviews.positivePercent >= 80
+                                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                            : comparison.steamReviews.positivePercent >= 70
+                                              ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+                                              : "bg-zinc-800 text-zinc-400 border-zinc-700",
+                                    )}
+                                    title={`${comparison.steamReviews.totalReviews.toLocaleString("pt-BR")} análises na Steam`}
+                                >
+                                    <ThumbsUp className="h-3 w-3 stroke-[2.5]" />
+                                    <span>{comparison.steamReviews.positivePercent}% {comparison.steamReviews.reviewScoreDesc}</span>
                                 </span>
                             )}
                         </div>

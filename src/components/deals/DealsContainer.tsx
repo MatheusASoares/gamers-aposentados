@@ -11,6 +11,7 @@ import {
     DealFilterType,
     StoreFilterType,
     RegionAdvantageFilterType,
+    PriceCapFilterType,
     TrackedDealItem,
 } from "@/types/deals";
 import { DealsSearch } from "./DealsSearch";
@@ -37,9 +38,10 @@ export function DealsContainer() {
     const [featuredDeals, setFeaturedDeals] = useState<FeaturedDealItem[]>([]);
     const [trackedDeals, setTrackedDeals] = useState<TrackedDealItem[]>([]);
     const [currencyRate, setCurrencyRate] = useState<CurrencyRate | null>(null);
-    const [activeFilter, setActiveFilter] = useState<DealFilterType>("best_savings");
+    const [activeFilter, setActiveFilter] = useState<DealFilterType>("historical_low");
     const [storeFilter, setStoreFilter] = useState<StoreFilterType>("all");
     const [regionFilter, setRegionFilter] = useState<RegionAdvantageFilterType>("all");
+    const [priceCap, setPriceCap] = useState<PriceCapFilterType>("all");
 
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
@@ -49,22 +51,7 @@ export function DealsContainer() {
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [, startTransition] = useTransition();
 
-    // 1. Load tracked deals from localStorage on initial mount
-    useEffect(() => {
-        try {
-            const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
-            if (raw) {
-                const parsed = JSON.parse(raw);
-                if (Array.isArray(parsed)) {
-                    setTrackedDeals(parsed);
-                }
-            }
-        } catch (err) {
-            console.error("Failed to load tracked deals from storage:", err);
-        }
-    }, []);
-
-    // 2. Fetch live price status for tracked games
+    // 1. Fetch live price status for tracked games
     const syncTrackedDeals = useCallback(async (currentTracked: TrackedDealItem[]) => {
         if (!currentTracked || currentTracked.length === 0) return;
         try {
@@ -88,6 +75,69 @@ export function DealsContainer() {
         }
     }, []);
 
+    // 2. Load tracked deals from DB favorites on initial mount (with localStorage fallback & sync)
+    useEffect(() => {
+        let isMounted = true;
+
+        fetch("/api/deals/favorites")
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (!isMounted) return;
+                if (data && data.isAuthenticated && Array.isArray(data.items)) {
+                    setTrackedDeals(data.items);
+                    localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(data.items));
+
+                    // If localStorage had items that were not yet in DB, sync them
+                    try {
+                        const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed) && parsed.length > data.items.length) {
+                                fetch("/api/deals/favorites", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ syncItems: parsed }),
+                                }).catch((e) => console.error(e));
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                } else {
+                    // Fallback to localStorage if guest or offline
+                    try {
+                        const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed)) {
+                                setTrackedDeals(parsed);
+                                syncTrackedDeals(parsed);
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Failed to load tracked deals from storage:", err);
+                    }
+                }
+            })
+            .catch(() => {
+                try {
+                    const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) {
+                            setTrackedDeals(parsed);
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, [syncTrackedDeals]);
+
     // Cooldown countdown timer
     useEffect(() => {
         if (cooldown <= 0) return;
@@ -97,17 +147,28 @@ export function DealsContainer() {
         return () => clearInterval(timer);
     }, [cooldown]);
 
-    // Fetch featured deals with filter, store & region advantage support
+    // Fetch featured deals with filter, store, region & priceCap support
     const loadFeaturedDeals = useCallback(
         async (
-            filter: DealFilterType = "best_savings",
+            filter: DealFilterType = "historical_low",
             store: StoreFilterType = "all",
             region: RegionAdvantageFilterType = "all",
+            priceLimit: PriceCapFilterType = "all",
             forceRefresh = false,
         ) => {
             if (filter === "monitored") {
-                // For monitored tab, sync tracked deals
+                // For monitored tab, reload from DB favorites
                 try {
+                    const favRes = await fetch("/api/deals/favorites");
+                    if (favRes.ok) {
+                        const favData = await favRes.json();
+                        if (favData.isAuthenticated && Array.isArray(favData.items)) {
+                            setTrackedDeals(favData.items);
+                            localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(favData.items));
+                            setIsLoadingFeatured(false);
+                            return;
+                        }
+                    }
                     const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
                     const parsed: TrackedDealItem[] = raw ? JSON.parse(raw) : [];
                     await syncTrackedDeals(parsed);
@@ -123,7 +184,7 @@ export function DealsContainer() {
             }
             try {
                 const res = await fetch(
-                    `/api/deals/featured?filter=${filter}&store=${store}&region=${region}${forceRefresh ? "&refresh=true" : ""}`,
+                    `/api/deals/featured?filter=${filter}&store=${store}&region=${region}&priceCap=${priceLimit}${forceRefresh ? "&refresh=true" : ""}`,
                     forceRefresh ? { cache: "no-store" } : undefined,
                 );
                 if (res.ok) {
@@ -145,8 +206,8 @@ export function DealsContainer() {
     );
 
     useEffect(() => {
-        loadFeaturedDeals(activeFilter, storeFilter, regionFilter);
-    }, [loadFeaturedDeals, activeFilter, storeFilter, regionFilter]);
+        loadFeaturedDeals(activeFilter, storeFilter, regionFilter, priceCap);
+    }, [loadFeaturedDeals, activeFilter, storeFilter, regionFilter, priceCap]);
 
     const handleFilterChange = (newFilter: DealFilterType) => {
         setActiveFilter(newFilter);
@@ -160,43 +221,79 @@ export function DealsContainer() {
         setRegionFilter(newRegion);
     };
 
-    // Toggle track game
-    const handleToggleTrack = (game: {
+    // Toggle track / favorite game with PostgreSQL persistence
+    const handleToggleTrack = async (game: {
         id: string;
         title: string;
         steamAppId?: number | null;
         slug?: string;
         coverImage?: string | null;
     }) => {
-        setTrackedDeals((prev) => {
-            const exists = prev.some(
-                (p) => p.id === game.id || (game.steamAppId && p.steamAppId === game.steamAppId),
+        const dealId = String(game.steamAppId || game.id);
+        const exists = trackedDeals.some(
+            (p) =>
+                p.id === game.id ||
+                p.id === dealId ||
+                (game.steamAppId && p.steamAppId === game.steamAppId),
+        );
+
+        let updated: TrackedDealItem[];
+        if (exists) {
+            // Remove / Unfavorite
+            updated = trackedDeals.filter(
+                (p) =>
+                    p.id !== game.id &&
+                    p.id !== dealId &&
+                    (!game.steamAppId || p.steamAppId !== game.steamAppId),
             );
-            let updated: TrackedDealItem[];
-            if (exists) {
-                updated = prev.filter(
-                    (p) => p.id !== game.id && (!game.steamAppId || p.steamAppId !== game.steamAppId),
-                );
-            } else {
-                const newItem: TrackedDealItem = {
-                    id: game.id,
+        } else {
+            // Add / Favorite
+            const newItem: TrackedDealItem = {
+                id: dealId,
+                title: game.title,
+                slug: game.slug || game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                steamAppId: game.steamAppId || null,
+                coverImage: game.coverImage || null,
+                addedAt: new Date().toISOString(),
+            };
+            updated = [newItem, ...trackedDeals];
+        }
+
+        // Optimistic UI state update
+        setTrackedDeals(updated);
+        try {
+            localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(updated));
+        } catch (err) {
+            console.error("Failed to save tracked deals to localStorage:", err);
+        }
+
+        // Sync with PostgreSQL
+        try {
+            const res = await fetch("/api/deals/favorites", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    dealId,
                     title: game.title,
-                    slug: game.slug || game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                    steamAppId: game.steamAppId || null,
-                    coverImage: game.coverImage || null,
-                    addedAt: new Date().toISOString(),
-                };
-                updated = [newItem, ...prev];
-                // Immediately check status for the new item
+                    steamAppId: game.steamAppId,
+                    slug: game.slug,
+                    coverImage: game.coverImage,
+                }),
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                // If it was added, refresh prices for the updated list
+                if (data.isTracked && !exists) {
+                    syncTrackedDeals(updated);
+                }
+            }
+        } catch (err) {
+            console.error("Failed to sync favorite with database:", err);
+            if (!exists) {
                 syncTrackedDeals(updated);
             }
-            try {
-                localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(updated));
-            } catch (err) {
-                console.error("Failed to save tracked deals:", err);
-            }
-            return updated;
-        });
+        }
     };
 
     const isTracked = (idOrAppId: string | number) => {
@@ -213,7 +310,7 @@ export function DealsContainer() {
 
         try {
             const refreshPromises: Promise<unknown>[] = [
-                loadFeaturedDeals(activeFilter, storeFilter, regionFilter, true),
+                loadFeaturedDeals(activeFilter, storeFilter, regionFilter, priceCap, true),
             ];
 
             if (trackedDeals.length > 0) {
@@ -338,7 +435,7 @@ export function DealsContainer() {
                         <h2 className="text-3xl font-black tracking-tight text-white uppercase drop-shadow-md sm:text-4xl md:text-5xl">
                             DEALS TRACKER
                         </h2>
-                        <p className="max-w-2xl text-sm sm:text-lg font-medium text-zinc-400">
+                        <p className="max-w-2xl text-sm sm:text-lg font-medium text-zinc-400 hidden sm:block">
                             Comparador de preços Steam Family (US 🇺🇸 vs BR 🇧🇷).
                         </p>
                     </div>
@@ -498,6 +595,8 @@ export function DealsContainer() {
                             onFilterChange={handleFilterChange}
                             storeFilter={storeFilter}
                             onStoreFilterChange={handleStoreFilterChange}
+                            priceCap={priceCap}
+                            onPriceCapChange={setPriceCap}
                             regionFilter={regionFilter}
                             onRegionFilterChange={handleRegionFilterChange}
                             onToggleTrack={handleToggleTrack}

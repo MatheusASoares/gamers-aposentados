@@ -70,6 +70,8 @@ model User {
   contractProgresses   CampaignContractProgress[]
   proposedSpecialGames SpecialGameProposal[]      @relation("ProposedSpecialGames")
   specialGameVotes     SpecialGameVote[]
+  trackedDeals         UserTrackedDeal[]
+  dismissedDeals       UserDismissedDeal[]
 
   xp_points       Int     @default(0)
   level           Int     @default(1)
@@ -324,5 +326,37 @@ model SpecialGameVote {
 
   @@unique([proposal_id, user_id])
   @@map("special_game_votes")
+}
+
+// --- DEALS TRACKER PERSISTENCE ---
+
+model UserTrackedDeal {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  deal_id      String   // ID do jogo ou steamAppId
+  steam_app_id Int?
+  title        String
+  slug         String
+  cover_image  String?
+  created_at   DateTime @default(now())
+
+  @@unique([user_id, deal_id])
+  @@index([user_id])
+  @@map("user_tracked_deals")
+}
+
+model UserDismissedDeal {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  game_title   String   // Lowercased or normalized title
+  steam_app_id Int?
+  reason       String?  @default("already_played") // "already_played" | "not_interested"
+  created_at   DateTime @default(now())
+
+  @@unique([user_id, game_title])
+  @@index([user_id])
+  @@map("user_dismissed_deals")
 }
 

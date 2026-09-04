@@ -9,6 +9,7 @@ import {
     DealFilterType,
     StoreFilterType,
     RegionAdvantageFilterType,
+    PriceCapFilterType,
     TrackedDealItem,
     TrackedDealsResponse,
 } from "@/types/deals";
@@ -166,6 +167,17 @@ export class DealsService {
                     source,
                 });
 
+                if (resolvedAppId) {
+                    try {
+                        const rev = await SteamStoreClient.getAppReviewsSummary(resolvedAppId);
+                        if (rev) {
+                            comparison.steamReviews = rev;
+                        }
+                    } catch (e) {
+                        console.warn("[DealsService] Failed to fetch reviews for comparison:", e);
+                    }
+                }
+
                 return comparison;
             },
             CACHE_TTL.GAME_COMPARISON,
@@ -185,9 +197,10 @@ export class DealsService {
                 const results = await Promise.all(
                     sampleGames.map(async (game): Promise<FeaturedDealItem | null> => {
                         try {
-                            const [pUS, pBR] = await Promise.all([
+                            const [pUS, pBR, reviews] = await Promise.all([
                                 SteamStoreClient.getAppPrice(game.steamAppId, "US"),
                                 SteamStoreClient.getAppPrice(game.steamAppId, "BR"),
+                                SteamStoreClient.getAppReviewsSummary(game.steamAppId),
                             ]);
 
                             if (!pUS || !pBR || pUS.currentPrice <= 0 || pBR.currentPrice <= 0) {
@@ -211,6 +224,7 @@ export class DealsService {
                                 storeUS: "Steam",
                                 storeBR: "Steam",
                                 isAllTimeLow: discount >= 50,
+                                steamReviews: reviews || undefined,
                                 dealUrlUS: `https://store.steampowered.com/app/${game.steamAppId}`,
                                 dealUrlBR: `https://store.steampowered.com/app/${game.steamAppId}`,
                             };
@@ -230,15 +244,16 @@ export class DealsService {
      * Retrieves featured/top deals comparing US vs BR stores.
      */
     static async getFeaturedDeals(
-        filter: DealFilterType = "best_savings",
+        filter: DealFilterType = "historical_low",
         forceRefresh = false,
         storeFilter: StoreFilterType = "all",
         regionFilter: RegionAdvantageFilterType = "all",
+        priceCap: PriceCapFilterType = "all",
     ): Promise<{
         deals: FeaturedDealItem[];
         currencyRate: CurrencyRate;
     }> {
-        const cacheKey = `deals:featured_list:${filter}:${storeFilter}:${regionFilter}`;
+        const cacheKey = `deals:featured_list:${filter}:${storeFilter}:${regionFilter}:${priceCap}`;
 
         if (forceRefresh) {
             dealsCache.deletePattern("deals:featured_list:");
@@ -260,6 +275,12 @@ export class DealsService {
                         SteamStoreClient.getFeaturedSpecials(),
                     ]);
                     deals = [...curatedDeals, ...steamSpecials];
+                } else if (filter === "highest_cut") {
+                    const [curatedDeals, steamSpecials] = await Promise.all([
+                        DealsService.getCuratedPoolDeals(),
+                        SteamStoreClient.getFeaturedSpecials(),
+                    ]);
+                    deals = [...steamSpecials, ...curatedDeals];
                 } else if (filter === "steam_only") {
                     deals = await SteamStoreClient.getFeaturedSpecials();
                 } else if (ItadClient.isConfigured()) {
@@ -271,7 +292,7 @@ export class DealsService {
                     deals = await SteamStoreClient.getFeaturedSpecials();
                 }
 
-                // 3. Merge curated pool deals into best_savings and historical_low to guarantee evergreen AAA titles
+                // 3. Merge curated pool deals into best_savings and historical_low
                 if (filter === "best_savings" || filter === "historical_low") {
                     try {
                         const curated = await DealsService.getCuratedPoolDeals();
@@ -301,6 +322,11 @@ export class DealsService {
                             storeUS: "Steam",
                             storeBR: "Steam",
                             isAllTimeLow: true,
+                            steamReviews: {
+                                reviewScoreDesc: "Extremamente positivas",
+                                positivePercent: 96,
+                                totalReviews: 448000,
+                            },
                             dealUrlUS: "https://store.steampowered.com/app/1086940",
                             dealUrlBR: "https://store.steampowered.com/app/1086940",
                         },
@@ -320,6 +346,11 @@ export class DealsService {
                             storeUS: "Steam",
                             storeBR: "Steam",
                             isAllTimeLow: false,
+                            steamReviews: {
+                                reviewScoreDesc: "Muito positivas",
+                                positivePercent: 92,
+                                totalReviews: 650000,
+                            },
                             dealUrlUS: "https://store.steampowered.com/app/1245620",
                             dealUrlBR: "https://store.steampowered.com/app/1245620",
                         },
@@ -339,6 +370,11 @@ export class DealsService {
                             storeUS: "Steam",
                             storeBR: "Steam",
                             isAllTimeLow: true,
+                            steamReviews: {
+                                reviewScoreDesc: "Muito positivas",
+                                positivePercent: 88,
+                                totalReviews: 700000,
+                            },
                             dealUrlUS: "https://store.steampowered.com/app/1091500",
                             dealUrlBR: "https://store.steampowered.com/app/1091500",
                         },
@@ -365,13 +401,29 @@ export class DealsService {
                     );
                 }
 
-                // 6. Normalize and Sort by Filter, Store & Region Advantage
+                // 5.5 Resolve Steam review scores for items missing reviews
+                const missingReviews = deals.filter((d) => d.steamAppId && !d.steamReviews);
+                if (missingReviews.length > 0) {
+                    await Promise.allSettled(
+                        missingReviews.slice(0, 16).map(async (deal) => {
+                            if (deal.steamAppId) {
+                                const rev = await SteamStoreClient.getAppReviewsSummary(deal.steamAppId);
+                                if (rev) {
+                                    deal.steamReviews = rev;
+                                }
+                            }
+                        }),
+                    );
+                }
+
+                // 6. Normalize and Sort by Filter, Store, Region Advantage & Price Cap
                 const normalized = DealComparator.normalizeFeaturedDeals(
                     deals,
                     currencyRate,
                     filter,
                     storeFilter,
                     regionFilter,
+                    priceCap,
                 );
 
                 return {

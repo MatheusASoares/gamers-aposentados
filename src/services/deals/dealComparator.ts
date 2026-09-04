@@ -5,6 +5,7 @@ import {
     DealComparisonResult,
     DealFilterType,
     FeaturedDealItem,
+    PriceCapFilterType,
     RegionAdvantageFilterType,
     RegionDeal,
     StorePrice,
@@ -160,9 +161,10 @@ export class DealComparator {
     static normalizeFeaturedDeals(
         items: FeaturedDealItem[],
         currencyRate: CurrencyRate,
-        filter: DealFilterType = "best_savings",
+        filter: DealFilterType = "historical_low",
         storeFilter: "all" | "steam" | "nuuvem" = "all",
         regionFilter: RegionAdvantageFilterType = "all",
+        priceCap: PriceCapFilterType = "all",
     ): FeaturedDealItem[] {
         const rate = currencyRate.rate;
 
@@ -240,18 +242,63 @@ export class DealComparator {
             );
         }
 
-        // 2.5 Apply region advantage filter if specified (e.g. BR winner vs US winner)
+        // 2.5 Apply region advantage filter if specified
         if (regionFilter === "br") {
             normalized = normalized.filter((item) => item.winningRegion === "BR");
         } else if (regionFilter === "us") {
             normalized = normalized.filter((item) => item.winningRegion === "US");
         }
 
+        // 2.7 Apply price cap filter if specified
+        if (priceCap === "under_30") {
+            normalized = normalized.filter((item) => item.priceBR > 0 && item.priceBR <= 30);
+        } else if (priceCap === "under_60") {
+            normalized = normalized.filter((item) => item.priceBR > 0 && item.priceBR <= 60);
+        } else if (priceCap === "under_100") {
+            normalized = normalized.filter((item) => item.priceBR > 0 && item.priceBR <= 100);
+        }
+
         // 3. Filter and Sort based on selected Tab/Filter
         if (filter === "historical_low") {
             return normalized
                 .filter((item) => item.isAllTimeLow)
-                .sort((a, b) => b.savingsPercent - a.savingsPercent || b.discountPercent - a.discountPercent);
+                .sort((a, b) => {
+                    const percentA = a.steamReviews?.positivePercent ?? 0;
+                    const percentB = b.steamReviews?.positivePercent ?? 0;
+                    return b.discountPercent - a.discountPercent || percentB - percentA || b.savingsPercent - a.savingsPercent;
+                });
+        }
+
+        if (filter === "highest_cut") {
+            return normalized
+                .filter((item) => item.discountPercent >= 20)
+                .sort(
+                    (a, b) =>
+                        b.discountPercent - a.discountPercent ||
+                        (b.steamReviews?.positivePercent ?? 0) - (a.steamReviews?.positivePercent ?? 0),
+                );
+        }
+
+        if (filter === "steam_acclaimed") {
+            return normalized
+                .filter((item) => {
+                    const percent = item.steamReviews?.positivePercent ?? 0;
+                    const desc = item.steamReviews?.reviewScoreDesc?.toLowerCase() ?? "";
+                    const isHighAcclaimDesc =
+                        desc.includes("muito positiva") ||
+                        desc.includes("extremamente positiva") ||
+                        desc.includes("very positive") ||
+                        desc.includes("overwhelmingly positive");
+                    return item.discountPercent > 0 && (percent >= 75 || isHighAcclaimDesc);
+                })
+                .sort((a, b) => {
+                    const percentA = a.steamReviews?.positivePercent ?? 0;
+                    const percentB = b.steamReviews?.positivePercent ?? 0;
+                    if (percentB !== percentA) {
+                        return percentB - percentA;
+                    }
+                    return b.discountPercent - a.discountPercent;
+                });
         }
 
         if (filter === "curated_specials") {
@@ -278,13 +325,7 @@ export class DealComparator {
                 });
         }
 
-        if (filter === "highest_cut") {
-            return normalized.sort(
-                (a, b) => b.discountPercent - a.discountPercent || b.savingsPercent - a.savingsPercent,
-            );
-        }
-
-        // Default: 'best_savings' - Sort by highest regional savings %, tie-break by absolute R$ savings
+        // Default: 'best_savings' (Câmbio US/BR)
         return normalized.sort((a, b) => {
             if (b.savingsPercent !== a.savingsPercent) {
                 return b.savingsPercent - a.savingsPercent;
