@@ -62,6 +62,7 @@ export function UserAvatar({
             src={src}
             alt={name || "Avatar"}
             fill
+            sizes="(max-width: 768px) 64px, 96px"
             className="rounded-full object-cover"
           />
         ) : (

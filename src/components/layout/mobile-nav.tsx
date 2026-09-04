@@ -28,11 +28,12 @@ export function MobileNav() {
             <Button
                 variant="ghost"
                 size="icon"
-                className="mr-2 -ml-2 md:hidden"
+                className="h-8.5 w-8.5 sm:h-9 sm:w-9 p-0 rounded-xl border border-white/10 bg-zinc-900/80 hover:bg-[#bd0df2]/20 hover:border-[#bd0df2]/40 hover:text-white text-zinc-300 transition-all active:scale-95 shrink-0 md:hidden shadow-sm"
                 onClick={() => setOpen(true)}
+                title="Abrir Menu Completo de Navegação"
             >
-                <Menu className="h-5 w-5" />
-                <span className="sr-only">Toggle Menu</span>
+                <Menu className="h-4.5 w-4.5 sm:h-5 sm:w-5 text-[#bd0df2]" />
+                <span className="sr-only">Abrir Menu</span>
             </Button>
 
             {mounted &&

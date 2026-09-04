@@ -13,20 +13,21 @@ import {
     Sparkles,
     ChevronLeft,
     ChevronRight,
-    Star,
     Heart,
-    Trash2,
-    Store,
     ShoppingBag,
+    ThumbsUp,
+    Globe,
 } from "lucide-react";
 import {
     FeaturedDealItem,
     DealFilterType,
     StoreFilterType,
     RegionAdvantageFilterType,
+    PriceCapFilterType,
     TrackedDealItem,
 } from "@/types/deals";
 import { cn } from "@/lib/utils";
+import { DealOracleSection } from "./DealOracleSection";
 
 const ITEMS_PER_PAGE = 12;
 
@@ -39,6 +40,8 @@ interface TopDealsCarouselProps {
     onFilterChange?: (filter: DealFilterType) => void;
     storeFilter?: StoreFilterType;
     onStoreFilterChange?: (store: StoreFilterType) => void;
+    priceCap?: PriceCapFilterType;
+    onPriceCapChange?: (priceCap: PriceCapFilterType) => void;
     regionFilter?: RegionAdvantageFilterType;
     onRegionFilterChange?: (region: RegionAdvantageFilterType) => void;
     onToggleTrack?: (game: {
@@ -58,12 +61,12 @@ export function TopDealsCarousel({
     trackedDeals = [],
     onSelectDeal,
     selectedId,
-    activeFilter = "best_savings",
+    activeFilter = "historical_low",
     onFilterChange,
     storeFilter = "all",
     onStoreFilterChange,
-    regionFilter = "all",
-    onRegionFilterChange,
+    priceCap = "all",
+    onPriceCapChange,
     onToggleTrack,
     isTracked = () => false,
     monitoredCount = 0,
@@ -72,12 +75,16 @@ export function TopDealsCarousel({
     const [currentPage, setCurrentPage] = useState(1);
     const [prevFilter, setPrevFilter] = useState(activeFilter);
     const [prevStore, setPrevStore] = useState(storeFilter);
-    const [prevRegion, setPrevRegion] = useState(regionFilter);
+    const [prevPriceCap, setPrevPriceCap] = useState(priceCap);
 
-    if (prevFilter !== activeFilter || prevStore !== storeFilter || prevRegion !== regionFilter) {
+    if (
+        prevFilter !== activeFilter ||
+        prevStore !== storeFilter ||
+        prevPriceCap !== priceCap
+    ) {
         setPrevFilter(activeFilter);
         setPrevStore(storeFilter);
-        setPrevRegion(regionFilter);
+        setPrevPriceCap(priceCap);
         setCurrentPage(1);
     }
 
@@ -88,26 +95,33 @@ export function TopDealsCarousel({
         badge?: number;
     }> = [
         {
-            id: "best_savings",
-            label: "Câmbio US/BR",
-            icon: <Flame className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />,
-        },
-        {
             id: "historical_low",
-            label: "Recordes",
+            label: "Recordes (ATL)",
             icon: <Trophy className="h-3.5 w-3.5 text-amber-400 flex-shrink-0" />,
         },
         {
-            id: "curated_specials",
-            label: "Destaques AAA",
-            icon: <Sparkles className="h-3.5 w-3.5 text-fuchsia-400 flex-shrink-0" />,
+            id: "highest_cut",
+            label: "Super Descontos",
+            icon: <Flame className="h-3.5 w-3.5 text-orange-400 flex-shrink-0" />,
+        },
+        {
+            id: "oracle",
+            label: "Oráculo IA",
+            icon: <Sparkles className="h-3.5 w-3.5 text-[#bd0df2] flex-shrink-0" />,
         },
         {
             id: "monitored",
             label: "Favoritos",
-            icon: <Star className="h-3.5 w-3.5 text-yellow-400 fill-yellow-400/30 flex-shrink-0" />,
+            icon: <Heart className="h-3.5 w-3.5 text-pink-400 fill-pink-400/30 flex-shrink-0" />,
             badge: monitoredCount,
         },
+    ];
+
+    const priceCapOptions: Array<{ id: PriceCapFilterType; label: string }> = [
+        { id: "all", label: "Qualquer Preço" },
+        { id: "under_30", label: "Até R$ 30" },
+        { id: "under_60", label: "Até R$ 60" },
+        { id: "under_100", label: "Até R$ 100" },
     ];
 
     const storeOptions: Array<{ id: StoreFilterType; label: string; icon: React.ReactNode }> = [
@@ -116,6 +130,7 @@ export function TopDealsCarousel({
     ];
 
     const isMonitoredTab = activeFilter === "monitored";
+    const isOracleTab = activeFilter === "oracle";
     const currentList = isMonitoredTab ? trackedDeals : deals;
     const totalDeals = currentList.length;
     const totalPages = Math.max(1, Math.ceil(totalDeals / ITEMS_PER_PAGE));
@@ -175,7 +190,7 @@ export function TopDealsCarousel({
                                     {opt.badge !== undefined && opt.badge > 0 && (
                                         <span className={cn(
                                             "ml-1 flex h-4 min-w-4 items-center justify-center rounded-full px-1.5 text-[10px] sm:text-xs font-black",
-                                            isActive ? "bg-theme-primary text-black" : "bg-zinc-800 text-yellow-400 border border-yellow-400/30",
+                                            isActive ? "bg-theme-primary text-black" : "bg-zinc-800 text-pink-400 border border-pink-400/30",
                                         )}>
                                             {opt.badge}
                                         </span>
@@ -187,52 +202,32 @@ export function TopDealsCarousel({
                 )}
             </div>
 
-            {/* Store & Region Advantage Micro-Filters (Only shown on deals tabs, not on monitored tab) */}
-            {!isMonitoredTab && (
+            {/* Store & Price Cap Micro-Filters (Only shown on deals tabs, not on monitored or oracle tab) */}
+            {!isMonitoredTab && !isOracleTab && (
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                    {/* Region Advantage Sub-Filter (shown when in Câmbio US/BR tab) */}
-                    {activeFilter === "best_savings" && onRegionFilterChange ? (
+                    {/* Price Cap Filter */}
+                    {onPriceCapChange && (
                         <div className="flex flex-wrap items-center gap-1.5 bg-zinc-950/80 p-1.5 rounded-xl border border-theme/30 w-full sm:w-auto">
-                            <span className="text-xs font-black uppercase text-zinc-400 px-1.5">Vantagem:</span>
-                            <button
-                                type="button"
-                                onClick={() => onRegionFilterChange("all")}
-                                className={cn(
-                                    "rounded-lg px-3 py-1.5 text-xs font-black transition-all",
-                                    regionFilter === "all"
-                                        ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
-                                        : "text-zinc-500 hover:text-zinc-300",
-                                )}
-                            >
-                                🌐 Todas
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => onRegionFilterChange("br")}
-                                className={cn(
-                                    "flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-black transition-all",
-                                    regionFilter === "br"
-                                        ? "bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 shadow-sm"
-                                        : "text-zinc-500 hover:text-zinc-300",
-                                )}
-                            >
-                                🇧🇷 No Brasil
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => onRegionFilterChange("us")}
-                                className={cn(
-                                    "flex items-center gap-1 rounded-lg px-3 py-1.5 text-xs font-black transition-all",
-                                    regionFilter === "us"
-                                        ? "bg-cyan-950/90 text-cyan-300 border border-cyan-500/50 shadow-sm"
-                                        : "text-zinc-500 hover:text-zinc-300",
-                                )}
-                            >
-                                🇺🇸 Nos EUA
-                            </button>
+                            <span className="text-xs font-black uppercase text-zinc-400 px-1.5">Preço:</span>
+                            {priceCapOptions.map((cap) => {
+                                const isCapActive = priceCap === cap.id;
+                                return (
+                                    <button
+                                        key={cap.id}
+                                        type="button"
+                                        onClick={() => onPriceCapChange(cap.id)}
+                                        className={cn(
+                                            "rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-black transition-all",
+                                            isCapActive
+                                                ? "bg-theme-primary/25 text-white border border-theme-primary shadow-sm"
+                                                : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60 border border-transparent",
+                                        )}
+                                    >
+                                        {cap.label}
+                                    </button>
+                                );
+                            })}
                         </div>
-                    ) : (
-                        <div />
                     )}
 
                     {/* Store Filter */}
@@ -265,23 +260,31 @@ export function TopDealsCarousel({
                 </div>
             )}
 
-            {/* Empty State */}
-            {(!currentList || currentList.length === 0) && (
+            {/* If Oracle Tab is active, render DealOracleSection */}
+            {isOracleTab ? (
+                <DealOracleSection
+                    onToggleTrack={onToggleTrack}
+                    isTracked={isTracked}
+                />
+            ) : (
+                <>
+                    {/* Empty State */}
+                    {(!currentList || currentList.length === 0) && (
                 <div className="glass-card border border-theme bg-theme-card flex flex-col items-center justify-center rounded-2xl p-8 sm:p-12 text-center">
                     {isMonitoredTab ? (
                         <>
-                            <Star className="h-10 w-10 text-yellow-400/60 mb-2.5 animate-pulse" />
-                            <h4 className="text-base font-extrabold text-white">Nenhum jogo monitorado ainda</h4>
+                            <Heart className="h-10 w-10 text-pink-400/60 mb-2.5 animate-pulse" />
+                            <h4 className="text-base font-extrabold text-white">Nenhum jogo favoritado ainda</h4>
                             <p className="max-w-md text-xs text-zinc-400 mt-1">
-                                Clique no ícone de <strong className="text-theme-primary">coração ❤️</strong> em qualquer jogo da vitrine ou no comparador para monitorá-lo. Avisaremos você quando ele atingir o <strong className="text-amber-400">Menor Preço Histórico</strong>!
+                                Clique no ícone de <strong className="text-pink-400">coração ❤️</strong> em qualquer oferta para salvá-lo. Seus favoritos ficam sincronizados na sua conta!
                             </p>
                         </>
-                    ) : regionFilter === "us" ? (
+                    ) : activeFilter === "historical_low" ? (
                         <>
-                            <Sparkles className="h-8 w-8 text-cyan-400 mb-2" />
-                            <h4 className="text-sm font-extrabold text-white">Nenhum jogo mais barato nos EUA no momento</h4>
+                            <Trophy className="h-8 w-8 text-amber-400 mb-2" />
+                            <h4 className="text-sm font-extrabold text-white">Nenhum recorde histórico encontrado</h4>
                             <p className="max-w-md text-xs text-zinc-400 mt-1">
-                                Os preços regionais da Steam Brasil estão mais vantajosos na totalidade dos títulos em promoção neste momento.
+                                Experimente alterar o teto de preço ou a loja selecionada para ver mais títulos.
                             </p>
                         </>
                     ) : (
@@ -291,7 +294,7 @@ export function TopDealsCarousel({
                                 Nenhum deal encontrado para este filtro no momento.
                             </p>
                             <p className="text-xs text-zinc-500 mt-1">
-                                Tente alternar os filtros de loja ou de região.
+                                Tente alternar o teto de preço ou a loja selecionada.
                             </p>
                         </>
                     )}
@@ -366,11 +369,11 @@ export function TopDealsCarousel({
                                                         coverImage: deal.coverImage,
                                                     });
                                                 }}
-                                                title={tracked ? "Remover dos monitorados" : "Monitorar este jogo"}
+                                                title={tracked ? "Remover dos favoritos" : "Favoritar este jogo"}
                                                 className={cn(
                                                     "flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
                                                     tracked
-                                                        ? "border-pink-500/60 bg-pink-950/80 text-pink-400 shadow-[0_0_10px_rgba(236,72,153,0.4)]"
+                                                        ? "border-pink-500/60 bg-pink-950/90 text-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.5)]"
                                                         : "border-white/10 bg-black/60 text-zinc-400 hover:text-pink-400 hover:border-pink-400/40",
                                                 )}
                                             >
@@ -378,20 +381,20 @@ export function TopDealsCarousel({
                                             </button>
                                         )}
 
-                                        {isBrWinner && savingsPercent > 0 && (
+                                        {deal.isAllTimeLow && (
+                                            <span className="flex items-center gap-1 rounded-lg bg-amber-500/95 px-2 py-0.5 text-[10px] sm:text-xs font-black text-black shadow-md backdrop-blur-sm">
+                                                <Trophy className="h-3 w-3" /> Recorde
+                                            </span>
+                                        )}
+
+                                        {isBrWinner && savingsPercent > 0 && !deal.isAllTimeLow && (
                                             <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-xs font-black text-emerald-400 border border-emerald-500/40 backdrop-blur-md shadow-md">
                                                 🇧🇷 -{savingsPercent}% Econ.
                                             </span>
                                         )}
-                                        {isUsWinner && savingsPercent > 0 && (
+                                        {isUsWinner && savingsPercent > 0 && !deal.isAllTimeLow && (
                                             <span className="rounded-lg bg-zinc-950/90 px-2 py-0.5 text-xs font-black text-cyan-400 border border-cyan-500/40 backdrop-blur-md shadow-md">
                                                 🇺🇸 -{savingsPercent}% Econ.
-                                            </span>
-                                        )}
-
-                                        {deal.isAllTimeLow && (
-                                            <span className="flex items-center gap-1 rounded-lg bg-amber-500/90 px-2 py-0.5 text-[10px] sm:text-xs font-black text-black shadow-md backdrop-blur-sm">
-                                                <Trophy className="h-3 w-3" /> Recorde
                                             </span>
                                         )}
                                     </div>
@@ -402,6 +405,31 @@ export function TopDealsCarousel({
                                     <h4 className="truncate text-sm sm:text-base font-bold text-white group-hover:text-theme-primary transition-colors" title={deal.title}>
                                         {deal.title}
                                     </h4>
+
+                                    {/* Steam Community Reviews Badge */}
+                                    {deal.steamReviews && deal.steamReviews.totalReviews > 0 ? (
+                                        <div className="flex items-center gap-1.5">
+                                            <span
+                                                className={cn(
+                                                    "flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[10px] sm:text-xs font-black border backdrop-blur-sm",
+                                                    deal.steamReviews.positivePercent >= 80
+                                                        ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                                        : deal.steamReviews.positivePercent >= 70
+                                                          ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+                                                          : "bg-zinc-800 text-zinc-400 border-zinc-700",
+                                                )}
+                                                title={`${deal.steamReviews.totalReviews.toLocaleString("pt-BR")} análises na Steam`}
+                                            >
+                                                <ThumbsUp className="h-3 w-3 stroke-[2.5]" />
+                                                <span>{deal.steamReviews.positivePercent}%</span>
+                                                <span className="font-semibold text-zinc-300 truncate max-w-[130px]">
+                                                    {deal.steamReviews.reviewScoreDesc}
+                                                </span>
+                                            </span>
+                                        </div>
+                                    ) : (
+                                        <div className="h-5" />
+                                    )}
 
                                     <div className="grid grid-cols-2 gap-2 rounded-xl bg-zinc-900/70 p-2 border border-theme/20">
                                         <div>
@@ -447,7 +475,7 @@ export function TopDealsCarousel({
                         <strong className="text-white">
                             {Math.min(currentPage * ITEMS_PER_PAGE, totalDeals)}
                         </strong>{" "}
-                        de <strong className="text-white">{totalDeals}</strong> {isMonitoredTab ? "jogos" : "ofertas"}
+                        de <strong className="text-white">{totalDeals}</strong> {isMonitoredTab ? "favoritos" : "ofertas"}
                     </span>
 
                     <div className="flex items-center gap-1.5">
@@ -491,6 +519,8 @@ export function TopDealsCarousel({
                         </button>
                     </div>
                 </div>
+            )}
+                </>
             )}
         </div>
     );

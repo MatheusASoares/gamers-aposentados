@@ -47,10 +47,22 @@ export async function claimPlatinumBonus(progressId: string): Promise<{ success:
 
     await recalculateUserXPAndLevel(session.user.id);
 
+    try {
+      const { getActiveGuild } = await import("@/app/lib/guild-actions");
+      const { recalculateGuildXPAndLevel } = await import("@/app/lib/guild-gamification-actions");
+      const activeGuild = await getActiveGuild();
+      if (activeGuild?.id) {
+        await recalculateGuildXPAndLevel(activeGuild.id);
+      }
+    } catch {
+      // Fallback
+    }
+
     revalidatePath("/");
     revalidatePath("/profile");
     revalidatePath("/dashboard");
     revalidatePath("/quests");
+    revalidatePath("/guild");
     return { success: true };
   } catch (error) {
     console.error("[claimPlatinumBonus] Error:", error);

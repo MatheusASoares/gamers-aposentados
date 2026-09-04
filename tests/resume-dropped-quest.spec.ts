@@ -40,12 +40,23 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
                 game: { title: { startsWith: "ResumeTestGame" } },
             },
         });
+
+        // Garantir que não haja outras quests ativas conflitantes durante o teste
+        await prisma.gameProgress.updateMany({
+            where: {
+                user_id: matheusUser.id,
+                status: "ACTIVE",
+            },
+            data: {
+                status: "DROPPED",
+            },
+        });
     });
 
     test("Permite retomar quest com status DROPPED no histórico e mantém porcentagem", async ({ page }) => {
         const game = await prisma.game.create({
             data: {
-                title: "ResumeTestGame Guitar Hero",
+                title: "ResumeTestGame Guitar Hero Alpha",
                 quest_type: "MAIN_QUEST",
             },
         });
@@ -62,13 +73,15 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
         });
 
         // Criar uma pool fechada com esse jogo para aparecer no Histórico
+        const foundersGuild = await prisma.guild.findFirst();
         await prisma.pool.create({
             data: {
                 type: "MAIN_QUEST",
                 status: "CLOSED",
                 year: new Date().getFullYear(),
-                month: 2,
+                month: 12,
                 winner_game_id: game.id,
+                guild_id: foundersGuild?.id || null,
             },
         });
 
@@ -81,15 +94,35 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
 
         // Ir para o Histórico de Quests
         await page.goto("/quests", { waitUntil: "load" });
-        await expect(page.locator("body")).toContainText("ResumeTestGame Guitar Hero", { timeout: 15000 });
+        await expect(page.locator("body")).toContainText("ResumeTestGame Guitar Hero Alpha", { timeout: 15000 });
 
-        // Localizar o botão Retomar Quest
-        const resumeBtn = page.getByRole("button", { name: /Retomar Quest/i }).first();
-        await expect(resumeBtn).toBeVisible();
+        page.on("console", (msg) => console.log("TEST 1 CONSOLE:", msg.text()));
+        page.on("pageerror", (err) => console.log("TEST 1 PAGE ERROR:", err));
+        page.on("dialog", async (dialog) => {
+            console.log("TEST 1 CAUGHT DIALOG:", dialog.message());
+            await dialog.accept();
+        });
+
+        const gameCard = page
+            .locator(".glass-card")
+            .filter({ hasText: "ResumeTestGame Guitar Hero Alpha" })
+            .first();
+        const resumeBtn = gameCard.getByRole("button", { name: /Retomar Quest/i });
+        await expect(resumeBtn).toBeVisible({ timeout: 15000 });
         await resumeBtn.click();
 
         // Aguardar atualização e validar que o status no banco foi alterado para ACTIVE e manteve 45%
-        await page.waitForTimeout(1000);
+        await expect.poll(async () => {
+            const p = await prisma.gameProgress.findUnique({
+                where: {
+                    user_id_game_id: {
+                        user_id: matheusUser.id,
+                        game_id: game.id,
+                    },
+                },
+            });
+            return p?.status;
+        }, { timeout: 10000 }).toBe("ACTIVE");
 
         const updatedProgress = await prisma.gameProgress.findUnique({
             where: {
@@ -126,7 +159,7 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
         // Criar jogo 2 que foi DROPPED
         const droppedGame = await prisma.game.create({
             data: {
-                title: "ResumeTestGame Guitar Hero 3",
+                title: "ResumeTestGame Guitar Hero Beta",
                 quest_type: "MAIN_QUEST",
             },
         });
@@ -140,13 +173,15 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
         });
 
         // Criar pool fechada para o jogo dropado
+        const foundersGuild = await prisma.guild.findFirst();
         await prisma.pool.create({
             data: {
                 type: "MAIN_QUEST",
                 status: "CLOSED",
                 year: new Date().getFullYear(),
-                month: 1,
+                month: 12,
                 winner_game_id: droppedGame.id,
+                guild_id: foundersGuild?.id || null,
             },
         });
 
@@ -159,20 +194,27 @@ test.describe("Resume Dropped Quest Integration Tests", () => {
 
         // Ir para /quests e tentar clicar em Retomar
         await page.goto("/quests", { waitUntil: "load" });
-        await expect(page.locator("body")).toContainText("ResumeTestGame Guitar Hero 3", { timeout: 15000 });
+        await expect(page.locator("body")).toContainText("ResumeTestGame Guitar Hero Beta", { timeout: 15000 });
 
-        // Monitorar dialog de alerta
-        let dialogMessage = "";
+        page.on("console", (msg) => console.log("PAGE CONSOLE:", msg.text()));
+        page.on("pageerror", (err) => console.log("PAGE ERROR:", err));
+
+        const gameCard = page
+            .locator(".glass-card")
+            .filter({ hasText: "ResumeTestGame Guitar Hero Beta" })
+            .first();
+        const resumeBtn = gameCard.getByRole("button", { name: /Retomar Quest/i });
+        await expect(resumeBtn).toBeVisible({ timeout: 15000 });
+
+        let dialogCaught = "";
         page.on("dialog", async (dialog) => {
-            dialogMessage = dialog.message();
+            dialogCaught = dialog.message();
+            console.log("CAUGHT DIALOG:", dialogCaught);
             await dialog.accept();
         });
 
-        const resumeBtn = page.getByRole("button", { name: /Retomar Quest/i }).first();
         await resumeBtn.click();
-        await page.waitForTimeout(1000);
-
-        expect(dialogMessage).toContain("já possui a Main Quest");
+        await expect.poll(() => dialogCaught, { timeout: 15000 }).toContain("já possui a Main Quest");
 
         // Validar que o status continua DROPPED no banco
         const progress = await prisma.gameProgress.findUnique({

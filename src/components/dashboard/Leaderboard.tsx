@@ -122,7 +122,7 @@ export function Leaderboard({ players, allMembers = [] }: LeaderboardProps) {
             {/* Conteúdo Aba 1: Duelo dos Fundadores */}
             {tab === "DUEL" && (
                 <div className="relative z-10 grid grid-cols-2 divide-x divide-white/5 bg-zinc-950/60 p-3 sm:p-5 backdrop-blur-md flex-1 items-center">
-                    {players.map((player, idx) => {
+                    {players.slice(0, 2).map((player, idx) => {
                         return (
                             <div key={idx} className="flex flex-col items-center px-2 sm:px-4 py-3 sm:py-4 text-center w-full min-w-0">
                                 {/* Avatar */}

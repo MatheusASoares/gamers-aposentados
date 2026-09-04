@@ -1,22 +1,28 @@
 import { prisma } from "../src/lib/prisma";
 
 async function check() {
-    const pools = await prisma.pool.findMany({
-        where: { year: 2026 },
-        include: { winner_game: true, entries: { include: { game: true, user: true } } }
-    });
-
-    console.log(`Found ${pools.length} pools for 2026.`);
-    for (const pool of pools) {
-        console.log(`--- Pool: ${pool.type} - Month: ${pool.month} ---`);
-        console.log("WINNER:", pool.winner_game?.title);
-        console.log("ENTRIES:");
-        for (const e of pool.entries) {
-            console.log(` - ${e.game.title} (Nominated by ${e.user.name})`);
-        }
+  const users = await prisma.user.findMany({
+    include: {
+      gameProgress: {
+        include: { game: true }
+      },
+      reviews: true
     }
+  });
+
+  for (const u of users) {
+    console.log(`\n👤 ${u.name} (${u.email}) [XP: ${u.xp_points}, Level: ${u.level}]`);
+    console.log(`Progresses (${u.gameProgress.length}):`);
+    for (const p of u.gameProgress) {
+      console.log(`  - ${p.game.title} [${p.game.quest_type}] Status: ${p.status} | HLTB: ${p.game.hltb_time}h | Plat: ${p.is_platinum}`);
+    }
+    console.log(`Reviews (${u.reviews.length}):`);
+    for (const r of u.reviews) {
+      console.log(`  - Review for game ${r.game_id}: "${r.review_text?.substring(0, 30)}..."`);
+    }
+  }
 }
 
 check()
-    .catch(console.error)
-    .finally(() => prisma.$disconnect());
+  .catch(console.error)
+  .finally(() => prisma.$disconnect());

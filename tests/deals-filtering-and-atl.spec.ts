@@ -29,6 +29,11 @@ const mockDeals: FeaturedDealItem[] = [
         storeUS: "Steam",
         storeBR: "Steam",
         isAllTimeLow: false,
+        steamReviews: {
+            reviewScoreDesc: "Extremamente positivas",
+            positivePercent: 96,
+            totalReviews: 50000,
+        },
     },
     {
         id: "game-2",
@@ -44,6 +49,11 @@ const mockDeals: FeaturedDealItem[] = [
         storeUS: "Steam",
         storeBR: "Nuuvem",
         isAllTimeLow: true,
+        steamReviews: {
+            reviewScoreDesc: "Muito positivas",
+            positivePercent: 88,
+            totalReviews: 14000,
+        },
     },
     {
         id: "game-3",
@@ -59,6 +69,11 @@ const mockDeals: FeaturedDealItem[] = [
         storeUS: "Steam",
         storeBR: "Steam",
         isAllTimeLow: false,
+        steamReviews: {
+            reviewScoreDesc: "Neutras",
+            positivePercent: 55,
+            totalReviews: 800,
+        },
     },
     {
         id: "game-4",
@@ -74,6 +89,31 @@ const mockDeals: FeaturedDealItem[] = [
         storeUS: "Steam",
         storeBR: "Nuuvem",
         isAllTimeLow: true,
+        steamReviews: {
+            reviewScoreDesc: "Ligeiramente positivas",
+            positivePercent: 72,
+            totalReviews: 1200,
+        },
+    },
+    {
+        id: "game-5",
+        title: "Cheap Indie Masterpiece",
+        slug: "cheap-indie",
+        steamAppId: 1005,
+        discountPercent: 80,
+        priceUS: 5.0,
+        priceBR: 24.9, // Under R$ 30
+        convertedBRInUSD: 0,
+        winningRegion: "EQUAL",
+        savingsPercent: 0,
+        storeUS: "Steam",
+        storeBR: "Steam",
+        isAllTimeLow: true,
+        steamReviews: {
+            reviewScoreDesc: "Extremamente positivas",
+            positivePercent: 98,
+            totalReviews: 32000,
+        },
     },
 ];
 
@@ -86,7 +126,7 @@ test.describe("Deals Filtering, Normalization and ATL Logic", () => {
             "all",
         );
 
-        expect(result.length).toBe(4);
+        expect(result.length).toBe(mockDeals.length);
         // First item should have the highest savingsPercent (50%)
         expect(result[0].id).toBe("game-1");
         expect(result[0].savingsPercent).toBe(50);
@@ -106,11 +146,12 @@ test.describe("Deals Filtering, Normalization and ATL Logic", () => {
             "all",
         );
 
-        // In mockDeals, only game-2 and game-4 have isAllTimeLow = true
-        expect(result.length).toBe(2);
+        // In mockDeals, game-2, game-4 and game-5 have isAllTimeLow = true
+        expect(result.length).toBe(3);
         expect(result.every((item) => item.isAllTimeLow)).toBe(true);
         expect(result.map((i) => i.id)).toContain("game-2");
         expect(result.map((i) => i.id)).toContain("game-4");
+        expect(result.map((i) => i.id)).toContain("game-5");
         expect(result.map((i) => i.id)).not.toContain("game-3");
     });
 
@@ -222,5 +263,69 @@ test.describe("Deals Filtering, Normalization and ATL Logic", () => {
         expect(usResult.length).toBe(1);
         expect(usResult[0].id).toBe("game-4");
         expect(usResult[0].winningRegion).toBe("US");
+    });
+
+    test("steam_acclaimed filter keeps only highly rated games and sorts by rating descending", () => {
+        const result = DealComparator.normalizeFeaturedDeals(
+            mockDeals,
+            mockCurrencyRate,
+            "steam_acclaimed",
+            "all",
+        );
+
+        // game-5 (98%), game-1 (96%), game-2 (88%) should qualify (>= 75%)
+        // game-3 (55%) and game-4 (72%) should be excluded
+        expect(result.length).toBe(3);
+        expect(result[0].id).toBe("game-5"); // 98%
+        expect(result[1].id).toBe("game-1"); // 96%
+        expect(result[2].id).toBe("game-2"); // 88%
+        expect(result.every((item) => (item.steamReviews?.positivePercent ?? 0) >= 75)).toBe(true);
+    });
+
+    test("highest_cut filter orders strictly by discountPercent descending", () => {
+        const result = DealComparator.normalizeFeaturedDeals(
+            mockDeals,
+            mockCurrencyRate,
+            "highest_cut",
+            "all",
+        );
+
+        expect(result.length).toBeGreaterThan(0);
+        expect(result[0].id).toBe("game-5"); // 80% discount
+        expect(result[1].id).toBe("game-2"); // 75% discount
+
+        for (let i = 0; i < result.length - 1; i++) {
+            expect(result[i].discountPercent).toBeGreaterThanOrEqual(result[i + 1].discountPercent);
+        }
+    });
+
+    test("priceCap filter 'under_30' limits results to games with priceBR <= 30", () => {
+        const result = DealComparator.normalizeFeaturedDeals(
+            mockDeals,
+            mockCurrencyRate,
+            "best_savings",
+            "all",
+            "all",
+            "under_30",
+        );
+
+        expect(result.length).toBe(1);
+        expect(result[0].id).toBe("game-5"); // 24.90 BRL
+        expect(result[0].priceBR).toBeLessThanOrEqual(30);
+    });
+
+    test("priceCap filter 'under_100' limits results to games with priceBR <= 100", () => {
+        const result = DealComparator.normalizeFeaturedDeals(
+            mockDeals,
+            mockCurrencyRate,
+            "best_savings",
+            "all",
+            "all",
+            "under_100",
+        );
+
+        // game-5 (24.90) and game-4 (75.0) are <= 100 BRL
+        expect(result.length).toBe(2);
+        expect(result.every((i) => i.priceBR <= 100)).toBe(true);
     });
 });

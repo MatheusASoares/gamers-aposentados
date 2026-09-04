@@ -557,7 +557,7 @@ export function NoticeBoardMuralClient({
                         <h1 className="text-shadow-glow mb-1.5 sm:mb-2 text-3xl font-black tracking-tight text-white uppercase sm:text-4xl lg:text-5xl">
                             BOARD
                         </h1>
-                        <p className="text-xs sm:text-base md:text-lg font-medium tracking-wide text-zinc-400">
+                        <p className="text-xs sm:text-base md:text-lg font-medium tracking-wide text-zinc-400 hidden sm:block">
                             Backlog fatigue ends here. Take up your contracts, defeat the bosses,
                             and finish the story.
                         </p>

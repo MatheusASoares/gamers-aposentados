@@ -303,6 +303,19 @@ export function getTitleBadgeStyle(titleName: string | null): string {
       return 'border-amber-400/90 bg-gradient-to-r from-amber-500/35 via-yellow-400/30 to-amber-600/35 text-amber-100 shadow-[0_0_22px_rgba(251,191,36,0.5)] ring-1 ring-amber-300/30';
     case 'Imortal do Backlog Zero':
       return 'border-orange-500/90 bg-gradient-to-r from-red-600/40 via-orange-500/40 to-amber-500/35 text-orange-100 shadow-[0_0_28px_rgba(234,88,12,0.7)] ring-1 ring-orange-400/60';
+    // --- GUILD 25-LEVEL TITLES ---
+    case 'Agentes da Foxhound':
+      return 'border-emerald-500/70 bg-gradient-to-r from-emerald-950/80 via-zinc-950 to-emerald-950/80 text-emerald-400 shadow-[0_0_20px_rgba(16,185,129,0.35)] ring-1 ring-emerald-500/30';
+    case 'Caçadores de Relíquias de Yharnam':
+      return 'border-rose-600/70 bg-gradient-to-r from-rose-950/90 via-zinc-950 to-rose-950/90 text-rose-300 shadow-[0_0_22px_rgba(225,29,72,0.45)] ring-1 ring-rose-500/30';
+    case 'Viajantes do Fim dos Tempos':
+      return 'border-cyan-400/70 bg-gradient-to-r from-cyan-950/80 via-indigo-950/60 to-zinc-950 text-cyan-300 shadow-[0_0_22px_rgba(6,182,212,0.45)] ring-1 ring-cyan-400/30';
+    case 'Guardiões de Midgard':
+      return 'border-orange-500/70 bg-gradient-to-r from-orange-950/90 via-amber-950/60 to-zinc-950 text-orange-400 shadow-[0_0_25px_rgba(249,115,22,0.5)] ring-1 ring-orange-500/30';
+    case 'Desbravadores do Oeste Selvagem':
+      return 'border-amber-400/80 bg-gradient-to-r from-amber-950/90 via-yellow-950/60 to-zinc-950 text-amber-300 shadow-[0_0_25px_rgba(251,191,36,0.5)] ring-1 ring-amber-400/40';
+    case 'Testadores da Aperture Science':
+      return 'border-cyan-400/70 bg-gradient-to-r from-cyan-950/70 via-zinc-950 to-orange-950/70 text-cyan-300 shadow-[0_0_25px_rgba(6,182,212,0.45)] ring-1 ring-orange-400/40';
     case 'Aposentado Novato':
     default:
       return 'border-zinc-700 bg-zinc-900/80 text-zinc-300 shadow-[0_0_10px_rgba(255,255,255,0.05)]';

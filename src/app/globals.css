@@ -662,4 +662,106 @@ html:not([data-theme]) .glass-card,
     -webkit-tap-highlight-color: transparent;
 }
 
+/* ==========================================================================
+   GUILD MASCOT PROCEDURAL PHYSICS & ANIMATION KEYFRAMES
+   ========================================================================== */
+
+@keyframes mascotIdle {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-5px);
+    }
+}
+
+@keyframes mascotShadow {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 0.6;
+    }
+    50% {
+        transform: scale(0.85);
+        opacity: 0.35;
+    }
+}
+
+@keyframes mascotJump {
+    0% {
+        transform: translateY(0) scale(1.18, 0.82);
+    }
+    30% {
+        transform: translateY(-38px) scale(0.86, 1.22) rotate(-5deg);
+    }
+    55% {
+        transform: translateY(-18px) scale(1.08, 0.94) rotate(3deg);
+    }
+    75% {
+        transform: translateY(5px) scale(1.14, 0.88) rotate(0deg);
+    }
+    100% {
+        transform: translateY(0) scale(1, 1);
+    }
+}
+
+@keyframes bounceShort {
+    0% {
+        opacity: 0;
+        transform: translateY(16px) scale(0.8);
+    }
+    60% {
+        opacity: 1;
+        transform: translateY(-6px) scale(1.06);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+@keyframes floatUp {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(0.8);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px) scale(1.4);
+    }
+}
+
+@keyframes spinSlow {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.animate-mascot-idle {
+    animation: mascotIdle 3.2s ease-in-out infinite !important;
+}
+
+.animate-mascot-jump {
+    animation: mascotJump 0.65s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+}
+
+.animate-mascot-shadow {
+    animation: mascotShadow 3.2s ease-in-out infinite !important;
+}
+
+.animate-bounce-short {
+    animation: bounceShort 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.animate-float-up {
+    animation: floatUp 1.2s ease-out forwards;
+}
+
+.animate-spin-slow {
+    animation: spinSlow 8s linear infinite;
+}
+
+
 

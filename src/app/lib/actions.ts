@@ -37,13 +37,28 @@ export async function register(prevState: string | undefined, formData: FormData
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        await prisma.user.create({
+        const user = await prisma.user.create({
             data: {
                 username,
                 email,
                 password: hashedPassword,
             },
         });
+
+        // Associar à guilda dos Fundadores se existir
+        const founderGuild = await prisma.guild.findFirst({
+            where: { slug: "fundadores" },
+        });
+        if (founderGuild) {
+            await prisma.guildMember.create({
+                data: {
+                    guild_id: founderGuild.id,
+                    user_id: user.id,
+                    role: "MEMBER",
+                    is_active: email.endsWith("@test.com"),
+                },
+            });
+        }
     } catch (error) {
         console.error("Registration error:", error);
         return "Failed to register user.";

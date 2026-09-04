@@ -40,6 +40,11 @@ enum UserRole {
   MEMBER
 }
 
+enum GuildRole {
+  LEADER
+  MEMBER
+}
+
 // --- MODELS (As Tabelas do seu Diagrama) ---
 
 model User {
@@ -70,6 +75,10 @@ model User {
   contractProgresses   CampaignContractProgress[]
   proposedSpecialGames SpecialGameProposal[]      @relation("ProposedSpecialGames")
   specialGameVotes     SpecialGameVote[]
+  ownedGuilds          Guild[]                    @relation("GuildOwner")
+  guildMemberships     GuildMember[]
+  trackedDeals         UserTrackedDeal[]
+  dismissedDeals       UserDismissedDeal[]
 
   xp_points       Int     @default(0)
   level           Int     @default(1)
@@ -210,6 +219,10 @@ model Pool {
 
   status PoolStatus @default(OPEN)
 
+  // Vínculo com a Guilda (Opcional para compatibilidade, preenchido na migração)
+  guild_id String?
+  guild    Guild?  @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+
   // O Vencedor (Sorteado)
   winner_game_id String?
   winner_game    Game?   @relation("WinnerGame", fields: [winner_game_id], references: [id], onDelete: SetNull)
@@ -220,6 +233,7 @@ model Pool {
 
   created_at DateTime @default(now())
 
+  @@index([guild_id, type, status, created_at])
   @@index([type, status, created_at])
   @@map("pools")
 }
@@ -256,6 +270,8 @@ model CampaignContract {
   id                  String @id @default(uuid())
   game_id             String
   game                Game   @relation(fields: [game_id], references: [id], onDelete: Cascade)
+  guild_id            String?
+  guild               Guild? @relation(fields: [guild_id], references: [id], onDelete: Cascade)
   sequence_order      Int // Ordem sequencial iniciando em 1
   title               String
   objective           String @db.Text
@@ -290,6 +306,8 @@ model CampaignContractProgress {
 
 model SpecialGameProposal {
   id               String         @id @default(uuid())
+  guild_id         String?
+  guild            Guild?         @relation(fields: [guild_id], references: [id], onDelete: Cascade)
   quest_type       QuestType
   status           ProposalStatus @default(PENDING)
 
@@ -307,6 +325,7 @@ model SpecialGameProposal {
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
 
+  @@index([guild_id, quest_type, status])
   @@index([quest_type, status])
   @@map("special_game_proposals")
 }
@@ -324,5 +343,83 @@ model SpecialGameVote {
 
   @@unique([proposal_id, user_id])
   @@map("special_game_votes")
+}
+
+// --- GUILDAS & MEMBROS (Multi-Tenancy) ---
+
+model Guild {
+  id              String         @id @default(uuid())
+  name            String
+  slug            String         @unique
+  description     String?        @db.Text
+  avatar_url      String?
+  banner_url      String?
+  invite_code     String         @unique
+  owner_id        String
+  owner           User           @relation("GuildOwner", fields: [owner_id], references: [id], onDelete: Restrict)
+
+  // Gamificação da Guilda
+  xp_points       Int            @default(0)
+  level           Int            @default(1)
+  equipped_banner String?
+  equipped_emblem String?
+  equipped_title  String?
+  equipped_mascot String?
+
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+
+  members         GuildMember[]
+  pools           Pool[]
+  proposals       SpecialGameProposal[]
+  contracts       CampaignContract[]
+
+  @@map("guilds")
+}
+
+model GuildMember {
+  id        String    @id @default(uuid())
+  guild_id  String
+  guild     Guild     @relation(fields: [guild_id], references: [id], onDelete: Cascade)
+  user_id   String
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role      GuildRole @default(MEMBER)
+  is_active Boolean   @default(true) // Se false, é membro/espectador e não trava as cotas do Randomizer
+  joined_at DateTime  @default(now())
+
+  @@unique([guild_id, user_id])
+  @@index([user_id])
+  @@index([guild_id, is_active])
+  @@map("guild_members")
+}
+
+model UserTrackedDeal {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  deal_id      String   // ID do jogo ou steamAppId
+  steam_app_id Int?
+  title        String
+  slug         String
+  cover_image  String?
+  created_at   DateTime @default(now())
+
+  @@unique([user_id, deal_id])
+  @@index([user_id])
+  @@map("user_tracked_deals")
+}
+
+model UserDismissedDeal {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  game_title   String   // Lowercased or normalized title
+  steam_app_id Int?
+  reason       String?  @default("already_played") // "already_played" | "not_interested"
+  created_at   DateTime @default(now())
+
+  @@unique([user_id, game_title])
+  @@index([user_id])
+  @@map("user_dismissed_deals")
 }
 

@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { DealsService } from "@/services/deals/dealsService";
-import { DealFilterType } from "@/types/deals";
+import { DealFilterType, PriceCapFilterType } from "@/types/deals";
 
 export async function GET(request: NextRequest) {
     try {
@@ -10,19 +10,28 @@ export async function GET(request: NextRequest) {
         const filterParam = searchParams.get("filter") as DealFilterType | null;
         const storeParam = (searchParams.get("store") || "all") as "all" | "steam" | "nuuvem";
         const regionParam = (searchParams.get("region") || "all") as "all" | "br" | "us";
+        const priceCapParam = (searchParams.get("priceCap") || "all") as PriceCapFilterType;
         const validFilters: DealFilterType[] = [
-            "best_savings",
             "historical_low",
+            "highest_cut",
+            "best_savings",
             "curated_specials",
             "steam_only",
-            "highest_cut",
         ];
         const filter = validFilters.includes(filterParam as DealFilterType)
             ? (filterParam as DealFilterType)
-            : "best_savings";
+            : "historical_low";
+        const validPriceCaps: PriceCapFilterType[] = ["all", "under_30", "under_60", "under_100"];
+        const priceCap = validPriceCaps.includes(priceCapParam) ? priceCapParam : "all";
         const forceRefresh = searchParams.get("refresh") === "true";
 
-        const data = await DealsService.getFeaturedDeals(filter, forceRefresh, storeParam, regionParam);
+        const data = await DealsService.getFeaturedDeals(
+            filter,
+            forceRefresh,
+            storeParam,
+            regionParam,
+            priceCap,
+        );
         return NextResponse.json(data, {
             headers: forceRefresh
                 ? {

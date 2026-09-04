@@ -5,16 +5,26 @@ export type Region = "US" | "BR";
 export type WinningRegion = "US" | "BR" | "EQUAL";
 
 export type DealFilterType =
-    | "best_savings"
     | "historical_low"
-    | "curated_specials"
-    | "steam_only"
+    | "highest_cut"
+    | "best_savings"
+    | "oracle"
     | "monitored"
-    | "highest_cut";
+    | "steam_acclaimed"
+    | "curated_specials"
+    | "steam_only";
 
 export type StoreFilterType = "all" | "steam" | "nuuvem";
 
 export type RegionAdvantageFilterType = "all" | "br" | "us";
+
+export type PriceCapFilterType = "all" | "under_30" | "under_60" | "under_100";
+
+export interface SteamCommunityReview {
+    reviewScoreDesc: string;
+    positivePercent: number;
+    totalReviews: number;
+}
 
 export interface CurrencyRate {
     code: string; // "USD"
@@ -76,6 +86,7 @@ export interface DealComparisonResult {
     historicalLowPriceBR?: number | null;
     cachedAt: string;
     source: "itad" | "steam" | "hybrid";
+    steamReviews?: SteamCommunityReview;
 }
 
 export interface SearchGameItem {
@@ -105,6 +116,7 @@ export interface FeaturedDealItem {
     dealUrlUS?: string;
     dealUrlBR?: string;
     absoluteSavingsBRL?: number;
+    steamReviews?: SteamCommunityReview;
 }
 
 export interface TrackedDealItem {
@@ -124,6 +136,7 @@ export interface TrackedDealItem {
     dealUrlBR?: string;
     dealUrlUS?: string;
     winningRegion?: WinningRegion;
+    steamReviews?: SteamCommunityReview;
 }
 
 export interface TrackedDealsBatchRequest {
@@ -142,4 +155,30 @@ export interface TrackedDealsResponse {
     hasAllTimeLow: boolean;
     allTimeLowCount: number;
     currencyRate?: CurrencyRate;
+}
+
+export type OracleGameTier = "AAA" | "INDIE" | "HIDDEN_GEM";
+
+export interface OracleGameRecommendation {
+    title: string;
+    tier: OracleGameTier;
+    pitch: string;
+    highlightReason: string;
+    steamAppId?: number;
+    coverImage?: string;
+    priceBR?: number;
+    regularPriceBR?: number;
+    discountPercent?: number;
+    isOnSale: boolean;
+    steamReviews?: SteamCommunityReview;
+    dealUrl?: string;
+}
+
+export interface OracleRecommendationsResponse {
+    recommendations: OracleGameRecommendation[];
+    onSale: OracleGameRecommendation[];
+    onRadar: OracleGameRecommendation[];
+    tasteSummary: string;
+    generatedAt: string;
+    cached: boolean;
 }

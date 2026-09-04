@@ -36,19 +36,33 @@ export interface QuestHistoryData {
 
 export async function getQuestHistoryByYear(
     year: number | "ALL",
-    questType: "ALL" | "MAIN" | "SIDE" = "ALL"
+    questType: "ALL" | "MAIN" | "SIDE" = "ALL",
+    targetGuildId?: string
 ): Promise<QuestHistoryData[]> {
     const typeEnum = questType === "ALL" ? undefined : questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
     try {
+        let guildId = targetGuildId;
+        if (!guildId) {
+            try {
+                const { getActiveGuild } = await import("@/app/lib/guild-actions");
+                const activeGuild = await getActiveGuild();
+                guildId = activeGuild?.id;
+            } catch {
+                // Fallback when executed outside Next.js request lifecycle
+            }
+        }
+
         const whereClause: {
             status: "CLOSED";
             year?: number;
             type?: "MAIN_QUEST" | "SIDE_QUEST";
             winner_game_id: { not: null };
+            guild_id?: string;
         } = {
             status: "CLOSED",
             winner_game_id: { not: null },
+            ...(guildId ? { guild_id: guildId } : {}),
         };
 
         if (year !== "ALL") {
@@ -90,9 +104,18 @@ export async function getQuestHistoryByYear(
             let playerProgress: PlayerProgress[] = [];
             if (winner) {
                 playerProgress = winner.progress
-                    .filter(p => {
+                    .filter((p) => {
+                        const email = (p.user.email || "").toLowerCase();
                         const name = (p.user.name || p.user.username || "").toLowerCase();
-                        return name.includes("lucas") || name.includes("matheus");
+                        return (
+                            email.includes("matheus") ||
+                            email.includes("lucas") ||
+                            name.includes("matheus") ||
+                            name.includes("lucas") ||
+                            name.includes("fmaniacs") ||
+                            name.includes("ocobraljhonson") ||
+                            name.includes("test")
+                        );
                     })
                     .map((p) => ({
                         userId: p.user.id,
@@ -131,10 +154,24 @@ export async function getQuestHistoryByYear(
     }
 }
 
-export async function getAvailableYears(): Promise<number[]> {
+export async function getAvailableYears(targetGuildId?: string): Promise<number[]> {
     try {
+        let guildId = targetGuildId;
+        if (!guildId) {
+            try {
+                const { getActiveGuild } = await import("@/app/lib/guild-actions");
+                const activeGuild = await getActiveGuild();
+                guildId = activeGuild?.id;
+            } catch {
+                // Fallback when executed outside Next.js request lifecycle
+            }
+        }
+
         const pools = await prisma.pool.findMany({
-            where: { status: "CLOSED" },
+            where: {
+                status: "CLOSED",
+                ...(guildId ? { guild_id: guildId } : {}),
+            },
             select: { year: true },
             distinct: ["year"],
             orderBy: { year: "desc" },
