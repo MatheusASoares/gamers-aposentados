@@ -346,9 +346,6 @@ model SpecialGameVote {
   @@map("special_game_votes")
 }
 
-<<<<<<< HEAD
-// --- DEALS TRACKER PERSISTENCE ---
-=======
 // --- GUILDAS & MEMBROS (Multi-Tenancy) ---
 
 model Guild {
@@ -396,7 +393,8 @@ model GuildMember {
   @@index([guild_id, is_active])
   @@map("guild_members")
 }
->>>>>>> feature/guild-system
+
+// --- DEALS TRACKER PERSISTENCE ---
 
 model UserTrackedDeal {
   id           String   @id @default(uuid())
