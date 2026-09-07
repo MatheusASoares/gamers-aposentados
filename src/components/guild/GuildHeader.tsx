@@ -23,6 +23,7 @@ import {
     Hourglass,
     Compass,
     Atom,
+    Sun,
     Scroll,
 } from "lucide-react";
 import { type ActiveGuildDetailsDTO, leaveGuild } from "@/app/lib/guild-actions";
@@ -32,7 +33,6 @@ import { cn } from "@/lib/utils";
 import { getGuildLevelProgress } from "@/lib/guild-xp-engine";
 import { GUILD_REWARDS_CATALOG } from "@/lib/constants/guild-rewards";
 import { BannerFxOverlay } from "@/components/profile/banner-fx-overlay";
-import { GuildMascotCompanion } from "./GuildMascotCompanion";
 
 interface GuildHeaderProps {
     guild: ActiveGuildDetailsDTO;
@@ -96,6 +96,8 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                 return <Compass className={cn(className, "text-amber-400 shrink-0")} />;
             case "Atom":
                 return <Atom className={cn(className, "text-cyan-400 shrink-0 animate-pulse")} />;
+            case "Sun":
+                return <Sun className={cn(className, "text-amber-400 shrink-0 animate-pulse")} />;
             default:
                 return <Scroll className={cn(className, "text-amber-400 shrink-0")} />;
         }

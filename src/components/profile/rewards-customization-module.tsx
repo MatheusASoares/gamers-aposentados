@@ -403,9 +403,9 @@ export function RewardsCustomizationModule({
                         fill
                         unoptimized
                         sizes="(max-width: 768px) 100vw, 50vw"
-                        className="object-cover opacity-90 transition-transform duration-500 hover:scale-105"
+                        className="object-cover transition-transform duration-500 hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/80 via-transparent to-transparent" />
+                      <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-zinc-950/30 via-transparent to-transparent" />
                       <BannerFxOverlay effectType={item.effectType} bannerId={item.id} />
                     </>
                   ) : (

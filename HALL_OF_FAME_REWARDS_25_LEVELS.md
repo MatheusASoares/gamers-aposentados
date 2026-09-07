@@ -39,7 +39,7 @@ Ao gerar e salvar os assets visuais, utilize rigorosamente as seguintes pastas:
 | **18** | 🖼️ Moldura | **Aura do Vazio**                | _Destiny / Hollow K._    | `EPIC`      | `public/assets/frames/celestial-violet-frame.png`|
 | **19** | 📜 Título  | **Mestre da Guilda Aposentada**  | _Liderança Lendária_     | `LEGENDARY` | _Textual_                                       |
 | **20** | 🖼️ Moldura | **Chama da Fênix**               | _Final Fantasy_          | `LEGENDARY` | `public/assets/frames/legendary-frame.png`      |
-| **21** | 🌆 Banner  | **Éter Astral**                  | _Final Fantasy VII_      | `LEGENDARY` | `public/assets/banners/banner-astral-crystal.png`|
+| **21** | 🌆 Banner  | **A Corrente da Vida de Midgar** | _Final Fantasy VII_      | `LEGENDARY` | `public/assets/banners/banner-midgar-lifestream.png`|
 | **22** | 🎨 Tema    | **Arcade Retrô**                 | _16-bit Gold Era_        | `LEGENDARY` | `theme-pixel`                                   |
 | **23** | 🌆 Banner  | **Santuário do Sol Nascente**    | _Ghost of Tsushima_      | `LEGENDARY` | `public/assets/banners/banner-japanese-sunrise.jpg`|
 | **24** | 🖼️ Moldura | **Coroa das Cinzas**             | _Dark Souls III_         | `LEGENDARY` | `public/assets/frames/frame-bonfire-cinders-v2.png`|
@@ -295,18 +295,18 @@ Square avatar profile frame border UI asset, legendary glowing phoenix feather f
 
 ---
 
-### 🌆 NÍVEL 21 • Banner: Éter Astral
+### 🌆 NÍVEL 21 • Banner: A Corrente da Vida de Midgar - DONE
 
-- **Jogo:** _Final Fantasy VII / Xenoblade_
+- **Jogo:** _Final Fantasy VII_
 - **Raridade:** `LEGENDARY`
-- **Arquivo Destino:** `public/assets/banners/banner-astral-crystal.png`
+- **Arquivo Destino:** `public/assets/banners/banner-midgar-lifestream.png`
 - **Efeito de Partículas:** Aura de Cristal (`crystal-aura`)
-- **Descrição:** _"Ouça o fluxo do Planeta. Rumo aos confins do Cosmos."_
+- **Descrição:** _"Ouça o clamor do Planeta. O Mako desperta sob a silhueta da metrópole."_
 
 **🎨 Prompt Panorâmico (Midjourney • 4:1 Ultra-Wide):**
 
 ```text
-Ultra wide panoramic 4:1 banner, majestic floating giant green and cyan Mako crystals hovering over an ethereal cosmic cliff, glowing aurora borealis weaving through a starry galaxy, Final Fantasy VII Lifestream aesthetic, crystalline reflections, breathtaking fantasy masterpiece, 8k photorealism --ar 4:1 --style raw --stylize 250
+Ultra wide panoramic 4:1 banner, majestic monumental dieselpunk skyline of Midgar at twilight, colossal central Shinra tower piercing through heavy industrial clouds, viewed from a vast rocky wasteland cliff with glowing emerald green and cyan Mako Lifestream energy rivers surging through a deep canyon, ethereal spirit particles ascending into the evening sky, Final Fantasy VII aesthetic, breathtaking scale and atmosphere, photorealistic cinematic 8k --ar 4:1 --style raw --stylize 300
 ```
 
 ---

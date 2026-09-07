@@ -26,6 +26,7 @@ import {
   Hourglass,
   Compass,
   Atom,
+  Sun,
 } from "lucide-react";
 import {
   GUILD_REWARDS_CATALOG,
@@ -129,6 +130,8 @@ export function GuildRewardsCustomizationModule({
         return <Compass className={cn(className, "text-amber-400 shrink-0")} />;
       case "Atom":
         return <Atom className={cn(className, "text-cyan-400 shrink-0")} />;
+      case "Sun":
+        return <Sun className={cn(className, "text-amber-400 shrink-0")} />;
       default:
         return <Scroll className={cn(className, "text-amber-400 shrink-0")} />;
     }

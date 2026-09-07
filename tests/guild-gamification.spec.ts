@@ -57,7 +57,18 @@ test.describe("Guild Gamification & Adaptive XP Engine (25 Levels, Proportional 
       const reward = GUILD_REWARDS_CATALOG.find((r) => r.level === lvl);
       expect(reward).toBeDefined();
       expect(reward?.name).toBeTruthy();
-      expect(reward?.type).toMatch(/TITLE|EMBLEM|BANNER|THEME/);
+      expect(reward?.type).toMatch(/TITLE|EMBLEM|BANNER|THEME|MASCOT/);
+    }
+  });
+
+  test("GUILD_REWARDS_CATALOG has zero consecutive duplicate reward types across all 25 levels", () => {
+    for (let i = 0; i < GUILD_REWARDS_CATALOG.length - 1; i++) {
+      const current = GUILD_REWARDS_CATALOG[i];
+      const next = GUILD_REWARDS_CATALOG[i + 1];
+      expect(
+        current.type,
+        `Level ${current.level} (${current.name}) and Level ${next.level} (${next.name}) cannot have the same type (${current.type})`
+      ).not.toBe(next.type);
     }
   });
 
@@ -67,6 +78,33 @@ test.describe("Guild Gamification & Adaptive XP Engine (25 Levels, Proportional 
 
     const lvl25Rewards = getUnlockedGuildRewards(25);
     expect(lvl25Rewards.length).toBe(25);
+  });
+
+  test("All mascots in GUILD_REWARDS_CATALOG have personalized themes and humorous phrases", () => {
+    const mascots = GUILD_REWARDS_CATALOG.filter((r) => r.type === "MASCOT");
+    expect(mascots.length).toBe(6);
+
+    const usedIcons = new Set<string>();
+
+    for (const mascot of mascots) {
+      // Must have phrases and at least 5 humorous lines
+      expect(mascot.phrases).toBeDefined();
+      expect(mascot.phrases!.length).toBeGreaterThanOrEqual(5);
+
+      // Must have custom mascotTheme
+      expect(mascot.mascotTheme).toBeDefined();
+      expect(mascot.mascotTheme?.borderColor).toBeTruthy();
+      expect(mascot.mascotTheme?.glowColor).toBeTruthy();
+      expect(mascot.mascotTheme?.textColor).toBeTruthy();
+      expect(mascot.mascotTheme?.pointerBorder).toBeTruthy();
+      expect(mascot.mascotTheme?.iconName).toBeTruthy();
+      expect(mascot.mascotTheme?.accentColor).toBeTruthy();
+
+      usedIcons.add(mascot.mascotTheme!.iconName);
+    }
+
+    // Every mascot should have its own thematic icon
+    expect(usedIcons.size).toBe(6);
   });
 
   test("Guild XP and Level in database updates correctly", async () => {
@@ -87,3 +125,4 @@ test.describe("Guild Gamification & Adaptive XP Engine (25 Levels, Proportional 
     }
   });
 });
+

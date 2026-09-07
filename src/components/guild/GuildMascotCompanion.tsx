@@ -2,9 +2,9 @@
 
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
-import { Sparkles, Heart } from "lucide-react";
+import { Sparkles, Zap, Leaf, Beer, Flame, Crown } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { GuildRewardItem } from "@/lib/constants/guild-rewards";
+import { GuildRewardItem, MascotThemeConfig } from "@/lib/constants/guild-rewards";
 
 interface GuildMascotCompanionProps {
   mascot: GuildRewardItem | null;
@@ -16,6 +16,34 @@ interface GuildMascotCompanionProps {
   animated?: boolean;
 }
 
+function MascotSpeechIcon({
+  iconName,
+  accentColor,
+}: {
+  iconName?: string;
+  accentColor?: string;
+}) {
+  const iconProps = {
+    className: cn("h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0 transition-transform", accentColor),
+  };
+
+  switch (iconName) {
+    case "Zap":
+      return <Zap {...iconProps} className={cn(iconProps.className, "animate-pulse")} />;
+    case "Leaf":
+      return <Leaf {...iconProps} className={cn(iconProps.className, "animate-bounce")} />;
+    case "Beer":
+      return <Beer {...iconProps} className={cn(iconProps.className, "animate-pulse")} />;
+    case "Flame":
+      return <Flame {...iconProps} className={cn(iconProps.className, "animate-pulse")} />;
+    case "Crown":
+      return <Crown {...iconProps} className={cn(iconProps.className, "animate-bounce")} />;
+    case "Sparkles":
+    default:
+      return <Sparkles {...iconProps} className={cn(iconProps.className, "animate-spin-slow")} />;
+  }
+}
+
 export function GuildMascotCompanion({
   mascot,
   guildLevel,
@@ -25,14 +53,29 @@ export function GuildMascotCompanion({
   bubblePosition = "top",
   animated = true,
 }: GuildMascotCompanionProps) {
-  const [isJumping, setIsJumping] = useState(false);
   const [speechBubble, setSpeechBubble] = useState<string | null>(null);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
-  const [hearts, setHearts] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const [hasImageError, setHasImageError] = useState(false);
+  const [hasVideoError, setHasVideoError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    setHasImageError(false);
+    setHasVideoError(false);
+  }, [mascot?.id]);
+
+  const defaultTheme: MascotThemeConfig = {
+    borderColor: "border-[#bd0df2]/70",
+    glowColor: "rgba(189, 13, 242, 0.45)",
+    textColor: "text-white",
+    pointerBorder: "border-[#bd0df2]/70",
+    iconName: "Sparkles",
+    accentColor: "text-[#bd0df2]",
+  };
+
+  const theme = mascot?.mascotTheme || defaultTheme;
 
   const fallbackPhrases = [
     "Miau! O backlog da Steam nunca dorme, humano!",
@@ -44,8 +87,8 @@ export function GuildMascotCompanion({
 
   const phrases = mascot?.phrases && mascot.phrases.length > 0 ? mascot.phrases : fallbackPhrases;
 
-  // Gentle Cyber Meow Beep Audio via Web Audio API (zero external assets needed)
-  const playCyberSound = () => {
+  // Personalized Cyber/Organic Sound Effect via Web Audio API
+  const playMascotSound = () => {
     try {
       const AudioCtx = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
       if (!AudioCtx) return;
@@ -53,19 +96,59 @@ export function GuildMascotCompanion({
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
 
-      osc.type = "sine";
-      osc.frequency.setValueAtTime(520, ctx.currentTime);
-      osc.frequency.exponentialRampToValueAtTime(980, ctx.currentTime + 0.08);
-      osc.frequency.exponentialRampToValueAtTime(1480, ctx.currentTime + 0.18);
-
-      gain.gain.setValueAtTime(0.06, ctx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      const icon = theme.iconName;
+      if (icon === "Flame") {
+        // Alduin dragon low fiery rumble
+        osc.type = "sawtooth";
+        osc.frequency.setValueAtTime(140, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 0.25);
+        gain.gain.setValueAtTime(0.08, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+      } else if (icon === "Leaf") {
+        // Korok playful wooden pop
+        osc.type = "triangle";
+        osc.frequency.setValueAtTime(320, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(680, ctx.currentTime + 0.12);
+        gain.gain.setValueAtTime(0.07, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      } else if (icon === "Beer") {
+        // Palico cheerful meow chirp
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(440, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(780, ctx.currentTime + 0.1);
+        osc.frequency.exponentialRampToValueAtTime(1100, ctx.currentTime + 0.22);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      } else if (icon === "Sparkles") {
+        // Chocobo high kweh chirp
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(750, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1450, ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.18);
+      } else if (icon === "Crown") {
+        // Luna royal joyful boop
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(340, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(520, ctx.currentTime + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(680, ctx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.07, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      } else {
+        // 808 cyber pulse
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(520, ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(980, ctx.currentTime + 0.08);
+        osc.frequency.exponentialRampToValueAtTime(1480, ctx.currentTime + 0.18);
+        gain.gain.setValueAtTime(0.06, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+      }
 
       osc.connect(gain);
       gain.connect(ctx.destination);
 
       osc.start();
-      osc.stop(ctx.currentTime + 0.22);
+      osc.stop(ctx.currentTime + 0.25);
     } catch {
       // Audio context silently handled
     }
@@ -96,32 +179,19 @@ export function GuildMascotCompanion({
 
   const handlePoke = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!interactive || isJumping) return;
+    if (!interactive) return;
 
-    setIsJumping(true);
-    playCyberSound();
+    playMascotSound();
 
     // Pick next speech phrase
     const nextPhrase = phrases[phraseIndex % phrases.length];
     setPhraseIndex((prev) => prev + 1);
     setSpeechBubble(nextPhrase);
 
-    // Spawn floating heart particles
-    const newHeart = {
-      id: Date.now(),
-      x: (Math.random() - 0.5) * 50,
-      y: (Math.random() - 0.5) * 20,
-    };
-    setHearts((prev) => [...prev.slice(-3), newHeart]);
-
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     timeoutRef.current = setTimeout(() => {
       setSpeechBubble(null);
     }, 4500);
-
-    setTimeout(() => {
-      setIsJumping(false);
-    }, 650);
   };
 
   if (!mascot || !mascot.assetUrl) {
@@ -143,32 +213,51 @@ export function GuildMascotCompanion({
       {/* 1. Holographic Speech Bubble Popup */}
       {speechBubble && (
         bubblePosition === "left" ? (
-          <div className="absolute right-[102%] sm:right-[105%] top-0 sm:top-4 z-50 flex items-center gap-1.5 sm:gap-2 rounded-2xl border border-theme bg-zinc-950/95 px-3 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs md:text-sm font-black text-white shadow-[0_0_30px_var(--theme-glow)] backdrop-blur-xl w-max max-w-[170px] sm:max-w-[260px] text-left leading-tight animate-fade-in">
-            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-theme-primary shrink-0 animate-spin-slow" />
-            <span>{speechBubble}</span>
+          <div
+            style={{
+              boxShadow: `0 0 25px ${theme.glowColor}, inset 0 0 12px ${theme.glowColor}`,
+            }}
+            className={cn(
+              "absolute right-[102%] sm:right-[105%] top-0 sm:top-2 z-50 flex items-start sm:items-center gap-1.5 sm:gap-2.5 rounded-2xl border bg-zinc-950/95 px-3.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs md:text-sm font-bold backdrop-blur-xl w-max max-w-[190px] sm:max-w-[300px] text-left leading-snug animate-fade-in",
+              theme.borderColor,
+              theme.textColor
+            )}
+          >
+            <MascotSpeechIcon iconName={theme.iconName} accentColor={theme.accentColor} />
+            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{speechBubble}</span>
             {/* Holographic pointer pointing right */}
-            <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 rotate-45 border-r border-t border-theme bg-zinc-950" />
+            <div
+              className={cn(
+                "absolute -right-1.5 top-1/2 -translate-y-1/2 h-3 w-3 rotate-45 border-r border-t bg-zinc-950",
+                theme.pointerBorder
+              )}
+            />
           </div>
         ) : (
-          <div className="absolute -top-14 sm:-top-16 z-50 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2 rounded-2xl border border-theme bg-zinc-950/95 px-3 py-2 sm:px-4 sm:py-2 text-[11px] sm:text-xs md:text-sm font-black text-white shadow-[0_0_30px_var(--theme-glow)] backdrop-blur-xl w-max max-w-[200px] sm:max-w-[280px] text-center leading-tight animate-fade-in">
-            <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-theme-primary shrink-0 animate-spin-slow" />
-            <span>{speechBubble}</span>
+          <div
+            style={{
+              boxShadow: `0 0 25px ${theme.glowColor}, inset 0 0 12px ${theme.glowColor}`,
+            }}
+            className={cn(
+              "absolute -top-16 sm:-top-20 z-50 left-1/2 -translate-x-1/2 flex items-center gap-1.5 sm:gap-2.5 rounded-2xl border bg-zinc-950/95 px-3.5 py-2 sm:px-4 sm:py-2.5 text-[11px] sm:text-xs md:text-sm font-bold backdrop-blur-xl w-max max-w-[220px] sm:max-w-[320px] text-center leading-snug animate-fade-in",
+              theme.borderColor,
+              theme.textColor
+            )}
+          >
+            <MascotSpeechIcon iconName={theme.iconName} accentColor={theme.accentColor} />
+            <span className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]">{speechBubble}</span>
             {/* Holographic pointer pointing down */}
-            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-3 w-3 rotate-45 border-r border-b border-theme bg-zinc-950" />
+            <div
+              className={cn(
+                "absolute -bottom-1.5 left-1/2 -translate-x-1/2 h-3 w-3 rotate-45 border-r border-b bg-zinc-950",
+                theme.pointerBorder
+              )}
+            />
           </div>
         )
       )}
 
-      {/* Floating Hearts Sparks on Poke */}
-      {hearts.map((h) => (
-        <div
-          key={h.id}
-          className="pointer-events-none absolute top-2 z-40 animate-float-up text-theme-primary"
-          style={{ transform: `translate(${h.x}px, ${h.y}px)` }}
-        >
-          <Heart className="h-5 w-5 fill-[var(--theme-primary)] drop-shadow-[0_0_10px_var(--theme-glow)]" />
-        </div>
-      ))}
+
 
       {/* 2. Outer Parallax Wrapper (Mouse 3D Tilt) */}
       <div
@@ -182,11 +271,17 @@ export function GuildMascotCompanion({
         <div
           className={cn(
             "relative flex items-center justify-center",
-            animated ? (isJumping ? "animate-mascot-jump" : "animate-mascot-idle") : ""
+            animated ? "animate-mascot-idle" : ""
           )}
         >
           {/* Ambient Glow Aura */}
-          <div className="pointer-events-none absolute inset-0 -z-10 rounded-full bg-[var(--theme-primary)]/20 blur-xl animate-pulse" />
+          <div
+            style={{ backgroundColor: theme.glowColor }}
+            className={cn(
+              "pointer-events-none absolute inset-0 -z-10 rounded-full opacity-35 blur-xl",
+              animated ? "animate-pulse" : ""
+            )}
+          />
 
           {/* Clickable Mascot Body */}
           <div
@@ -208,7 +303,7 @@ export function GuildMascotCompanion({
                 const videoMp4Src = `${baseAssetPath}.mp4`;
                 const imagePngSrc = `${baseAssetPath}.png`;
 
-                if (animated) {
+                if (animated && !hasVideoError) {
                   return (
                     <video
                       key={`mascot-video-${mascot.id}-${videoWebmSrc}`}
@@ -217,6 +312,7 @@ export function GuildMascotCompanion({
                       loop
                       muted
                       playsInline
+                      onError={() => setHasVideoError(true)}
                       className="h-full w-full object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] filter transition-all duration-300 group-hover:drop-shadow-[0_0_25px_var(--theme-primary)]"
                     >
                       <source src={videoWebmSrc} type="video/webm" />
@@ -249,10 +345,13 @@ export function GuildMascotCompanion({
 
         {/* 4. Ambient Neon Radial Glow Base (100% borderless, NO black line!) */}
         <div
+          style={{
+            background: `radial-gradient(ellipse at center, ${theme.glowColor} 0%, transparent 70%)`,
+          }}
           className={cn(
-            "mx-auto rounded-full bg-gradient-to-r from-transparent via-[var(--theme-primary)]/30 to-transparent blur-sm pointer-events-none transition-all duration-300",
+            "mx-auto rounded-full blur-sm pointer-events-none transition-all duration-300 opacity-70",
             size === "sm" ? "h-2 w-14 mt-1" : size === "md" ? "h-2.5 w-24 mt-1.5" : size === "lg" ? "h-3 w-32 mt-2" : "h-3.5 w-40 mt-2.5",
-            isJumping ? "scale-50 opacity-20" : "animate-mascot-shadow"
+            animated ? "animate-mascot-shadow" : ""
           )}
         />
       </div>

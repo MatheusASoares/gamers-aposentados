@@ -10,6 +10,7 @@
         "lint": "eslint .",
         "format": "prettier --write .",
         "sales:check": "tsx scripts/verify-steam-sales.ts",
+        "guild:asset": "python scripts/process_guild_asset.py",
         "test": "playwright test",
         "test:ui": "playwright test --ui",
         "db:reset": "prisma migrate reset --force",

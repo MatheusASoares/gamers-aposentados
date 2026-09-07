@@ -196,13 +196,13 @@ export const REWARDS_CATALOG: RewardItem[] = [
     cssClass: 'border-2 border-rose-500 shadow-[0_0_25px_rgba(244,63,94,0.9)] ring-2 ring-amber-400',
   },
   {
-    id: 'banner-astral-crystal',
+    id: 'banner-midgar-lifestream',
     level: 21,
     type: 'BANNER',
-    name: 'Éter Astral',
-    description: '"Ouça o fluxo do Planeta. Rumo às estrelas!"',
+    name: 'A Corrente da Vida de Midgar',
+    description: '"Ouça o clamor do Planeta. O Mako desperta sob a silhueta da metrópole."',
     rarity: 'LEGENDARY',
-    assetUrl: '/assets/banners/banner-astral-crystal.png',
+    assetUrl: '/assets/banners/banner-midgar-lifestream.png?v=2',
     effectType: 'crystal-aura',
   },
   {
