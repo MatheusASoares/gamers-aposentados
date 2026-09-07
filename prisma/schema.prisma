@@ -72,6 +72,7 @@ model User {
   specialGameVotes     SpecialGameVote[]
   trackedDeals         UserTrackedDeal[]
   dismissedDeals       UserDismissedDeal[]
+  oracleRecommendation UserOracleRecommendation?
 
   xp_points       Int     @default(0)
   level           Int     @default(1)
@@ -358,5 +359,15 @@ model UserDismissedDeal {
   @@unique([user_id, game_title])
   @@index([user_id])
   @@map("user_dismissed_deals")
+}
+
+model UserOracleRecommendation {
+  user_id         String   @id
+  user            User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  recommendations Json
+  taste_summary   String?
+  generated_at    DateTime @default(now())
+
+  @@map("user_oracle_recommendations")
 }
 
