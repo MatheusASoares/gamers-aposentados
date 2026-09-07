@@ -168,10 +168,15 @@ export interface OracleGameRecommendation {
     coverImage?: string;
     priceBR?: number;
     regularPriceBR?: number;
+    priceUS?: number;
+    regularPriceUS?: number;
     discountPercent?: number;
     isOnSale: boolean;
     steamReviews?: SteamCommunityReview;
     dealUrl?: string;
+    winningRegion?: WinningRegion;
+    savingsPercent?: number;
+    absoluteSavingsBRL?: number;
 }
 
 export interface OracleRecommendationsResponse {
@@ -181,4 +186,5 @@ export interface OracleRecommendationsResponse {
     tasteSummary: string;
     generatedAt: string;
     cached: boolean;
+    currencyRate?: CurrencyRate;
 }

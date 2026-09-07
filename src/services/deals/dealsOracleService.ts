@@ -5,9 +5,11 @@ import {
     OracleGameRecommendation,
     OracleRecommendationsResponse,
     OracleGameTier,
+    WinningRegion,
 } from "@/types/deals";
 import { dealsCache } from "./dealsCache";
 import { SteamStoreClient } from "./steamStoreClient";
+import { CurrencyService } from "./currencyService";
 
 interface RawOracleItem {
     title: string;
@@ -297,6 +299,17 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
     private static async enrichWithSteamData(
         rawItems: RawOracleItem[],
     ): Promise<OracleGameRecommendation[]> {
+        // Fetch current USD -> BRL exchange rate for comparison
+        let rate = 5.85;
+        try {
+            const currencyData = await CurrencyService.getUsdBrlRate();
+            if (currencyData?.rate) {
+                rate = currencyData.rate;
+            }
+        } catch (e) {
+            console.warn("[DealsOracleService] Failed to fetch live currency rate, using fallback 5.85:", e);
+        }
+
         const enriched = await Promise.all(
             rawItems.map(async (item): Promise<OracleGameRecommendation> => {
                 try {
@@ -312,26 +325,70 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
                         coverImage = `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${steamAppId}/header.jpg`;
                     }
 
-                    // 2. Buscar preço em BRL e avaliações se tiver appId
+                    // 2. Buscar preços em BRL e USD e avaliações se tiver appId
                     let priceBR: number | undefined;
                     let regularPriceBR: number | undefined;
+                    let priceUS: number | undefined;
+                    let regularPriceUS: number | undefined;
                     let discountPercent = 0;
                     let reviews = undefined;
+                    let winningRegion: WinningRegion = "EQUAL";
+                    let savingsPercent = 0;
+                    let absoluteSavingsBRL = 0;
 
                     if (steamAppId) {
-                        const [priceObj, reviewObj] = await Promise.all([
+                        const [priceObjBR, priceObjUS, reviewObj] = await Promise.all([
                             SteamStoreClient.getAppPrice(steamAppId, "BR"),
+                            SteamStoreClient.getAppPrice(steamAppId, "US"),
                             SteamStoreClient.getAppReviewsSummary(steamAppId),
                         ]);
 
-                        if (priceObj) {
-                            priceBR = priceObj.currentPrice;
-                            regularPriceBR = priceObj.regularPrice;
-                            discountPercent = priceObj.discountPercent || 0;
+                        if (priceObjBR) {
+                            priceBR = priceObjBR.currentPrice;
+                            regularPriceBR = priceObjBR.regularPrice;
+                            discountPercent = priceObjBR.discountPercent || 0;
+                        }
+
+                        if (priceObjUS) {
+                            priceUS = priceObjUS.currentPrice;
+                            regularPriceUS = priceObjUS.regularPrice;
+                            if (!discountPercent && priceObjUS.discountPercent) {
+                                discountPercent = priceObjUS.discountPercent;
+                            }
                         }
 
                         if (reviewObj) {
                             reviews = reviewObj;
+                        }
+
+                        // Comparação de Regiões US x BR
+                        if (priceBR !== undefined && priceUS !== undefined) {
+                            const priceUsInUsd = priceUS;
+                            const priceBrInUsd = CurrencyService.convertBrlToUsd(priceBR, rate);
+                            const priceUsInBrl = CurrencyService.convertUsdToBrl(priceUS, rate);
+                            const priceBrInBrl = priceBR;
+
+                            const diffUsd = Number((priceUsInUsd - priceBrInUsd).toFixed(2));
+
+                            if (Math.abs(diffUsd) < 0.05 || (priceUsInUsd === 0 && priceBrInBrl === 0)) {
+                                winningRegion = "EQUAL";
+                                savingsPercent = 0;
+                                absoluteSavingsBRL = 0;
+                            } else if (priceBrInUsd < priceUsInUsd) {
+                                winningRegion = "BR";
+                                absoluteSavingsBRL = Number((priceUsInBrl - priceBrInBrl).toFixed(2));
+                                savingsPercent =
+                                    priceUsInUsd > 0
+                                        ? Math.min(100, Math.round(((priceUsInUsd - priceBrInUsd) / priceUsInUsd) * 100))
+                                        : 0;
+                            } else {
+                                winningRegion = "US";
+                                absoluteSavingsBRL = Number((priceBrInBrl - priceUsInBrl).toFixed(2));
+                                savingsPercent =
+                                    priceBrInUsd > 0
+                                        ? Math.min(100, Math.round(((priceBrInUsd - priceUsInUsd) / priceBrInUsd) * 100))
+                                        : 0;
+                            }
                         }
                     }
 
@@ -348,9 +405,14 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
                             "https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=600&auto=format&fit=crop&q=80",
                         priceBR,
                         regularPriceBR,
+                        priceUS,
+                        regularPriceUS,
                         discountPercent,
                         isOnSale,
                         steamReviews: reviews,
+                        winningRegion,
+                        savingsPercent,
+                        absoluteSavingsBRL,
                         dealUrl: steamAppId
                             ? `https://store.steampowered.com/app/${steamAppId}`
                             : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`,
@@ -382,9 +444,59 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
         const cacheKey = `deals:oracle:${userId || "guest"}`;
 
         if (!forceRefresh) {
+            // 1. Verificar cache em memória do processo
             const cached = dealsCache.get<OracleRecommendationsResponse>(cacheKey);
             if (cached) {
                 return { ...cached, cached: true };
+            }
+
+            // 2. Verificar persistência permanente no PostgreSQL
+            if (userId) {
+                try {
+                    const savedRows = await prisma.$queryRaw<Array<{
+                        recommendations: any;
+                        taste_summary: string | null;
+                        generated_at: Date;
+                    }>>`
+                        SELECT recommendations, taste_summary, generated_at
+                        FROM user_oracle_recommendations
+                        WHERE user_id = ${userId}
+                    `;
+                    if (savedRows && savedRows.length > 0) {
+                        const row = savedRows[0];
+                        const recs: OracleGameRecommendation[] =
+                            typeof row.recommendations === "string"
+                                ? JSON.parse(row.recommendations)
+                                : row.recommendations;
+
+                        if (Array.isArray(recs) && recs.length > 0) {
+                            const onSale = recs.filter((r) => r.isOnSale);
+                            const onRadar = recs.filter((r) => !r.isOnSale);
+                            let currencyRate = undefined;
+                            try {
+                                currencyRate = await CurrencyService.getUsdBrlRate();
+                            } catch {}
+
+                            const response: OracleRecommendationsResponse = {
+                                recommendations: recs,
+                                onSale,
+                                onRadar,
+                                tasteSummary: row.taste_summary || "Perfil personalizado da Guilda",
+                                generatedAt: row.generated_at
+                                    ? new Date(row.generated_at).toISOString()
+                                    : new Date().toISOString(),
+                                cached: true,
+                                currencyRate,
+                            };
+
+                            // Salvar de volta na memória para respostas instantâneas (< 1ms)
+                            dealsCache.set(cacheKey, response, 12 * 60 * 60 * 1000);
+                            return response;
+                        }
+                    }
+                } catch (dbErr) {
+                    console.warn("[DealsOracleService] Failed reading saved recommendations from DB:", dbErr);
+                }
             }
         }
 
@@ -392,7 +504,7 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
         const { favorites, excludedTitles, tasteSummary } =
             await DealsOracleService.getUserTasteProfile(userId);
 
-        // 2. Consultar Gemini Flash
+        // 2. Consultar Gemini Flash (APENAS se forceRefresh=true ou usuário nunca gerou nada na vida)
         const rawItems = await DealsOracleService.queryGeminiForRecommendations(
             favorites,
             excludedTitles,
@@ -411,6 +523,11 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
         const onSale = recommendations.filter((r) => r.isOnSale);
         const onRadar = recommendations.filter((r) => !r.isOnSale);
 
+        let currencyRate = undefined;
+        try {
+            currencyRate = await CurrencyService.getUsdBrlRate();
+        } catch {}
+
         const response: OracleRecommendationsResponse = {
             recommendations,
             onSale,
@@ -418,10 +535,28 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
             tasteSummary,
             generatedAt: new Date().toISOString(),
             cached: false,
+            currencyRate,
         };
 
-        // Cache por 12 horas
+        // Cache por 12 horas em memória
         dealsCache.set(cacheKey, response, 12 * 60 * 60 * 1000);
+
+        // Persistência permanente no PostgreSQL
+        if (userId) {
+            try {
+                const recsJson = JSON.stringify(recommendations);
+                await prisma.$executeRaw`
+                    INSERT INTO user_oracle_recommendations (user_id, recommendations, taste_summary, generated_at)
+                    VALUES (${userId}, ${recsJson}::jsonb, ${tasteSummary}, NOW())
+                    ON CONFLICT (user_id) DO UPDATE SET
+                        recommendations = EXCLUDED.recommendations,
+                        taste_summary = EXCLUDED.taste_summary,
+                        generated_at = NOW()
+                `;
+            } catch (dbSaveErr) {
+                console.warn("[DealsOracleService] Failed saving recommendations to DB:", dbSaveErr);
+            }
+        }
 
         return response;
     }
@@ -448,8 +583,20 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
             }
         }
 
-        // Invalidar cache do usuário para recalcular na próxima consulta
+        // Atualizar o cache em memória sem limpar tudo (para não forçar re-consulta da IA)
         const cacheKey = `deals:oracle:${userId || "guest"}`;
-        dealsCache.delete(cacheKey);
+        const cached = dealsCache.get<OracleRecommendationsResponse>(cacheKey);
+        if (cached) {
+            const updatedRecs = cached.recommendations.filter(
+                (r) => r.title.toLowerCase().trim() !== normalizedTitle,
+            );
+            const updatedResponse: OracleRecommendationsResponse = {
+                ...cached,
+                recommendations: updatedRecs,
+                onSale: updatedRecs.filter((r) => r.isOnSale),
+                onRadar: updatedRecs.filter((r) => !r.isOnSale),
+            };
+            dealsCache.set(cacheKey, updatedResponse, 12 * 60 * 60 * 1000);
+        }
     }
 }

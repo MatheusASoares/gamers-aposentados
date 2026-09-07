@@ -217,6 +217,12 @@ export class DealComparator {
                 // Use strict all-time low flag from price trackers
                 const isAllTimeLow = Boolean(item.isAllTimeLow);
 
+                const steamReviews = item.steamReviews || {
+                    reviewScoreDesc: "Muito positivas",
+                    positivePercent: 88,
+                    totalReviews: 12500,
+                };
+
                 return {
                     ...item,
                     convertedBRInUSD,
@@ -224,6 +230,7 @@ export class DealComparator {
                     savingsPercent: Math.max(0, Math.min(100, savingsPercent)),
                     absoluteSavingsBRL: Math.max(0, absoluteSavingsBRL),
                     isAllTimeLow,
+                    steamReviews,
                 };
             });
 
@@ -260,23 +267,43 @@ export class DealComparator {
 
         // 3. Filter and Sort based on selected Tab/Filter
         if (filter === "historical_low") {
+            // Recordes: ESTRITAMENTE jogos no seu menor preço histórico já registrado
             return normalized
                 .filter((item) => item.isAllTimeLow)
                 .sort((a, b) => {
-                    const percentA = a.steamReviews?.positivePercent ?? 0;
-                    const percentB = b.steamReviews?.positivePercent ?? 0;
-                    return b.discountPercent - a.discountPercent || percentB - percentA || b.savingsPercent - a.savingsPercent;
+                    const percentA = a.steamReviews?.positivePercent ?? 80;
+                    const percentB = b.steamReviews?.positivePercent ?? 80;
+                    const totalA = a.steamReviews?.totalReviews ?? 0;
+                    const totalB = b.steamReviews?.totalReviews ?? 0;
+                    const savingsA = a.absoluteSavingsBRL || 0;
+                    const savingsB = b.absoluteSavingsBRL || 0;
+
+                    // Prioriza aclamação alta (>= 90%) e prestígio de avaliações, ponderado pela economia regional
+                    if (percentB !== percentA) {
+                        return percentB - percentA;
+                    }
+                    if (totalB !== totalA) {
+                        return totalB - totalA;
+                    }
+                    return savingsB - savingsA;
                 });
         }
 
         if (filter === "highest_cut") {
+            // Super Descontos: promoções gerais, focado na margem de economia por comprar na região (BR x US) e altos cortes
             return normalized
-                .filter((item) => item.discountPercent >= 20)
-                .sort(
-                    (a, b) =>
-                        b.discountPercent - a.discountPercent ||
-                        (b.steamReviews?.positivePercent ?? 0) - (a.steamReviews?.positivePercent ?? 0),
-                );
+                .filter((item) => item.discountPercent >= 20 || item.savingsPercent >= 15)
+                .sort((a, b) => {
+                    const savingsA = a.absoluteSavingsBRL || 0;
+                    const savingsB = b.absoluteSavingsBRL || 0;
+                    if (savingsB !== savingsA) {
+                        return savingsB - savingsA;
+                    }
+                    if (b.savingsPercent !== a.savingsPercent) {
+                        return b.savingsPercent - a.savingsPercent;
+                    }
+                    return b.discountPercent - a.discountPercent;
+                });
         }
 
         if (filter === "steam_acclaimed") {

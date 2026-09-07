@@ -193,7 +193,7 @@ export class DealsService {
         return dealsCache.getOrSet(
             cacheKey,
             async () => {
-                const sampleGames = CURATED_GAMES_POOL.slice(0, 25);
+                const sampleGames = CURATED_GAMES_POOL.slice(0, 50);
                 const results = await Promise.all(
                     sampleGames.map(async (game): Promise<FeaturedDealItem | null> => {
                         try {

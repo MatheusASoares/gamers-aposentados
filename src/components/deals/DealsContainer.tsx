@@ -589,6 +589,7 @@ export function DealsContainer() {
                         <TopDealsCarousel
                             deals={featuredDeals}
                             trackedDeals={trackedDeals}
+                            currencyRate={currencyRate}
                             onSelectDeal={handleSelectFeatured}
                             selectedId={comparison?.id}
                             activeFilter={activeFilter}
