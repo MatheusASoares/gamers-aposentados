@@ -18,32 +18,32 @@ Ao salvar os arquivos no projeto, utilize as pastas:
 
 ## 📊 Tabela de Progressão da Guilda (25 Níveis)
 
-|   Nv   |    Tipo    | Recompensa                            | Jogo Homenageado         |  Raridade   |
-| :----: | :--------: | :------------------------------------ | :----------------------- | :---------: |
-| **01** | 🛡️ Brasão  | **Escudo do Cavaleiro de Astora**     | _Dark Souls_             |  `COMMON`   |
-| **02** | 🐾 Mascote | **Kuro-bot (Gato Cyberpunk)**         | _Stray / Cyberpunk 2077_ |  `COMMON`   |
-| **03** | 🖼️ Banner  | **Bastião de Night City**             | _Cyberpunk 2077_         |  `COMMON`   |
-| **04** | 📜 Título  | **Agentes da Foxhound**               | _Metal Gear Solid_       |  `COMMON`   |
-| **05** | 🛡️ Brasão  | **Lâminas Duplas do Hadouken**        | _Street Fighter_         |  `COMMON`   |
-| **06** | 🐾 Mascote | **Makar o Korok Folião**              | _The Legend of Zelda_    | `UNCOMMON`  |
-| **07** | 🖼️ Banner  | **Cidade Subaquática de Rapture**     | _BioShock_               | `UNCOMMON`  |
-| **08** | 📜 Título  | **Caçadores de Relíquias de Yharnam** | _Bloodborne_             | `UNCOMMON`  |
-| **09** | 🛡️ Brasão  | **Medalhão do Lobo Branco**           | _The Witcher 3_          | `UNCOMMON`  |
-| **10** | 🐾 Mascote | **Palico Guerreiro Felyne**           | _Monster Hunter_         |   `RARE`    |
-| **11** | 🖼️ Banner  | **Fortaleza de Kaer Morhen**          | _The Witcher 3_          |   `RARE`    |
-| **12** | 📜 Título  | **Viajantes do Fim dos Tempos**       | _Chrono Trigger_         |   `RARE`    |
-| **13** | 🛡️ Brasão  | **Selo dos Belmonts & Alucard**       | _Castlevania: SotN_      |   `RARE`    |
-| **14** | 📜 Título  | **Herdeiros da Primeira Chama**       | _Dark Souls_             |   `RARE`    |
-| **15** | 🐾 Mascote | **Chocobo Dourado Mecha**             | _Final Fantasy VII_      |   `EPIC`    |
-| **16** | 📜 Título  | **Guardiões de Midgard**              | _God of War Ragnarök_    |   `EPIC`    |
-| **17** | 🛡️ Brasão  | **Insígnia dos Spartanos de Reach**   | _Halo_                   |   `EPIC`    |
-| **18** | 🖼️ Banner  | **Santuário de Tsushima ao Luar**     | _Ghost of Tsushima_      |   `EPIC`    |
-| **19** | 🐾 Mascote | **Filhote de Dragão de Alduin**       | _Skyrim_                 |   `EPIC`    |
-| **20** | 📜 Título  | **Desbravadores do Oeste Selvagem**   | _Red Dead Redemption 2_  | `LEGENDARY` |
-| **21** | 🖼️ Banner  | **A Cidadela dos Espaços Profundos**  | _Mass Effect_            | `LEGENDARY` |
-| **22** | 🛡️ Brasão  | **Vaso de Alma & Ferrão Puro**        | _Hollow Knight_          | `LEGENDARY` |
-| **23** | 📜 Título  | **Testadores da Aperture Science**    | _Portal 2_               | `LEGENDARY` |
-| **24** | 🖼️ Banner  | **A Árvore Sagrada do Cosmos**        | _Elden Ring_             | `LEGENDARY` |
+|   Nv   |    Tipo    | Recompensa                            | Jogo Homenageado            |  Raridade   |
+| :----: | :--------: | :------------------------------------ | :-------------------------- | :---------: |
+| **01** | 🛡️ Brasão  | **Escudo do Cavaleiro de Astora**     | _Dark Souls_                |  `COMMON`   |
+| **02** | 🐾 Mascote | **Kuro-bot (Gato Cyberpunk)**         | _Stray / Cyberpunk 2077_    |  `COMMON`   |
+| **03** | 🖼️ Banner  | **Bastião de Night City**             | _Cyberpunk 2077_            |  `COMMON`   |
+| **04** | 📜 Título  | **Agentes da Foxhound**               | _Metal Gear Solid_          |  `COMMON`   |
+| **05** | 🛡️ Brasão  | **Lâminas Duplas do Hadouken**        | _Street Fighter_            |  `COMMON`   |
+| **06** | 🐾 Mascote | **Makar o Korok Folião**              | _The Legend of Zelda_       | `UNCOMMON`  |
+| **07** | 🖼️ Banner  | **Cidade Subaquática de Rapture**     | _BioShock_                  | `UNCOMMON`  |
+| **08** | 📜 Título  | **Caçadores de Relíquias de Yharnam** | _Bloodborne_                | `UNCOMMON`  |
+| **09** | 🛡️ Brasão  | **Medalhão do Lobo Branco**           | _The Witcher 3_             | `UNCOMMON`  |
+| **10** | 🐾 Mascote | **Palico Guerreiro Felyne**           | _Monster Hunter_            |   `RARE`    |
+| **11** | 🖼️ Banner  | **Fortaleza de Kaer Morhen**          | _The Witcher 3_             |   `RARE`    |
+| **12** | 📜 Título  | **Viajantes do Fim dos Tempos**       | _Chrono Trigger_            |   `RARE`    |
+| **13** | 🛡️ Brasão  | **Selo dos Belmonts & Alucard**       | _Castlevania: SotN_         |   `RARE`    |
+| **14** | 📜 Título  | **Herdeiros da Primeira Chama**       | _Dark Souls_                |   `RARE`    |
+| **15** | 🐾 Mascote | **Chocobo Dourado Mecha**             | _Final Fantasy VII_         |   `EPIC`    |
+| **16** | 📜 Título  | **Guardiões de Midgard**              | _God of War Ragnarök_       |   `EPIC`    |
+| **17** | 🛡️ Brasão  | **Insígnia dos Spartanos de Reach**   | _Halo_                      |   `EPIC`    |
+| **18** | 🖼️ Banner  | **Santuário de Tsushima ao Luar**     | _Ghost of Tsushima_         |   `EPIC`    |
+| **19** | 🐾 Mascote | **Filhote de Dragão de Alduin**       | _Skyrim_                    |   `EPIC`    |
+| **20** | 📜 Título  | **Desbravadores do Oeste Selvagem**   | _Red Dead Redemption 2_     | `LEGENDARY` |
+| **21** | 🖼️ Banner  | **A Cidadela dos Espaços Profundos**  | _Mass Effect_               | `LEGENDARY` |
+| **22** | 🛡️ Brasão  | **Vaso de Alma & Ferrão Puro**        | _Hollow Knight_             | `LEGENDARY` |
+| **23** | 📜 Título  | **Testadores da Aperture Science**    | _Portal 2_                  | `LEGENDARY` |
+| **24** | 🖼️ Banner  | **A Árvore Sagrada do Cosmos**        | _Elden Ring_                | `LEGENDARY` |
 | **25** | 🐾 Mascote | **Luna Lovegood**                     | _Mascote Suprema da Guilda_ |  `MYTHIC`   |
 
 ---
