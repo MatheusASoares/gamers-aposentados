@@ -11,11 +11,8 @@ import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
 import { getPendingSpecialGameProposals } from "@/app/lib/special-game-actions";
 import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast";
-import { GuildStatusCard } from "@/components/dashboard/GuildStatusCard";
 import { isGuildMaster } from "@/lib/permissions";
-
 import { getActiveGuild } from "@/app/lib/guild-actions";
-import { GUILD_REWARDS_CATALOG } from "@/lib/constants/guild-rewards";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -380,47 +377,6 @@ export default async function DashboardPage() {
         };
     });
 
-    // Build Guild Master status data
-    const guildMainGame = latestMainPool?.winner_game
-        ? {
-              id: latestMainPool.winner_game.id,
-              title: latestMainPool.winner_game.title,
-              cover_url: latestMainPool.winner_game.cover_url,
-              artwork_url: latestMainPool.winner_game.artwork_url,
-              quest_type: "MAIN_QUEST" as const,
-              hltb_time: latestMainPool.winner_game.hltb_time,
-              playersProgress: activeUsers.map((u) => {
-                  const prog = completedProgresses.find((p) => p.user_id === u.id && p.game_id === latestMainPool.winner_game!.id)
-                      || recentProgress.find((p) => p.user_id === u.id && p.game_id === latestMainPool.winner_game!.id);
-                  return {
-                      name: u.name || u.email?.split("@")[0] || "Jogador",
-                      progress_percentage: prog?.progress_percentage ?? 0,
-                      status: prog?.status ?? "ACTIVE",
-                  };
-              }),
-          }
-        : null;
-
-    const guildSideGame = latestSidePool?.winner_game
-        ? {
-              id: latestSidePool.winner_game.id,
-              title: latestSidePool.winner_game.title,
-              cover_url: latestSidePool.winner_game.cover_url,
-              artwork_url: latestSidePool.winner_game.artwork_url,
-              quest_type: "SIDE_QUEST" as const,
-              hltb_time: latestSidePool.winner_game.hltb_time,
-              playersProgress: activeUsers.map((u) => {
-                  const prog = completedProgresses.find((p) => p.user_id === u.id && p.game_id === latestSidePool.winner_game!.id)
-                      || recentProgress.find((p) => p.user_id === u.id && p.game_id === latestSidePool.winner_game!.id);
-                  return {
-                      name: u.name || u.email?.split("@")[0] || "Jogador",
-                      progress_percentage: prog?.progress_percentage ?? 0,
-                      status: prog?.status ?? "ACTIVE",
-                  };
-              }),
-          }
-        : null;
-
     return (
         <div className="mx-auto w-full max-w-[1920px] space-y-6 sm:space-y-8 px-2 sm:px-6 py-3 sm:py-8 md:px-8 lg:px-12 lg:py-12">
             {/* Active Pause Quorum Voting Banner */}
@@ -458,27 +414,6 @@ export default async function DashboardPage() {
                     progress={sideQuestProgress}
                 />
             </div>
-
-            {/* Status da Guilda Oficial dos Fundadores */}
-            {(() => {
-                const emblemItem = activeGuild?.equippedEmblem
-                    ? GUILD_REWARDS_CATALOG.find((r) => r.type === "EMBLEM" && (r.name === activeGuild.equippedEmblem || r.id === activeGuild.equippedEmblem))
-                    : null;
-                const bannerItem = activeGuild?.equippedBanner
-                    ? GUILD_REWARDS_CATALOG.find((r) => r.type === "BANNER" && (r.name === activeGuild.equippedBanner || r.assetUrl === activeGuild.equippedBanner || r.id === activeGuild.equippedBanner))
-                    : null;
-
-                return (
-                    <GuildStatusCard
-                        mainGame={guildMainGame}
-                        sideGame={guildSideGame}
-                        guildName={activeGuild?.name}
-                        guildDescription={activeGuild?.description || undefined}
-                        emblemUrl={emblemItem?.assetUrl}
-                        bannerUrl={bannerItem?.assetUrl}
-                    />
-                );
-            })()}
 
             {/* Row 3: Stats Cards Grid */}
             <StatsGrid reviews={randomReviewsForStats} />
