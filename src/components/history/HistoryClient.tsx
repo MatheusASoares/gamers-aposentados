@@ -34,6 +34,8 @@ interface HistoryClientProps {
     initialYear: number;
     initialData: QuestHistoryData[];
     currentUserId: string;
+    activeGuildId?: string;
+    activeGuildName?: string;
 }
 
 const MONTH_OPTIONS: AppDropdownOption<number | "ALL">[] = [
@@ -85,6 +87,8 @@ export function HistoryClient({
     initialYear,
     initialData,
     currentUserId,
+    activeGuildId,
+    activeGuildName,
 }: HistoryClientProps) {
     const [activeTab, setActiveTab] = useState<"GUILD" | "PERSONAL">("GUILD");
 
@@ -116,7 +120,7 @@ export function HistoryClient({
         const fetchData = async () => {
             setIsLoadingGuild(true);
             try {
-                const newData = await getQuestHistoryByYear(guildYearFilter, guildQuestType);
+                const newData = await getQuestHistoryByYear(guildYearFilter, guildQuestType, activeGuildId);
                 if (isMounted) setGuildData(newData);
             } catch (error) {
                 console.error("Failed to fetch history:", error);
@@ -130,7 +134,7 @@ export function HistoryClient({
         return () => {
             isMounted = false;
         };
-    }, [guildYearFilter, guildQuestType, activeTab]);
+    }, [guildYearFilter, guildQuestType, activeTab, activeGuildId]);
 
     // Fetch Personal history when switching to PERSONAL tab
     useEffect(() => {
@@ -376,7 +380,7 @@ export function HistoryClient({
                         <h1 className="text-shadow-glow text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">
                             {activeTab === "GUILD" ? "Histórico da Guilda" : "Meu Histórico Pessoal"}
                         </h1>
-                        <p className="text-xs sm:text-sm lg:text-base font-bold tracking-wide text-zinc-400 max-w-2xl">
+                        <p className="text-xs sm:text-sm lg:text-base font-bold tracking-wide text-zinc-400 max-w-2xl hidden sm:block">
                             {activeTab === "GUILD"
                                 ? "Registro auditável dos sorteios, indicações e campanhas conquistadas pela dupla oficial (Matheus & Lucas)."
                                 : "Acompanhe todos os jogos que você iniciou, completou ou dropou na sua jornada pessoal."}

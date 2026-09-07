@@ -72,10 +72,22 @@ export async function updateQuestProgress(
 
         await recalculateUserXPAndLevel(session.user.id);
 
+        try {
+            const { getActiveGuild } = await import("@/app/lib/guild-actions");
+            const { recalculateGuildXPAndLevel } = await import("@/app/lib/guild-gamification-actions");
+            const activeGuild = await getActiveGuild();
+            if (activeGuild?.id) {
+                await recalculateGuildXPAndLevel(activeGuild.id);
+            }
+        } catch {
+            // Fallback
+        }
+
         revalidatePath("/");
         revalidatePath("/quests");
         revalidatePath("/dashboard");
         revalidatePath("/reviews");
+        revalidatePath("/guild");
         return result;
     } catch (e: unknown) {
         console.error("Error updating progress:", e);
@@ -127,10 +139,22 @@ export async function completeQuest(gameId: string): Promise<{ success: boolean;
 
         await recalculateUserXPAndLevel(session.user.id);
 
+        try {
+            const { getActiveGuild } = await import("@/app/lib/guild-actions");
+            const { recalculateGuildXPAndLevel } = await import("@/app/lib/guild-gamification-actions");
+            const activeGuild = await getActiveGuild();
+            if (activeGuild?.id) {
+                await recalculateGuildXPAndLevel(activeGuild.id);
+            }
+        } catch {
+            // Fallback
+        }
+
         revalidatePath("/");
         revalidatePath("/quests");
         revalidatePath("/dashboard");
         revalidatePath("/reviews");
+        revalidatePath("/guild");
         return result;
     } catch (e: unknown) {
         console.error("Error completing quest:", e);
@@ -211,12 +235,25 @@ export async function dropQuest(gameId: string): Promise<{ success: boolean; err
     }
 }
 
-// Verifica se podemos sortear de novo (Regra 2 da Pool: Só pode rolar se nenhum deles tiver a quest aberta)
-export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST") {
+// Verifica se podemos sortear de novo (Regra 2 da Pool: Só pode rolar se nenhum membro ativo tiver a quest aberta)
+export async function getRandomizerStatus(
+    questType: "MAIN_QUEST" | "SIDE_QUEST",
+    targetGuildId?: string
+) {
     try {
-        // Acha qual é o jogo atual da quest type selecionada (pegamos da pool ativa mais recente)
+        let guildId = targetGuildId;
+        if (!guildId) {
+            const founderGuild = await prisma.guild.findFirst({ where: { slug: "fundadores" } });
+            guildId = founderGuild?.id;
+        }
+
+        // Acha qual é o jogo atual da quest type selecionada na guilda (pegamos da pool com vencedor mais recente)
         const lastPool = await prisma.pool.findFirst({
-            where: { type: questType, winner_game_id: { not: null } },
+            where: {
+                ...(guildId ? { guild_id: guildId } : {}),
+                type: questType,
+                winner_game_id: { not: null },
+            },
             orderBy: { created_at: "desc" },
         });
 
@@ -226,17 +263,30 @@ export async function getRandomizerStatus(questType: "MAIN_QUEST" | "SIDE_QUEST"
 
         const activeGameId = lastPool.winner_game_id;
 
-        // Verifica se algum usuário ainda está com esse jogo ACTIVE
-        // Agora filtra apenas pelos jogadores oficiais do Randomizer (Matheus e Lucas)
+        // Obter membros ativos da guilda
+        let activeUserIds: string[] = [];
+        if (guildId) {
+            const activeMembers = await prisma.guildMember.findMany({
+                where: { guild_id: guildId, is_active: true },
+                select: { user_id: true },
+            });
+            activeUserIds = activeMembers.map((m) => m.user_id);
+        }
+
+        if (activeUserIds.length === 0) {
+            const activeUsers = await prisma.user.findMany({
+                where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+                select: { id: true },
+            });
+            activeUserIds = activeUsers.map((u) => u.id);
+        }
+
+        // Verifica se algum membro ativo ainda está com esse jogo ACTIVE
         const activeProgresses = await prisma.gameProgress.findMany({
             where: {
                 game_id: activeGameId,
                 status: "ACTIVE",
-                user: {
-                    email: {
-                        in: RANDOMIZER_PLAYER_EMAILS,
-                    },
-                },
+                user_id: { in: activeUserIds },
             },
             include: { user: true },
         });

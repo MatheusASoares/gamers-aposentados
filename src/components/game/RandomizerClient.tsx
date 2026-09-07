@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { Loader2, Trophy, History, Save, Pencil, X, Sparkles, Flame } from "lucide-react";
+import { Loader2, Trophy, History, Save, Pencil, X, Sparkles, Flame, Shield } from "lucide-react";
 import { GiSwordsEmblem, GiDragonHead, GiSpaceship, GiPortal, GiRetroController, GiCyberEye } from "react-icons/gi";
 import Image from "next/image";
 import { GameSearchResult } from "@/components/ui/game-autocomplete";
@@ -70,18 +70,31 @@ function ThemedEmblemIcon({ theme }: { theme: string }) {
     );
 }
 
+export interface ActiveGuildContext {
+    id: string;
+    name: string;
+    level: number;
+    myRole: "LEADER" | "MEMBER";
+    myIsActive: boolean;
+    activeMembers: Array<{ id: string; userId: string; name: string; role: "LEADER" | "MEMBER" }>;
+}
+
 export function RandomizerClient({
     currentUserId,
     currentUserName,
     currentUserEmail,
     canAddGames,
+    isLeader = false,
     otherPlayerName: defaultOtherName,
+    activeGuild,
 }: {
     currentUserId: string;
     currentUserName: string;
     currentUserEmail: string;
     canAddGames: boolean;
-    otherPlayerName: string;
+    isLeader?: boolean;
+    otherPlayerName?: string;
+    activeGuild?: ActiveGuildContext | null;
 }) {
     if (!canAddGames) {
         return (
@@ -134,7 +147,8 @@ export function RandomizerClient({
     const [refreshingTitles, setRefreshingTitles] = useState<Set<string>>(new Set());
 
     const isTestUser = currentUserEmail.endsWith("@test.com");
-    const requiredTotal = questType === "MAIN" ? 4 : 6;
+    const activeMemberCount = activeGuild?.activeMembers?.length || 2;
+    const requiredTotal = isTestUser ? (questType === "MAIN" ? 4 : 6) : (questType === "MAIN" ? 2 : 3) * activeMemberCount;
     const maxPerPerson = isTestUser ? requiredTotal : (questType === "MAIN" ? 2 : 3);
 
     // Determine the "other" user's name from pool entries or from the prop
@@ -145,7 +159,7 @@ export function RandomizerClient({
         async (type: QuestType, silent: boolean = false) => {
             if (!silent) setIsLoading(true);
             try {
-                const pool = await getOpenPool(type);
+                const pool = await getOpenPool(type, activeGuild?.id);
                 if (pool) {
                     setPoolId(pool.poolId);
 
@@ -196,6 +210,7 @@ export function RandomizerClient({
                 // Check lock status
                 const status = await getRandomizerStatus(
                     type === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST",
+                    activeGuild?.id
                 );
                 setLockStatus(status);
 
@@ -208,7 +223,7 @@ export function RandomizerClient({
                 if (!silent) setIsLoading(false);
             }
         },
-        [currentUserId],
+        [currentUserId, activeGuild?.id],
     );
 
     const handleRefreshHltb = async (title: string) => {
@@ -365,7 +380,7 @@ export function RandomizerClient({
                 imageUrl: c.imageUrl,
             }));
 
-            const response = await saveSelections(questType, games);
+            const response = await saveSelections(questType, games, activeGuild?.id);
 
             if (response.success) {
                 setIsEditing(false);
@@ -457,11 +472,16 @@ export function RandomizerClient({
         };
     }, []);
 
-    const handleRoll = async () => {
+    const handleRoll = async (forceEmergency: boolean = false) => {
         if (!poolId || isRolling || isSaving || lockStatus.locked || winner) return;
 
         const totalGames = mySelections.length + otherSelections.length;
-        if (totalGames < requiredTotal) return;
+        if (!forceEmergency && totalGames < requiredTotal) return;
+        if (forceEmergency && totalGames < 1) return;
+
+        if (forceEmergency) {
+            if (!confirm(`⚡ ATENÇÃO (LÍDER): Deseja sortear antecipadamente entre as ${totalGames} indicações dos membros presentes?`)) return;
+        }
 
         setIsRolling(true);
         setWinner(null);
@@ -490,7 +510,7 @@ export function RandomizerClient({
                 cycleIntervalRef.current = null;
             }
 
-            const response = await executeRoll(poolId);
+            const response = await executeRoll(poolId, { forceEmergency });
 
             if (response.success) {
                 const result = response as {
@@ -506,7 +526,7 @@ export function RandomizerClient({
                     title: result.winnerTitle,
                     imageUrl: cinematicImg,
                 });
-                setSaveStatus({ success: true, message: "Resultado salvo no Cofre!" });
+                setSaveStatus({ success: true, message: "Resultado salvo no Cofre da Guilda!" });
             } else {
                 setSaveStatus({ success: false, message: response.error || "Erro no sorteio." });
             }
@@ -662,6 +682,28 @@ export function RandomizerClient({
                     <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-2 lg:gap-12 xl:gap-16">
                         {/* Left Column: Candidates Pool */}
                         <div className="flex flex-col gap-6">
+                            {/* Active Guild Badge Info */}
+                            {activeGuild && (
+                                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-zinc-950/80 p-3.5 sm:px-5 sm:py-3.5 backdrop-blur-xl shadow-lg">
+                                    <div className="flex items-center gap-3">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#bd0df2]/50 bg-[#bd0df2]/20 text-[#bd0df2] shadow-[0_0_12px_rgba(189,13,242,0.3)]">
+                                            <Shield className="h-5 w-5" />
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-sm sm:text-base font-black uppercase tracking-wider text-white">
+                                                {activeGuild.name}
+                                            </span>
+                                            <span className="rounded-lg border border-amber-400/50 bg-amber-950/50 px-2 py-0.5 text-xs font-black text-amber-300 shadow-sm">
+                                                Nv {activeGuild.level}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <span className="text-xs font-bold text-zinc-300 bg-zinc-900/90 border border-white/10 px-3 py-1.5 rounded-xl">
+                                        👥 {activeGuild.activeMembers.length} {activeGuild.activeMembers.length === 1 ? "membro ativo" : "membros ativos"} • {maxPerPerson} indicações/membro
+                                    </span>
+                                </div>
+                            )}
+
                             <div className="flex items-center justify-between">
                                 <h3 className="text-sm font-bold tracking-widest text-[#bd0df2]/80 uppercase">
                                     Candidates Pool
@@ -806,57 +848,127 @@ export function RandomizerClient({
                                     )}
                             </div>
 
-                            {/* OTHER USER's Choices */}
-                            <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
-                                <div className="mb-2 flex items-center justify-between">
-                                    <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
-                                        {otherUserName}&apos;s Choices
-                                    </span>
-                                    <span className="text-sm font-bold text-zinc-500">
-                                        {otherSelections.length}/{maxPerPerson}
-                                    </span>
-                                </div>
+                            {/* OTHER USERS' Choices (Multi-Guild Active Members) */}
+                            {activeGuild && activeGuild.activeMembers.filter((m) => m.userId !== currentUserId).length > 0 ? (
+                                activeGuild.activeMembers
+                                    .filter((m) => m.userId !== currentUserId)
+                                    .map((member) => {
+                                        const memberEntries = otherSelections.filter((e) => e.userId === member.userId);
+                                        return (
+                                            <div
+                                                key={member.userId}
+                                                className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md"
+                                            >
+                                                <div className="mb-2 flex items-center justify-between">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
+                                                            {member.name}&apos;s Choices
+                                                        </span>
+                                                        {member.role === "LEADER" && (
+                                                            <span className="text-[10px] font-black text-amber-400 border border-amber-400/30 bg-amber-400/10 px-1.5 py-0.5 rounded">
+                                                                👑 Líder
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <span className="text-sm font-bold text-zinc-500">
+                                                        {memberEntries.length}/{maxPerPerson}
+                                                    </span>
+                                                </div>
 
-                                {otherSelections.length === 0 ? (
-                                    <div className="flex items-center justify-center rounded-xl border border-dashed border-white/5 bg-zinc-950/30 py-8">
-                                        <span className="text-xs font-bold tracking-widest text-zinc-600 uppercase">
-                                            Aguardando {otherUserName} selecionar...
-                                        </span>
-                                    </div>
-                                ) : (
-                                    otherSelections.map((entry) => (
-                                        <div
-                                            key={entry.id}
-                                            className="group relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-950/50 p-3 shadow-inner transition-all duration-300 hover:border-[#bd0df2]/40 hover:bg-[#bd0df2]/5 hover:shadow-[0_0_20px_rgba(189,13,242,0.1)]"
-                                        >
-                                            <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
-                                                {entry.gameImageUrl && (
-                                                    <Image
-                                                        src={entry.gameImageUrl}
-                                                        alt={entry.gameTitle}
-                                                        fill
-                                                        sizes="48px"
-                                                        unoptimized
-                                                        className="object-cover"
-                                                    />
+                                                {memberEntries.length === 0 ? (
+                                                    <div className="flex items-center justify-center rounded-xl border border-dashed border-white/5 bg-zinc-950/30 py-8">
+                                                        <span className="text-xs font-bold tracking-widest text-zinc-600 uppercase">
+                                                            Aguardando {member.name} selecionar...
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    memberEntries.map((entry) => (
+                                                        <div
+                                                            key={entry.id}
+                                                            className="group relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-950/50 p-3 shadow-inner transition-all duration-300 hover:border-[#bd0df2]/40 hover:bg-[#bd0df2]/5 hover:shadow-[0_0_20px_rgba(189,13,242,0.1)]"
+                                                        >
+                                                            <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
+                                                                {entry.gameImageUrl && (
+                                                                    <Image
+                                                                        src={entry.gameImageUrl}
+                                                                        alt={entry.gameTitle}
+                                                                        fill
+                                                                        sizes="48px"
+                                                                        unoptimized
+                                                                        className="object-cover"
+                                                                    />
+                                                                )}
+                                                            </div>
+                                                            <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
+                                                                {entry.gameTitle}
+                                                            </h4>
+                                                            <HltbBadge
+                                                                hours={hltbTimes[entry.gameTitle]}
+                                                                isLoading={
+                                                                    (isFetchingHltb && !isEditing) ||
+                                                                    refreshingTitles.has(entry.gameTitle)
+                                                                }
+                                                                onRefresh={() => handleRefreshHltb(entry.gameTitle)}
+                                                                className="mr-2"
+                                                            />
+                                                        </div>
+                                                    ))
                                                 )}
                                             </div>
-                                            <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
-                                                {entry.gameTitle}
-                                            </h4>
-                                            <HltbBadge
-                                                hours={hltbTimes[entry.gameTitle]}
-                                                isLoading={
-                                                    (isFetchingHltb && !isEditing) ||
-                                                    refreshingTitles.has(entry.gameTitle)
-                                                }
-                                                onRefresh={() => handleRefreshHltb(entry.gameTitle)}
-                                                className="mr-2"
-                                            />
+                                        );
+                                    })
+                            ) : (
+                                <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
+                                    <div className="mb-2 flex items-center justify-between">
+                                        <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.3)]">
+                                            {otherUserName}&apos;s Choices
+                                        </span>
+                                        <span className="text-sm font-bold text-zinc-500">
+                                            {otherSelections.length}/{maxPerPerson}
+                                        </span>
+                                    </div>
+
+                                    {otherSelections.length === 0 ? (
+                                        <div className="flex items-center justify-center rounded-xl border border-dashed border-white/5 bg-zinc-950/30 py-8">
+                                            <span className="text-xs font-bold tracking-widest text-zinc-600 uppercase">
+                                                Aguardando {otherUserName} selecionar...
+                                            </span>
                                         </div>
-                                    ))
-                                )}
-                            </div>
+                                    ) : (
+                                        otherSelections.map((entry) => (
+                                            <div
+                                                key={entry.id}
+                                                className="group relative flex items-center overflow-hidden rounded-xl border border-white/5 bg-zinc-950/50 p-3 shadow-inner transition-all duration-300 hover:border-[#bd0df2]/40 hover:bg-[#bd0df2]/5 hover:shadow-[0_0_20px_rgba(189,13,242,0.1)]"
+                                            >
+                                                <div className="relative mr-4 h-16 w-12 shrink-0 overflow-hidden rounded border border-white/5 bg-zinc-900">
+                                                    {entry.gameImageUrl && (
+                                                        <Image
+                                                            src={entry.gameImageUrl}
+                                                            alt={entry.gameTitle}
+                                                            fill
+                                                            sizes="48px"
+                                                            unoptimized
+                                                            className="object-cover"
+                                                        />
+                                                    )}
+                                                </div>
+                                                <h4 className="flex-1 truncate text-sm font-black tracking-wide text-white lg:text-base">
+                                                    {entry.gameTitle}
+                                                </h4>
+                                                <HltbBadge
+                                                    hours={hltbTimes[entry.gameTitle]}
+                                                    isLoading={
+                                                        (isFetchingHltb && !isEditing) ||
+                                                        refreshingTitles.has(entry.gameTitle)
+                                                    }
+                                                    onRefresh={() => handleRefreshHltb(entry.gameTitle)}
+                                                    className="mr-2"
+                                                />
+                                            </div>
+                                        ))
+                                    )}
+                                </div>
+                            )}
 
                             {/* Special Break Card / Pausa Ativa */}
                             <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-6 shadow-2xl backdrop-blur-md">
@@ -1192,45 +1304,60 @@ export function RandomizerClient({
                                             </span>
                                         </button>
                                     ) : (
-                                        <div className="mx-auto flex flex-col items-center justify-center gap-4 w-full max-w-xl sm:flex-row">
-                                            <button
-                                                onClick={handleRoll}
-                                                disabled={
-                                                    !poolIsComplete ||
-                                                    hasUnsavedChanges ||
-                                                    isRolling ||
-                                                    isSaving ||
-                                                    !poolId
-                                                }
-                                                className={cn(
-                                                    "flex-1 flex items-center justify-center gap-3 rounded-2xl border px-8 py-4 transition-all duration-300 w-full",
-                                                    poolIsComplete &&
-                                                        !hasUnsavedChanges &&
-                                                        !isRolling &&
-                                                        !isSaving &&
-                                                        poolId
-                                                        ? "border-theme-primary/50 bg-theme-primary/20 text-theme-primary shadow-[0_10px_40px_var(--theme-glow)] hover:scale-[1.03] hover:bg-theme-primary/30 active:scale-[0.97]"
-                                                        : "cursor-not-allowed border-white/5 bg-zinc-900 text-zinc-600",
-                                                )}
-                                            >
-                                                <Trophy
+                                        <div className="mx-auto flex flex-col items-center justify-center gap-4 w-full max-w-xl">
+                                            <div className="flex flex-col sm:flex-row items-center gap-4 w-full">
+                                                <button
+                                                    onClick={() => handleRoll(false)}
+                                                    disabled={
+                                                        !poolIsComplete ||
+                                                        hasUnsavedChanges ||
+                                                        isRolling ||
+                                                        isSaving ||
+                                                        !poolId
+                                                    }
                                                     className={cn(
-                                                        "h-8 w-8",
-                                                        isRolling && "animate-spin",
+                                                        "flex-1 flex items-center justify-center gap-3 rounded-2xl border px-8 py-4 transition-all duration-300 w-full",
+                                                        poolIsComplete &&
+                                                            !hasUnsavedChanges &&
+                                                            !isRolling &&
+                                                            !isSaving &&
+                                                            poolId
+                                                            ? "border-theme-primary/50 bg-theme-primary/20 text-theme-primary shadow-[0_10px_40px_var(--theme-glow)] hover:scale-[1.03] hover:bg-theme-primary/30 active:scale-[0.97]"
+                                                            : "cursor-not-allowed border-white/5 bg-zinc-900 text-zinc-600",
                                                     )}
-                                                />
-                                                <span className="text-xl font-black tracking-tighter whitespace-nowrap uppercase lg:text-2xl">
-                                                    {isRolling ? "Rolling..." : "Roll the Dice"}
-                                                </span>
-                                            </button>
-                                            <button
-                                                onClick={handleTestRoll}
-                                                disabled={isRolling}
-                                                className="flex items-center justify-center gap-2 rounded-2xl border border-theme-primary/30 bg-theme-primary/10 px-6 py-4 text-xs font-black tracking-widest text-theme-primary uppercase transition-all duration-300 hover:border-theme-primary/60 hover:bg-theme-primary/20 hover:scale-[1.03] active:scale-95 w-full sm:w-auto"
-                                            >
-                                                <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
-                                                <span>Testar Animação 🎲</span>
-                                            </button>
+                                                >
+                                                    <Trophy
+                                                        className={cn(
+                                                            "h-8 w-8",
+                                                            isRolling && "animate-spin",
+                                                        )}
+                                                    />
+                                                    <span className="text-xl font-black tracking-tighter whitespace-nowrap uppercase lg:text-2xl">
+                                                        {isRolling ? "Rolling..." : "Roll the Dice"}
+                                                    </span>
+                                                </button>
+                                                <button
+                                                    onClick={handleTestRoll}
+                                                    disabled={isRolling}
+                                                    className="flex items-center justify-center gap-2 rounded-2xl border border-theme-primary/30 bg-theme-primary/10 px-6 py-4 text-xs font-black tracking-widest text-theme-primary uppercase transition-all duration-300 hover:border-theme-primary/60 hover:bg-theme-primary/20 hover:scale-[1.03] active:scale-95 w-full sm:w-auto"
+                                                >
+                                                    <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
+                                                    <span>Testar 🎲</span>
+                                                </button>
+                                            </div>
+
+                                            {/* Emergency Roll Button for Leader */}
+                                            {isLeader && totalGames > 0 && !poolIsComplete && (
+                                                <button
+                                                    onClick={() => handleRoll(true)}
+                                                    disabled={isRolling || isSaving || !poolId}
+                                                    className="w-full flex items-center justify-center gap-2.5 rounded-2xl border border-amber-500/50 bg-amber-500/15 py-3.5 px-6 text-xs sm:text-sm font-black uppercase tracking-wider text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.25)] hover:bg-amber-500/25 hover:border-amber-400 hover:scale-[1.02] active:scale-95 transition-all"
+                                                    title="Sortear antecipadamente com as indicações presentes"
+                                                >
+                                                    <Flame className="h-5 w-5 text-amber-400 animate-pulse" />
+                                                    <span>⚡ Forçar Sorteio de Emergência ({totalGames}/{requiredTotal})</span>
+                                                </button>
+                                            )}
                                         </div>
                                     )}
                                 </div>

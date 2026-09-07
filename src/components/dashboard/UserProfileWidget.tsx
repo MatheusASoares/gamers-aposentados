@@ -14,6 +14,7 @@ import { UserAvatar } from "@/components/ui/user-avatar";
 import { TitleBadge } from "@/components/ui/title-badge";
 import { REWARDS_CATALOG } from "@/lib/constants/rewards";
 import { BannerFxOverlay } from "@/components/profile/banner-fx-overlay";
+import { cn } from "@/lib/utils";
 
 export interface UserProfileWidgetProps {
   user: {
@@ -41,11 +42,12 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
   const activeBannerId = user.equippedBanner || null;
   const bannerItem = activeBannerId ? REWARDS_CATALOG.find((r) => r.type === "BANNER" && r.id === activeBannerId) : null;
 
-
-
   return (
     <div
-      className="glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 shadow-2xl p-4 sm:p-6 md:p-8"
+      className={cn(
+        "glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/15 shadow-2xl p-4 sm:p-6 md:p-8",
+        !bannerItem?.assetUrl && "bg-zinc-950/80"
+      )}
       data-testid="user-profile-widget"
     >
       {/* Dynamic Ambient Glow matching the unlocked Rank Tier */}
@@ -62,20 +64,20 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
             priority
             unoptimized
             sizes="100vw"
-            className="object-cover object-center opacity-90 transition-all duration-700 hover:scale-105"
+            className="object-cover object-center opacity-95 transition-all duration-700 hover:scale-105"
           />
-          {/* Smooth Vignette Scrim for High-Definition Text Legibility */}
-          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-zinc-950/20" />
+          {/* Luminous Cinematic Vignette */}
+          <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/70 via-black/20 to-black/30" />
           {/* Dynamic Animated FX Overlay */}
           <BannerFxOverlay effectType={bannerItem.effectType} bannerId={bannerItem.id} />
         </div>
       )}
 
       {/* Balanced 3-Column Layout (5 - 4 - 3 Grid) */}
-      <div className="relative z-10 grid grid-cols-1 gap-5 sm:gap-6 lg:grid-cols-12 lg:items-center">
+      <div className="relative z-10 grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12 lg:items-center">
 
-        {/* Column 1: Player Profile & Info (5 cols) */}
-        <div className="flex items-center gap-3.5 sm:gap-6 min-w-0 lg:col-span-5 lg:border-r lg:border-white/10 lg:pr-6">
+        {/* Column 1: Player Profile & Info (5 cols) in Frosted Glass Capsule */}
+        <div className="flex items-center gap-3.5 sm:gap-6 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
           <div className="relative shrink-0">
             <UserAvatar
               src={user.image || null}
@@ -103,21 +105,22 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
           </div>
         </div>
 
-        {/* Column 2: Featured Last Completed Game Showcase Card (4 cols) */}
-        <div className="flex flex-col items-center justify-center gap-2 lg:col-span-4">
+        {/* Column 2: Featured Last Completed Game Showcase Card (4 cols) in Frosted Glass Capsule */}
+        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-3.5 sm:p-4 shadow-xl backdrop-blur-md lg:col-span-4">
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-emerald-400 uppercase drop-shadow-sm">
             <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>Último Jogo Zerado</span>
           </div>
 
           {lastGame ? (
-            <div className="group relative aspect-[3/4] h-48 sm:h-52 w-auto overflow-hidden rounded-2xl border border-emerald-500/40 bg-zinc-950 shadow-[0_0_25px_rgba(16,185,129,0.3)]">
+            <div className="group relative aspect-[3/4] h-44 sm:h-48 w-auto overflow-hidden rounded-2xl border border-emerald-500/40 bg-zinc-950 shadow-[0_0_25px_rgba(16,185,129,0.3)]">
               {lastGame.coverUrl ? (
                 <Image
                   src={lastGame.coverUrl.startsWith("//") ? `https:${lastGame.coverUrl}` : lastGame.coverUrl}
                   alt={lastGame.title}
                   fill
                   unoptimized
+                  sizes="(max-width: 768px) 160px, 200px"
                   className="object-cover object-top transition-transform duration-500 group-hover:scale-105"
                 />
               ) : (
@@ -131,22 +134,22 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
 
               {/* Game Title Overlay at Bottom */}
               <div className="absolute bottom-3 left-3 right-3 text-center">
-                <h3 className="line-clamp-2 text-sm font-black tracking-tight text-white drop-shadow-md md:text-base">
+                <h3 className="line-clamp-2 text-xs sm:text-sm font-black tracking-tight text-white drop-shadow-md">
                   {lastGame.title}
                 </h3>
               </div>
             </div>
           ) : (
-            <div className="flex aspect-[3/4] h-48 w-auto items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/60 p-4 text-xs font-bold text-zinc-400 uppercase backdrop-blur-md">
+            <div className="flex aspect-[3/4] h-44 w-auto items-center justify-center rounded-2xl border border-dashed border-white/15 bg-black/40 p-4 text-xs font-bold text-zinc-400 uppercase">
               Nenhum jogo zerado
             </div>
           )}
         </div>
 
-        {/* Column 3: Stats Summary & Career XP (3 cols) */}
-        <div className="flex flex-col justify-between gap-3 lg:col-span-3 lg:border-l lg:border-white/10 lg:pl-6">
-          {/* XP Progress - Sleek Glass */}
-          <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-black/60 p-3.5 shadow-xl backdrop-blur-md">
+        {/* Column 3: Stats Summary & Career XP (3 cols) in Frosted Glass Capsule */}
+        <div className="flex flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 shadow-xl backdrop-blur-md lg:col-span-3">
+          {/* XP Progress */}
+          <div className="flex flex-col gap-2">
             <div className="flex items-center justify-between text-[11px] font-black tracking-widest uppercase">
               <span className="text-zinc-300">Career XP</span>
               <span className={`${tierDetails.titleColor} font-black`}>
@@ -163,25 +166,25 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
 
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/60 p-2.5 text-center shadow-xl backdrop-blur-md">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/40 p-2 text-center shadow-sm">
               <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Zerados</span>
-              <span className="text-xl font-black text-white drop-shadow-md">{user.completedGamesCount}</span>
+              <span className="text-lg sm:text-xl font-black text-white drop-shadow-md">{user.completedGamesCount}</span>
             </div>
 
-            <div className="flex flex-col items-center justify-center rounded-xl border border-amber-500/30 bg-black/60 p-2.5 text-center shadow-xl backdrop-blur-md">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-amber-500/30 bg-black/40 p-2 text-center shadow-sm">
               <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">Platinas</span>
-              <span className="text-xl font-black text-amber-300 drop-shadow-md">{user.platinumCount} 🏆</span>
+              <span className="text-lg sm:text-xl font-black text-amber-300 drop-shadow-md">{user.platinumCount} 🏆</span>
             </div>
           </div>
 
           {/* Hall of Fame Action Button */}
           <Link
             href="/profile"
-            className="group flex items-center justify-center gap-2.5 rounded-2xl border border-amber-500/40 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/20 py-3.5 px-5 text-xs font-black tracking-widest text-amber-300 uppercase shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-300 hover:border-amber-500 hover:bg-amber-500/30 hover:text-white hover:shadow-[0_0_30px_rgba(251,191,36,0.35)] hover:scale-[1.02]"
+            className="group flex items-center justify-center gap-2 rounded-xl border border-amber-500/40 bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-amber-500/20 py-2.5 px-4 text-xs font-black tracking-widest text-amber-300 uppercase shadow-[0_0_20px_rgba(251,191,36,0.15)] transition-all duration-300 hover:border-amber-500 hover:bg-amber-500/30 hover:text-white hover:shadow-[0_0_30px_rgba(251,191,36,0.35)] active:scale-95"
           >
-            <Trophy className="h-4 w-4 text-amber-400 transition-transform duration-300 group-hover:rotate-12" />
-            <span>Acessar Hall of Fame</span>
-            <ChevronRight className="h-4 w-4 transition-transform duration-300 group-hover:translate-x-1" />
+            <Trophy className="h-3.5 w-3.5 text-amber-400 transition-transform duration-300 group-hover:rotate-12" />
+            <span>Hall of Fame</span>
+            <ChevronRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
           </Link>
         </div>
 

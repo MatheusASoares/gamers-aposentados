@@ -29,22 +29,22 @@ Ao salvar os arquivos no projeto, utilize as pastas:
 | **07** | 🖼️ Banner  | **Cidade Subaquática de Rapture**     | _BioShock_               | `UNCOMMON`  |
 | **08** | 📜 Título  | **Caçadores de Relíquias de Yharnam** | _Bloodborne_             | `UNCOMMON`  |
 | **09** | 🛡️ Brasão  | **Medalhão do Lobo Branco**           | _The Witcher 3_          | `UNCOMMON`  |
-| **10** | 🐾 Mascote | **Ghost Orbe Companheiro**            | _Destiny_                |   `RARE`    |
+| **10** | 🐾 Mascote | **Palico Guerreiro Felyne**           | _Monster Hunter_         |   `RARE`    |
 | **11** | 🖼️ Banner  | **Fortaleza de Kaer Morhen**          | _The Witcher 3_          |   `RARE`    |
 | **12** | 📜 Título  | **Viajantes do Fim dos Tempos**       | _Chrono Trigger_         |   `RARE`    |
 | **13** | 🛡️ Brasão  | **Selo dos Belmonts & Alucard**       | _Castlevania: SotN_      |   `RARE`    |
-| **14** | 🖼️ Banner  | **Catedral Dourada de Anor Londo**    | _Dark Souls_             |   `RARE`    |
-| **15** | 🐾 Mascote | **Palico Guerreiro Felyne**           | _Monster Hunter_         |   `EPIC`    |
+| **14** | 📜 Título  | **Herdeiros da Primeira Chama**       | _Dark Souls_             |   `RARE`    |
+| **15** | 🐾 Mascote | **Chocobo Dourado Mecha**             | _Final Fantasy VII_      |   `EPIC`    |
 | **16** | 📜 Título  | **Guardiões de Midgard**              | _God of War Ragnarök_    |   `EPIC`    |
 | **17** | 🛡️ Brasão  | **Insígnia dos Spartanos de Reach**   | _Halo_                   |   `EPIC`    |
 | **18** | 🖼️ Banner  | **Santuário de Tsushima ao Luar**     | _Ghost of Tsushima_      |   `EPIC`    |
-| **19** | 🐾 Mascote | **Chocobo Dourado Mecha**             | _Final Fantasy VII_      |   `EPIC`    |
+| **19** | 🐾 Mascote | **Filhote de Dragão de Alduin**       | _Skyrim_                 |   `EPIC`    |
 | **20** | 📜 Título  | **Desbravadores do Oeste Selvagem**   | _Red Dead Redemption 2_  | `LEGENDARY` |
 | **21** | 🖼️ Banner  | **A Cidadela dos Espaços Profundos**  | _Mass Effect_            | `LEGENDARY` |
 | **22** | 🛡️ Brasão  | **Vaso de Alma & Ferrão Puro**        | _Hollow Knight_          | `LEGENDARY` |
 | **23** | 📜 Título  | **Testadores da Aperture Science**    | _Portal 2_               | `LEGENDARY` |
-| **24** | 🐾 Mascote | **Filhote de Dragão de Alduin**       | _Skyrim_                 | `LEGENDARY` |
-| **25** | 🖼️ Banner  | **A Árvore Sagrada do Cosmos**        | _Elden Ring_             |  `MYTHIC`   |
+| **24** | 🖼️ Banner  | **A Árvore Sagrada do Cosmos**        | _Elden Ring_             | `LEGENDARY` |
+| **25** | 🐾 Mascote | **Luna Lovegood**                     | _Mascote Suprema da Guilda_ |  `MYTHIC`   |
 
 ---
 
@@ -139,10 +139,10 @@ Two crossed glowing steel duel swords emblem, glowing cyan and magenta energy sp
 
 #### 🍃 **OPÇÃO A: MAKAR (O Pequeno Korok do Wind Waker)**
 
-**📸 Prompt 1: Imagem Base (Midjourney v6.1 / Flux / DALL-E 3 / Recraft):**
+**📸 Prompt 1: Imagem Base (Midjourney / Flux / DALL-E 3 / Recraft):**
 
 ```text
-Full body 3D character render of Makar the Korok forest spirit from The Legend of Zelda, cute round carved wooden tree trunk body with natural oak bark grain texture, wearing a flat vibrant green maple leaf face mask with two circular eye cutouts, a delicate leafy green twig sprouting from top of head, holding two small carved wooden rattle maracas, stubby wooden feet, standing centered occupying 60% of canvas with wide green padding on all 4 sides, plenty of headroom above sprout, isolated on pure solid bright chroma green screen background (#00FF00), clean sharp silhouette edges, studio lighting, Pixar and Unreal Engine 5 render style, 8k resolution --ar 1:1  --style raw
+Full body 3D character render of Makar the Korok forest spirit from The Legend of Zelda, cute round carved wooden tree trunk body with natural oak bark grain texture, wearing a flat vibrant green maple leaf face mask with two circular eye cutouts, a delicate leafy green twig sprouting from top of head, holding two small carved wooden rattle maracas, stubby wooden feet, standing centered occupying 60% of canvas with wide green padding on all 4 sides, plenty of headroom above sprout, isolated on pure solid bright chroma green screen background (#00FF00), clean sharp silhouette edges, studio lighting, Pixar and Unreal Engine 5 render style, 8k resolution --ar 1:1 --style raw
 ```
 
 **🎬 Prompt 2: Vídeo / Animação em Loop (Kling 1.5 / Runway Gen-3 / Luma / Veo / Minimax):**
@@ -161,7 +161,7 @@ Locked static camera, 1:1 square aspect ratio, maintain generous headroom above 
 - **Efeito da Sede:** Scanline CRT (`scanline`)
 - **Descrição:** _"No gods or kings. Only man. A metrópole do oceano profundo."_
 
-**🎨 Prompt Panorâmico (Midjourney v6.1):**
+**🎨 Prompt Panorâmico (Midjourney):**
 
 ```text
 Ultra wide panoramic 4:1 banner, majestic art deco underwater metropolis submerged in deep navy blue ocean, colossal glass domes and brass skyscrapers illuminated with warm amber and emerald vintage neon lights, bioshock rapture city aesthetic, glowing schools of bioluminescent fish swimming past curved glass tunnels, atmospheric god rays filtering through dark water, cinematic composition, octane render, unreal engine 5, 8k resolution --ar 4:1 --style raw --stylize 250
@@ -169,7 +169,7 @@ Ultra wide panoramic 4:1 banner, majestic art deco underwater metropolis submerg
 
 ---
 
-### 📜 NÍVEL 08 • Título: Caçadores de Relíquias de Yharnam - DONE
+### 📜 NÍVEL 08 • Título: Caçadores de Relíquias de Yharnam
 
 - **Jogo:** _Bloodborne_
 - **Raridade:** `UNCOMMON`
@@ -178,14 +178,14 @@ Ultra wide panoramic 4:1 banner, majestic art deco underwater metropolis submerg
 
 ---
 
-### 🛡️ NÍVEL 09 • Brasão: Medalhão do Lobo Branco
+### 🛡️ NÍVEL 09 • Brasão: Medalhão do Lobo Branco - DONE
 
 - **Jogo:** _The Witcher 3_
 - **Raridade:** `UNCOMMON`
 - **Arquivo Destino:** `public/assets/guild/emblems/witcher-wolf.png`
 - **Descrição:** _"O aço para humanos, a prata para monstros. O medalhão dos bruxos de Kaer Morhen."_
 
-**🎨 Prompt de Imagem (Midjourney v6.1 • Ícone 1:1):**
+**🎨 Prompt de Imagem (Midjourney • Ícone 1:1):**
 
 ```text
 Roaring metallic wolf head medallion emblem, Witcher 3 school of the wolf crest, jagged weathered silver and obsidian steel textures, piercing glowing amber yellow eyes, sharp specular rim lighting, engraved runes on metal collar, centered 3D game UI badge icon, clean silhouette, isolated on solid pitch black background (#000000) --ar 1:1 --style raw --stylize 200
@@ -193,94 +193,17 @@ Roaring metallic wolf head medallion emblem, Witcher 3 school of the wolf crest,
 
 ---
 
-### 🐾 NÍVEL 10 • Mascote: Ghost Orbe Companheiro
-
-- **Jogo:** _Destiny_
-- **Raridade:** `RARE`
-- **Arquivo Destino:** `public/assets/guild/mascots/ghost-drone.webm` (e `ghost-drone.png` / `ghost-drone.mp4`)
-- **Descrição:** _"Drone autônomo com carcaça modular levitante, olho holográfico e telemetria estelar."_
-
-**📸 Prompt 1: Imagem Base 3D (Midjourney v6.1 • Chroma Screen #00FF00):**
-
-```text
-Full body centered shot with generous empty green padding around all 4 sides, character occupies 60% of center frame, futuristic sci-fi floating drone companion, geometric modular outer shells made of pristine white ceramic armor plates and brushed titanium, central glowing cybernetic lens eye pulsing with purple and electric cyan light, magnetic levitation floating separated armor pieces, stylized AAA game asset, Destiny ghost aesthetic, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1  --style raw --no floor shadows, ground, blur, text, watermark
-```
-
-**🎬 Prompt 2: Vídeo / Animação em Loop (Kling 1.5 / Runway Gen-3 / Luma / Veo):**
-
-```text
-Locked static camera, 1:1 square framing, maintain generous headroom above upper armor shells, do not zoom in, do not pan, entire robotic drone fully visible in center frame. Seamless looping idle animation of the futuristic floating drone on solid flat bright green screen background (#00FF00). Its geometric white and titanium armor shells gently float, expand and rotate in magnetic levitation, the central glowing purple eye pulses softly and blinks with blue telemetry glints, and a subtle glowing holographic ring slowly rotates around its core. Perfectly centered, no camera movement, zero edge cutoffs, seamless 60fps loop.
-```
-
----
-
-### 🖼️ NÍVEL 11 • Banner: Fortaleza de Kaer Morhen
-
-- **Jogo:** _The Witcher 3_
-- **Raridade:** `RARE`
-- **Arquivo Destino:** `public/assets/guild/banners/kaer-morhen.jpg`
-- **Efeito da Sede:** Synthwave Grid (`synthwave-grid`)
-- **Descrição:** _"As montanhas se lembram de cada contrato e monstro abatido."_
-
-**🎨 Prompt Panorâmico (Midjourney v6.1):**
-
-```text
-Ultra wide panoramic 4:1 banner, ancient colossal medieval stone fortress perched on rugged snow-dusted mountain peaks, Kaer Morhen Witcher stronghold aesthetic, dramatic sunset sky with golden amber and deep indigo clouds, glowing torchlight in stone watchtowers, pine forest valley mist below, epic fantasy concept art, photorealistic 8k, volumetric atmosphere --ar 4:1  --style raw --stylize 250
-```
-
----
-
-### 📜 NÍVEL 12 • Título: Viajantes do Fim dos Tempos
-
-- **Jogo:** _Chrono Trigger_
-- **Raridade:** `RARE`
-- **Descrição:** _"The black wind howls... Através das eras, o destino do mundo é moldado."_
-- _(Recompensa textual do sistema - não requer geração de imagem)_
-
----
-
-### 🛡️ NÍVEL 13 • Brasão: Selo dos Belmonts & Alucard
-
-- **Jogo:** _Castlevania: Symphony of the Night_
-- **Raridade:** `RARE`
-- **Arquivo Destino:** `public/assets/guild/emblems/castlevania-seal.png`
-- **Descrição:** _"What is a man? A miserable little pile of secrets! O brasão dos caçadores da noite."_
-
-**🎨 Prompt de Imagem (Midjourney v6.1 • Ícone 1:1):**
-
-```text
-Gothic vampire hunting crest emblem, ornate crimson dragon and bat wings framing an engraved polished silver longsword and golden baroque crucifix, Castlevania Symphony of the Night aesthetic, rich crimson velvet backing, dark antique steel filigree, sharp specular reflections, centered 3D game UI badge asset, isolated on pure solid black background (#000000) --ar 1:1  --style raw --stylize 250
-```
-
----
-
-### 🖼️ NÍVEL 14 • Banner: Catedral Dourada de Anor Londo
-
-- **Jogo:** _Dark Souls_
-- **Raridade:** `RARE`
-- **Arquivo Destino:** `public/assets/guild/banners/anor-londo.jpg`
-- **Efeito da Sede:** Dragon Fire (`dragon-fire`)
-- **Descrição:** _"O crepúsculo dos Deuses nunca se apaga para os escolhidos."_
-
-**🎨 Prompt Panorâmico (Midjourney v6.1):**
-
-```text
-Ultra wide panoramic 4:1 banner, colossal gothic fantasy cathedral city bathed in eternal celestial golden sunset, Dark Souls Anor Londo and Elden Ring Leyndell architecture, towering flying buttresses, majestic marble statues, grand stone spires piercing through golden clouds, divine volumetric sunbeams, epic cinematic scale, photorealistic 8k --ar 4:1  --style raw --stylize 300
-```
-
----
-
-### 🐾 NÍVEL 15 • Mascote: Palico Guerreiro Felyne
+### 🐾 NÍVEL 10 • Mascote: Palico Guerreiro Felyne - DONE
 
 - **Jogo:** _Monster Hunter_
-- **Raridade:** `EPIC`
+- **Raridade:** `RARE`
 - **Arquivo Destino:** `public/assets/guild/mascots/palico-felyne.webm` (e `palico-felyne.png` / `palico-felyne.mp4`)
 - **Descrição:** _"Gatinho caçador com mini armadura medieval de placas, elmo com penacho e caneca de poção."_
 
-**📸 Prompt 1: Imagem Base 3D (Midjourney v6.1 • Chroma Screen #00FF00):**
+**📸 Prompt 1: Imagem Base 3D (Midjourney • Chroma Screen #00FF00):**
 
 ```text
-Full body centered shot with generous empty green padding on all sides, character occupies 60% of center frame, plenty of headroom above helmet feather plume, adorable heroic calico cat knight warrior mascot, wearing polished steel and brass medieval plate armor with ornate leather straps, tiny knight helmet with flowing scarlet feather crest, holding a large carved wooden hunting tankard filled with bubbly glowing golden potion foam, expressive big bright eyes, playful heroic smile, stylized 3D game character, Monster Hunter and Pixar render style, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1  --style raw --no floor shadows, ground, blur, text, watermark
+Full body centered shot with generous empty green padding on all sides, character occupies 60% of center frame, plenty of headroom above helmet feather plume, adorable heroic calico cat knight warrior mascot, wearing polished steel and brass medieval plate armor with ornate leather straps, tiny knight helmet with flowing scarlet feather crest, holding a large carved wooden hunting tankard filled with bubbly glowing golden potion foam, expressive big bright eyes, playful heroic smile, stylized 3D game character, Monster Hunter and Pixar render style, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1 --style raw --no floor shadows, ground, blur, text, watermark
 ```
 
 **🎬 Prompt 2: Vídeo / Animação em Loop (Kling 1.5 / Runway Gen-3 / Luma / Veo):**
@@ -291,57 +214,68 @@ Locked static camera, 1:1 square framing, maintain generous headroom above feath
 
 ---
 
-### 📜 NÍVEL 16 • Título: Guardiões de Midgard
+### 🖼️ NÍVEL 11 • Banner: Fortaleza de Kaer Morhen - DONE
 
-- **Jogo:** _God of War Ragnarök_
-- **Raridade:** `EPIC`
-- **Descrição:** _"Don't be sorry, be better. A fúria espartana guiando o esquadrão."_
+- **Jogo:** _The Witcher 3_
+- **Raridade:** `RARE`
+- **Arquivo Destino:** `public/assets/guild/banners/kaer-morhen.jpg`
+- **Efeito da Sede:** Synthwave Grid (`synthwave-grid`)
+- **Descrição:** _"As montanhas se lembram de cada contrato e monstro abatido."_
+
+**🎨 Prompt Panorâmico (Midjourney):**
+
+```text
+Ultra wide panoramic 4:1 banner, ancient colossal medieval stone fortress perched on rugged snow-dusted mountain peaks, Kaer Morhen Witcher stronghold aesthetic, dramatic sunset sky with golden amber and deep indigo clouds, glowing torchlight in stone watchtowers, pine forest valley mist below, epic fantasy concept art, photorealistic 8k, volumetric atmosphere --ar 4:1 --style raw --stylize 250
+```
+
+---
+
+### 📜 NÍVEL 12 • Título: Viajantes do Fim dos Tempos - DONE
+
+- **Jogo:** _Chrono Trigger_
+- **Raridade:** `RARE`
+- **Descrição:** _"The black wind howls... Através das eras, o destino do mundo é moldado."_
 - _(Recompensa textual do sistema - não requer geração de imagem)_
 
 ---
 
-### 🛡️ NÍVEL 17 • Brasão: Insígnia dos Spartanos de Reach
+### 🛡️ NÍVEL 13 • Brasão: Selo dos Belmonts & Alucard - DONE
 
-- **Jogo:** _Halo_
-- **Raridade:** `EPIC`
-- **Arquivo Destino:** `public/assets/guild/emblems/spartan-reach.png`
-- **Descrição:** _"Spartans never die, they're just missing in action. O elmo dos guerreiros titânicos."_
+- **Jogo:** _Castlevania: Symphony of the Night_
+- **Raridade:** `RARE`
+- **Arquivo Destino:** `public/assets/guild/emblems/castlevania-seal.png`
+- **Descrição:** _"What is a man? A miserable little pile of secrets! O brasão dos caçadores da noite."_
 
-**🎨 Prompt de Imagem (Midjourney v6.1 • Ícone 1:1):**
+**🎨 Prompt de Imagem (Midjourney • Ícone 1:1):**
 
 ```text
-Futuristic Spartan helmet crest emblem, matte olive-drab and dark titanium combat armor with reflective golden-amber hex visor, glowing neon cyan shield circuit nodes, Halo Reach Noble Team aesthetic, hard-surface sci-fi badge asset, sharp 3D render, centered icon, clean silhouette, isolated on pure solid black background (#000000) --ar 1:1  --style raw --stylize 200
+Gothic vampire hunting crest emblem, ornate crimson dragon and bat wings framing an engraved polished silver longsword and golden baroque crucifix, Castlevania Symphony of the Night aesthetic, rich crimson velvet backing, dark antique steel filigree, sharp specular reflections, centered 3D game UI badge asset, isolated on pure solid black background (#000000) --ar 1:1 --style raw --stylize 250
 ```
 
 ---
 
-### 🖼️ NÍVEL 18 • Banner: Santuário de Tsushima ao Luar
+### 📜 NÍVEL 14 • Título: Herdeiros da Primeira Chama - DONE
 
-- **Jogo:** _Ghost of Tsushima_
-- **Raridade:** `EPIC`
-- **Arquivo Destino:** `public/assets/guild/banners/tsushima-shrine.jpg`
-- **Efeito da Sede:** Pétalas de Sakura (`sakura-twilight`)
-- **Descrição:** _"A honra morreu na praia. Nós renascemos como fantasmas na tempestade."_
-
-**🎨 Prompt Panorâmico (Midjourney v6.1):**
-
-```text
-Ultra wide panoramic 4:1 banner, serene ancient Japanese Shinto shrine at twilight, vibrant red wooden Torii gate surrounded by glowing crimson and golden maple leaves falling in gentle wind, glowing stone lanterns, massive luminous full moon reflecting over a calm misty koi pond, Ghost of Tsushima aesthetic, cinematic atmosphere, 8k painterly realism --ar 4:1  --style raw --stylize 250
-```
+- **Jogo:** _Dark Souls_
+- **Raridade:** `RARE`
+- **Ícone Lucide:** `Sun`
+- **Descrição:** _"Praise the Sun! \\[T]/ Aqueles que desafiaram a maldição e reacenderam a Era do Fogo."_
+- **Badges / Cores:** `border-amber-500/70 bg-gradient-to-r from-amber-950/80 via-orange-950/60 to-zinc-950 text-amber-300 shadow-[0_0_22px_rgba(245,158,11,0.45)] ring-1 ring-amber-500/30`
+- _(Recompensa textual do sistema - não requer geração de imagem)_
 
 ---
 
-### 🐾 NÍVEL 19 • Mascote: Chocobo Dourado Mecha
+### 🐾 NÍVEL 15 • Mascote: Chocobo Dourado Mecha - DONE
 
 - **Jogo:** _Final Fantasy VII_
 - **Raridade:** `EPIC`
 - **Arquivo Destino:** `public/assets/guild/mascots/mecha-chocobo.webm` (e `mecha-chocobo.png` / `mecha-chocobo.mp4`)
 - **Descrição:** _"Filhote de pássaro lendário dourado com asas cibernéticas de titânio, óculos de aviador e circuitos neon."_
 
-**📸 Prompt 1: Imagem Base 3D (Midjourney v6.1 • Chroma Screen #00FF00):**
+**📸 Prompt 1: Imagem Base 3D (Midjourney • Chroma Screen #00FF00):**
 
 ```text
-Full body centered shot with generous empty green padding on all 4 sides, character occupies 60% of frame, plenty of headroom above head feathers, adorable cute chibi golden fantasy bird chick mascot, metallic golden-yellow feathers with subtle glowing neon cyan cybernetic circuit lines, glossy aviator goggles with iridescent holographic lenses resting on forehead, small mechanical cyber-wings with brass and carbon fiber accents, energetic standing pose, stylized 3D AAA game character, Final Fantasy Chocobo and Pixar aesthetic, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1  --style raw --no floor shadows, ground, blur, text, watermark
+Full body centered shot with generous empty green padding on all 4 sides, character occupies 60% of frame, plenty of headroom above head feathers, adorable cute chibi golden fantasy bird chick mascot, metallic golden-yellow feathers with subtle glowing neon cyan cybernetic circuit lines, glossy aviator goggles with iridescent holographic lenses resting on forehead, small mechanical cyber-wings with brass and carbon fiber accents, energetic standing pose, stylized 3D AAA game character, Final Fantasy Chocobo and Pixar aesthetic, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1 --style raw --no floor shadows, ground, blur, text, watermark
 ```
 
 **🎬 Prompt 2: Vídeo / Animação em Loop (Kling 1.5 / Runway Gen-3 / Luma / Veo):**
@@ -352,66 +286,57 @@ Locked static camera, 1:1 square framing, maintain generous headroom above head 
 
 ---
 
-### 📜 NÍVEL 20 • Título: Desbravadores do Oeste Selvagem
+### 📜 NÍVEL 16 • Título: Guardiões de Midgard - DONE
 
-- **Jogo:** _Red Dead Redemption 2_
-- **Raridade:** `LEGENDARY`
-- **Descrição:** _"We're more ghosts than people. O bando mais respeitado de toda a fronteira."_
+- **Jogo:** _God of War Ragnarök_
+- **Raridade:** `EPIC`
+- **Descrição:** _"Don't be sorry, be better. A fúria espartana guiando o esquadrão."_
 - _(Recompensa textual do sistema - não requer geração de imagem)_
 
 ---
 
-### 🖼️ NÍVEL 21 • Banner: A Cidadela dos Espaços Profundos
+### 🛡️ NÍVEL 17 • Brasão: Insígnia dos Spartanos de Reach - DONE
 
-- **Jogo:** _Mass Effect_
-- **Raridade:** `LEGENDARY`
-- **Arquivo Destino:** `public/assets/guild/banners/citadel-station.jpg`
-- **Efeito da Sede:** Estrelas Cósmicas (`cosmic-stars`)
-- **Descrição:** _"I'm Commander Shepard and this is my favorite guild on the Citadel."_
+- **Jogo:** _Halo_
+- **Raridade:** `EPIC`
+- **Arquivo Destino:** `public/assets/guild/emblems/spartan-reach.png`
+- **Descrição:** _"Spartans never die, they're just missing in action. O elmo dos guerreiros titânicos."_
 
-**🎨 Prompt Panorâmico (Midjourney v6.1):**
+**🎨 Prompt de Imagem (Midjourney • Ícone 1:1):**
 
 ```text
-Ultra wide panoramic 4:1 banner, colossal sci-fi space station metropolis floating in deep cosmos, massive open ward arms illuminated with millions of blue, white and amber city lights, glowing purple and teal galactic nebula in background, sleek starships cruising through space lanes, Mass Effect Citadel aesthetic, epic scale, photorealistic 8k render, cinematic sci-fi vista --ar 4:1  --style raw --stylize 250
+Futuristic Spartan helmet crest emblem, matte olive-drab and dark titanium combat armor with reflective golden-amber hex visor, glowing neon cyan shield circuit nodes, Halo Reach Noble Team aesthetic, hard-surface sci-fi badge asset, sharp 3D render, centered icon, clean silhouette, isolated on pure solid black background (#000000) --ar 1:1 --style raw --stylize 200
 ```
 
 ---
 
-### 🛡️ NÍVEL 22 • Brasão: Vaso de Alma & Ferrão Puro
+### 🖼️ NÍVEL 18 • Banner: Santuário de Tsushima ao Luar - DONE
 
-- **Jogo:** _Hollow Knight_
-- **Raridade:** `LEGENDARY`
-- **Arquivo Destino:** `public/assets/guild/emblems/hollow-knight.png`
-- **Descrição:** _"Born of God and Void. A lâmina pura que cortou a escuridão de Hallownest."_
+- **Jogo:** _Ghost of Tsushima_
+- **Raridade:** `EPIC`
+- **Arquivo Destino:** `public/assets/guild/banners/tsushima-shrine.jpg`
+- **Efeito da Sede:** Pétalas de Sakura (`sakura-twilight`)
+- **Descrição:** _"A honra morreu na praia. Nós renascemos como fantasmas na tempestade."_
 
-**🎨 Prompt de Imagem (Midjourney v6.1 • Ícone 1:1):**
+**🎨 Prompt Panorâmico (Midjourney):**
 
 ```text
-Pure Nail silver blade and porcelain white Void Vessel horned mask crest emblem, ethereal glowing cyan and deep void black tendrils swirling behind mask, sharp specular blade reflections, Hollow Knight Hallownest aesthetic, high-contrast 3D stylized game UI badge asset, centered, clean silhouette, isolated on pure solid black background (#000000) --ar 1:1  --style raw --stylize 250
+Ultra wide panoramic 4:1 banner, serene ancient Japanese Shinto shrine at twilight, vibrant red wooden Torii gate surrounded by glowing crimson and golden maple leaves falling in gentle wind, glowing stone lanterns, massive luminous full moon reflecting over a calm misty koi pond, Ghost of Tsushima aesthetic, cinematic atmosphere, 8k painterly realism --ar 4:1 --style raw --stylize 250
 ```
 
 ---
 
-### 📜 NÍVEL 23 • Título: Testadores da Aperture Science
-
-- **Jogo:** _Portal 2_
-- **Raridade:** `LEGENDARY`
-- **Descrição:** _"The cake is a lie, mas as conquistas desta guilda são 100% reais."_
-- _(Recompensa textual do sistema - não requer geração de imagem)_
-
----
-
-### 🐾 NÍVEL 24 • Mascote: Filhote de Dragão de Alduin
+### 🐾 NÍVEL 19 • Mascote: Filhote de Dragão de Alduin - DONE
 
 - **Jogo:** _Skyrim_
-- **Raridade:** `LEGENDARY`
+- **Raridade:** `EPIC`
 - **Arquivo Destino:** `public/assets/guild/mascots/alduin-dragon.webm` (e `alduin-dragon.png` / `alduin-dragon.mp4`)
 - **Descrição:** _"Filhote de dragão ancião de obsidiana com escamas vulcânicas, asas cósmicas e sopro de chama mágica."_
 
-**📸 Prompt 1: Imagem Base 3D (Midjourney v6.1 • Chroma Screen #00FF00):**
+**📸 Prompt 1: Imagem Base 3D (Midjourney • Chroma Screen #00FF00):**
 
 ```text
-Full body centered shot with generous empty green padding on all 4 sides, character occupies 60% of frame, plenty of headroom above dragon horns and wings, adorable cute chibi baby ancient dragon mascot, obsidian black textured scales with glowing molten magenta and golden volcanic lava cracks along its chest and spine, tiny majestic obsidian horns, small leathery wings with cosmic stardust pattern on underside, curled tail with spiked tip, proud playful pose, stylized 3D AAA game character, Skyrim Alduin and Pixar render style, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1  --style raw --no floor shadows, ground, blur, text, watermark
+Full body centered shot with generous empty green padding on all 4 sides, character occupies 60% of frame, plenty of headroom above dragon horns and wings, adorable cute chibi baby ancient dragon mascot, obsidian black textured scales with glowing molten magenta and golden volcanic lava cracks along its chest and spine, tiny majestic obsidian horns, small leathery wings with cosmic stardust pattern on underside, curled tail with spiked tip, proud playful pose, stylized 3D AAA game character, Skyrim Alduin and Pixar render style, studio rim lighting, sharp crisp contour edges, isolated on pure solid bright chroma green screen background (#00FF00) --ar 1:1 --style raw --no floor shadows, ground, blur, text, watermark
 ```
 
 **🎬 Prompt 2: Vídeo / Animação em Loop (Kling 1.5 / Runway Gen-3 / Luma / Veo):**
@@ -422,18 +347,89 @@ Locked static camera, 1:1 square framing, maintain generous headroom above drago
 
 ---
 
-### 🖼️ NÍVEL 25 • Banner: A Árvore Sagrada do Cosmos
+### 📜 NÍVEL 20 • Título: Desbravadores do Oeste Selvagem - DONE
 
-- **Jogo:** _Elden Ring_
-- **Raridade:** `MYTHIC`
-- **Arquivo Destino:** `public/assets/guild/banners/erdtree-cosmos.jpg`
-- **Efeito da Sede:** Aura de Cristal (`crystal-aura`)
-- **Descrição:** _"Foul Tarnished, in search of the Elden Ring... O pináculo de todas as eras."_
+- **Jogo:** _Red Dead Redemption 2_
+- **Raridade:** `LEGENDARY`
+- **Descrição:** _"We're more ghosts than people. O bando mais respeitado de toda a fronteira."_
+- _(Recompensa textual do sistema - não requer geração de imagem)_
 
-**🎨 Prompt Panorâmico (Midjourney v6.1):**
+---
+
+### 🖼️ NÍVEL 21 • Banner: A Cidadela dos Espaços Profundos - DONE
+
+- **Jogo:** _Mass Effect_
+- **Raridade:** `LEGENDARY`
+- **Arquivo Destino:** `public/assets/guild/banners/citadel-station.jpg`
+- **Efeito da Sede:** Estrelas Cósmicas (`cosmic-stars`)
+- **Descrição:** _"I'm Commander Shepard and this is my favorite guild on the Citadel."_
+
+**🎨 Prompt Panorâmico (Midjourney):**
 
 ```text
-Ultra wide panoramic 4:1 banner, colossal celestial golden Erdtree standing in the center of the universe, towering radiant trunk with glowing golden-amber foliage branching into deep space, sparkling cosmic stardust, nebulae and distant constellations orbiting the tree, Elden Ring and Chrono Cross mythical fantasy landscape, breathtaking scale, divine volumetric lighting, cinematic masterpiece 8k --ar 4:1  --style raw --stylize 300
+Ultra wide panoramic 4:1 banner, colossal sci-fi space station metropolis floating in deep cosmos, massive open ward arms illuminated with millions of blue, white and amber city lights, glowing purple and teal galactic nebula in background, sleek starships cruising through space lanes, Mass Effect Citadel aesthetic, epic scale, photorealistic 8k render, cinematic sci-fi vista --ar 4:1 --style raw --stylize 250
+```
+
+---
+
+### 🛡️ NÍVEL 22 • Brasão: Vaso de Alma & Ferrão Puro - DONE
+
+- **Jogo:** _Hollow Knight_
+- **Raridade:** `LEGENDARY`
+- **Arquivo Destino:** `public/assets/guild/emblems/hollow-knight.png`
+- **Descrição:** _"Born of God and Void. A lâmina pura que cortou a escuridão de Hallownest."_
+
+**🎨 Prompt de Imagem (Midjourney • Ícone 1:1):**
+
+```text
+Pure Nail silver blade and porcelain white Void Vessel horned mask crest emblem, ethereal glowing cyan and deep void black tendrils swirling behind mask, sharp specular blade reflections, Hollow Knight Hallownest aesthetic, high-contrast 3D stylized game UI badge asset, centered, clean silhouette, isolated on pure solid black background (#000000) --ar 1:1 --style raw --stylize 250
+```
+
+---
+
+### 📜 NÍVEL 23 • Título: Testadores da Aperture Science - DONE
+
+- **Jogo:** _Portal 2_
+- **Raridade:** `LEGENDARY`
+- **Descrição:** _"The cake is a lie, mas as conquistas desta guilda são 100% reais."_
+- _(Recompensa textual do sistema - não requer geração de imagem)_
+
+---
+
+### 🖼️ NÍVEL 24 • Banner: A Árvore Sagrada do Cosmos - DONE
+
+- **Jogo:** _Elden Ring_
+- **Raridade:** `LEGENDARY`
+- **Arquivo Destino:** `public/assets/guild/banners/erdtree-cosmos.jpg`
+- **Efeito da Sede:** Aura de Cristal (`crystal-aura`)
+- **Descrição:** _"Foul Tarnished, in search of the Elden Ring... A luz dourada guia os passos da guilda."_
+
+**🎨 Prompt Panorâmico (Midjourney):**
+
+```text
+Ultra wide panoramic 4:1 banner, colossal celestial golden Erdtree standing in the center of the universe, towering radiant trunk with glowing golden-amber foliage branching into deep space, sparkling cosmic stardust, nebulae and distant constellations orbiting the tree, Elden Ring and Chrono Cross mythical fantasy landscape, breathtaking scale, divine volumetric lighting, cinematic masterpiece 8k --ar 4:1 --style raw --stylize 300
+```
+
+---
+
+### 🐾 NÍVEL 25 • Mascote: Luna Lovegood (A Guardiã Suprema) - DONE
+
+- **Homenagem:** _Mascote Oficial e Suprema da Guilda dos Gamers Aposentados_
+- **Raridade:** `MYTHIC`
+- **Referência Salva:** `public/assets/guild/mascots/luna-reference.jpg`
+- **Arquivo Destino:** `public/assets/guild/mascots/luna-lovegood.webm` (e `luna-lovegood.png` / `luna-lovegood.mp4`)
+- **Descrição:** _"A rainha canina da guilda, protetora do descanso dos aposentados e devoradora de petiscos lendários."_
+
+**🎨 Prompt de Imagem (Midjourney / Flux / Leonardo - Chroma Key Verde):**
+
+```text
+An adorable pure white Shih Tzu dog, fluffy and silky pristine white coat, perfectly round cute puppy face, big expressive glossy dark eyes filled with affection, charming black button nose, soft floppy ears. Completely natural canine portrait without any armor, clothes, or artificial gear—pure adorable dog in her natural glory. Resting gracefully in a cute sphinx pose, looking up towards the camera with a loving and loyal gaze. Centered full body portrait, soft volumetric studio lighting illuminating the fine fur strands, solid bright uniform chroma green screen background (#00FF00), 8k photorealistic masterpiece --ar 1:1 --style raw --stylize 250
+```
+
+**🎬 Prompt de Vídeo (Kling AI / Runway Gen-3 / Luma Dream Machine):**
+
+```text
+Fixed static camera on tripod, eye-level. A small, fluffy white Shih Tzu dog resting in sphinx pose on a flat solid chroma key green screen background (#00FF00). The dog breathes gently, blinks her shiny black eyes tenderly, tilts her head slightly with curiosity, twitches her soft floppy ears, gives a tiny happy lick to her nose and wags her tail gently. High detail fur simulation, completely static and flat uniform green background without shadows, perfectly looped subtle idle movement.
 ```
 
 ---

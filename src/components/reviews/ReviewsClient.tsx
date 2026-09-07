@@ -147,7 +147,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                         <h1 className="text-shadow-glow text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">
                             Reviews & Críticas
                         </h1>
-                        <p className="text-sm sm:text-base font-bold tracking-wide text-zinc-400 max-w-2xl">
+                        <p className="text-sm sm:text-base font-bold tracking-wide text-zinc-400 max-w-2xl hidden sm:block">
                             Todas as análises sinceras, notas, registros de screenshots e impressões finais deixadas pelos membros após zerarem suas jornadas.
                         </p>
                     </div>

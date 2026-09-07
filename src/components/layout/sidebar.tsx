@@ -11,6 +11,7 @@ import {
     Scroll,
     Trophy,
     Scale,
+    Shield,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,7 +53,8 @@ export function Sidebar({ className }: SidebarProps) {
                 <AppLogo theme={equippedTheme} variant="sidebar" />
 
                 <div className="mt-4 px-4 py-2">
-                    <nav className="space-y-2.5">
+                    <nav className="space-y-1.5">
+                        {/* 1. Hub / Overview */}
                         <Link href="/" passHref>
                             <Button
                                 variant="ghost"
@@ -67,20 +69,8 @@ export function Sidebar({ className }: SidebarProps) {
                                 <span className="truncate">Dashboard</span>
                             </Button>
                         </Link>
-                        <Link href="/profile" passHref>
-                            <Button
-                                variant="ghost"
-                                className={cn(
-                                    "h-11 w-full justify-start gap-3 rounded-xl px-3 text-[11px] font-bold tracking-wide uppercase transition-all duration-300 overflow-hidden",
-                                    isActive("/profile")
-                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
-                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-4 hover:text-zinc-300",
-                                )}
-                            >
-                                <Trophy className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/profile") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-amber-400")} />
-                                <span className="truncate">Hall of Fame</span>
-                            </Button>
-                        </Link>
+
+                        {/* 2. Active Quests & Backlog */}
                         <Link href="/quests" passHref>
                             <Button
                                 variant="ghost"
@@ -92,9 +82,27 @@ export function Sidebar({ className }: SidebarProps) {
                                 )}
                             >
                                 <Map className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/quests") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-emerald-400")} />
-                                <span className="truncate">Quests</span>
+                                <span className="truncate">Quest Log</span>
                             </Button>
                         </Link>
+
+                        {/* 3. Guild Headquarters */}
+                        <Link href="/guild" passHref>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "h-11 w-full justify-start gap-3 rounded-xl px-3 text-[11px] font-bold tracking-wide uppercase transition-all duration-300 overflow-hidden",
+                                    isActive("/guild")
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-4 hover:text-zinc-300",
+                                )}
+                            >
+                                <Shield className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/guild") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-[#bd0df2]")} />
+                                <span className="truncate">Guild HQ</span>
+                            </Button>
+                        </Link>
+
+                        {/* 4. AI Campaign Contracts & Notice Board */}
                         <Link href="/board" passHref>
                             <Button
                                 variant="ghost"
@@ -106,23 +114,11 @@ export function Sidebar({ className }: SidebarProps) {
                                 )}
                             >
                                 <Scroll className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/board") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-rose-400")} />
-                                <span className="truncate">Board</span>
+                                <span className="truncate">Notice Board</span>
                             </Button>
                         </Link>
-                        <Link href="/reviews" passHref>
-                            <Button
-                                variant="ghost"
-                                className={cn(
-                                    "h-11 w-full justify-start gap-3 rounded-xl px-3 text-[11px] font-bold tracking-wide uppercase transition-all duration-300 overflow-hidden",
-                                    isActive("/reviews")
-                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
-                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-4 hover:text-zinc-300",
-                                )}
-                            >
-                                <History className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/reviews") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-indigo-400")} />
-                                <span className="truncate">Reviews</span>
-                            </Button>
-                        </Link>
+
+                        {/* 5. Randomizer / Selection Cycle */}
                         <Link href="/randomizer" passHref>
                             <Button
                                 variant="ghost"
@@ -137,6 +133,40 @@ export function Sidebar({ className }: SidebarProps) {
                                 <span className="truncate">Randomizer</span>
                             </Button>
                         </Link>
+
+                        {/* 6. Post-Game Reviews & Ratings */}
+                        <Link href="/reviews" passHref>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "h-11 w-full justify-start gap-3 rounded-xl px-3 text-[11px] font-bold tracking-wide uppercase transition-all duration-300 overflow-hidden",
+                                    isActive("/reviews")
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-4 hover:text-zinc-300",
+                                )}
+                            >
+                                <History className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/reviews") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-indigo-400")} />
+                                <span className="truncate">Reviews</span>
+                            </Button>
+                        </Link>
+
+                        {/* 7. Personal Profile & Level Progression */}
+                        <Link href="/profile" passHref>
+                            <Button
+                                variant="ghost"
+                                className={cn(
+                                    "h-11 w-full justify-start gap-3 rounded-xl px-3 text-[11px] font-bold tracking-wide uppercase transition-all duration-300 overflow-hidden",
+                                    isActive("/profile")
+                                        ? "border border-theme-primary bg-theme-primary/15 text-theme-primary theme-glow"
+                                        : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-4 hover:text-zinc-300",
+                                )}
+                            >
+                                <Trophy className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/profile") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-amber-400")} />
+                                <span className="truncate">Hall of Fame</span>
+                            </Button>
+                        </Link>
+
+                        {/* 8. Deals & Wishlist */}
                         <Link href="/deals" passHref>
                             <Button
                                 variant="ghost"

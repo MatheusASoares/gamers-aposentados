@@ -19,7 +19,7 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
       ? "dragon-fire"
       : bannerId === "banner-chronos"
       ? "cosmic-stars"
-      : bannerId === "banner-astral-crystal"
+      : bannerId === "banner-astral-crystal" || bannerId === "banner-midgar-lifestream"
       ? "crystal-aura"
       : bannerId === "banner-japanese-sunrise" || bannerId === "banner-sakura-fuji"
       ? "sakura-twilight"
@@ -76,19 +76,18 @@ export function BannerFxOverlay({ effectType, bannerId, className = "" }: Banner
       {/* 3. ASTRAL CRYSTAL & MAKO ETHER EFFECT (Final Fantasy / Sci-Fi JRPG) */}
       {activeEffect === "crystal-aura" && (
         <div className="relative h-full w-full">
-          {/* Mako Cyan & Crystal Violet Nebula Pulse */}
-          <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/10 via-[#bd0df2]/20 to-cyan-500/10 animate-laser-sweep" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 h-64 w-64 rounded-full bg-cyan-400/25 blur-3xl animate-pulse" />
+          {/* Mako Cyan & Crystal Violet Nebula Pulse with smooth faded edges */}
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-[#bd0df2]/15 to-transparent animate-laser-sweep" />
 
-          {/* Twinkling Crystal Shards & Ether Starlight */}
-          <div className="absolute inset-0 opacity-85">
-            <div className="absolute top-1/3 left-1/4 h-2.5 w-2.5 rounded-full bg-cyan-200 shadow-[0_0_15px_#a5f3fc] animate-ping" />
-            <div className="absolute top-1/2 left-3/4 h-3 w-3 rounded-full bg-purple-300 shadow-[0_0_18px_#d8b4fe] animate-pulse" />
-            <div className="hidden sm:block absolute bottom-1/4 left-1/2 h-2 w-2 rounded-full bg-white shadow-[0_0_12px_#ffffff] animate-ping" />
+          {/* Twinkling Crystal Shards & Ether Starlight - crisp, subtle particles */}
+          <div className="absolute inset-0 opacity-80">
+            <div className="absolute top-1/3 left-1/4 h-2 w-2 rounded-full bg-cyan-200 shadow-[0_0_12px_#a5f3fc] animate-ping" />
+            <div className="absolute top-1/2 left-3/4 h-2 w-2 rounded-full bg-purple-300 shadow-[0_0_12px_#d8b4fe] animate-pulse" />
+            <div className="hidden sm:block absolute bottom-1/4 left-1/2 h-1.5 w-1.5 rounded-full bg-white shadow-[0_0_10px_#ffffff] animate-ping" />
           </div>
 
           {/* Celestial Holographic Border */}
-          <div className="absolute inset-0 border-2 border-cyan-300/50 shadow-[0_0_25px_rgba(103,232,249,0.4)]" />
+          <div className="absolute inset-0 border-2 border-cyan-300/40 shadow-[0_0_20px_rgba(103,232,249,0.3)]" />
         </div>
       )}
 

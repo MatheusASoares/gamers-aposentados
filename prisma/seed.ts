@@ -863,6 +863,8 @@ const allReviews: ReviewData[] = [
 // ============================================================
 async function main() {
     console.log("🧹 Clearing existing games, pools and reviews...");
+    await prisma.guildMember.deleteMany();
+    await prisma.guild.deleteMany();
     await prisma.campaignContractProgress.deleteMany();
     await prisma.campaignContract.deleteMany();
     await prisma.specialGameVote.deleteMany();
@@ -874,7 +876,7 @@ async function main() {
     await prisma.game.deleteMany();
 
     // ----------------------------------------------------------
-    // 1. UPSERT USERS (Preserves passwords and accounts)
+    // 1. UPSERT USERS & GUILDA DOS FUNDADORES
     // ----------------------------------------------------------
     console.log("👤 Ensuring primary guild users exist...");
     const matheus = await prisma.user.upsert({
@@ -914,6 +916,30 @@ async function main() {
             username: "ygnos",
             email: "yanhyuuga@gmail.com",
             name: "Ygnos, The Mage",
+        },
+    });
+
+    console.log("🛡️ Creating Guilda dos Fundadores...");
+    const founderGuild = await prisma.guild.create({
+        data: {
+            name: "Guilda dos Fundadores",
+            slug: "fundadores",
+            description: "A guilda lendária original de Matheus & Lucas. Foco em zerar o backlog, campanhas épicas e platinas.",
+            invite_code: "FUNDADORES",
+            owner_id: matheus.id,
+            level: 8,
+            xp_points: 4800,
+            equipped_title: "Fundadores Lendários",
+            equipped_banner: "banner-retro-arcade",
+            equipped_emblem: "emblem-shield-purple",
+            members: {
+                create: [
+                    { user_id: matheus.id, role: "LEADER", is_active: true },
+                    { user_id: lucas.id, role: "LEADER", is_active: true },
+                    { user_id: leticia.id, role: "MEMBER", is_active: false },
+                    { user_id: ygnos.id, role: "MEMBER", is_active: false },
+                ],
+            },
         },
     });
 
@@ -1019,6 +1045,7 @@ async function main() {
 
         const pool = await prisma.pool.create({
             data: {
+                guild_id: founderGuild.id,
                 month: poolData.month,
                 year: poolData.year,
                 type: poolData.type,

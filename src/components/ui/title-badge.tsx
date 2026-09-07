@@ -9,6 +9,10 @@ import {
   Crown,
   Flame,
   Trophy,
+  Radio,
+  Moon,
+  Hourglass,
+  Atom,
 } from "lucide-react";
 import { getTitleBadgeStyle } from "@/lib/constants/rewards";
 import { cn } from "@/lib/utils";
@@ -35,6 +39,19 @@ export function renderTitleIcon(titleName: string | null, className: string = "h
       return <Flame className={cn("text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]", className)} />;
     case "Imortal do Backlog Zero":
       return <Trophy className={cn("text-orange-400 drop-shadow-[0_0_10px_rgba(234,88,12,0.9)]", className)} />;
+    // --- GUILD 25-LEVEL TITLES ---
+    case "Agentes da Foxhound":
+      return <Radio className={cn("text-emerald-400 drop-shadow-[0_0_6px_rgba(16,185,129,0.6)] animate-pulse", className)} />;
+    case "Caçadores de Relíquias de Yharnam":
+      return <Moon className={cn("text-rose-400 drop-shadow-[0_0_6px_rgba(225,29,72,0.6)]", className)} />;
+    case "Viajantes do Fim dos Tempos":
+      return <Hourglass className={cn("text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.6)]", className)} />;
+    case "Guardiões de Midgard":
+      return <Flame className={cn("text-orange-400 drop-shadow-[0_0_8px_rgba(249,115,22,0.8)]", className)} />;
+    case "Desbravadores do Oeste Selvagem":
+      return <Compass className={cn("text-amber-400 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)]", className)} />;
+    case "Testadores da Aperture Science":
+      return <Atom className={cn("text-cyan-400 drop-shadow-[0_0_6px_rgba(6,182,212,0.6)] animate-pulse", className)} />;
     case "Aposentado Novato":
     default:
       return <Shield className={cn("text-zinc-400", className)} />;

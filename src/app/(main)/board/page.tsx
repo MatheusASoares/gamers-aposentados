@@ -5,6 +5,8 @@ import { isRandomizerPlayer } from "@/lib/randomizer-players";
 import { NoticeBoardMuralClient } from "@/components/contracts/NoticeBoardMuralClient";
 import { ensureUserContractProgress } from "@/app/lib/notice-board-actions";
 
+import { getActiveGuild } from "@/app/lib/guild-actions";
+
 export default async function ContractsPage() {
     const session = await auth();
     if (!session?.user?.id) {
@@ -13,7 +15,8 @@ export default async function ContractsPage() {
 
     const userId = session.user.id;
     const userEmail = session.user.email || "";
-    const isPlayer = isRandomizerPlayer(userEmail);
+    const activeGuild = await getActiveGuild();
+    const isPlayer = isRandomizerPlayer(userEmail) || (activeGuild?.members.some((m) => m.userId === userId) ?? false);
 
     // 1. Buscar se o usuário logado possui uma quest ativa (status === "ACTIVE") na categoria (ex: retomada de quest dropada)
     const [userActiveMainProgress, userActiveSideProgress] = await Promise.all([
@@ -39,14 +42,22 @@ export default async function ContractsPage() {
     const [latestMainPool, latestSidePool] = await Promise.all([
         !userActiveMainProgress
             ? prisma.pool.findFirst({
-                  where: { type: "MAIN_QUEST", winner_game_id: { not: null } },
+                  where: {
+                      ...(activeGuild ? { guild_id: activeGuild.id } : {}),
+                      type: "MAIN_QUEST",
+                      winner_game_id: { not: null },
+                  },
                   orderBy: { created_at: "desc" },
                   include: { winner_game: true },
               })
             : null,
         !userActiveSideProgress
             ? prisma.pool.findFirst({
-                  where: { type: "SIDE_QUEST", winner_game_id: { not: null } },
+                  where: {
+                      ...(activeGuild ? { guild_id: activeGuild.id } : {}),
+                      type: "SIDE_QUEST",
+                      winner_game_id: { not: null },
+                  },
                   orderBy: { created_at: "desc" },
                   include: { winner_game: true },
               })

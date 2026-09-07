@@ -65,18 +65,13 @@ export function AppLogo({ theme, className, variant = "sidebar" }: AppLogoProps)
 
   if (variant === "compact") {
     return (
-      <Link href="/" className={cn("flex items-center gap-3 group", className)}>
-        <div className={cn("relative h-9 w-9 overflow-hidden rounded-xl border p-0.5 shadow-md", currentConfig.border)}>
-          <Image src={logo} alt="Logo" fill className="object-cover rounded-lg" />
+      <Link href="/" className={cn("flex items-center gap-2 group shrink-0", className)} title="Gamers Aposentados - Início">
+        <div className={cn("relative h-9 w-9 overflow-hidden rounded-xl border p-0.5 shadow-md shrink-0 transition-transform active:scale-95", currentConfig.border)}>
+          <Image src={logo} alt="Gamers Aposentados" fill sizes="36px" className="object-cover rounded-lg" />
         </div>
-        <div className="flex flex-col">
-          <span className="text-xs font-black tracking-tight text-white">
-            GAMERS <span className={currentConfig.accentText}>APOSENTADOS</span>
-          </span>
-          <span className="text-xs font-black uppercase text-zinc-400 tracking-wider">
-            {currentConfig.badgeText}
-          </span>
-        </div>
+        <span className="hidden sm:inline text-xs font-black tracking-tight text-white whitespace-nowrap">
+          GAMERS <span className={currentConfig.accentText}>APOSENTADOS</span>
+        </span>
       </Link>
     );
   }

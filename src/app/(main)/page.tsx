@@ -14,11 +14,15 @@ import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast
 import { GuildStatusCard } from "@/components/dashboard/GuildStatusCard";
 import { isGuildMaster } from "@/lib/permissions";
 
+import { getActiveGuild } from "@/app/lib/guild-actions";
+import { GUILD_REWARDS_CATALOG } from "@/lib/constants/guild-rewards";
+
 export default async function DashboardPage() {
     const session = await auth();
 
     const userId = session?.user?.id || "";
-    const isMaster = isGuildMaster(session?.user);
+    const activeGuild = await getActiveGuild();
+    const isMaster = isGuildMaster(session?.user) || (activeGuild?.members.some((m) => m.userId === userId && m.role === "LEADER") ?? false);
 
     interface RawReview {
         id: string;
@@ -46,13 +50,21 @@ export default async function DashboardPage() {
     ] = await Promise.all([
         // Active Main Quest
         prisma.pool.findFirst({
-            where: { type: "MAIN_QUEST", winner_game_id: { not: null } },
+            where: {
+                ...(activeGuild ? { guild_id: activeGuild.id } : {}),
+                type: "MAIN_QUEST",
+                winner_game_id: { not: null },
+            },
             orderBy: { created_at: "desc" },
             include: { winner_game: { include: { nominator: true } } },
         }),
         // Active Side Quest
         prisma.pool.findFirst({
-            where: { type: "SIDE_QUEST", winner_game_id: { not: null } },
+            where: {
+                ...(activeGuild ? { guild_id: activeGuild.id } : {}),
+                type: "SIDE_QUEST",
+                winner_game_id: { not: null },
+            },
             orderBy: { created_at: "desc" },
             include: { winner_game: { include: { nominator: true } } },
         }),
@@ -104,7 +116,9 @@ export default async function DashboardPage() {
         prisma.gameProgress.findMany({
             where: {
                 status: "COMPLETED",
-                user: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+                ...(activeGuild && activeGuild.members.length > 0
+                    ? { user_id: { in: activeGuild.members.map((m) => m.userId) } }
+                    : { user: { email: { in: RANDOMIZER_PLAYER_EMAILS } } }),
             },
             include: {
                 game: true,
@@ -113,10 +127,12 @@ export default async function DashboardPage() {
         }),
         // Fetch active players details
         prisma.user.findMany({
-            where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+            where: activeGuild && activeGuild.members.length > 0
+                ? { id: { in: activeGuild.members.filter((m) => m.isActive).map((m) => m.userId) } }
+                : { email: { in: RANDOMIZER_PLAYER_EMAILS } },
         }),
         // Fetch pending special game proposals for active pause voting
-        getPendingSpecialGameProposals(),
+        getPendingSpecialGameProposals(undefined, activeGuild?.id),
     ]);
 
     // --- Block 2: Dependent Data Fetching (Parallel) ---
@@ -149,7 +165,7 @@ export default async function DashboardPage() {
     ]);
 
     const [fallbackMainProgress, fallbackSideProgress] = await Promise.all([
-        isMaster && !userActiveMainProgress && latestMainPool?.winner_game_id && userId
+        !userActiveMainProgress && latestMainPool?.winner_game_id && userId
             ? prisma.gameProgress.findUnique({
                   where: {
                       user_id_game_id: { user_id: userId, game_id: latestMainPool.winner_game_id },
@@ -157,7 +173,7 @@ export default async function DashboardPage() {
                   include: { game: { include: { nominator: true } } },
               })
             : null,
-        isMaster && !userActiveSideProgress && latestSidePool?.winner_game_id && userId
+        !userActiveSideProgress && latestSidePool?.winner_game_id && userId
             ? prisma.gameProgress.findUnique({
                   where: {
                       user_id_game_id: { user_id: userId, game_id: latestSidePool.winner_game_id },
@@ -273,17 +289,17 @@ export default async function DashboardPage() {
         .slice(0, 4);
 
     // Build players stats for FilaDoInss leaderboard
-    const playersStats: PlayerStats[] = RANDOMIZER_PLAYER_EMAILS.map((email) => {
-        const user = activeUsers.find((u) => u.email?.toLowerCase() === email.toLowerCase());
-        const name = user?.name || email.split("@")[0];
-        const image = user?.image || null;
+    const playersStats: PlayerStats[] = activeUsers.map((user) => {
+        const email = user.email || "";
+        const name = user.name || user.username || email.split("@")[0] || "Jogador";
+        const image = user.image || null;
 
-        const userCompleted = completedProgresses.filter((p) => p.user_id === user?.id);
+        const userCompleted = completedProgresses.filter((p) => p.user_id === user.id);
         const goldMedals = userCompleted.filter((p) => p.game.quest_type === "MAIN_QUEST").length;
         const silverMedals = userCompleted.filter((p) => p.game.quest_type === "SIDE_QUEST").length;
 
         return {
-            id: user?.id || "",
+            id: user.id,
             name,
             email,
             image,
@@ -433,18 +449,36 @@ export default async function DashboardPage() {
             {/* Row 1: Active Quests */}
             <div className="grid grid-cols-1 gap-8 xl:grid-cols-2">
                 <ActiveQuestHero
-                    activePool={isMaster ? latestMainPool : null}
+                    activePool={latestMainPool}
                     progress={mainQuestProgress}
                     userName={session?.user?.name ?? "Comandante"}
                 />
                 <SideQuestBar
-                    activePool={isMaster ? latestSidePool : null}
+                    activePool={latestSidePool}
                     progress={sideQuestProgress}
                 />
             </div>
 
             {/* Status da Guilda Oficial dos Fundadores */}
-            <GuildStatusCard mainGame={guildMainGame} sideGame={guildSideGame} />
+            {(() => {
+                const emblemItem = activeGuild?.equippedEmblem
+                    ? GUILD_REWARDS_CATALOG.find((r) => r.type === "EMBLEM" && (r.name === activeGuild.equippedEmblem || r.id === activeGuild.equippedEmblem))
+                    : null;
+                const bannerItem = activeGuild?.equippedBanner
+                    ? GUILD_REWARDS_CATALOG.find((r) => r.type === "BANNER" && (r.name === activeGuild.equippedBanner || r.assetUrl === activeGuild.equippedBanner || r.id === activeGuild.equippedBanner))
+                    : null;
+
+                return (
+                    <GuildStatusCard
+                        mainGame={guildMainGame}
+                        sideGame={guildSideGame}
+                        guildName={activeGuild?.name}
+                        guildDescription={activeGuild?.description || undefined}
+                        emblemUrl={emblemItem?.assetUrl}
+                        bannerUrl={bannerItem?.assetUrl}
+                    />
+                );
+            })()}
 
             {/* Row 3: Stats Cards Grid */}
             <StatsGrid reviews={randomReviewsForStats} />

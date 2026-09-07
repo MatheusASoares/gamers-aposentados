@@ -8,6 +8,8 @@ import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-p
 import { getRandomizerStatus } from "./quest-actions";
 import { validateGameEligibilityForPool } from "./pool-actions";
 
+import { getActiveGuild } from "@/app/lib/guild-actions";
+
 export interface SpecialProposalDTO {
     id: string;
     quest_type: QuestType;
@@ -17,6 +19,7 @@ export interface SpecialProposalDTO {
     game_cover_url: string | null;
     existing_game_id: string | null;
     proposer_id: string;
+    guild_id?: string | null;
     proposer: {
         id: string;
         name: string | null;
@@ -51,8 +54,10 @@ export async function proposeSpecialGame(
 
     const userId = session.user.id;
     const userEmail = session.user.email;
+    const activeGuild = await getActiveGuild();
 
-    if (!isRandomizerPlayer(userEmail)) {
+    const isMember = isRandomizerPlayer(userEmail) || (activeGuild?.members.some((m) => m.userId === userId) ?? false);
+    if (!isMember) {
         return {
             success: false,
             error: "Você não tem permissão para propor uma Pausa Ativa.",
@@ -75,6 +80,7 @@ export async function proposeSpecialGame(
         where: {
             quest_type: typeEnum,
             status: "PENDING",
+            ...(activeGuild?.id ? { guild_id: activeGuild.id } : {}),
         },
     });
 
@@ -108,6 +114,7 @@ export async function proposeSpecialGame(
                 game_cover_url: game.imageUrl || null,
                 existing_game_id: game.id || null,
                 proposer_id: userId,
+                guild_id: activeGuild?.id || null,
                 votes: {
                     create: {
                         user_id: userId,
@@ -450,7 +457,7 @@ export async function cancelSpecialGameProposal(proposalId: string) {
 /**
  * Recupera propostas de Pausa Ativa pendentes para renderização de banners e votações.
  */
-export async function getPendingSpecialGameProposals(questType?: "MAIN" | "SIDE"): Promise<SpecialProposalDTO[]> {
+export async function getPendingSpecialGameProposals(questType?: "MAIN" | "SIDE", guildId?: string): Promise<SpecialProposalDTO[]> {
     try {
         const typeEnum = questType ? (questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST") : undefined;
 
@@ -458,6 +465,7 @@ export async function getPendingSpecialGameProposals(questType?: "MAIN" | "SIDE"
             where: {
                 status: "PENDING",
                 ...(typeEnum ? { quest_type: typeEnum } : {}),
+                ...(guildId ? { guild_id: guildId } : {}),
             },
             include: {
                 proposer: {

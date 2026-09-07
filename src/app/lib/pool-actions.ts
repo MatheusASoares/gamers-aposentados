@@ -4,8 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { isRandomizerPlayer, RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { getRandomizerStatus } from "./quest-actions";
+import { getActiveGuild } from "./guild-actions";
 
 // ---------- Types ----------
 
@@ -22,6 +22,7 @@ export interface PoolEntryData {
 
 export interface PoolData {
     poolId: string;
+    guildId?: string | null;
     questType: "MAIN" | "SIDE";
     status: import("@prisma/client").$Enums.PoolStatus;
     entries: PoolEntryData[];
@@ -31,21 +32,37 @@ export interface PoolData {
 }
 
 /**
- * Valida se um jogo é elegível para entrar em uma pool do Randomizer.
+ * Valida se um jogo é elegível para entrar em uma pool da Guilda.
  * Regras:
- * 1. Não pode estar completo (COMPLETED) por nenhum jogador (Matheus ou Lucas).
- * 2. Não pode estar ativo (ACTIVE) por nenhum jogador.
- * 3. Se possuir progresso, só pode entrar se AMBOS tiverem status DROPPED.
+ * 1. Não pode estar completo (COMPLETED) por nenhum membro ativo da guilda.
+ * 2. Não pode estar ativo (ACTIVE) por nenhum membro ativo da guilda.
+ * 3. Se possuir progresso, só pode entrar se TODOS os membros ativos que jogaram tiverem status DROPPED.
  */
 export async function validateGameEligibilityForPool(
     tx: Prisma.TransactionClient,
-    gameId: string
+    gameId: string,
+    guildId?: string
 ): Promise<{ eligible: boolean; error?: string }> {
-    const activeUsers = await tx.user.findMany({
-        where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
-        select: { id: true },
-    });
-    const activeUserIds = activeUsers.map((u) => u.id);
+    let activeUserIds: string[] = [];
+
+    if (guildId) {
+        const activeMembers = await tx.guildMember.findMany({
+            where: { guild_id: guildId, is_active: true },
+            select: { user_id: true },
+        });
+        activeUserIds = activeMembers.map((m) => m.user_id);
+    }
+
+    // Fallback: se não tiver guildId, busca da guilda padrão ou ignora
+    if (activeUserIds.length === 0) {
+        const founderGuild = await tx.guild.findFirst({
+            where: { slug: "fundadores" },
+            include: { members: { where: { is_active: true } } },
+        });
+        if (founderGuild) {
+            activeUserIds = founderGuild.members.map((m) => m.user_id);
+        }
+    }
 
     if (activeUserIds.length === 0) {
         return { eligible: true };
@@ -62,32 +79,32 @@ export async function validateGameEligibilityForPool(
         return { eligible: true };
     }
 
-    // Regra 1: Se o jogo for completed por 1 player ele nao pode participar de quest novamente
-    const hasCompleted = progresses.some((p) => p.status === "COMPLETED");
+    // Regra 1: Se o jogo for completed por 1 player ativo ele não pode participar de quest novamente
+    const hasCompleted = progresses.some((p) => p.status === "COMPLETED" || p.progress_percentage === 100);
     if (hasCompleted) {
         return {
             eligible: false,
-            error: "Este jogo já foi completado por pelo menos um dos jogadores oficiais e não pode participar novamente.",
+            error: "Este jogo já foi completado por pelo menos um dos membros da guilda e não pode participar novamente.",
         };
     }
 
-    // Se estiver ativo para algum jogador
+    // Regra 2: Se estiver ativo para algum jogador
     const hasActive = progresses.some((p) => p.status === "ACTIVE");
     if (hasActive) {
         return {
             eligible: false,
-            error: "Este jogo já está ativo em uma quest em andamento para um dos jogadores.",
+            error: "Este jogo já está ativo em uma quest em andamento para um dos membros da guilda.",
         };
     }
 
-    // Regra 2: se algum jogador dropou o jogo, ele só pode entrar se AMBOS tiverem status DROPPED
+    // Regra 3: Se algum jogador dropou o jogo, só pode entrar se todos que jogaram tiverem status DROPPED
     const hasDropped = progresses.some((p) => p.status === "DROPPED");
     if (hasDropped) {
         const droppedCount = progresses.filter((p) => p.status === "DROPPED").length;
-        if (droppedCount < activeUserIds.length) {
+        if (droppedCount < progresses.length) {
             return {
                 eligible: false,
-                error: "Este jogo possui progresso registrado e não foi abandonado (dropped) por ambos os jogadores oficiais.",
+                error: "Este jogo possui progresso não abandonado (dropped) por todos os membros que o iniciaram.",
             };
         }
     }
@@ -97,17 +114,30 @@ export async function validateGameEligibilityForPool(
 
 // ---------- Get or Create Open Pool ----------
 
-export async function getOpenPool(questType: "MAIN" | "SIDE"): Promise<PoolData | null> {
+export async function getOpenPool(
+    questType: "MAIN" | "SIDE",
+    targetGuildId?: string
+): Promise<PoolData | null> {
     const session = await auth();
-    if (!session?.user?.id) {
-        return null;
+    if (!session?.user?.id) return null;
+
+    let guildId = targetGuildId;
+    if (!guildId) {
+        const activeGuild = await getActiveGuild();
+        guildId = activeGuild?.id;
     }
+
+    if (!guildId) return null;
 
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
     try {
         const pool = await prisma.pool.findFirst({
-            where: { type: typeEnum, status: "OPEN" },
+            where: {
+                guild_id: guildId,
+                type: typeEnum,
+                status: "OPEN",
+            },
             include: {
                 entries: {
                     include: {
@@ -123,6 +153,7 @@ export async function getOpenPool(questType: "MAIN" | "SIDE"): Promise<PoolData 
 
         return {
             poolId: pool.id,
+            guildId: pool.guild_id,
             questType,
             status: pool.status,
             entries: pool.entries.map((e) => ({
@@ -153,26 +184,48 @@ export interface GameSelection {
     imageUrl: string;
 }
 
-export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSelection[]) {
+export async function saveSelections(
+    questType: "MAIN" | "SIDE",
+    games: GameSelection[],
+    targetGuildId?: string
+) {
     const session = await auth();
     if (!session?.user?.id) {
         return { success: false, error: "Usuário não autenticado" };
     }
 
     const userId = session.user.id;
-    const userEmail = session.user.email;
 
-    if (!isRandomizerPlayer(userEmail)) {
+    let guildId = targetGuildId;
+    if (!guildId) {
+        const activeGuild = await getActiveGuild();
+        guildId = activeGuild?.id;
+    }
+
+    if (!guildId) {
+        return { success: false, error: "Selecione uma guilda para adicionar indicações." };
+    }
+
+    // Validar se o usuário é membro ativo da guilda
+    const membership = await prisma.guildMember.findUnique({
+        where: {
+            guild_id_user_id: {
+                guild_id: guildId,
+                user_id: userId,
+            },
+        },
+    });
+
+    if (!membership) {
         return {
             success: false,
-            error: "Você não tem permissão para adicionar jogos ao Randomizer",
+            error: "Você não é membro desta guilda.",
         };
     }
 
+    const isTestUser = session.user.email?.toLowerCase().endsWith("@test.com");
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
-    const isTestUser = userEmail?.endsWith("@test.com");
-    const requiredTotal = questType === "MAIN" ? 4 : 6;
-    const maxPerPerson = isTestUser ? requiredTotal : (questType === "MAIN" ? 2 : 3);
+    const maxPerPerson = isTestUser ? (questType === "MAIN" ? 4 : 6) : (questType === "MAIN" ? 2 : 3);
 
     if (games.length > maxPerPerson) {
         return {
@@ -183,14 +236,19 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            // 1. Find or create the OPEN pool for this quest type
+            // 1. Find or create the OPEN pool for this quest type in this guild
             let pool = await tx.pool.findFirst({
-                where: { type: typeEnum, status: "OPEN" },
+                where: {
+                    guild_id: guildId,
+                    type: typeEnum,
+                    status: "OPEN",
+                },
             });
 
             if (!pool) {
                 pool = await tx.pool.create({
                     data: {
+                        guild_id: guildId,
                         type: typeEnum,
                         status: "OPEN",
                         month: new Date().getMonth() + 1,
@@ -199,11 +257,9 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                 });
             }
 
-            // 2. LOCK PESSIMISTA: Previne que outros usuários modifiquem este pote simultaneamente
-            // e garante que o pote não seja sorteado (fechado) enquanto salvamos.
+            // 2. LOCK PESSIMISTA
             await tx.$executeRaw`SELECT * FROM pools WHERE id = ${pool.id} FOR UPDATE`;
 
-            // Double Check: O pote ainda está aberto após obtermos o lock?
             const freshPool = await tx.pool.findUnique({ where: { id: pool.id } });
             if (!freshPool || freshPool.status !== "OPEN") {
                 throw new Error("Este pote foi fechado por outro usuário enquanto você salvava.");
@@ -217,9 +273,8 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                 },
             });
 
-            // 3. Create or find each game and create pool entries
+            // 4. Create or find each game and create pool entries
             for (const game of games) {
-                // Check if game already exists by igdb_id, internal id, or title
                 let dbGame = await tx.game.findFirst({
                     where: {
                         OR: [
@@ -241,8 +296,7 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                         },
                     });
                 } else {
-                    // Validar elegibilidade de jogo existente
-                    const eligibility = await validateGameEligibilityForPool(tx, dbGame.id);
+                    const eligibility = await validateGameEligibilityForPool(tx, dbGame.id, guildId);
                     if (!eligibility.eligible) {
                         throw new Error(`Jogo "${dbGame.title}" inválido: ${eligibility.error}`);
                     }
@@ -259,7 +313,7 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                     }
                 }
 
-                // Verificar se o jogo já está no pote (indicado por qualquer pessoa)
+                // Verificar se o jogo já está no pote
                 const existingEntry = await tx.poolEntry.findFirst({
                     where: {
                         pool_id: pool.id,
@@ -271,7 +325,6 @@ export async function saveSelections(questType: "MAIN" | "SIDE", games: GameSele
                     throw new Error(`O jogo "${dbGame.title}" já foi indicado neste sorteio.`);
                 }
 
-                // Create pool entry
                 await tx.poolEntry.create({
                     data: {
                         pool_id: pool.id,
@@ -311,7 +364,6 @@ export async function removeEntry(entryId: string) {
     }
 
     try {
-        // Only allow user to remove their own entries
         const entry = await prisma.poolEntry.findUnique({
             where: { id: entryId },
         });
@@ -335,27 +387,41 @@ export async function removeEntry(entryId: string) {
     }
 }
 
-// ---------- Execute Roll (Server-Side) ----------
+// ---------- Execute Roll (Server-Side) with Emergency Support ----------
 
-export async function executeRoll(poolId: string) {
+export async function executeRoll(
+    poolId: string,
+    options?: { forceEmergency?: boolean }
+) {
     const session = await auth();
     if (!session?.user?.id) {
         return { success: false, error: "Usuário não autenticado" };
     }
 
-    if (!isRandomizerPlayer(session.user.email)) {
-        return { success: false, error: "Acesso negado" };
-    }
+    const userId = session.user.id;
 
     try {
-        // Pré-busca apenas os usuários ativos (Lucas e Matheus) fora da transação
-        // Isso evita segurar o lock do banco em operações de leitura lentas
-        const activeUsers = await prisma.user.findMany({
-            where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+        const poolBefore = await prisma.pool.findUnique({
+            where: { id: poolId },
+            include: { guild: { include: { members: { where: { is_active: true } } } } },
         });
 
+        if (!poolBefore) return { success: false, error: "Pote não encontrado." };
+
+        const guildId = poolBefore.guild_id;
+        const activeMembers = poolBefore.guild?.members || [];
+        const isLeader = activeMembers.some((m) => m.user_id === userId && m.role === "LEADER");
+
+        // Se for sorteio de emergência (forçar com os presentes), apenas líderes podem acionar
+        if (options?.forceEmergency && !isLeader) {
+            return {
+                success: false,
+                error: "Apenas líderes da guilda podem realizar o sorteio de emergência antecipado.",
+            };
+        }
+
         const result = await prisma.$transaction(async (tx) => {
-            // 1. LOCK PESSIMISTA: Trava o pote para evitar que novos jogos sejam adicionados durante o sorteio
+            // 1. LOCK PESSIMISTA
             await tx.$executeRaw`SELECT * FROM pools WHERE id = ${poolId} FOR UPDATE`;
 
             const pool = await tx.pool.findUnique({
@@ -369,22 +435,26 @@ export async function executeRoll(poolId: string) {
 
             if (!pool) throw new Error("Pool não encontrada");
             if (pool.status !== "OPEN") throw new Error("Pool já foi sorteada ou fechada");
-            if (!pool.entries || pool.entries.length === 0) throw new Error("Pool vazia");
+            if (!pool.entries || pool.entries.length === 0) throw new Error("O pote está vazio. É necessário pelo menos 1 indicação.");
 
-            // Verify pool is complete
             const typeEnum = pool.type;
+            const isTestUser = session.user.email?.toLowerCase().endsWith("@test.com");
             const maxPerPerson = typeEnum === "MAIN_QUEST" ? 2 : 3;
-            const totalRequired = maxPerPerson * 2;
+            const activeMemberCount = activeMembers.length > 0 ? activeMembers.length : 2;
+            const totalRequired = isTestUser
+                ? (typeEnum === "MAIN_QUEST" ? 4 : 6)
+                : maxPerPerson * activeMemberCount;
 
-            if (pool.entries.length < totalRequired) {
-                throw new Error(`Pool incompleta: ${pool.entries.length}/${totalRequired} jogos`);
+            // Se NÃO for sorteio forçado de emergência, exige a cota cheia proporcional
+            if (!options?.forceEmergency && pool.entries.length < totalRequired) {
+                throw new Error(`Pool incompleta: ${pool.entries.length}/${totalRequired} jogos indicados pelos membros ativos.`);
             }
 
-            // SERVER-SIDE RANDOM - transparent and unbiased
+            // SERVER-SIDE RANDOM - Proporcional e transparente
             const randomIndex = Math.floor(Math.random() * pool.entries.length);
             const winnerEntry = pool.entries[randomIndex];
 
-            // Close pool with winner and update to the current month/year of the draw
+            // Fechar o pote com o vencedor e atualizar mês/ano do sorteio
             await tx.pool.update({
                 where: { id: poolId },
                 data: {
@@ -395,12 +465,18 @@ export async function executeRoll(poolId: string) {
                 },
             });
 
-            // Ensure all pool games have GameProgress for active users
+            // Determinar os usuários alvo para criação e ativação do progresso
+            const targetUserIds =
+                activeMembers.length > 0
+                    ? activeMembers.map((m) => m.user_id)
+                    : Array.from(new Set(pool.entries.map((e) => e.user_id)));
+
+            // Criar GameProgress para todos os membros alvo
             const progressData = [];
             for (const entry of pool.entries) {
-                for (const user of activeUsers) {
+                for (const uId of targetUserIds) {
                     progressData.push({
-                        user_id: user.id,
+                        user_id: uId,
                         game_id: entry.game_id,
                         status: "SUGGESTED" as const,
                     });
@@ -414,11 +490,11 @@ export async function executeRoll(poolId: string) {
                 });
             }
 
-            // Set winner game to ACTIVE for active users (reativa se era SUGGESTED ou DROPPED)
+            // Definir o jogo vencedor como ACTIVE para os membros alvo
             await tx.gameProgress.updateMany({
                 where: {
                     game_id: winnerEntry.game_id,
-                    user_id: { in: activeUsers.map((u) => u.id) },
+                    user_id: { in: targetUserIds },
                     status: { in: ["SUGGESTED", "DROPPED"] },
                 },
                 data: {
@@ -433,6 +509,7 @@ export async function executeRoll(poolId: string) {
                 winnerId: winnerEntry.game_id,
                 winnerTitle: winnerEntry.game.title,
                 winnerImageUrl: winnerEntry.game.cover_url,
+                isEmergency: !!options?.forceEmergency,
             };
         });
 
@@ -457,12 +534,12 @@ export async function getPastIncompleteGames() {
             where: {
                 progress: {
                     some: {
-                        status: { in: ["DROPPED", "SUGGESTED"] }
+                        status: { in: ["DROPPED", "SUGGESTED"] },
                     },
                     none: {
-                        status: "COMPLETED"
-                    }
-                }
+                        status: "COMPLETED",
+                    },
+                },
             },
             select: {
                 id: true,
@@ -471,8 +548,8 @@ export async function getPastIncompleteGames() {
                 igdb_id: true,
             },
             orderBy: {
-                title: "asc"
-            }
+                title: "asc",
+            },
         });
         return { success: true, games };
     } catch (error) {
@@ -485,7 +562,8 @@ export async function getPastIncompleteGames() {
 
 export async function insertSpecialGame(
     questType: "MAIN" | "SIDE",
-    game: { id?: string; igdbId?: string | null; nome: string; imageUrl?: string | null }
+    game: { id?: string; igdbId?: string | null; nome: string; imageUrl?: string | null },
+    targetGuildId?: string
 ) {
     const session = await auth();
     if (!session?.user?.id) {
@@ -493,19 +571,38 @@ export async function insertSpecialGame(
     }
 
     const userId = session.user.id;
-    const userEmail = session.user.email;
 
-    if (!isRandomizerPlayer(userEmail)) {
+    let guildId = targetGuildId;
+    if (!guildId) {
+        const activeGuild = await getActiveGuild();
+        guildId = activeGuild?.id;
+    }
+
+    if (!guildId) {
+        return { success: false, error: "Selecione uma guilda." };
+    }
+
+    // Validar se o usuário é líder da guilda
+    const membership = await prisma.guildMember.findUnique({
+        where: {
+            guild_id_user_id: {
+                guild_id: guildId,
+                user_id: userId,
+            },
+        },
+    });
+
+    if (!membership || membership.role !== "LEADER") {
         return {
             success: false,
-            error: "Você não tem permissão para realizar essa ação",
+            error: "Apenas líderes da guilda podem inserir um jogo especial diretamente.",
         };
     }
 
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
     // Validar se já existe um jogo ativo (travado)
-    const status = await getRandomizerStatus(typeEnum);
+    const status = await getRandomizerStatus(typeEnum, guildId);
     if (status.locked) {
         return {
             success: false,
@@ -514,12 +611,11 @@ export async function insertSpecialGame(
     }
 
     try {
-        const activeUsers = await prisma.user.findMany({
-            where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+        const activeMembers = await prisma.guildMember.findMany({
+            where: { guild_id: guildId, is_active: true },
         });
 
         const result = await prisma.$transaction(async (tx) => {
-            // 1. Find or create the game
             let dbGame;
             if (game.id) {
                 dbGame = await tx.game.findUnique({ where: { id: game.id } });
@@ -528,7 +624,7 @@ export async function insertSpecialGame(
                     where: {
                         OR: [
                             game.igdbId ? { igdb_id: game.igdbId } : undefined,
-                            { title: game.nome }
+                            { title: game.nome },
                         ].filter(Boolean) as Prisma.GameWhereInput[],
                     },
                 });
@@ -545,8 +641,7 @@ export async function insertSpecialGame(
                     },
                 });
             } else {
-                // Validar elegibilidade de jogo existente
-                const eligibility = await validateGameEligibilityForPool(tx, dbGame.id);
+                const eligibility = await validateGameEligibilityForPool(tx, dbGame.id, guildId);
                 if (!eligibility.eligible) {
                     throw new Error(`Jogo "${dbGame.title}" inválido: ${eligibility.error}`);
                 }
@@ -560,9 +655,8 @@ export async function insertSpecialGame(
                 });
             }
 
-            // 2. Handle pool
             let pool = await tx.pool.findFirst({
-                where: { type: typeEnum, status: "OPEN" },
+                where: { guild_id: guildId, type: typeEnum, status: "OPEN" },
             });
 
             if (pool) {
@@ -578,6 +672,7 @@ export async function insertSpecialGame(
             } else {
                 pool = await tx.pool.create({
                     data: {
+                        guild_id: guildId,
                         type: typeEnum,
                         status: "CLOSED",
                         winner_game_id: dbGame.id,
@@ -587,7 +682,6 @@ export async function insertSpecialGame(
                 });
             }
 
-            // 3. Ensure a PoolEntry exists
             const entryExists = await tx.poolEntry.findFirst({
                 where: { pool_id: pool.id, game_id: dbGame.id },
             });
@@ -602,12 +696,11 @@ export async function insertSpecialGame(
                 });
             }
 
-            // 4. Update GameProgress to ACTIVE
-            for (const user of activeUsers) {
+            for (const member of activeMembers) {
                 await tx.gameProgress.upsert({
                     where: {
                         user_id_game_id: {
-                            user_id: user.id,
+                            user_id: member.user_id,
                             game_id: dbGame.id,
                         },
                     },
@@ -617,7 +710,7 @@ export async function insertSpecialGame(
                         end_date: null,
                     },
                     create: {
-                        user_id: user.id,
+                        user_id: member.user_id,
                         game_id: dbGame.id,
                         status: "ACTIVE",
                         progress_percentage: 0,
@@ -644,4 +737,3 @@ export async function insertSpecialGame(
         return { success: false, error: "Erro ao inserir jogo especial: " + errorMessage };
     }
 }
-

@@ -8,6 +8,7 @@ import { isGuildMaster } from "@/lib/permissions";
 import { generateContractsForGame } from "@/services/notice-board-service";
 import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
 import { ensureUserContractProgress } from "@/services/notice-board-progression";
+import { getActiveGuild } from "@/app/lib/guild-actions";
 
 export { ensureUserContractProgress };
 
@@ -78,16 +79,16 @@ export async function generateNoticeBoardAction(gameId: string) {
                 };
             }
 
-            // Checar saldo de tokens
+            // Checar se possui tokens disponíveis
             if (currentTokens <= 0) {
                 return {
                     success: false,
-                    error: "Você atingiu seu limite de 2 tokens de geração de mural por IA deste mês. Seus tokens serão renovados no próximo mês. Você pode utilizar a Trilha Manual gratuitamente!",
+                    error: "Você atingiu o limite de 2 gerações de Mural por IA este mês. Utilize a Trilha Manual ou aguarde a renovação mensal dos tokens!",
                 };
             }
         }
 
-        // 3. GERAR CONTRATOS VIA GEMINI
+        // 3. GERAÇÃO DOS CONTRATOS VIA IA (OpenAI / DeepSeek)
         const generatedContracts = await generateContractsForGame({
             title: game.title,
             quest_type: game.quest_type,
@@ -95,18 +96,22 @@ export async function generateNoticeBoardAction(gameId: string) {
             hltb_time: game.hltb_time,
         });
 
-        // Buscar usuários fundadores caso o criador seja GM
-        const activeUsers = isGM
-            ? await prisma.user.findMany({
-                  where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
-              })
-            : [user];
+        // Buscar usuários fundadores ou da guilda ativa
+        const activeGuild = await getActiveGuild();
+        const activeUsers = activeGuild && activeGuild.members.length > 0
+            ? await prisma.user.findMany({ where: { id: { in: activeGuild.members.map((m) => m.userId) } } })
+            : isGM
+                ? await prisma.user.findMany({
+                      where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+                  })
+                : [user];
 
         await prisma.$transaction(async (tx) => {
             // Criar contratos
             const dbContracts = await tx.campaignContract.createManyAndReturn({
                 data: generatedContracts.map((contract) => ({
                     game_id: gameId,
+                    guild_id: activeGuild?.id || null,
                     sequence_order: contract.sequence_order,
                     title: contract.title,
                     objective: contract.objective,
@@ -134,7 +139,7 @@ export async function generateNoticeBoardAction(gameId: string) {
                 });
             }
 
-            // Se for MEMBER, consumir 1 token
+            // Consumir 1 token do usuário se não for GM
             if (!isGM) {
                 await tx.user.update({
                     where: { id: user.id },
@@ -149,10 +154,12 @@ export async function generateNoticeBoardAction(gameId: string) {
         revalidatePath("/board");
         revalidatePath(`/games/${gameId}`);
         return { success: true };
-    } catch (error) {
-        console.error("Erro em generateNoticeBoardAction:", error);
-        const errorMessage = error instanceof Error ? error.message : "Desconhecido";
-        return { success: false, error: "Falha ao gerar Quadro de Avisos: " + errorMessage };
+    } catch (err: unknown) {
+        console.error("Erro ao gerar mural de contratos:", err);
+        return {
+            success: false,
+            error: err instanceof Error ? err.message : "Erro desconhecido ao gerar contratos",
+        };
     }
 }
 
@@ -186,6 +193,8 @@ export async function generateManualNoticeBoardAction(gameId: string) {
             return { success: true, cached: true };
         }
 
+        const activeGuild = await getActiveGuild();
+
         const defaultMilestones = [
             { sequence_order: 1, title: "Capítulo 1: O Início da Jornada", objective: "Explorar a introdução do jogo e completar os primeiros 25% da campanha.", progress_percentage: 25 },
             { sequence_order: 2, title: "Capítulo 2: Enfrentando os Desafios", objective: "Avançar na história principal até atingir 50% de conclusão.", progress_percentage: 50 },
@@ -197,6 +206,7 @@ export async function generateManualNoticeBoardAction(gameId: string) {
             const dbContracts = await tx.campaignContract.createManyAndReturn({
                 data: defaultMilestones.map((m) => ({
                     game_id: gameId,
+                    guild_id: activeGuild?.id || null,
                     sequence_order: m.sequence_order,
                     title: m.title,
                     objective: m.objective,
