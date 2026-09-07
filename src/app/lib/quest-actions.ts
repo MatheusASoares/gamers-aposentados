@@ -243,7 +243,7 @@ export async function getRandomizerStatus(
     try {
         let guildId = targetGuildId;
         if (!guildId) {
-            const founderGuild = await prisma.guild.findFirst({ where: { slug: "fundadores" } });
+            const founderGuild = await prisma.guild.findFirst({ where: { slug: { in: ["fundadores", "aposentados"] } } });
             guildId = founderGuild?.id;
         }
 

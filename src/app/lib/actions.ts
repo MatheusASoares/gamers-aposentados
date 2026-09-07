@@ -47,7 +47,7 @@ export async function register(prevState: string | undefined, formData: FormData
 
         // Associar à guilda dos Fundadores se existir
         const founderGuild = await prisma.guild.findFirst({
-            where: { slug: "fundadores" },
+            where: { slug: { in: ["fundadores", "aposentados"] } },
         });
         if (founderGuild) {
             await prisma.guildMember.create({

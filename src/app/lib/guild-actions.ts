@@ -143,7 +143,7 @@ export async function getActiveGuild(): Promise<ActiveGuildDetailsDTO | null> {
         // Fallback 1: Verificar se é membro da "Guilda dos Fundadores"
         const founderGuild = await prisma.guild.findFirst({
             where: {
-                slug: "fundadores",
+                slug: { in: ["fundadores", "aposentados"] },
                 members: { some: { user_id: userId } },
             },
             include: {

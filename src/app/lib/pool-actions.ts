@@ -56,7 +56,7 @@ export async function validateGameEligibilityForPool(
     // Fallback: se não tiver guildId, busca da guilda padrão ou ignora
     if (activeUserIds.length === 0) {
         const founderGuild = await tx.guild.findFirst({
-            where: { slug: "fundadores" },
+            where: { slug: { in: ["fundadores", "aposentados"] } },
             include: { members: { where: { is_active: true } } },
         });
         if (founderGuild) {

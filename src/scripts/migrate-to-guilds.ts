@@ -8,11 +8,13 @@ export async function migrateToGuilds() {
     const lucasEmail = "lucasedu17gomes@gmail.com";
     const leticiaEmail = "lsoares.english@gmail.com";
     const ygnosEmail = "yanhyuuga@gmail.com";
+    const fmaniacsEmail = "fmaniacs31@gmail.com";
 
     const matheus = await prisma.user.findUnique({ where: { email: matheusEmail } });
     const lucas = await prisma.user.findUnique({ where: { email: lucasEmail } });
     const leticia = await prisma.user.findUnique({ where: { email: leticiaEmail } });
     const ygnos = await prisma.user.findUnique({ where: { email: ygnosEmail } });
+    const fmaniacs = await prisma.user.findUnique({ where: { email: fmaniacsEmail } });
 
     if (!matheus || !lucas) {
         throw new Error("❌ Usuários fundadores (Matheus e Lucas) não encontrados no banco de dados.");
@@ -20,35 +22,37 @@ export async function migrateToGuilds() {
 
     console.log(`👤 Fundadores localizados: Matheus (${matheus.id}) e Lucas (${lucas.id})`);
 
-    // 2. Criar ou Atualizar a "Guilda dos Fundadores"
+    // 2. Criar ou Atualizar a guilda "Aposentados"
     const founderGuild = await prisma.guild.upsert({
-        where: { slug: "fundadores" },
+        where: { slug: "aposentados" },
         update: {
-            name: "Guilda dos Fundadores",
-            description: "A guilda lendária original de Matheus & Lucas. Foco em zerar o backlog, campanhas épicas e platinas.",
-            invite_code: "FUNDADORES",
+            name: "Aposentados",
+            description: "A guilda lendária original de Matheus & Lucas.",
+            invite_code: "APOSENTADOS",
             owner_id: matheus.id,
-            level: 8,
-            xp_points: 4800,
-            equipped_title: "Fundadores Lendários",
-            equipped_banner: "banner-retro-arcade",
-            equipped_emblem: "emblem-shield-purple",
+            level: 3,
+            xp_points: 3600,
+            equipped_title: "Guilda de Garagem",
+            equipped_banner: "banner-night-city",
+            equipped_emblem: "astora-shield",
+            equipped_mascot: "kuro-bot",
         },
         create: {
-            slug: "fundadores",
-            name: "Guilda dos Fundadores",
-            description: "A guilda lendária original de Matheus & Lucas. Foco em zerar o backlog, campanhas épicas e platinas.",
-            invite_code: "FUNDADORES",
+            slug: "aposentados",
+            name: "Aposentados",
+            description: "A guilda lendária original de Matheus & Lucas.",
+            invite_code: "APOSENTADOS",
             owner_id: matheus.id,
-            level: 8,
-            xp_points: 4800,
-            equipped_title: "Fundadores Lendários",
-            equipped_banner: "banner-retro-arcade",
-            equipped_emblem: "emblem-shield-purple",
+            level: 3,
+            xp_points: 3600,
+            equipped_title: "Guilda de Garagem",
+            equipped_banner: "banner-night-city",
+            equipped_emblem: "astora-shield",
+            equipped_mascot: "kuro-bot",
         },
     });
 
-    console.log(`🛡️ Guilda dos Fundadores criada/atualizada: ID = ${founderGuild.id}`);
+    console.log(`🛡️ Guilda Aposentados criada/atualizada: ID = ${founderGuild.id}`);
 
     // 3. Adicionar membros fundadores com seus papéis e status de participação ativa
     const memberData = [
@@ -56,6 +60,7 @@ export async function migrateToGuilds() {
         { userId: lucas.id, role: "LEADER" as const, isActive: true, name: "Lucas" },
         ...(leticia ? [{ userId: leticia.id, role: "MEMBER" as const, isActive: false, name: "Letícia" }] : []),
         ...(ygnos ? [{ userId: ygnos.id, role: "MEMBER" as const, isActive: false, name: "Ygnos" }] : []),
+        ...(fmaniacs ? [{ userId: fmaniacs.id, role: "LEADER" as const, isActive: true, name: "Matheus (fmaniacs)" }] : []),
     ];
 
     for (const m of memberData) {

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { LogOut, Settings, Trophy } from "lucide-react";
+import { LogOut, Settings, Trophy, Shield } from "lucide-react";
 import { LoginModal } from "@/components/auth/login-modal";
 import { RegisterModal } from "@/components/auth/register-modal";
 import { SettingsModal } from "@/components/auth/settings-modal";
@@ -74,6 +74,15 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                             Minha Conta
                         </DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-white/5" />
+                        <DropdownMenuItem
+                            className="cursor-pointer text-zinc-300 focus:bg-white/5 focus:text-white"
+                            asChild
+                        >
+                            <Link href="/guild">
+                                <Shield className="mr-2 h-4 w-4 text-[#bd0df2]" />
+                                <span className="font-medium text-[#bd0df2]">Sede da Guilda</span>
+                            </Link>
+                        </DropdownMenuItem>
                         <DropdownMenuItem
                             className="cursor-pointer text-zinc-300 focus:bg-white/5 focus:text-white"
                             asChild
