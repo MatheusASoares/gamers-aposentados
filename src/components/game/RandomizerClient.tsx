@@ -16,7 +16,6 @@ import {
     GameSelection,
     PoolEntryData,
     getPastIncompleteGames,
-    insertSpecialGame,
 } from "@/app/lib/pool-actions";
 import {
     proposeSpecialGame,
@@ -96,15 +95,6 @@ export function RandomizerClient({
     otherPlayerName?: string;
     activeGuild?: ActiveGuildContext | null;
 }) {
-    if (!canAddGames) {
-        return (
-            <PersonalQuestHub
-                currentUserId={currentUserId}
-                currentUserName={currentUserName}
-            />
-        );
-    }
-
     const { data: session } = useSession();
     const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
 
@@ -146,7 +136,20 @@ export function RandomizerClient({
     const [isFetchingHltb, setIsFetchingHltb] = useState(false);
     const [refreshingTitles, setRefreshingTitles] = useState<Set<string>>(new Set());
 
-    const isTestUser = currentUserEmail.endsWith("@test.com");
+    const [cycleText, setCycleText] = useState<string>("");
+    const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (cycleIntervalRef.current) {
+                clearInterval(cycleIntervalRef.current);
+            }
+        };
+    }, []);
+
+    const isTestUser =
+        (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") &&
+        currentUserEmail.endsWith("@test.com");
     const activeMemberCount = activeGuild?.activeMembers?.length || 2;
     const requiredTotal = isTestUser ? (questType === "MAIN" ? 4 : 6) : (questType === "MAIN" ? 2 : 3) * activeMemberCount;
     const maxPerPerson = isTestUser ? requiredTotal : (questType === "MAIN" ? 2 : 3);
@@ -461,17 +464,6 @@ export function RandomizerClient({
         setAddingGame(false);
     };
 
-    const [cycleText, setCycleText] = useState<string>("");
-    const cycleIntervalRef = useRef<NodeJS.Timeout | null>(null);
-
-    useEffect(() => {
-        return () => {
-            if (cycleIntervalRef.current) {
-                clearInterval(cycleIntervalRef.current);
-            }
-        };
-    }, []);
-
     const handleRoll = async (forceEmergency: boolean = false) => {
         if (!poolId || isRolling || isSaving || lockStatus.locked || winner) return;
 
@@ -578,6 +570,15 @@ export function RandomizerClient({
     };
 
     // --- Handlers ---
+
+    if (!canAddGames) {
+        return (
+            <PersonalQuestHub
+                currentUserId={currentUserId}
+                currentUserName={currentUserName}
+            />
+        );
+    }
 
     return (
         <div className="relative mx-auto min-h-screen w-full px-2 sm:px-6 py-4 sm:py-8">

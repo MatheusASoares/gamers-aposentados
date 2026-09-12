@@ -317,7 +317,7 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
                     const searchResults = await SteamStoreClient.searchGames(item.title);
                     const bestMatch = searchResults[0];
 
-                    let steamAppId = bestMatch?.steamAppId;
+                    const steamAppId = bestMatch?.steamAppId;
                     let coverImage = bestMatch?.coverImage;
 
                     // Fallback de capa se não encontrar

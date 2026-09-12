@@ -7,7 +7,9 @@ import {
     ALLOWED_IMAGE_EXTENSIONS,
     sanitizeFileExtension,
     validateImageMagicBytes,
+    isValidScreenshotUrl,
 } from "../src/lib/file-validation";
+
 
 test.describe("Security: Upload Folder Sanitization & Validation (Audit 2.4 / CWE-22)", () => {
     test("isValidUploadFolder only permits explicitly allowed folders", () => {
@@ -173,4 +175,59 @@ test.describe("Security: Upload Folder Sanitization & Validation (Audit 2.4 / CW
             await prisma.user.delete({ where: { id: user.id } });
         }
     });
+
+    test("Security: isValidScreenshotUrl strictly allows authorized storage origins and blocks SSRF/tracking (Audit 2.3 / CWE-20)", () => {
+        // 1. Authorized Vercel Blob URLs
+        expect(isValidScreenshotUrl("https://abc123hash.public.blob.vercel-storage.com/screenshots/my-print.png")).toBe(true);
+        expect(isValidScreenshotUrl("https://blob.vercel-storage.com/screenshots/my-print.webp")).toBe(true);
+
+        // 2. Authorized Local Relative Paths
+        expect(isValidScreenshotUrl("/uploads/screenshots/pic.jpg")).toBe(true);
+        expect(isValidScreenshotUrl("/uploads/avatars/user-123.png")).toBe(true);
+
+        // 3. Authorized Game CDNs
+        expect(isValidScreenshotUrl("https://images.igdb.com/igdb/image/upload/t_1080p/co1abc.jpg")).toBe(true);
+        expect(isValidScreenshotUrl("https://cdn.cloudflare.steamstatic.com/steam/apps/1086940/header.jpg")).toBe(true);
+        expect(isValidScreenshotUrl("https://shared.akamai.steamstatic.com/store_item_assets/steam/apps/123/ss_1.jpg")).toBe(true);
+        expect(isValidScreenshotUrl("https://steamcdn-a.akamaihd.net/steam/apps/456/capsule.jpg")).toBe(true);
+        expect(isValidScreenshotUrl("https://images.unsplash.com/photo-12345")).toBe(true);
+
+        // 4. Rejection of Arbitrary / Malicious External Domains (IP Tracking)
+        expect(isValidScreenshotUrl("https://attacker.com/tracking.png")).toBe(false);
+        expect(isValidScreenshotUrl("https://evil-site.org/beacon.gif")).toBe(false);
+        expect(isValidScreenshotUrl("https://google.com/pixel.png")).toBe(false);
+        expect(isValidScreenshotUrl("https://analytics.thirdparty.com/collect")).toBe(false);
+
+        // 5. Rejection of Private IP Addresses and Cloud Metadata (SSRF Defense)
+        expect(isValidScreenshotUrl("https://169.254.169.254/latest/meta-data")).toBe(false);
+        expect(isValidScreenshotUrl("http://192.168.1.1/router-login")).toBe(false);
+        expect(isValidScreenshotUrl("http://10.0.0.1/admin.png")).toBe(false);
+        expect(isValidScreenshotUrl("http://172.16.0.1/exploit.jpg")).toBe(false);
+
+        // 6. Rejection of Dangerous Protocols
+        expect(isValidScreenshotUrl("javascript:alert(1)")).toBe(false);
+        expect(isValidScreenshotUrl("file:///etc/passwd")).toBe(false);
+        expect(isValidScreenshotUrl("data:image/png;base64,iVBORw0KGgo=")).toBe(false);
+        expect(isValidScreenshotUrl("ftp://ftp.example.com/file.png")).toBe(false);
+
+        // 7. Rejection of Insecure HTTP on External Hosts
+        expect(isValidScreenshotUrl("http://images.igdb.com/pic.png")).toBe(false);
+        expect(isValidScreenshotUrl("http://blob.vercel-storage.com/pic.png")).toBe(false);
+
+        // 8. Rejection of Path Traversal in Relative Paths
+        expect(isValidScreenshotUrl("/uploads/../secret.txt")).toBe(false);
+        expect(isValidScreenshotUrl("/uploads/../../etc/passwd")).toBe(false);
+        expect(isValidScreenshotUrl("/uploads//malicious")).toBe(false);
+        expect(isValidScreenshotUrl("/uploads/c:/windows/win.ini")).toBe(false);
+
+        // 9. Rejection of Invalid Inputs
+        expect(isValidScreenshotUrl("")).toBe(false);
+        expect(isValidScreenshotUrl("   ")).toBe(false);
+        expect(isValidScreenshotUrl(null)).toBe(false);
+        expect(isValidScreenshotUrl(undefined)).toBe(false);
+        expect(isValidScreenshotUrl(12345)).toBe(false);
+        expect(isValidScreenshotUrl({})).toBe(false);
+        expect(isValidScreenshotUrl("not-a-valid-url")).toBe(false);
+    });
 });
+

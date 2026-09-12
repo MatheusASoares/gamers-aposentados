@@ -113,24 +113,46 @@ export function calculateLevelFromXP(totalXP: number): {
   nextLevelXP: number;
   progressPercentage: number;
 } {
+  const MAX_LEVEL = 999;
+
+  // Se for Infinity ou valor astronômico superior a 1 bilhão, retornar nível máximo diretamente
+  if (totalXP === Infinity || totalXP >= 1_000_000_000) {
+    return {
+      level: MAX_LEVEL,
+      currentLevelXP: 0,
+      nextLevelXP: getXPForNextLevel(MAX_LEVEL),
+      progressPercentage: 100,
+    };
+  }
+
+  // Sanitização estrita: NaN, valores não-numéricos ou negativos viram 0
+  const safeXP = typeof totalXP !== "number" || Number.isNaN(totalXP) || totalXP < 0 ? 0 : Math.floor(totalXP);
+
   let level = 1;
   let accumulated = 0;
 
-  while (true) {
+  while (level < MAX_LEVEL) {
     const xpNeeded = getXPForNextLevel(level);
-    if (accumulated + xpNeeded > totalXP) {
-      const currentLevelXP = totalXP - accumulated;
-      const progressPercentage = Math.min(100, Math.round((currentLevelXP / xpNeeded) * 100));
+    if (accumulated + xpNeeded > safeXP) {
+      const currentLevelXP = safeXP - accumulated;
+      const progressPercentage = Math.min(100, Math.max(0, Math.round((currentLevelXP / xpNeeded) * 100)));
       return {
         level,
         currentLevelXP,
         nextLevelXP: xpNeeded,
-        progressPercentage
+        progressPercentage,
       };
     }
     accumulated += xpNeeded;
     level++;
   }
+
+  return {
+    level: MAX_LEVEL,
+    currentLevelXP: 0,
+    nextLevelXP: getXPForNextLevel(MAX_LEVEL),
+    progressPercentage: 100,
+  };
 }
 
 export function calculateGameXP({

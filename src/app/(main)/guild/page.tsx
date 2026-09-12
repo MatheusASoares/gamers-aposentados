@@ -5,6 +5,7 @@ import { GuildHeader } from "@/components/guild/GuildHeader";
 import { GuildRoster } from "@/components/guild/GuildRoster";
 import { Shield } from "lucide-react";
 import { Metadata } from "next";
+import Link from "next/link";
 
 import { GuildRewardsCustomizationModule } from "@/components/guild/GuildRewardsCustomizationModule";
 import { GuildMascotCompanion } from "@/components/guild/GuildMascotCompanion";
@@ -41,12 +42,12 @@ export default async function GuildPage() {
                 </p>
 
                 <div className="flex flex-wrap items-center justify-center gap-3">
-                    <a
+                    <Link
                         href="/"
                         className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-2.5 text-xs font-bold text-zinc-300 hover:text-white transition-all"
                     >
                         Voltar ao Dashboard
-                    </a>
+                    </Link>
                 </div>
             </div>
         );

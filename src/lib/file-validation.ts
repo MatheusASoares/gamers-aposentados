@@ -99,3 +99,100 @@ export function sanitizeFileExtension(filename: string): string {
     return "webp";
 }
 
+/**
+ * Domínios e padrões de host autorizados para URLs de screenshots e imagens (Allowlist contra SSRF e IP tracking)
+ */
+export const ALLOWED_IMAGE_HOSTS = [
+    "blob.vercel-storage.com",
+    "images.igdb.com",
+    "images.unsplash.com",
+    "steamcdn-a.akamaihd.net",
+] as const;
+
+/**
+ * Valida se uma URL de screenshot informada é segura e pertence a uma origem autorizada.
+ * Proteção contra CWE-20, IP Tracking não consentido e SSRF.
+ */
+export function isValidScreenshotUrl(urlStr: unknown): boolean {
+    if (typeof urlStr !== "string") {
+        return false;
+    }
+
+    const trimmed = urlStr.trim();
+    if (!trimmed) {
+        return false;
+    }
+
+    // 1. Caminhos relativos locais seguros (/uploads/...)
+    if (trimmed.startsWith("/uploads/")) {
+        // Bloquear path traversal e caracteres perigosos
+        if (
+            trimmed.includes("..") ||
+            trimmed.includes(":") ||
+            trimmed.includes("//") ||
+            trimmed.includes("\\")
+        ) {
+            return false;
+        }
+        return true;
+    }
+
+    // 2. URLs absolutas
+    try {
+        const parsed = new URL(trimmed);
+
+        const isLocalhost =
+            parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+
+        // Protocolo deve ser HTTPS (ou HTTP estritamente para localhost em ambiente de teste/dev)
+        if (parsed.protocol !== "https:") {
+            if (!isLocalhost || parsed.protocol !== "http:") {
+                return false;
+            }
+        }
+
+        // Portas não padronizadas são restritas a localhost em dev/test
+        if (parsed.port && parsed.port !== "443" && parsed.port !== "80") {
+            if (!isLocalhost || process.env.NODE_ENV === "production") {
+                return false;
+            }
+        }
+
+        const hostname = parsed.hostname.toLowerCase();
+
+        // Vercel Blob Storage (*.public.blob.vercel-storage.com ou blob.vercel-storage.com)
+        if (
+            hostname === "blob.vercel-storage.com" ||
+            hostname.endsWith(".public.blob.vercel-storage.com")
+        ) {
+            return true;
+        }
+
+        // CDNs da Steam
+        if (
+            hostname.endsWith(".steamstatic.com") ||
+            hostname === "steamcdn-a.akamaihd.net"
+        ) {
+            return true;
+        }
+
+        // IGDB e Unsplash
+        if (
+            hostname === "images.igdb.com" ||
+            hostname === "images.unsplash.com"
+        ) {
+            return true;
+        }
+
+        // Localhost em ambiente de desenvolvimento ou testes
+        if (isLocalhost && process.env.NODE_ENV !== "production") {
+            return true;
+        }
+
+        return false;
+    } catch {
+        return false;
+    }
+}
+
+

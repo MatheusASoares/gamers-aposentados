@@ -141,7 +141,7 @@ export function GuildRewardsCustomizationModule({
     if (!isLeader) return;
     setLoadingName(item.name);
     startTransition(async () => {
-      let payload: { banner?: string | null; emblem?: string | null; title?: string | null; mascot?: string | null } = {};
+      const payload: { banner?: string | null; emblem?: string | null; title?: string | null; mascot?: string | null } = {};
       if (item.type === "BANNER") {
         payload.banner = item.name;
       } else if (item.type === "EMBLEM") {

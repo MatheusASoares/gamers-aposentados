@@ -56,15 +56,13 @@ export function GuildMascotCompanion({
   const [speechBubble, setSpeechBubble] = useState<string | null>(null);
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
-  const [hasImageError, setHasImageError] = useState(false);
-  const [hasVideoError, setHasVideoError] = useState(false);
+  const [imageErrorMascotId, setImageErrorMascotId] = useState<string | null>(null);
+  const [videoErrorMascotId, setVideoErrorMascotId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    setHasImageError(false);
-    setHasVideoError(false);
-  }, [mascot?.id]);
+  const hasImageError = Boolean(mascot?.id && imageErrorMascotId === mascot.id);
+  const hasVideoError = Boolean(mascot?.id && videoErrorMascotId === mascot.id);
 
   const defaultTheme: MascotThemeConfig = {
     borderColor: "border-[#bd0df2]/70",
@@ -312,7 +310,7 @@ export function GuildMascotCompanion({
                       loop
                       muted
                       playsInline
-                      onError={() => setHasVideoError(true)}
+                      onError={() => setVideoErrorMascotId(mascot.id)}
                       className="h-full w-full object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] filter transition-all duration-300 group-hover:drop-shadow-[0_0_25px_var(--theme-primary)]"
                     >
                       <source src={videoWebmSrc} type="video/webm" />
@@ -329,7 +327,7 @@ export function GuildMascotCompanion({
                     fill
                     priority
                     unoptimized
-                    onError={() => setHasImageError(true)}
+                    onError={() => setImageErrorMascotId(mascot.id)}
                     sizes="320px"
                     className="object-contain drop-shadow-[0_12px_24px_rgba(0,0,0,0.9)] filter transition-all duration-300 group-hover:drop-shadow-[0_0_22px_var(--theme-primary)]"
                   />

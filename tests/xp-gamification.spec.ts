@@ -31,6 +31,29 @@ test.describe("XP and Gamification System", () => {
         expect(calculateLevelFromXP(1000).level).toBe(5);
     });
 
+    test("calculateLevelFromXP defensively handles edge cases (NaN, negative, decimals, overflow)", () => {
+        // NaN input should safely return level 1 with 0% progress without infinite loop
+        const nanResult = calculateLevelFromXP(NaN);
+        expect(nanResult.level).toBe(1);
+        expect(nanResult.currentLevelXP).toBe(0);
+        expect(nanResult.progressPercentage).toBe(0);
+
+        // Negative numbers should be normalized to 0
+        const negativeResult = calculateLevelFromXP(-150);
+        expect(negativeResult.level).toBe(1);
+        expect(negativeResult.currentLevelXP).toBe(0);
+        expect(negativeResult.progressPercentage).toBe(0);
+
+        // Decimals should be floored
+        const decimalResult = calculateLevelFromXP(100.9);
+        expect(decimalResult.level).toBe(2);
+
+        // Extremely high values should reach MAX_LEVEL (999) without timing out
+        const maxResult = calculateLevelFromXP(Infinity);
+        expect(maxResult.level).toBe(999);
+        expect(maxResult.progressPercentage).toBe(100);
+    });
+
     test("recalculateUserXPAndLevel combines both completed games and all reviews XP", async () => {
         // Create isolated test user
         const testUser = await prisma.user.create({

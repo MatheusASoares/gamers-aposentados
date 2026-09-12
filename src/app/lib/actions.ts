@@ -6,8 +6,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-
-// const prisma = new PrismaClient(); // Removed
+import { authRateLimiter, getClientIp } from "@/lib/rate-limiter";
 
 const RegisterSchema = z.object({
     username: z.string().min(3),
@@ -16,6 +15,15 @@ const RegisterSchema = z.object({
 });
 
 export async function register(prevState: string | undefined, formData: FormData) {
+    const clientIp = await getClientIp();
+
+    // Rate Limiting: Máximo de 5 cadastros a cada 15 minutos por IP
+    const rateLimit = authRateLimiter.check(`register:ip:${clientIp}`, 5, 900);
+    if (!rateLimit.success) {
+        const minutes = Math.max(1, Math.ceil(rateLimit.resetSeconds / 60));
+        return `Too many registration attempts. Please try again in ${minutes} minute${minutes > 1 ? "s" : ""}.`;
+    }
+
     const validatedFields = RegisterSchema.safeParse(Object.fromEntries(formData.entries()));
 
     if (!validatedFields.success) {
@@ -55,7 +63,7 @@ export async function register(prevState: string | undefined, formData: FormData
                     guild_id: founderGuild.id,
                     user_id: user.id,
                     role: "MEMBER",
-                    is_active: email.endsWith("@test.com"),
+                    is_active: true,
                 },
             });
         }
@@ -68,6 +76,25 @@ export async function register(prevState: string | undefined, formData: FormData
 }
 
 export async function authenticate(prevState: string | undefined, formData: FormData) {
+    const clientIp = await getClientIp();
+    const rawEmail = String(formData.get("email") || "").toLowerCase().trim();
+
+    // Rate Limiting por IP: Máximo de 10 tentativas a cada 15 minutos
+    const ipLimit = authRateLimiter.check(`login:ip:${clientIp}`, 10, 900);
+    if (!ipLimit.success) {
+        const minutes = Math.max(1, Math.ceil(ipLimit.resetSeconds / 60));
+        return `Too many login attempts. Please try again in ${minutes} minute${minutes > 1 ? "s" : ""}.`;
+    }
+
+    // Rate Limiting por Conta (E-mail): Máximo de 5 tentativas a cada 15 minutos
+    if (rawEmail) {
+        const emailLimit = authRateLimiter.check(`login:email:${rawEmail}`, 5, 900);
+        if (!emailLimit.success) {
+            const minutes = Math.max(1, Math.ceil(emailLimit.resetSeconds / 60));
+            return `Too many failed login attempts for this account. Please try again in ${minutes} minute${minutes > 1 ? "s" : ""}.`;
+        }
+    }
+
     try {
         await signIn("credentials", formData);
     } catch (error) {
@@ -82,3 +109,4 @@ export async function authenticate(prevState: string | undefined, formData: Form
         throw error;
     }
 }
+

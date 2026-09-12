@@ -223,7 +223,8 @@ export async function saveSelections(
         };
     }
 
-    const isTestUser = session.user.email?.toLowerCase().endsWith("@test.com");
+    const isTestEnv = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+    const isTestUser = isTestEnv && session.user.email?.toLowerCase().endsWith("@test.com");
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
     const maxPerPerson = isTestUser ? (questType === "MAIN" ? 4 : 6) : (questType === "MAIN" ? 2 : 3);
 
@@ -438,7 +439,8 @@ export async function executeRoll(
             if (!pool.entries || pool.entries.length === 0) throw new Error("O pote está vazio. É necessário pelo menos 1 indicação.");
 
             const typeEnum = pool.type;
-            const isTestUser = session.user.email?.toLowerCase().endsWith("@test.com");
+            const isTestEnv = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
+            const isTestUser = isTestEnv && session.user.email?.toLowerCase().endsWith("@test.com");
             const maxPerPerson = typeEnum === "MAIN_QUEST" ? 2 : 3;
             const activeMemberCount = activeMembers.length > 0 ? activeMembers.length : 2;
             const totalRequired = isTestUser

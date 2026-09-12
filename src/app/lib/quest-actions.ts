@@ -1,7 +1,6 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@prisma/client";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
@@ -29,44 +28,31 @@ export async function updateQuestProgress(
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            const existingProgress = await tx.gameProgress.findUnique({
+            const isCompleted = validPercentage === 100;
+
+            await tx.gameProgress.upsert({
                 where: {
                     user_id_game_id: {
                         user_id: session.user.id,
                         game_id: validGameId,
                     },
                 },
+                update: {
+                    progress_percentage: validPercentage,
+                    ...(isCompleted
+                        ? { status: "COMPLETED", end_date: new Date() }
+                        : { status: "ACTIVE", end_date: null }),
+                },
+                create: {
+                    user_id: session.user.id,
+                    game_id: validGameId,
+                    progress_percentage: validPercentage,
+                    status: isCompleted ? "COMPLETED" : "ACTIVE",
+                    start_date: new Date(),
+                    end_date: isCompleted ? new Date() : null,
+                },
             });
 
-            const dataToUpdate: Prisma.GameProgressUpdateInput = { progress_percentage: validPercentage };
-            if (validPercentage === 100) {
-                dataToUpdate.status = "COMPLETED";
-                dataToUpdate.end_date = new Date();
-            } else if (
-                existingProgress &&
-                (existingProgress.status === "COMPLETED" || existingProgress.status === "DROPPED")
-            ) {
-                dataToUpdate.status = "ACTIVE";
-                dataToUpdate.end_date = null;
-            }
-
-            if (existingProgress) {
-                await tx.gameProgress.update({
-                    where: { id: existingProgress.id },
-                    data: dataToUpdate,
-                });
-            } else {
-                await tx.gameProgress.create({
-                    data: {
-                        user_id: session.user.id,
-                        game_id: validGameId,
-                        progress_percentage: validPercentage,
-                        status: validPercentage === 100 ? "COMPLETED" : "ACTIVE",
-                        start_date: new Date(),
-                        ...(validPercentage === 100 ? { end_date: new Date() } : {}),
-                    },
-                });
-            }
             return { success: true };
         });
 
@@ -101,39 +87,28 @@ export async function completeQuest(gameId: string): Promise<{ success: boolean;
 
     try {
         const result = await prisma.$transaction(async (tx) => {
-            const existing = await tx.gameProgress.findUnique({
+            await tx.gameProgress.upsert({
                 where: {
                     user_id_game_id: {
                         user_id: session.user.id,
                         game_id: gameId,
                     },
                 },
+                update: {
+                    progress_percentage: 100,
+                    status: "COMPLETED",
+                    end_date: new Date(),
+                },
+                create: {
+                    user_id: session.user.id,
+                    game_id: gameId,
+                    progress_percentage: 100,
+                    status: "COMPLETED",
+                    start_date: new Date(),
+                    end_date: new Date(),
+                },
             });
 
-            if (existing) {
-                if (existing.status === "COMPLETED") {
-                    return { success: true };
-                }
-                await tx.gameProgress.update({
-                    where: { id: existing.id },
-                    data: {
-                        progress_percentage: 100,
-                        status: "COMPLETED",
-                        end_date: new Date(),
-                    },
-                });
-            } else {
-                await tx.gameProgress.create({
-                    data: {
-                        user_id: session.user.id,
-                        game_id: gameId,
-                        progress_percentage: 100,
-                        status: "COMPLETED",
-                        start_date: new Date(),
-                        end_date: new Date(),
-                    },
-                });
-            }
             return { success: true };
         });
 

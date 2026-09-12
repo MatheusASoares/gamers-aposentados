@@ -7,13 +7,24 @@ import { getActiveGuild } from "@/app/lib/guild-actions";
 import { GUILD_REWARDS_CATALOG, isGuildRewardUnlocked } from "@/lib/constants/guild-rewards";
 import { calculateGuildLevelFromXP } from "@/lib/guild-xp-engine";
 
+import { calculateGuildGameXP, GUILD_XP_CONSTANTS } from "@/lib/guild-gamification-utils";
+
 /**
- * Recalcula e persiste o XP total e nível de uma guilda com base nas conquistas coletivas dos membros.
+ * Recalcula e persiste o XP total e nível de uma guilda com base nas conquistas coletivas dos membros,
+ * considerando a unicidade de cada quest (categoria + horas HLTB + platina proporcional)
+ * e o Bônus de Sinergia Co-op quando ambos/múltiplos membros concluem a mesma quest.
  */
 export async function recalculateGuildXPAndLevel(guildId: string): Promise<{
   success: boolean;
   xpPoints: number;
   level: number;
+  breakdown?: {
+    gamesXP: number;
+    coopSynergyXP: number;
+    reviewsXP: number;
+    contractsXP: number;
+    coopGamesCount: number;
+  };
   error?: string;
 }> {
   try {
@@ -43,28 +54,65 @@ export async function recalculateGuildXPAndLevel(guildId: string): Promise<{
       return { success: false, xpPoints: 0, level: 1, error: "Guilda não encontrada" };
     }
 
-    let totalGuildXP = 0;
+    let gamesXP = 0;
+    let reviewsXP = 0;
+    let contractsXP = 0;
+
+    // Rastreia jogos completados por membro para calcular o Bônus de Sinergia Co-op
+    // Mapeamento: gameId -> { game: Game, userIds: Set<string>, baseGameXP: number, coopBonusXP: number }
+    const gameCompletionsMap = new Map<
+      string,
+      {
+        title: string;
+        userIds: Set<string>;
+        coopBonusXP: number;
+      }
+    >();
 
     for (const member of guild.members) {
-      // 1. Quests Zeradas (Main Quest = 500 XP, Side Quest = 300 XP, Platina = +200 XP)
+      // 1. Quests Zeradas (Dinâmico: Base de honra + horas HLTB + platina proporcional)
       for (const progress of member.user.gameProgress) {
-        if (progress.game.quest_type === "MAIN_QUEST") {
-          totalGuildXP += 500;
-        } else if (progress.game.quest_type === "SIDE_QUEST") {
-          totalGuildXP += 300;
-        }
+        const calc = calculateGuildGameXP({
+          questType: progress.game.quest_type,
+          hltbHours: progress.game.hltb_time,
+          isPlatinum: progress.is_platinum,
+        });
 
-        if (progress.is_platinum) {
-          totalGuildXP += 200;
+        gamesXP += calc.totalMemberXP;
+
+        // Registra para análise de co-op (conclusão em dupla/grupo)
+        const gameId = progress.game.id;
+        const existing = gameCompletionsMap.get(gameId);
+        if (existing) {
+          existing.userIds.add(member.user_id);
+        } else {
+          gameCompletionsMap.set(gameId, {
+            title: progress.game.title,
+            userIds: new Set([member.user_id]),
+            coopBonusXP: calc.coopSynergyBonusXP,
+          });
         }
       }
 
-      // 2. Reviews Publicadas (100 XP cada)
-      totalGuildXP += member.user.reviews.length * 100;
+      // 2. Reviews Publicadas (+100 XP cada)
+      reviewsXP += member.user.reviews.length * GUILD_XP_CONSTANTS.REVIEW_XP;
 
-      // 3. Contratos de Mural Concluídos (50 XP cada)
-      totalGuildXP += member.user.contractProgresses.length * 50;
+      // 3. Contratos de Mural Concluídos (+50 XP cada)
+      contractsXP += member.user.contractProgresses.length * GUILD_XP_CONSTANTS.CONTRACT_XP;
     }
+
+    // 4. Bônus de Sinergia Co-op (+25% do valor base para cada quest completada por 2+ membros)
+    let coopSynergyXP = 0;
+    let coopGamesCount = 0;
+
+    for (const [, item] of gameCompletionsMap) {
+      if (item.userIds.size >= 2) {
+        coopSynergyXP += item.coopBonusXP;
+        coopGamesCount++;
+      }
+    }
+
+    const totalGuildXP = gamesXP + coopSynergyXP + reviewsXP + contractsXP;
 
     const activeMemberCount = Math.max(2, guild.members.filter((m) => m.is_active).length);
     const newLevel = calculateGuildLevelFromXP(totalGuildXP, activeMemberCount);
@@ -77,14 +125,25 @@ export async function recalculateGuildXPAndLevel(guildId: string): Promise<{
       },
     });
 
-    revalidatePath("/guild");
-    revalidatePath("/");
-    revalidatePath("/dashboard");
+    try {
+      revalidatePath("/guild");
+      revalidatePath("/");
+      revalidatePath("/dashboard");
+    } catch {
+      // Ignora erro de revalidatePath quando invocado via scripts CLI fora do contexto Next.js
+    }
 
     return {
       success: true,
       xpPoints: totalGuildXP,
       level: newLevel,
+      breakdown: {
+        gamesXP,
+        coopSynergyXP,
+        reviewsXP,
+        contractsXP,
+        coopGamesCount,
+      },
     };
   } catch (error) {
     console.error("[recalculateGuildXPAndLevel] Error:", error);

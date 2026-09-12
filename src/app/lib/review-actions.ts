@@ -9,14 +9,23 @@ import { z } from "zod";
 
 import { calculateReviewXP } from "./xp-engine";
 import { recalculateUserXPAndLevel } from "./gamification-actions";
+import { isValidScreenshotUrl } from "@/lib/file-validation";
+
+const screenshotUrlSchema = z.string().refine(
+    (url) => isValidScreenshotUrl(url),
+    {
+        message: "URL de screenshot não permitida. Apenas imagens enviadas pelo sistema ou de provedores autorizados são aceitas.",
+    }
+);
 
 const baseReviewSchema = z.object({
     rating: z.number().min(0, "A nota deve ser no mínimo 0").max(10, "A nota deve ser no máximo 10"),
     difficulty: z.number().min(1, "A dificuldade deve ser no mínimo 1").max(5, "A dificuldade deve ser no máximo 5").optional(),
     hoursPlayed: z.number().min(0, "Horas jogadas não podem ser negativas").optional(),
     reviewText: z.string().optional(),
-    screenshots: z.array(z.string().url("URL de screenshot inválida")).optional(),
+    screenshots: z.array(screenshotUrlSchema).max(10, "Máximo de 10 screenshots por review").optional(),
 });
+
 
 const createReviewSchema = baseReviewSchema.extend({
     gameId: z.string().min(1, "O ID do jogo é obrigatório"),

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -80,12 +80,14 @@ const MORE_ITEMS = [
 
 export function BottomNav() {
     const pathname = usePathname();
+    const [prevPathname, setPrevPathname] = useState(pathname);
     const [isMoreOpen, setIsMoreOpen] = useState(false);
 
-    // Close "Mais" sheet automatically on route change
-    useEffect(() => {
+    // Fechar automaticamente a gaveta "Mais" ao navegar de rota
+    if (pathname !== prevPathname) {
+        setPrevPathname(pathname);
         setIsMoreOpen(false);
-    }, [pathname]);
+    }
 
     const isPrimaryActive = (href: string) => {
         if (href === "/") return pathname === "/";

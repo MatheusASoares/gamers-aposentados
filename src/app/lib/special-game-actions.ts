@@ -40,12 +40,20 @@ export interface SpecialProposalDTO {
     created_at: Date;
 }
 
+import {
+    validateSpecialGameVotePermission,
+    validateSpecialGameCancelPermission,
+} from "@/lib/special-game-permissions";
+
+
+
 /**
  * Cria uma proposta de Pausa Ativa / Jogo Especial para votação da guilda.
  */
 export async function proposeSpecialGame(
     questType: "MAIN" | "SIDE",
-    game: { id?: string; igdbId?: string | null; nome: string; imageUrl?: string | null }
+    game: { id?: string; igdbId?: string | null; nome: string; imageUrl?: string | null },
+    targetGuildId?: string
 ) {
     const session = await auth();
     if (!session?.user?.id) {
@@ -54,9 +62,28 @@ export async function proposeSpecialGame(
 
     const userId = session.user.id;
     const userEmail = session.user.email;
-    const activeGuild = await getActiveGuild();
 
-    const isMember = isRandomizerPlayer(userEmail) || (activeGuild?.members.some((m) => m.userId === userId) ?? false);
+    let guildId = targetGuildId;
+    if (!guildId) {
+        const activeGuild = await getActiveGuild();
+        guildId = activeGuild?.id;
+    }
+
+    let isMember = false;
+    if (guildId) {
+        const membership = await prisma.guildMember.findUnique({
+            where: {
+                guild_id_user_id: {
+                    guild_id: guildId,
+                    user_id: userId,
+                },
+            },
+        });
+        isMember = Boolean(membership && membership.is_active);
+    } else {
+        isMember = isRandomizerPlayer(userEmail);
+    }
+
     if (!isMember) {
         return {
             success: false,
@@ -67,7 +94,7 @@ export async function proposeSpecialGame(
     const typeEnum: QuestType = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
 
     // Validar se já existe um jogo ativo travado
-    const status = await getRandomizerStatus(typeEnum);
+    const status = await getRandomizerStatus(typeEnum, guildId || undefined);
     if (status.locked) {
         return {
             success: false,
@@ -80,7 +107,7 @@ export async function proposeSpecialGame(
         where: {
             quest_type: typeEnum,
             status: "PENDING",
-            ...(activeGuild?.id ? { guild_id: activeGuild.id } : {}),
+            ...(guildId ? { guild_id: guildId } : {}),
         },
     });
 
@@ -95,7 +122,7 @@ export async function proposeSpecialGame(
         // Se for jogo já existente no banco, validar elegibilidade
         if (game.id) {
             const eligibility = await prisma.$transaction(async (tx) => {
-                return validateGameEligibilityForPool(tx, game.id!);
+                return validateGameEligibilityForPool(tx, game.id!, guildId || undefined);
             });
             if (!eligibility.eligible) {
                 return {
@@ -114,7 +141,7 @@ export async function proposeSpecialGame(
                 game_cover_url: game.imageUrl || null,
                 existing_game_id: game.id || null,
                 proposer_id: userId,
-                guild_id: activeGuild?.id || null,
+                guild_id: guildId || null,
                 votes: {
                     create: {
                         user_id: userId,
@@ -140,7 +167,7 @@ export async function proposeSpecialGame(
 
         return {
             success: true,
-            message: `Proposta de Pausa Ativa para "${game.nome}" enviada com sucesso! Aguardando confirmação do outro jogador.`,
+            message: `Proposta de Pausa Ativa para "${game.nome}" enviada com sucesso! Aguardando confirmação da guilda.`,
             proposal,
         };
     } catch (err) {
@@ -154,7 +181,7 @@ export async function proposeSpecialGame(
 
 /**
  * Vota em uma proposta de Pausa Ativa (Aceitar ou Recusar).
- * Atingindo 2/2 aprovações, ativa o jogo com a tag de Special Release.
+ * Atingindo o quórum, ativa o jogo com a tag de Special Release para a guilda.
  */
 export async function voteSpecialGameProposal(proposalId: string, approved: boolean) {
     const session = await auth();
@@ -164,13 +191,6 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
 
     const userId = session.user.id;
     const userEmail = session.user.email;
-
-    if (!isRandomizerPlayer(userEmail)) {
-        return {
-            success: false,
-            error: "Você não tem permissão para votar em propostas de Pausa Ativa.",
-        };
-    }
 
     try {
         const proposal = await prisma.specialGameProposal.findUnique({
@@ -189,6 +209,15 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
             return {
                 success: false,
                 error: `Esta proposta não está mais aberta para votação (Status atual: ${proposal.status}).`,
+            };
+        }
+
+        // Proteção contra BOLA / IDOR: Validação de associação e filiação ativa
+        const permission = await validateSpecialGameVotePermission(proposal, userId, userEmail);
+        if (!permission.allowed) {
+            return {
+                success: false,
+                error: permission.error || "Você não tem permissão para votar nesta proposta.",
             };
         }
 
@@ -257,12 +286,25 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
                 },
             });
 
-            const activeUsers = await tx.user.findMany({
-                where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
-            });
+            // Identificar os membros participantes da guilda ou fundadores
+            let activeUserIds: string[] = [];
+            if (proposal.guild_id) {
+                const guildMembers = await tx.guildMember.findMany({
+                    where: { guild_id: proposal.guild_id, is_active: true },
+                    select: { user_id: true },
+                });
+                activeUserIds = guildMembers.map((m) => m.user_id);
+            } else {
+                const officialUsers = await tx.user.findMany({
+                    where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
+                    select: { id: true },
+                });
+                activeUserIds = officialUsers.map((u) => u.id);
+            }
 
-            // Se atingir o quórum (2/2 jogadores oficiais aprovaram)
-            const quorumReached = approvedVotes.length >= 2 || approvedVotes.length >= activeUsers.length;
+            // Quórum: mínimo de 2 aprovações (ou o total de membros se houver menos de 2)
+            const targetQuorum = Math.min(2, Math.max(1, activeUserIds.length));
+            const quorumReached = approvedVotes.length >= targetQuorum;
 
             if (quorumReached) {
                 // 3. Atualiza status da proposta para ACCEPTED
@@ -310,9 +352,10 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
                     });
                 }
 
-                // 5. Cria uma Pool fechada dedicada para a Special Release
+                // 5. Cria uma Pool fechada dedicada para a Special Release (com guild_id)
                 const specialPool = await tx.pool.create({
                     data: {
+                        guild_id: proposal.guild_id || null,
                         type: proposal.quest_type,
                         status: "CLOSED",
                         winner_game_id: dbGame.id,
@@ -331,12 +374,12 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
                     },
                 });
 
-                // 7. Ativa o GameProgress para ambos os usuários oficiais
-                for (const user of activeUsers) {
+                // 7. Ativa o GameProgress para os usuários da guilda
+                for (const memberId of activeUserIds) {
                     await tx.gameProgress.upsert({
                         where: {
                             user_id_game_id: {
-                                user_id: user.id,
+                                user_id: memberId,
                                 game_id: dbGame.id,
                             },
                         },
@@ -346,7 +389,7 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
                             end_date: null,
                         },
                         create: {
-                            user_id: user.id,
+                            user_id: memberId,
                             game_id: dbGame.id,
                             status: "ACTIVE",
                             progress_percentage: 0,
@@ -391,7 +434,7 @@ export async function voteSpecialGameProposal(proposalId: string, approved: bool
 }
 
 /**
- * Cancela uma proposta de Pausa Ativa pendente (ação restrita ao proponente).
+ * Cancela uma proposta de Pausa Ativa pendente (ação permitida ao proponente ou ao líder da guilda).
  */
 export async function cancelSpecialGameProposal(proposalId: string) {
     const session = await auth();
@@ -400,14 +443,6 @@ export async function cancelSpecialGameProposal(proposalId: string) {
     }
 
     const userId = session.user.id;
-    const userEmail = session.user.email;
-
-    if (!isRandomizerPlayer(userEmail)) {
-        return {
-            success: false,
-            error: "Você não tem permissão para cancelar esta proposta.",
-        };
-    }
 
     try {
         const proposal = await prisma.specialGameProposal.findUnique({
@@ -418,17 +453,19 @@ export async function cancelSpecialGameProposal(proposalId: string) {
             return { success: false, error: "Proposta não encontrada." };
         }
 
-        if (proposal.proposer_id !== userId) {
-            return {
-                success: false,
-                error: "Apenas o autor da proposta pode cancelá-la.",
-            };
-        }
-
         if (proposal.status !== "PENDING") {
             return {
                 success: false,
                 error: "Apenas propostas pendentes podem ser canceladas.",
+            };
+        }
+
+        // Validação BOLA / IDOR de Permissão de Cancelamento
+        const permission = await validateSpecialGameCancelPermission(proposal, userId);
+        if (!permission.allowed) {
+            return {
+                success: false,
+                error: permission.error || "Você não tem permissão para cancelar esta proposta.",
             };
         }
 
@@ -461,11 +498,17 @@ export async function getPendingSpecialGameProposals(questType?: "MAIN" | "SIDE"
     try {
         const typeEnum = questType ? (questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST") : undefined;
 
+        let targetGuildId = guildId;
+        if (!targetGuildId) {
+            const activeGuild = await getActiveGuild();
+            targetGuildId = activeGuild?.id;
+        }
+
         const proposals = await prisma.specialGameProposal.findMany({
             where: {
                 status: "PENDING",
                 ...(typeEnum ? { quest_type: typeEnum } : {}),
-                ...(guildId ? { guild_id: guildId } : {}),
+                ...(targetGuildId ? { guild_id: targetGuildId } : {}),
             },
             include: {
                 proposer: {
@@ -486,3 +529,4 @@ export async function getPendingSpecialGameProposals(questType?: "MAIN" | "SIDE"
         return [];
     }
 }
+

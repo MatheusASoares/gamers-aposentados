@@ -2,7 +2,7 @@
 
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useSyncExternalStore } from "react";
 import {
     Flame,
     Clock,
@@ -20,6 +20,8 @@ import {
     SteamSaleEvent,
 } from "@/lib/constants/steam-sales";
 import { cn } from "@/lib/utils";
+
+const emptySubscribe = () => () => {};
 
 function formatDateBR(isoString: string): string {
     const date = new Date(isoString);
@@ -48,11 +50,10 @@ function formatSalePeriod(startIso: string, endIso: string): string {
 export function SteamSaleCountdownCard() {
     const [now, setNow] = useState<Date>(() => new Date());
     const [isRoadmapOpen, setIsRoadmapOpen] = useState(false);
-    const [isMounted, setIsMounted] = useState(false);
+    const isMounted = useSyncExternalStore(emptySubscribe, () => true, () => false);
 
-    // Client-only mount protection for hydration consistency
+    // Timer to update live countdown seconds
     useEffect(() => {
-        setIsMounted(true);
         const timer = setInterval(() => {
             setNow(new Date());
         }, 1000);

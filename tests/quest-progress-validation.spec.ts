@@ -166,4 +166,53 @@ test.describe("Security: Quest Progress Input Validation (Audit 2.5 / CWE-20)", 
             await prisma.user.delete({ where: { id: user.id } });
         }
     });
+
+    test("database integrity: concurrent upserts on the same gameProgress resolve without P2002 duplicate key errors", async () => {
+        const timestamp = Date.now();
+        const user = await prisma.user.create({
+            data: {
+                username: `concurrent_user_${timestamp}`,
+                email: `concurrent_user_${timestamp}@test.com`,
+            },
+        });
+
+        const game = await prisma.game.create({
+            data: {
+                title: `Concurrent Game ${timestamp}`,
+                quest_type: "SIDE_QUEST",
+            },
+        });
+
+        try {
+            // Execute multiple concurrent upserts simultaneously
+            const results = await Promise.all([
+                prisma.gameProgress.upsert({
+                    where: { user_id_game_id: { user_id: user.id, game_id: game.id } },
+                    update: { progress_percentage: 25, status: "ACTIVE" },
+                    create: { user_id: user.id, game_id: game.id, progress_percentage: 25, status: "ACTIVE" },
+                }),
+                prisma.gameProgress.upsert({
+                    where: { user_id_game_id: { user_id: user.id, game_id: game.id } },
+                    update: { progress_percentage: 50, status: "ACTIVE" },
+                    create: { user_id: user.id, game_id: game.id, progress_percentage: 50, status: "ACTIVE" },
+                }),
+                prisma.gameProgress.upsert({
+                    where: { user_id_game_id: { user_id: user.id, game_id: game.id } },
+                    update: { progress_percentage: 75, status: "ACTIVE" },
+                    create: { user_id: user.id, game_id: game.id, progress_percentage: 75, status: "ACTIVE" },
+                }),
+            ]);
+
+            expect(results).toHaveLength(3);
+            const finalRecord = await prisma.gameProgress.findUnique({
+                where: { user_id_game_id: { user_id: user.id, game_id: game.id } },
+            });
+            expect(finalRecord).not.toBeNull();
+            expect([25, 50, 75]).toContain(finalRecord?.progress_percentage);
+        } finally {
+            await prisma.gameProgress.deleteMany({ where: { user_id: user.id } });
+            await prisma.game.delete({ where: { id: game.id } });
+            await prisma.user.delete({ where: { id: user.id } });
+        }
+    });
 });

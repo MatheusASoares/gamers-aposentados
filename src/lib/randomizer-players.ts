@@ -17,13 +17,16 @@ export const PLAYER_DISPLAY_NAMES: Record<string, string> = {
 };
 
 export function isRandomizerPlayer(email: string | null | undefined): boolean {
-    console.log(`[isRandomizerPlayer] email=${email}, NODE_ENV=${process.env.NODE_ENV}`);
-    if (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") {
-        return true;
-    }
     if (!email) return false;
     const lower = email.toLowerCase();
-    return RANDOMIZER_PLAYER_EMAILS.includes(lower) || lower.endsWith("@test.com");
+    if (RANDOMIZER_PLAYER_EMAILS.includes(lower)) return true;
+
+    // Em ambiente de teste e desenvolvimento, permite contas @test.com para testes automatizados
+    const isTestEnv = process.env.NODE_ENV !== "production";
+    if (isTestEnv && lower.endsWith("@test.com")) {
+        return true;
+    }
+    return false;
 }
 
 export function getOtherPlayerName(myEmail: string | null | undefined): string {

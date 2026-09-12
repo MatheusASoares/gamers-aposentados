@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import { RandomizerClient } from "@/components/game/RandomizerClient";
+import { PersonalQuestHub } from "@/components/game/PersonalQuestHub";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { isGuildMaster } from "@/lib/permissions";
@@ -29,32 +30,39 @@ export default async function RandomizerPage() {
     return (
         <main className="w-full">
             <div className="mx-auto max-w-[1920px] px-4 sm:px-6 py-6 md:px-8 lg:px-12">
-                <RandomizerClient
-                    currentUserId={session.user.id}
-                    currentUserName={session.user.name || session.user.username || "Player"}
-                    currentUserEmail={session.user.email || ""}
-                    canAddGames={canAddGames}
-                    isLeader={isLeader}
-                    activeGuild={
-                        activeGuild
-                            ? {
-                                  id: activeGuild.id,
-                                  name: activeGuild.name,
-                                  level: activeGuild.level,
-                                  myRole: activeGuild.myRole,
-                                  myIsActive: activeGuild.myIsActive,
-                                  activeMembers: activeGuild.members
-                                      .filter((m) => m.isActive)
-                                      .map((m) => ({
-                                          id: m.id,
-                                          userId: m.userId,
-                                          name: m.name,
-                                          role: m.role,
-                                      })),
-                              }
-                            : null
-                    }
-                />
+                {!canAddGames ? (
+                    <PersonalQuestHub
+                        currentUserId={session.user.id}
+                        currentUserName={session.user.name || session.user.username || "Player"}
+                    />
+                ) : (
+                    <RandomizerClient
+                        currentUserId={session.user.id}
+                        currentUserName={session.user.name || session.user.username || "Player"}
+                        currentUserEmail={session.user.email || ""}
+                        canAddGames={canAddGames}
+                        isLeader={isLeader}
+                        activeGuild={
+                            activeGuild
+                                ? {
+                                      id: activeGuild.id,
+                                      name: activeGuild.name,
+                                      level: activeGuild.level,
+                                      myRole: activeGuild.myRole,
+                                      myIsActive: activeGuild.myIsActive,
+                                      activeMembers: activeGuild.members
+                                          .filter((m) => m.isActive)
+                                          .map((m) => ({
+                                              id: m.id,
+                                              userId: m.userId,
+                                              name: m.name,
+                                              role: m.role,
+                                          })),
+                                  }
+                                : null
+                        }
+                    />
+                )}
             </div>
         </main>
     );

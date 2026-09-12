@@ -17,7 +17,9 @@ export function isGuildMaster(user: UserPermissionContext | null | undefined): b
     if (user.role === "GUILD_MASTER") return true;
     if (user.email) {
         const lower = user.email.toLowerCase();
-        if (RANDOMIZER_PLAYER_EMAILS.includes(lower) || lower.endsWith("@test.com")) return true;
+        if (RANDOMIZER_PLAYER_EMAILS.includes(lower)) return true;
+        const isTestEnv = process.env.NODE_ENV !== "production";
+        if (isTestEnv && lower.endsWith("@test.com")) return true;
     }
     return false;
 }
