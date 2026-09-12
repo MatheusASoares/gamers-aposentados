@@ -4,6 +4,7 @@ import { BottomNav } from "@/components/layout/bottom-nav";
 import { ReactNode } from "react";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 import { LevelUpCelebrationListener } from "@/components/gamification/LevelUpCelebrationListener";
 
 export default async function MainLayout({ children }: { children: ReactNode }) {
@@ -22,8 +23,12 @@ export default async function MainLayout({ children }: { children: ReactNode }) 
         }
     }
 
+    const cookieStore = await cookies();
+    const cookieTheme = cookieStore.get("gp_theme")?.value;
+    const resolvedTheme = userTheme || cookieTheme || "cyberpunk";
+
     return (
-        <div className="bg-background flex min-h-screen w-full overflow-x-hidden">
+        <div className="bg-background flex min-h-screen w-full overflow-x-hidden" data-theme={resolvedTheme}>
             {/* Desktop Sidebar (100% inalterada, fixa e visível a partir de md:) */}
             <Sidebar className="fixed top-0 left-0 z-50 hidden h-full md:flex" />
 

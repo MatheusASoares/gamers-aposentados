@@ -19,6 +19,7 @@ import { handleSignOut } from "@/lib/actions";
 
 import { useSession } from "next-auth/react";
 import { AppLogo } from "@/components/layout/app-logo";
+import { useTheme } from "@/components/providers";
 
 interface SidebarProps {
     className?: string;
@@ -27,7 +28,8 @@ interface SidebarProps {
 export function Sidebar({ className }: SidebarProps) {
     const pathname = usePathname();
     const { data: session } = useSession();
-    const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
+    const { theme } = useTheme();
+    const equippedTheme = theme || session?.user?.equipped_theme || "cyberpunk";
 
     const isActive = (path: string) => {
         if (path === "/") return pathname === "/";

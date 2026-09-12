@@ -65,15 +65,16 @@ export const authConfig = {
                 token.equipped_theme = user.equipped_theme || "cyberpunk";
             }
             if (trigger === "update") {
-                if (session?.username) token.username = session.username;
-                if (session?.role) token.role = session.role;
-                if (session?.notice_board_tokens !== undefined) token.notice_board_tokens = session.notice_board_tokens;
-                if (session?.ai_cooldown_until !== undefined) token.ai_cooldown_until = session.ai_cooldown_until;
-                if (session?.image) token.image = session.image;
-                if (session?.equipped_frame !== undefined) token.equipped_frame = session.equipped_frame;
-                if (session?.equipped_title !== undefined) token.equipped_title = session.equipped_title;
-                if (session?.equipped_banner !== undefined) token.equipped_banner = session.equipped_banner;
-                if (session?.equipped_theme !== undefined) token.equipped_theme = session.equipped_theme;
+                const s = session?.user ? { ...session, ...session.user } : session;
+                if (s?.username) token.username = s.username;
+                if (s?.role) token.role = s.role;
+                if (s?.notice_board_tokens !== undefined) token.notice_board_tokens = s.notice_board_tokens;
+                if (s?.ai_cooldown_until !== undefined) token.ai_cooldown_until = s.ai_cooldown_until;
+                if (s?.image) token.image = s.image;
+                if (s?.equipped_frame !== undefined) token.equipped_frame = s.equipped_frame;
+                if (s?.equipped_title !== undefined) token.equipped_title = s.equipped_title;
+                if (s?.equipped_banner !== undefined) token.equipped_banner = s.equipped_banner;
+                if (s?.equipped_theme !== undefined) token.equipped_theme = s.equipped_theme;
             }
             return token;
         },

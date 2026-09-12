@@ -10,6 +10,7 @@ import { REWARDS_CATALOG, RewardItem, getTitleBadgeStyle, isRewardUnlocked } fro
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { renderTitleIcon } from "@/components/ui/title-badge";
 import { BannerFxOverlay } from "@/components/profile/banner-fx-overlay";
+import { useTheme } from "@/components/providers";
 
 interface RewardsCustomizationModuleProps {
   userLevel: number;
@@ -34,6 +35,7 @@ export function RewardsCustomizationModule({
 }: RewardsCustomizationModuleProps) {
   const router = useRouter();
   const { update: updateSession } = useSession();
+  const { setTheme: setAppTheme } = useTheme();
 
   const [activeTab, setActiveTab] = useState<"frames" | "titles" | "banners" | "themes">("frames");
   const [currentTitle, setCurrentTitle] = useState<string | null>(equippedTitle);
@@ -122,7 +124,11 @@ export function RewardsCustomizationModule({
       const res = await equipBanner(bannerId);
       if (res.success) {
         setCurrentBanner(bannerId);
-        await updateSession({ equipped_banner: bannerId });
+        try {
+          await updateSession({ equipped_banner: bannerId });
+        } catch (sessionErr) {
+          console.warn("[handleEquipBanner] updateSession error:", sessionErr);
+        }
         router.refresh();
       } else {
         alert(res.error || "Falha ao equipar banner.");
@@ -141,9 +147,11 @@ export function RewardsCustomizationModule({
       const res = await equipTheme(themeId);
       if (res.success) {
         setCurrentTheme(themeId);
-        await updateSession({ equipped_theme: themeId });
-        if (typeof document !== "undefined") {
-          document.documentElement.setAttribute("data-theme", themeId);
+        setAppTheme(themeId);
+        try {
+          await updateSession({ equipped_theme: themeId });
+        } catch (sessionErr) {
+          console.warn("[handleEquipTheme] updateSession error:", sessionErr);
         }
         router.refresh();
       } else {

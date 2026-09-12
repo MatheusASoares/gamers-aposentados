@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { cookies } from "next/headers";
 import { Breadcrumbs } from "./breadcrumbs";
 import { AuthButtons } from "./auth-buttons";
 import { AppLogo } from "./app-logo";
@@ -8,7 +9,8 @@ import { getActiveGuild, getUserGuilds } from "@/app/lib/guild-actions";
 export async function Header() {
     const session = await auth();
     const user = session?.user;
-    const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
+    const cookieStore = await cookies();
+    const equippedTheme = cookieStore.get("gp_theme")?.value || session?.user?.equipped_theme || "cyberpunk";
 
     const [activeGuild, userGuilds] = user
         ? await Promise.all([getActiveGuild(), getUserGuilds()])

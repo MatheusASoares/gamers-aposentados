@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
 import { isRandomizerPlayer } from "@/lib/randomizer-players";
 import {
@@ -97,8 +98,7 @@ export async function equipTitle(title: string): Promise<{ success: boolean; err
       data: { equipped_title: title },
     });
 
-    revalidatePath("/profile");
-    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("[equipTitle] Error:", error);
@@ -124,9 +124,7 @@ export async function equipFrame(frameUrl: string | null): Promise<{ success: bo
 
     await prisma.$executeRaw`UPDATE users SET equipped_frame = ${frameUrl} WHERE id = ${session.user.id}`;
 
-    revalidatePath("/profile");
-    revalidatePath("/dashboard");
-    revalidatePath("/");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("[equipFrame] Error:", error);
@@ -152,8 +150,7 @@ export async function equipBanner(bannerId: string | null): Promise<{ success: b
 
     await prisma.$executeRaw`UPDATE users SET equipped_banner = ${bannerId} WHERE id = ${session.user.id}`;
 
-    revalidatePath("/profile");
-    revalidatePath("/dashboard");
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("[equipBanner] Error:", error);
@@ -179,9 +176,18 @@ export async function equipTheme(themeId: string): Promise<{ success: boolean; e
 
     await prisma.$executeRaw`UPDATE users SET equipped_theme = ${themeId} WHERE id = ${session.user.id}`;
 
-    revalidatePath("/profile");
-    revalidatePath("/dashboard");
-    revalidatePath("/");
+    try {
+      const cookieStore = await cookies();
+      cookieStore.set("gp_theme", themeId, {
+        path: "/",
+        maxAge: 31536000,
+        sameSite: "lax",
+      });
+    } catch (cookieErr) {
+      console.warn("[equipTheme] Cookie set error:", cookieErr);
+    }
+
+    revalidatePath("/", "layout");
     return { success: true };
   } catch (error) {
     console.error("[equipTheme] Error:", error);
