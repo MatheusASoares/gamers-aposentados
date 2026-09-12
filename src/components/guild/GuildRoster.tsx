@@ -26,6 +26,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -35,10 +43,20 @@ interface GuildRosterProps {
     currentUserId: string;
 }
 
+interface MemberToKick {
+    userId: string;
+    name: string;
+    image: string | null;
+    role: string;
+    level: number;
+}
+
 export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
     const router = useRouter();
     const isLeader = guild.myRole === "LEADER";
     const [loadingUserId, setLoadingUserId] = useState<string | null>(null);
+    const [memberToKick, setMemberToKick] = useState<MemberToKick | null>(null);
+    const [isKicking, setIsKicking] = useState(false);
 
     const handleToggleActive = async (targetUserId: string, currentActive: boolean) => {
         if (!isLeader) return;
@@ -61,13 +79,18 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
         }
     };
 
-    const handleKick = async (targetUserId: string) => {
-        if (!confirm("Tem certeza que deseja remover este membro da guilda?")) return;
-        setLoadingUserId(targetUserId);
+    const handleConfirmKick = async () => {
+        if (!memberToKick) return;
+        setIsKicking(true);
+        setLoadingUserId(memberToKick.userId);
         try {
-            await kickMember(guild.id, targetUserId);
+            await kickMember(guild.id, memberToKick.userId);
+            setMemberToKick(null);
             router.refresh();
+        } catch (error) {
+            console.error("Erro ao expulsar membro:", error);
         } finally {
+            setIsKicking(false);
             setLoadingUserId(null);
         }
     };
@@ -247,8 +270,16 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
                                                 </DropdownMenuItem>
                                             )}
                                             <DropdownMenuItem
-                                                onClick={() => handleKick(m.userId)}
-                                                className="flex items-center gap-2 text-xs font-bold text-red-400 cursor-pointer"
+                                                onClick={() =>
+                                                    setMemberToKick({
+                                                        userId: m.userId,
+                                                        name: m.name,
+                                                        image: m.image,
+                                                        role: m.role,
+                                                        level: m.level,
+                                                    })
+                                                }
+                                                className="flex items-center gap-2 text-xs font-bold text-rose-400 focus:bg-rose-500/15 focus:text-rose-300 cursor-pointer"
                                             >
                                                 <UserMinus className="h-4 w-4" />
                                                 Expulsar da Guilda
@@ -261,6 +292,90 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
                     );
                 })}
             </div>
+
+            {/* Cyberpunk Modal de Confirmação de Expulsão */}
+            <Dialog open={!!memberToKick} onOpenChange={(open) => !open && !isKicking && setMemberToKick(null)}>
+                <DialogContent className="border border-rose-500/50 bg-zinc-950/95 p-6 shadow-[0_0_50px_rgba(244,63,94,0.3)] backdrop-blur-2xl sm:max-w-md">
+                    <DialogHeader className="space-y-3 text-left">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-500/50 bg-rose-500/15 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.35)]">
+                                <UserMinus className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-lg font-black uppercase tracking-wider text-white">
+                                    Expulsar Membro
+                                </DialogTitle>
+                                <span className="text-[11px] font-bold text-rose-400 uppercase tracking-widest">
+                                    Ação Destrutiva Irreversível
+                                </span>
+                            </div>
+                        </div>
+                        <DialogDescription className="text-xs text-zinc-300 leading-relaxed pt-1">
+                            Você está prestes a remover este jogador do esquadrão. Ele perderá o acesso imediato à sede da guilda, sorteios do Randomizer e histórico de conquistas compartilhadas.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {memberToKick && (
+                        <div className="flex items-center gap-3 rounded-xl border border-zinc-800/90 bg-zinc-900/70 p-3.5 my-2">
+                            <div className="relative h-12 w-12 shrink-0 rounded-xl overflow-hidden border border-zinc-700 bg-zinc-800">
+                                {memberToKick.image ? (
+                                    <Image
+                                        src={memberToKick.image}
+                                        alt={memberToKick.name}
+                                        fill
+                                        sizes="48px"
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-full w-full items-center justify-center bg-zinc-800 text-sm font-black text-zinc-400">
+                                        {memberToKick.name.slice(0, 2).toUpperCase()}
+                                    </div>
+                                )}
+                                <div className="absolute bottom-0 right-0 bg-zinc-950/90 px-1 text-[8px] font-black text-amber-400 border-t border-l border-zinc-800">
+                                    Nv{memberToKick.level}
+                                </div>
+                            </div>
+                            <div className="flex flex-col min-w-0">
+                                <span className="text-sm font-black text-white truncate">
+                                    {memberToKick.name}
+                                </span>
+                                <span className="text-xs text-zinc-400">
+                                    Cargo Atual: {memberToKick.role === "LEADER" ? "Líder" : "Membro"}
+                                </span>
+                            </div>
+                        </div>
+                    )}
+
+                    <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+                        <button
+                            type="button"
+                            disabled={isKicking}
+                            onClick={() => setMemberToKick(null)}
+                            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                        >
+                            Cancelar
+                        </button>
+                        <button
+                            type="button"
+                            disabled={isKicking}
+                            onClick={handleConfirmKick}
+                            className="flex items-center justify-center gap-2 rounded-xl border border-rose-500/80 bg-rose-600/30 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-rose-200 hover:bg-rose-600 hover:text-white shadow-[0_0_20px_rgba(244,63,94,0.4)] transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            {isKicking ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Expulsando...
+                                </>
+                            ) : (
+                                <>
+                                    <UserMinus className="h-4 w-4" />
+                                    Sim, Expulsar Membro
+                                </>
+                            )}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

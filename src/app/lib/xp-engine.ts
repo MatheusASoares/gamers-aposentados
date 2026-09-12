@@ -96,7 +96,8 @@ export function getUnlockedTitles(level: number): string[] {
 }
 
 export function getXPForNextLevel(level: number): number {
-  return Math.floor(80 * Math.pow(level, 1.18));
+  // Calibrado para um horizonte épico de 10 anos (Nível 25 em ~19.570 XP individual)
+  return Math.floor(40 * Math.pow(level, 1.18));
 }
 
 export function getCumulativeXPForLevel(targetLevel: number): number {

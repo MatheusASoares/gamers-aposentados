@@ -5,6 +5,7 @@ import { SideQuestBar } from "@/components/dashboard/SideQuestBar";
 import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { RecentActivity, ActivityEvent } from "@/components/dashboard/RecentGames";
 import { UserProfileWidget } from "@/components/dashboard/UserProfileWidget";
+import { GuildDashboardWidget } from "@/components/dashboard/GuildDashboardWidget";
 import { Leaderboard, PlayerStats } from "@/components/dashboard/Leaderboard";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
@@ -12,7 +13,7 @@ import { getPendingSpecialGameProposals } from "@/app/lib/special-game-actions";
 import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast";
 import { isGuildMaster } from "@/lib/permissions";
-import { getActiveGuild } from "@/app/lib/guild-actions";
+import { getActiveGuild, getGuildStats } from "@/app/lib/guild-actions";
 
 export default async function DashboardPage() {
     const session = await auth();
@@ -44,6 +45,7 @@ export default async function DashboardPage() {
         completedProgresses,
         activeUsers,
         pendingProposals,
+        guildStats,
     ] = await Promise.all([
         // Active Main Quest
         prisma.pool.findFirst({
@@ -130,6 +132,8 @@ export default async function DashboardPage() {
         }),
         // Fetch pending special game proposals for active pause voting
         getPendingSpecialGameProposals(undefined, activeGuild?.id),
+        // Fetch guild statistics if active guild exists
+        activeGuild ? getGuildStats(activeGuild.id) : Promise.resolve(null),
     ]);
 
     // --- Block 2: Dependent Data Fetching (Parallel) ---
@@ -399,6 +403,13 @@ export default async function DashboardPage() {
             {userWidgetData && (
                 <div className="w-full">
                     <UserProfileWidget user={userWidgetData} />
+                </div>
+            )}
+
+            {/* Guild Gamification Banner */}
+            {activeGuild && (
+                <div className="w-full">
+                    <GuildDashboardWidget guild={activeGuild} stats={guildStats} />
                 </div>
             )}
 

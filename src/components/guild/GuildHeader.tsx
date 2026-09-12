@@ -25,7 +25,16 @@ import {
     Atom,
     Sun,
     Scroll,
+    Loader2,
 } from "lucide-react";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { type ActiveGuildDetailsDTO, leaveGuild } from "@/app/lib/guild-actions";
 import { GuildSettingsModal } from "./GuildSettingsModal";
 import { useRouter } from "next/navigation";
@@ -51,6 +60,8 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isLeaving, setIsLeaving] = useState(false);
+    const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+    const [leaveError, setLeaveError] = useState<string | null>(null);
     const [bannerError, setBannerError] = useState(false);
 
     // XP calculation via guild engine (adapted to active members)
@@ -131,17 +142,21 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
         setTimeout(() => setCopied(false), 2500);
     };
 
-    const handleLeave = async () => {
-        if (!confirm("Tem certeza que deseja sair desta guilda?")) return;
+    const handleConfirmLeave = async () => {
         setIsLeaving(true);
+        setLeaveError(null);
         try {
             const res = await leaveGuild(guild.id);
             if (res.success) {
+                setIsLeaveModalOpen(false);
                 router.push("/");
                 router.refresh();
             } else {
-                alert(res.error || "Erro ao sair da guilda.");
+                setLeaveError(res.error || "Erro ao sair da guilda.");
             }
+        } catch (err: unknown) {
+            const message = err instanceof Error ? err.message : "Erro inesperado ao sair da guilda.";
+            setLeaveError(message);
         } finally {
             setIsLeaving(false);
         }
@@ -321,12 +336,14 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                                 !guild.isOwner && (
                                     <button
                                         type="button"
-                                        disabled={isLeaving}
-                                        onClick={handleLeave}
-                                        className="flex items-center justify-center gap-2 rounded-xl border border-red-500/40 bg-red-950/40 py-2 px-3 text-xs font-black uppercase tracking-wider text-red-300 hover:bg-red-900/60 transition-all shadow-sm active:scale-95 disabled:opacity-50"
+                                        onClick={() => {
+                                            setLeaveError(null);
+                                            setIsLeaveModalOpen(true);
+                                        }}
+                                        className="flex items-center justify-center gap-2 rounded-xl border border-red-500/40 bg-red-950/40 py-2 px-3 text-xs font-black uppercase tracking-wider text-red-300 hover:bg-red-900/60 transition-all shadow-sm active:scale-95"
                                     >
                                         <LogOut className="h-3.5 w-3.5" />
-                                        <span>{isLeaving ? "Saindo..." : "Sair da Guilda"}</span>
+                                        <span>Sair da Guilda</span>
                                     </button>
                                 )
                             )}
@@ -404,6 +421,65 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
             />
+
+            {/* Cyberpunk Leave Guild Modal */}
+            <Dialog open={isLeaveModalOpen} onOpenChange={(open) => !open && !isLeaving && setIsLeaveModalOpen(false)}>
+                <DialogContent className="border border-rose-500/50 bg-zinc-950/95 p-6 shadow-[0_0_50px_rgba(244,63,94,0.3)] backdrop-blur-2xl sm:max-w-md">
+                    <DialogHeader className="space-y-3 text-left">
+                        <div className="flex items-center gap-3">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-rose-500/50 bg-rose-500/15 text-rose-400 shadow-[0_0_20px_rgba(244,63,94,0.35)]">
+                                <LogOut className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <DialogTitle className="text-lg font-black uppercase tracking-wider text-white">
+                                    Sair da Guilda
+                                </DialogTitle>
+                                <span className="text-[11px] font-bold text-rose-400 uppercase tracking-widest">
+                                    Confirmação de Deserção
+                                </span>
+                            </div>
+                        </div>
+                        <DialogDescription className="text-xs text-zinc-300 leading-relaxed pt-1">
+                            Você está prestes a abandonar <strong className="text-white font-bold">{guild.name}</strong>. Ao sair, você perderá acesso imediato ao quartel, sorteios ativos no Randomizer e benefícios compartilhados.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    {leaveError && (
+                        <div className="rounded-xl border border-rose-500/50 bg-rose-500/10 p-3 text-xs font-bold text-rose-300">
+                            {leaveError}
+                        </div>
+                    )}
+
+                    <DialogFooter className="flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-2">
+                        <button
+                            type="button"
+                            disabled={isLeaving}
+                            onClick={() => setIsLeaveModalOpen(false)}
+                            className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-zinc-800 hover:text-white transition-all disabled:opacity-50"
+                        >
+                            Permanecer no Esquadrão
+                        </button>
+                        <button
+                            type="button"
+                            disabled={isLeaving}
+                            onClick={handleConfirmLeave}
+                            className="flex items-center justify-center gap-2 rounded-xl border border-rose-500/80 bg-rose-600/30 px-5 py-2.5 text-xs font-black uppercase tracking-wider text-rose-200 hover:bg-rose-600 hover:text-white shadow-[0_0_20px_rgba(244,63,94,0.4)] transition-all active:scale-95 disabled:opacity-50"
+                        >
+                            {isLeaving ? (
+                                <>
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                    Abandonando...
+                                </>
+                            ) : (
+                                <>
+                                    <LogOut className="h-4 w-4" />
+                                    Sim, Sair da Guilda
+                                </>
+                            )}
+                        </button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
