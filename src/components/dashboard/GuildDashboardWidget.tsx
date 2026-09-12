@@ -20,7 +20,6 @@ import {
     Atom,
     Sun,
     Scroll,
-    Users,
 } from "lucide-react";
 import { type ActiveGuildDetailsDTO } from "@/app/lib/guild-actions";
 import { getGuildLevelProgress } from "@/lib/guild-xp-engine";
@@ -208,10 +207,6 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                             <h2 className="truncate text-xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-2xl md:text-3xl uppercase">
                                 {guild.name}
                             </h2>
-                            <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-[#bd0df2]/50 bg-[#bd0df2]/20 px-2 py-0.5 text-[10px] sm:text-xs font-black text-[#bd0df2] uppercase shadow-[0_0_12px_rgba(189,13,242,0.3)]">
-                                <Shield className="h-3 w-3 text-[#bd0df2]" />
-                                Guilda
-                            </span>
                         </div>
 
                         {guild.equippedTitle && (
@@ -228,16 +223,6 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                                 </span>
                             </div>
                         )}
-
-                        <div className="flex items-center gap-2 text-xs font-bold text-zinc-400 pt-0.5">
-                            <Users className="h-3.5 w-3.5 text-zinc-400 shrink-0" />
-                            <span>
-                                {guild.memberCount} membros{" "}
-                                <span className="text-zinc-500 font-normal">
-                                    ({guild.activeMemberCount} ativos no sorteio)
-                                </span>
-                            </span>
-                        </div>
                     </div>
                 </div>
 

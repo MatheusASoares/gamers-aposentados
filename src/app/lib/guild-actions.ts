@@ -732,10 +732,26 @@ export async function getGuildStats(guildId: string) {
         });
 
         const totalPlatinums = completedProgresses.filter((p) => p.is_platinum).length;
-        const uniqueGamesCompleted = new Set(completedProgresses.map((p) => p.game_id)).size;
+
+        // Contar jogos zerados em conjunto (concluídos por 2 ou mais membros da guilda)
+        const gameCompletionsByUser = new Map<string, Set<string>>();
+        for (const p of completedProgresses) {
+            if (!gameCompletionsByUser.has(p.game_id)) {
+                gameCompletionsByUser.set(p.game_id, new Set());
+            }
+            gameCompletionsByUser.get(p.game_id)!.add(p.user_id);
+        }
+
+        const coopThreshold = Math.min(2, Math.max(1, memberUserIds.length));
+        let coopCompletedGames = 0;
+        for (const userSet of gameCompletionsByUser.values()) {
+            if (userSet.size >= coopThreshold) {
+                coopCompletedGames++;
+            }
+        }
 
         return {
-            totalCompletedGames: uniqueGamesCompleted,
+            totalCompletedGames: coopCompletedGames,
             totalPools: guild.pools.length,
             totalHoursPlayed: totalPlatinums, // Exibe o total de platinas conquistadas pelo grupo
             totalMembers: guild.members.length,
