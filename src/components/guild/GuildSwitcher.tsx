@@ -78,14 +78,14 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                         type="button"
                         disabled={isSwitching}
                         className={cn(
-                            "flex items-center justify-between gap-2 sm:gap-2.5 rounded-xl border border-white/10 bg-zinc-950/85 px-2.5 sm:px-3.5 py-1.5 backdrop-blur-md transition-all hover:border-[#bd0df2]/60 hover:bg-zinc-900/90 active:scale-95 focus:outline-none shadow-lg w-full max-w-[200px] sm:max-w-[280px] md:max-w-[340px]",
+                            "flex items-center justify-between gap-2 sm:gap-2.5 rounded-xl border border-white/10 bg-theme-card/90 px-2.5 sm:px-3.5 py-1.5 backdrop-blur-md transition-all hover:border-theme-primary/60 hover:bg-theme-card active:scale-95 focus:outline-none shadow-lg w-full max-w-[200px] sm:max-w-[280px] md:max-w-[340px]",
                             activeGuild ? "shadow-[0_0_20px_rgba(0,0,0,0.6)]" : "border-dashed border-zinc-700 text-zinc-400"
                         )}
                         title="Alternar Guilda Ativa"
                     >
                         <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
                             {/* Miniature Guild Emblem Crest Box */}
-                            <div className="relative flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-lg border border-[#bd0df2]/40 bg-zinc-900/90 text-[#bd0df2] shadow-[0_0_10px_rgba(189,13,242,0.25)] overflow-hidden">
+                            <div className="relative flex h-6 w-6 sm:h-7 sm:w-7 shrink-0 items-center justify-center rounded-lg border border-theme-primary/40 bg-theme-card text-theme-primary shadow-[0_0_10px_var(--theme-glow)] overflow-hidden">
                                 {emblemAssetUrl ? (
                                     <Image
                                         src={emblemAssetUrl}
@@ -96,7 +96,7 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                                         className="object-contain p-0.5 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]"
                                     />
                                 ) : (
-                                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 drop-shadow-[0_0_8px_#bd0df2]" />
+                                    <Shield className="h-3.5 w-3.5 sm:h-4 sm:w-4 drop-shadow-[0_0_8px_var(--theme-glow)]" />
                                 )}
                             </div>
 
@@ -133,7 +133,7 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                 <DropdownMenuContent
                     align="center"
                     sideOffset={8}
-                    className="w-[calc(100vw-24px)] max-w-sm border border-theme bg-zinc-950/98 p-2.5 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.9)] z-[70] rounded-2xl animate-fade-in"
+                    className="w-[calc(100vw-24px)] max-w-sm border border-theme bg-theme-card p-2.5 backdrop-blur-2xl shadow-[0_10px_40px_rgba(0,0,0,0.9)] shadow-[0_0_25px_var(--theme-glow)] z-[70] rounded-2xl animate-fade-in"
                 >
                     <DropdownMenuLabel className="px-3 py-2 text-xs font-black uppercase tracking-widest text-zinc-400 flex items-center justify-between">
                         <span>Minhas Guildas</span>
@@ -150,14 +150,14 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                                     className={cn(
                                         "flex items-center justify-between gap-2.5 rounded-xl px-3 py-2.5 cursor-pointer transition-all",
                                         isCurrent
-                                            ? "bg-[#bd0df2]/20 border border-[#bd0df2]/50 text-white font-bold shadow-[0_0_15px_rgba(189,13,242,0.25)]"
-                                            : "text-zinc-300 hover:bg-zinc-900 hover:text-white"
+                                            ? "bg-theme-primary/20 border border-theme-primary/50 text-white font-bold shadow-[0_0_15px_var(--theme-glow)]"
+                                            : "text-zinc-300 hover:bg-theme-primary/10 hover:text-white"
                                     )}
                                 >
                                     <div className="flex items-center gap-3 min-w-0">
                                         <div className={cn(
                                             "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border",
-                                            isCurrent ? "border-[#bd0df2] bg-[#bd0df2]/20 text-[#bd0df2]" : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                                            isCurrent ? "border-theme-primary bg-theme-primary/20 text-theme-primary" : "border-zinc-800 bg-zinc-900 text-zinc-400"
                                         )}>
                                             <Shield className="h-4 w-4" />
                                         </div>
@@ -181,7 +181,7 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                         <DropdownMenuItem asChild>
                             <Link
                                 href="/guild"
-                                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-[#bd0df2] hover:bg-[#bd0df2]/15 hover:text-white transition-all cursor-pointer"
+                                className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-xs font-bold uppercase tracking-wider text-theme-primary hover:bg-theme-primary/15 hover:text-white transition-all cursor-pointer"
                             >
                                 <Landmark className="h-4 w-4" />
                                 <span>Acessar Sede da Guilda</span>
@@ -194,7 +194,7 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                         <button
                             type="button"
                             onClick={() => setIsJoinOpen(true)}
-                            className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900 px-2.5 py-2 text-xs font-bold text-zinc-300 hover:border-[#bd0df2] hover:text-white transition-all active:scale-95"
+                            className="flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-900 px-2.5 py-2 text-xs font-bold text-zinc-300 hover:border-theme-primary hover:text-white transition-all active:scale-95"
                         >
                             <Link2 className="h-3.5 w-3.5 text-cyan-400" />
                             Entrar
@@ -202,7 +202,7 @@ export function GuildSwitcher({ activeGuild, userGuilds }: GuildSwitcherProps) {
                         <button
                             type="button"
                             onClick={() => setIsCreateOpen(true)}
-                            className="flex items-center justify-center gap-1.5 rounded-xl border border-[#bd0df2]/50 bg-[#bd0df2]/20 px-2.5 py-2 text-xs font-black uppercase text-[#bd0df2] hover:bg-[#bd0df2]/30 hover:text-white transition-all active:scale-95 shadow-sm"
+                            className="flex items-center justify-center gap-1.5 rounded-xl border border-theme-primary/50 bg-theme-primary/20 px-2.5 py-2 text-xs font-black uppercase text-theme-primary hover:bg-theme-primary/30 hover:text-white transition-all active:scale-95 shadow-[0_0_12px_var(--theme-glow)]"
                         >
                             <Plus className="h-3.5 w-3.5" />
                             Criar

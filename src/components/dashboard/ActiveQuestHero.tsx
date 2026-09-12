@@ -89,10 +89,10 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                 badge: "bg-red-500/20 border-red-500/50 text-red-500",
             };
         return {
-            border: "border-t-[#bd0df2] hover:border-[#bd0df2]/50 shadow-[0_0_20px_rgba(189,13,242,0.15)]",
-            text: "text-[#bd0df2]",
-            bg: "bg-[#bd0df2]",
-            badge: "bg-[#bd0df2]/20 border-[#bd0df2]/50 text-[#bd0df2]",
+            border: "border-t-theme-primary hover:border-theme-primary/50 shadow-[0_0_20px_var(--theme-glow)]",
+            text: "text-theme-primary",
+            bg: "bg-theme-primary",
+            badge: "bg-theme-primary/20 border-theme-primary/50 text-theme-primary",
         };
     };
     const theme = getThemeClasses();
@@ -103,7 +103,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
             style={{ animationDelay: "0ms" }}
         >
             {/* Dark/Grain/Glow Background Effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#12001a]" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-black/60 via-transparent to-theme-primary/10 pointer-events-none" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
                 style={{ backgroundImage: "url('/noise.svg')" }}
@@ -160,7 +160,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
                                 <p className="mt-auto text-xs sm:text-sm font-medium text-zinc-400 pb-1 truncate">
                                     Indicado por:{" "}
                                     {game.nominator ? (
-                                        <span className="font-bold text-white transition-colors hover:text-[#bd0df2]">
+                                        <span className="font-bold text-white transition-colors hover:text-theme-primary">
                                             <UserLink
                                                 userId={game.nominator.id}
                                                 name={game.nominator.name}
@@ -182,7 +182,7 @@ export function ActiveQuestHero({ progress, activePool }: ActiveQuestHeroProps) 
             </div>
 
             {/* Info Side */}
-            <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-zinc-950/80 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
+            <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-theme-card/90 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
                 <div className="space-y-4">
                     {/* Progress Bar & HLTB */}
                     {progress && progress.status !== "SUGGESTED" ? (

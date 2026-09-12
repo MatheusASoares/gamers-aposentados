@@ -206,20 +206,20 @@ export function DealOracleSection({
     };
 
     return (
-        <div className="relative overflow-hidden rounded-2xl border border-[#bd0df2]/30 bg-zinc-950/80 p-4 sm:p-6 backdrop-blur-xl shadow-2xl shadow-[#bd0df2]/10 transition-all my-2">
+        <div className="relative overflow-hidden rounded-3xl border border-theme bg-theme-card/90 p-4 sm:p-6 backdrop-blur-xl shadow-[0_0_30px_var(--theme-glow)] transition-all my-2">
             {/* Efeito sutil de iluminação neon no topo */}
-            <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-44 w-96 rounded-full bg-[#bd0df2]/15 blur-3xl" />
+            <div className="pointer-events-none absolute -top-24 left-1/2 -translate-x-1/2 h-44 w-96 rounded-full bg-theme-primary/15 blur-3xl" />
 
             {/* Cabeçalho da Seção Padronizado */}
-            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-zinc-800/80">
+            <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-theme/20">
                 <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="inline-flex items-center gap-1.5 rounded-md border border-[#bd0df2]/50 bg-[#bd0df2]/20 px-2.5 py-1 text-xs font-black tracking-wide text-white uppercase shadow-sm">
-                            <Sparkles className="h-3.5 w-3.5 text-[#bd0df2] animate-pulse" />
+                        <span className="inline-flex items-center gap-1.5 rounded-md border border-theme-primary/50 bg-theme-primary/20 px-2.5 py-1 text-xs font-black tracking-wide text-white uppercase shadow-sm">
+                            <Sparkles className="h-3.5 w-3.5 text-theme-primary animate-pulse" />
                             Oráculo da Guilda
                         </span>
                         {lastUpdated && (
-                            <span className="text-xs font-semibold text-zinc-300 hidden sm:inline-flex items-center gap-1.5 rounded-md border border-zinc-800 bg-zinc-900/80 px-2.5 py-0.5 shadow-sm">
+                            <span className="text-xs font-semibold text-zinc-300 hidden sm:inline-flex items-center gap-1.5 rounded-md border border-theme/30 bg-black/40 px-2.5 py-0.5 shadow-sm">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
                                 Garimpo salvo • {new Date(lastUpdated).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} às {new Date(lastUpdated).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                             </span>
@@ -241,13 +241,13 @@ export function DealOracleSection({
                         onClick={() => handleConsult(true)}
                         disabled={isRefreshing || isLoading}
                         className={cn(
-                            "flex items-center gap-2 rounded-xl border border-zinc-700/80 bg-zinc-900/90 px-4 py-2 text-xs sm:text-sm font-extrabold text-zinc-200 transition-all hover:border-[#bd0df2]/60 hover:text-white hover:bg-zinc-800 shadow-sm active:scale-95",
+                            "flex items-center gap-2 rounded-xl border border-theme/40 bg-zinc-900/90 px-4 py-2 text-xs sm:text-sm font-extrabold text-zinc-200 transition-all hover:border-theme-primary hover:text-white hover:bg-zinc-800 shadow-sm active:scale-95",
                             (isRefreshing || isLoading) && "opacity-60 cursor-not-allowed",
                         )}
                         title="Atualizar recomendações do Oráculo"
                     >
                         <RefreshCw
-                            className={cn("h-4 w-4 text-[#bd0df2]", (isRefreshing || isLoading) && "animate-spin")}
+                            className={cn("h-4 w-4 text-theme-primary", (isRefreshing || isLoading) && "animate-spin")}
                         />
                         <span>{isRefreshing ? "Atualizando..." : "Atualizar Garimpo"}</span>
                     </button>
@@ -355,13 +355,13 @@ export function DealOracleSection({
                                     key={`${game.title}-${idx}`}
                                     onClick={handleCardClick}
                                     className={cn(
-                                        "group relative flex flex-col justify-between rounded-xl border border-zinc-800 bg-zinc-900/70 p-3.5 transition-all hover:border-[#bd0df2]/50 hover:bg-zinc-900 hover:shadow-xl hover:shadow-[#bd0df2]/5",
+                                        "group relative flex flex-col justify-between rounded-2xl border border-theme/40 bg-theme-card/80 p-3.5 transition-all hover:border-theme-primary/60 hover:shadow-[0_0_20px_var(--theme-glow)]",
                                         onSelectDeal && "cursor-pointer",
                                     )}
                                 >
                                     <div>
                                         {/* Capa com Imagem e Tier Badge */}
-                                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-lg bg-zinc-950 border border-zinc-800/60">
+                                        <div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl bg-zinc-950 border border-theme/30">
                                             {game.coverImage ? (
                                                 <Image
                                                     src={game.coverImage}
@@ -392,7 +392,7 @@ export function DealOracleSection({
 
                                         {/* Título e Avaliação Steam Obrigatória */}
                                         <div className="mt-3">
-                                            <h4 className="text-sm sm:text-base font-bold text-white line-clamp-1 group-hover:text-[#bd0df2] transition-colors" title={game.title}>
+                                            <h4 className="text-sm sm:text-base font-bold text-white line-clamp-1 group-hover:text-theme-primary transition-colors" title={game.title}>
                                                 {game.title}
                                             </h4>
 
@@ -402,8 +402,8 @@ export function DealOracleSection({
                                                     className={cn(
                                                         "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold border backdrop-blur-sm",
                                                         (game.steamReviews?.positivePercent ?? 88) >= 80
-                                                            ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                                            : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+                                                             ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                                             : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
                                                     )}
                                                     title={`${(game.steamReviews?.totalReviews ?? 10000).toLocaleString("pt-BR")} análises na Steam`}
                                                 >
@@ -417,7 +417,7 @@ export function DealOracleSection({
                                         </div>
 
                                         {/* Comparador Regional de Preços US x BR com Economia Explícita */}
-                                        <div className="mt-2.5 rounded-xl bg-zinc-950/85 p-2.5 border border-[#bd0df2]/20 space-y-1.5 shadow-inner">
+                                        <div className="mt-2.5 rounded-xl bg-black/50 p-2.5 border border-theme/30 space-y-1.5 shadow-inner">
                                             <div className="grid grid-cols-2 gap-2 text-xs">
                                                 <div>
                                                     <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">

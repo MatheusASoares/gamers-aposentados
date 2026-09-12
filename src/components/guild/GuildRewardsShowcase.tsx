@@ -23,7 +23,7 @@ export function GuildRewardsShowcase({ level, xpPoints }: GuildRewardsShowcasePr
   const getRewardIcon = (type: string) => {
     switch (type) {
       case "EMBLEM":
-        return <Shield className="h-5 w-5 text-[#bd0df2]" />;
+        return <Shield className="h-5 w-5 text-theme-primary" />;
       case "BANNER":
         return <ImageIcon className="h-5 w-5 text-cyan-400" />;
       case "TITLE":
@@ -34,8 +34,8 @@ export function GuildRewardsShowcase({ level, xpPoints }: GuildRewardsShowcasePr
   };
 
   return (
-    <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-zinc-950/80 p-5 sm:p-7 backdrop-blur-xl shadow-2xl">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-5 mb-6">
+    <div className="overflow-hidden rounded-3xl border border-theme bg-theme-card/90 p-5 sm:p-7 backdrop-blur-xl shadow-2xl">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-theme/20 pb-5 mb-6">
         <div className="flex items-center gap-3.5">
           <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-amber-400/50 bg-amber-400/10 text-amber-400 shadow-[0_0_18px_rgba(245,158,11,0.25)]">
             <Trophy className="h-6 w-6" />
@@ -45,13 +45,13 @@ export function GuildRewardsShowcase({ level, xpPoints }: GuildRewardsShowcasePr
               Evolução & Recompensas da Guilda
             </h3>
             <p className="text-xs sm:text-sm text-zinc-300 font-bold">
-              Tier Atual: <span className="text-[#bd0df2] uppercase">{getTierName(level)}</span> (Nv. {level}/25)
+              Tier Atual: <span className="text-theme-primary uppercase">{getTierName(level)}</span> (Nv. {level}/25)
             </p>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300 bg-zinc-900/80 border border-white/10 px-3.5 py-1.5 rounded-xl">
-          <Sparkles className="h-4 w-4 text-[#bd0df2]" />
+        <div className="flex items-center gap-2 text-xs font-mono font-bold text-zinc-300 bg-black/40 border border-theme/30 px-3.5 py-1.5 rounded-xl">
+          <Sparkles className="h-4 w-4 text-theme-primary" />
           <span>{xpPoints.toLocaleString()} XP Acumulado</span>
         </div>
       </div>
@@ -84,7 +84,7 @@ export function GuildRewardsShowcase({ level, xpPoints }: GuildRewardsShowcasePr
 
         {/* Next Level Unlock */}
         {nextReward ? (
-          <div className="flex items-center gap-4 rounded-2xl border border-white/10 bg-zinc-900/50 p-5 backdrop-blur-sm shadow-md">
+          <div className="flex items-center gap-4 rounded-2xl border border-theme/30 bg-black/40 p-5 backdrop-blur-sm shadow-md">
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-zinc-700 bg-zinc-800/80 text-zinc-500">
               <Lock className="h-6 w-6" />
             </div>

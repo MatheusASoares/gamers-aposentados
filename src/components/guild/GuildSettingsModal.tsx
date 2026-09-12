@@ -100,10 +100,10 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-md border border-theme bg-zinc-950/95 p-6 backdrop-blur-2xl shadow-[0_0_40px_rgba(189,13,242,0.25)] rounded-2xl">
+            <DialogContent className="max-w-md border border-theme bg-theme-card p-6 backdrop-blur-2xl shadow-[0_0_40px_var(--theme-glow)] rounded-2xl">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-[#bd0df2]/40 bg-[#bd0df2]/15 text-[#bd0df2]">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-theme-primary/40 bg-theme-primary/15 text-theme-primary">
                             <Settings className="h-4 w-4" />
                         </div>
                         Configurações da Guilda
@@ -131,7 +131,7 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
                             onChange={(e) => handleNameChange(e.target.value)}
                             maxLength={35}
                             disabled={isLoading}
-                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-sm font-bold text-white placeholder-zinc-500 focus:border-[#bd0df2] focus:outline-none focus:ring-1 focus:ring-[#bd0df2] transition-all shadow-inner"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-sm font-bold text-white placeholder-zinc-500 focus:border-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-primary transition-all shadow-inner"
                             placeholder="Ex: Guilda dos Fundadores"
                             required
                         />
@@ -174,7 +174,7 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
                             rows={3}
                             maxLength={200}
                             disabled={isLoading}
-                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-[#bd0df2] focus:outline-none focus:ring-1 focus:ring-[#bd0df2] transition-all resize-none"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-primary transition-all resize-none"
                             placeholder="Lema ou descrição do esquadrão..."
                         />
                     </div>
@@ -191,7 +191,7 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="flex items-center gap-2 rounded-xl border border-[#bd0df2] bg-[#bd0df2] px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_15px_rgba(189,13,242,0.4)] hover:bg-[#bd0df2]/90 active:scale-95 transition-all disabled:opacity-50"
+                            className="flex items-center gap-2 rounded-xl border border-theme-primary bg-theme-primary px-5 py-2.5 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_15px_var(--theme-glow)] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
                         >
                             {isLoading ? (
                                 <>

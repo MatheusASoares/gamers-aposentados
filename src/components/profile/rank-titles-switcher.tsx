@@ -52,7 +52,7 @@ export function RankTitlesSwitcher({
     };
 
     return (
-        <div className="glass-card relative flex flex-col overflow-hidden rounded-[1.5rem] border border-white/5 bg-zinc-950/80 p-6 shadow-2xl backdrop-blur-md">
+        <div className="glass-card relative flex flex-col overflow-hidden rounded-[1.5rem] border border-theme p-6 shadow-2xl backdrop-blur-md">
             <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                     <Trophy className="h-5 w-5 text-amber-400" />

@@ -164,7 +164,7 @@ function QuestProgressBlock({
                 <button
                     type="button"
                     onClick={() => setIsExpanded(!isExpanded)}
-                    className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-zinc-800 bg-zinc-950/80 py-2 text-xs font-bold text-zinc-300 hover:border-[#bd0df2]/40 hover:text-white transition-all w-full"
+                    className="mt-3 flex items-center justify-center gap-1.5 rounded-xl border border-theme/40 bg-theme-card/80 py-2 text-xs font-bold text-zinc-300 hover:border-theme-primary hover:text-white transition-all w-full"
                 >
                     {isExpanded ? (
                         <>
@@ -194,7 +194,7 @@ export function GuildStatusCard({
     if (!mainGame && !sideGame) return null;
 
     return (
-        <div className="relative overflow-hidden rounded-3xl border border-theme/40 bg-zinc-950/80 p-5 sm:p-6 backdrop-blur-xl shadow-[0_0_30px_rgba(0,0,0,0.6)]">
+        <div className="relative overflow-hidden rounded-3xl border border-theme bg-theme-card/90 p-5 sm:p-6 backdrop-blur-xl shadow-[0_0_30px_var(--theme-glow)]">
             {/* Optional Banner Ambient Glow */}
             {bannerUrl ? (
                 <div className="pointer-events-none absolute inset-0 z-0 opacity-15 overflow-hidden">
@@ -209,7 +209,7 @@ export function GuildStatusCard({
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-zinc-950/40" />
                 </div>
             ) : (
-                <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-[#bd0df2]/15 blur-2xl pointer-events-none" />
+                <div className="absolute -right-12 -top-12 h-40 w-40 rounded-full bg-theme-primary/15 blur-2xl pointer-events-none" />
             )}
 
             <div className="relative z-10 flex items-center justify-between border-b border-zinc-800/80 pb-4 mb-4">

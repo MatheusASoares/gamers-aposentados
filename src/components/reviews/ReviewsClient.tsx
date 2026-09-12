@@ -160,12 +160,12 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
 
                 {/* Stat Badges Grid */}
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="flex items-center gap-3 rounded-2xl border border-theme/30 bg-zinc-950/60 p-4 backdrop-blur-md">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-primary/40 bg-primary/10 text-primary shadow-[0_0_15px_var(--theme-glow)]">
-                            <Star className="h-5 w-5 fill-primary" />
+                    <div className="flex items-center gap-3 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 backdrop-blur-md">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-theme-primary/40 bg-theme-primary/10 text-theme-primary shadow-[0_0_15px_var(--theme-glow)]">
+                            <Star className="h-5 w-5 fill-theme-primary" />
                         </div>
                         <div>
-                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
                                 Média Geral
                             </span>
                             <span className="text-xl font-black text-white">
@@ -174,12 +174,12 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 rounded-2xl border border-theme/30 bg-zinc-950/60 p-4 backdrop-blur-md">
+                    <div className="flex items-center gap-3 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 backdrop-blur-md">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-amber-400/40 bg-amber-400/10 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.2)]">
                             <Award className="h-5 w-5" />
                         </div>
                         <div>
-                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
                                 Platinas
                             </span>
                             <span className="text-xl font-black text-white">
@@ -188,12 +188,12 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 rounded-2xl border border-theme/30 bg-zinc-950/60 p-4 backdrop-blur-md">
+                    <div className="flex items-center gap-3 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 backdrop-blur-md">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-cyan-400/40 bg-cyan-400/10 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
                             <Camera className="h-5 w-5" />
                         </div>
                         <div>
-                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
                                 Galeria
                             </span>
                             <span className="text-xl font-black text-white">
@@ -202,12 +202,12 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-3 rounded-2xl border border-theme/30 bg-zinc-950/60 p-4 backdrop-blur-md">
+                    <div className="flex items-center gap-3 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 backdrop-blur-md">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-zinc-700 bg-zinc-800/50 text-zinc-300">
                             <Gamepad2 className="h-5 w-5" />
                         </div>
                         <div>
-                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-wider block">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider block">
                                 Total de Reviews
                             </span>
                             <span className="text-xl font-black text-white">
@@ -218,7 +218,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                 </div>
 
                 {/* Filter and Search Toolbar */}
-                <div className="flex flex-col gap-4 rounded-3xl border border-theme/30 bg-zinc-950/80 p-4 sm:p-5 backdrop-blur-xl shadow-xl">
+                <div className="flex flex-col gap-4 rounded-3xl border border-theme bg-theme-card/90 p-4 sm:p-5 backdrop-blur-xl shadow-xl">
                     <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-4">
                         {/* Campo de Busca */}
                         <div className="relative flex-1 min-w-0 w-full">
@@ -229,7 +229,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                 placeholder="Buscar por jogo, usuário ou palavra-chave..."
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full rounded-xl border border-theme/30 bg-zinc-900/80 py-2.5 pl-11 pr-4 text-sm font-bold text-white placeholder-zinc-500 transition-colors focus:border-primary focus:outline-none min-h-[44px]"
+                                className="w-full rounded-xl border border-theme/40 bg-zinc-900/80 py-2.5 pl-11 pr-4 text-sm font-bold text-white placeholder-zinc-500 transition-colors focus:border-theme-primary focus:outline-none min-h-[44px]"
                             />
                             {searchQuery && (
                                 <button
@@ -247,8 +247,8 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                 onClick={() => setFilterType("ALL")}
                                 className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-black tracking-wider uppercase transition-all whitespace-nowrap shrink-0 min-h-[44px] ${
                                     filterType === "ALL"
-                                        ? "border-primary/60 bg-primary/15 text-primary shadow-[0_0_15px_var(--theme-glow)]"
-                                        : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                                        ? "border-theme-primary/60 bg-theme-primary/15 text-theme-primary shadow-[0_0_15px_var(--theme-glow)]"
+                                        : "border-theme/20 bg-black/40 text-zinc-400 hover:border-theme/40 hover:text-white"
                                 }`}
                             >
                                 Todas Quests
@@ -258,7 +258,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                 className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-black tracking-wider uppercase transition-all whitespace-nowrap shrink-0 min-h-[44px] ${
                                     filterType === "MAIN_QUEST"
                                         ? "border-amber-400/60 bg-amber-400/15 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)]"
-                                        : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                                        : "border-theme/20 bg-black/40 text-zinc-400 hover:border-theme/40 hover:text-white"
                                 }`}
                             >
                                 Main Quests
@@ -268,7 +268,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                 className={`rounded-xl border px-4 py-2.5 text-xs sm:text-sm font-black tracking-wider uppercase transition-all whitespace-nowrap shrink-0 min-h-[44px] ${
                                     filterType === "SIDE_QUEST"
                                         ? "border-cyan-400/60 bg-cyan-400/15 text-cyan-400 shadow-[0_0_15px_rgba(6,182,212,0.15)]"
-                                        : "border-white/5 bg-zinc-900/50 text-zinc-400 hover:border-zinc-700 hover:text-white"
+                                        : "border-theme/20 bg-black/40 text-zinc-400 hover:border-theme/40 hover:text-white"
                                 }`}
                             >
                                 Side Quests
@@ -284,7 +284,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                     value={sortBy}
                                     onChange={setSortBy}
                                     options={SORT_OPTIONS}
-                                    accentColor="purple"
+                                    accentColor="theme"
                                 />
                             </div>
 
@@ -293,7 +293,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                     value={filterUser}
                                     onChange={setFilterUser}
                                     options={userOptions}
-                                    accentColor="purple"
+                                    accentColor="theme"
                                 />
                             </div>
                         </div>
@@ -302,13 +302,13 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                             <span className="text-zinc-400 font-bold text-xs sm:text-sm">
                                 Exibindo <strong className="text-white font-black">{filteredReviews.length}</strong> de {reviews.length} reviews
                             </span>
-                            <div className="flex shrink-0 overflow-hidden rounded-xl border border-theme/30 bg-zinc-950 text-zinc-500">
+                            <div className="flex shrink-0 overflow-hidden rounded-xl border border-theme bg-theme-card text-zinc-500">
                                 <button
                                     onClick={() => setViewMode("grid")}
                                     className={`p-2 transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center ${
                                         viewMode === "grid"
-                                            ? "bg-zinc-800 text-white"
-                                            : "hover:bg-zinc-900 hover:text-white"
+                                            ? "bg-theme-primary/20 text-theme-primary font-bold"
+                                            : "hover:bg-theme-primary/10 hover:text-white"
                                     }`}
                                     title="Visualização em Grade"
                                 >
@@ -318,8 +318,8 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                     onClick={() => setViewMode("list")}
                                     className={`p-2 transition-colors min-h-[38px] min-w-[38px] flex items-center justify-center ${
                                         viewMode === "list"
-                                            ? "bg-zinc-800 text-white"
-                                            : "hover:bg-zinc-900 hover:text-white"
+                                            ? "bg-theme-primary/20 text-theme-primary font-bold"
+                                            : "hover:bg-theme-primary/10 hover:text-white"
                                     }`}
                                     title="Visualização em Lista"
                                 >
@@ -348,8 +348,8 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                             />
                         ))
                     ) : (
-                        <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border border-dashed border-zinc-800 bg-zinc-950/40 py-24 text-center backdrop-blur-sm space-y-3">
-                            <Gamepad2 className="h-16 w-16 text-zinc-700 opacity-40 animate-pulse" />
+                        <div className="col-span-full flex flex-col items-center justify-center rounded-3xl border border-dashed border-theme/40 bg-theme-card/40 py-24 text-center backdrop-blur-sm space-y-3">
+                            <Gamepad2 className="h-16 w-16 text-zinc-600 opacity-40 animate-pulse" />
                             <p className="text-base font-black tracking-widest text-zinc-400 uppercase">
                                 Nenhuma review encontrada para estes filtros.
                             </p>
@@ -359,7 +359,7 @@ export function ReviewsClient({ reviews, games, currentUserId }: ReviewsClientPr
                                     setFilterUser("ALL");
                                     setSearchQuery("");
                                 }}
-                                className="text-xs sm:text-sm font-bold text-primary hover:underline uppercase tracking-wider"
+                                className="text-xs sm:text-sm font-bold text-theme-primary hover:underline uppercase tracking-wider"
                             >
                                 Limpar todos os filtros
                             </button>

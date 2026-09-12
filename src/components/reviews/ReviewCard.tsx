@@ -126,7 +126,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
     return (
         <>
             <div
-                className={`glass-card group relative flex overflow-hidden rounded-3xl border border-zinc-800/80 bg-zinc-950/80 shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_35px_rgba(189,13,242,0.25)] ${
+                className={`glass-card group relative flex overflow-hidden rounded-3xl border border-theme shadow-2xl backdrop-blur-xl transition-all duration-500 hover:border-primary/50 hover:shadow-[0_0_35px_var(--theme-glow)] ${
                     layout === "list" ? "h-auto flex-col md:h-auto md:flex-row" : "min-h-[480px] flex-col"
                 } ${isDeleting ? "pointer-events-none opacity-50" : ""}`}
             >
@@ -151,7 +151,7 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                             </div>
                             <div className="absolute inset-0 z-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
 
-                            <div className="relative z-10 aspect-3/4 h-full max-h-80 w-auto overflow-hidden rounded-2xl border border-white/10 shadow-[0_0_35px_rgba(0,0,0,0.85)] transition-all duration-500 group-hover:scale-105 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_rgba(189,13,242,0.4)]">
+                            <div className="relative z-10 aspect-3/4 h-full max-h-80 w-auto overflow-hidden rounded-2xl border border-white/10 shadow-[0_0_35px_rgba(0,0,0,0.85)] transition-all duration-500 group-hover:scale-105 group-hover:border-primary/50 group-hover:shadow-[0_0_30px_var(--theme-glow)]">
                                 <Image
                                     src={coverUrl}
                                     alt={`Cover of ${review.game.title}`}
@@ -194,25 +194,25 @@ export function ReviewCard({ review, currentUserId, layout = "grid" }: ReviewCar
                     
                     {/* Quest Badges Row */}
                     <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1 text-[11px] font-black tracking-widest text-primary uppercase shadow-[0_0_10px_rgba(189,13,242,0.15)]">
+                        <span className="rounded-lg border border-primary/30 bg-primary/10 px-3 py-1 text-xs font-black tracking-widest text-primary uppercase shadow-[0_0_10px_rgba(189,13,242,0.15)]">
                             {review.game.quest_type === "MAIN_QUEST" ? "Main Quest" : "Side Quest"}
                         </span>
 
                         {review.game.platform && (
-                            <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-[11px] font-extrabold text-zinc-300 uppercase">
+                            <span className="rounded-lg border border-zinc-800 bg-zinc-900 px-2.5 py-1 text-xs font-extrabold text-zinc-300 uppercase">
                                 {review.game.platform}
                             </span>
                         )}
 
                         {difficultyInfo && (
-                            <span className={`rounded-lg border px-2.5 py-1 text-[11px] font-extrabold uppercase flex items-center gap-1 ${difficultyInfo.color}`}>
+                            <span className={`rounded-lg border px-2.5 py-1 text-xs font-extrabold uppercase flex items-center gap-1 ${difficultyInfo.color}`}>
                                 <span>{difficultyInfo.icon}</span>
                                 <span>{difficultyInfo.label}</span>
                             </span>
                         )}
 
                         {review.hours_played && (
-                            <span className="rounded-lg border border-cyan-500/30 bg-cyan-950/30 px-2.5 py-1 text-[11px] font-extrabold text-cyan-400 uppercase flex items-center gap-1">
+                            <span className="rounded-lg border border-cyan-500/30 bg-cyan-950/30 px-2.5 py-1 text-xs font-extrabold text-cyan-400 uppercase flex items-center gap-1">
                                 <Clock className="h-3 w-3" />
                                 {review.hours_played}h
                             </span>

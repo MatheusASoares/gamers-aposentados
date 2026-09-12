@@ -84,7 +84,7 @@ export function SteamSaleCountdownCard() {
                 className="pointer-events-none absolute -top-24 -right-24 h-72 w-72 rounded-full opacity-20 blur-[100px] transition-colors duration-1000"
                 style={{ backgroundColor: activeTarget.accentColor }}
             />
-            <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-[#bd0df2]/10 blur-[100px]" />
+            <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-theme-primary/10 blur-[100px]" />
 
             {/* Main Header & Sale Radar */}
             <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -104,7 +104,7 @@ export function SteamSaleCountdownCard() {
                             </span>
                         )}
 
-                        <span className={cn("rounded-full border px-2.5 py-0.5 text-[11px] font-extrabold uppercase tracking-wider", activeTarget.badgeClass)}>
+                        <span className={cn("rounded-full border px-2.5 py-0.5 text-xs font-extrabold uppercase tracking-wider", activeTarget.badgeClass)}>
                             {activeTarget.shortName}
                         </span>
                     </div>
@@ -127,48 +127,48 @@ export function SteamSaleCountdownCard() {
 
                 {/* Right: Live 4-Pill Countdown Timer */}
                 <div className="flex flex-col items-center lg:items-end gap-2.5">
-                    <span className="text-[11px] font-extrabold uppercase tracking-widest text-zinc-400">
+                    <span className="text-xs font-extrabold uppercase tracking-widest text-zinc-400">
                         {currentSale ? "Tempo Restante da Promoção" : "Contagem Regressiva para o Início"}
                     </span>
 
                     {isMounted ? (
                         <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full sm:w-auto">
                             {/* Days */}
-                            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/80 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg">
+                            <div className="flex flex-col items-center justify-center rounded-2xl border border-theme/40 bg-theme-card/85 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg">
                                 <span className="text-xl sm:text-2xl font-black text-white font-mono leading-none">
                                     {String(timeRemaining.days).padStart(2, "0")}
                                 </span>
-                                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-1">
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mt-1">
                                     DIAS
                                 </span>
                             </div>
 
                             {/* Hours */}
-                            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/80 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg">
+                            <div className="flex flex-col items-center justify-center rounded-2xl border border-theme/40 bg-theme-card/85 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg">
                                 <span className="text-xl sm:text-2xl font-black text-white font-mono leading-none">
                                     {String(timeRemaining.hours).padStart(2, "0")}
                                 </span>
-                                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-1">
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mt-1">
                                     HORAS
                                 </span>
                             </div>
 
                             {/* Minutes */}
-                            <div className="flex flex-col items-center justify-center rounded-2xl border border-white/10 bg-zinc-950/80 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg">
+                            <div className="flex flex-col items-center justify-center rounded-2xl border border-theme/40 bg-theme-card/85 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg">
                                 <span className="text-xl sm:text-2xl font-black text-cyan-400 font-mono leading-none">
                                     {String(timeRemaining.minutes).padStart(2, "0")}
                                 </span>
-                                <span className="text-[9px] sm:text-[10px] font-bold text-zinc-500 uppercase tracking-wider mt-1">
+                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider mt-1">
                                     MIN
                                 </span>
                             </div>
 
                             {/* Seconds */}
-                            <div className="flex flex-col items-center justify-center rounded-2xl border border-theme-primary/40 bg-zinc-950/80 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg ring-1 ring-theme-primary/20">
+                            <div className="flex flex-col items-center justify-center rounded-2xl border border-theme-primary/40 bg-theme-card/85 px-3 sm:px-4 py-2.5 min-w-[64px] sm:min-w-[74px] shadow-lg ring-1 ring-theme-primary/20">
                                 <span className="text-xl sm:text-2xl font-black text-theme-primary font-mono leading-none animate-pulse">
                                     {String(timeRemaining.seconds).padStart(2, "0")}
                                 </span>
-                                <span className="text-[9px] sm:text-[10px] font-bold text-theme-primary uppercase tracking-wider mt-1">
+                                <span className="text-xs font-bold text-theme-primary uppercase tracking-wider mt-1">
                                     SEG
                                 </span>
                             </div>

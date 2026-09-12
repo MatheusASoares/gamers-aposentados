@@ -367,7 +367,7 @@ export function HistoryClient({
                                     className={cn(
                                         "flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs sm:text-sm font-bold uppercase tracking-wider transition-all min-h-[44px]",
                                         activeTab === "PERSONAL"
-                                            ? "bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/40 shadow-[0_0_12px_rgba(189,13,242,0.25)] font-black"
+                                            ? "bg-theme-primary/20 text-theme-primary border border-theme-primary/40 shadow-[0_0_12px_var(--theme-glow)] font-black"
                                             : "text-zinc-400 hover:text-white"
                                     )}
                                 >
@@ -392,7 +392,7 @@ export function HistoryClient({
                 {activeTab === "GUILD" && (
                     <div className="space-y-6 sm:space-y-8">
                         {/* TOOLBAR DE FILTROS DA GUILDA (Dual-Paradigm: Desktop 4x1 Streamlined vs Mobile 2x2 Grid) */}
-                        <div className="flex flex-col gap-3.5 sm:gap-4 rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-zinc-950/85 p-3.5 sm:p-5 backdrop-blur-xl shadow-xl">
+                        <div className="flex flex-col gap-3.5 sm:gap-4 rounded-2xl sm:rounded-3xl border border-theme bg-theme-card/90 p-3.5 sm:p-5 backdrop-blur-xl shadow-xl">
                             
                             {/* Desktop View: Linha Única Contínua (4x1) */}
                             <div className="hidden lg:flex items-center justify-between gap-3.5 flex-wrap">
@@ -426,7 +426,7 @@ export function HistoryClient({
                                         className={cn(
                                             "rounded-lg px-3.5 py-2 text-sm font-bold uppercase tracking-wider transition-all min-h-[38px]",
                                             guildQuestType === "ALL"
-                                                ? "bg-zinc-800 text-white shadow font-black"
+                                                 ? "bg-zinc-800 text-white shadow font-black"
                                                 : "text-zinc-400 hover:text-white"
                                         )}
                                     >
@@ -450,7 +450,7 @@ export function HistoryClient({
                                         className={cn(
                                             "rounded-lg px-3.5 py-2 text-sm font-bold uppercase tracking-wider transition-all min-h-[38px]",
                                             guildQuestType === "SIDE"
-                                                ? "bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/40 shadow-[0_0_10px_rgba(189,13,242,0.2)] font-black"
+                                                ? "bg-theme-primary/20 text-theme-primary border border-theme-primary/40 shadow-[0_0_10px_var(--theme-glow)] font-black"
                                                 : "text-zinc-400 hover:text-white"
                                         )}
                                     >
@@ -555,7 +555,7 @@ export function HistoryClient({
                                         className={cn(
                                             "rounded-lg px-2 py-2 text-xs font-bold uppercase tracking-wider transition-all min-h-[40px] text-center",
                                             guildQuestType === "SIDE"
-                                                ? "bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/40 shadow-[0_0_10px_rgba(189,13,242,0.2)] font-black"
+                                                ? "bg-theme-primary/20 text-theme-primary border border-theme-primary/40 shadow-[0_0_10px_var(--theme-glow)] font-black"
                                                 : "text-zinc-400 hover:text-white"
                                         )}
                                     >
@@ -620,8 +620,8 @@ export function HistoryClient({
                         {/* Listagem de Cards da Guilda */}
                         {isLoadingGuild ? (
                             <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-                                <Loader2 className="size-10 animate-spin text-[#bd0df2]" />
-                                <span className="text-sm font-bold tracking-widest text-[#bd0df2] uppercase">
+                                <Loader2 className="size-10 animate-spin text-theme-primary" />
+                                <span className="text-sm font-bold tracking-widest text-theme-primary uppercase">
                                     Carregando Arquivos...
                                 </span>
                             </div>
@@ -676,7 +676,7 @@ export function HistoryClient({
                     <div className="space-y-6 sm:space-y-8">
                         
                         {/* TOOLBAR DE FILTROS DA ABA PESSOAL (Dual-Paradigm: Desktop 4x1 Streamlined vs Mobile 2x2 Grid) */}
-                        <div className="flex flex-col gap-3.5 sm:gap-4 rounded-2xl sm:rounded-3xl border border-zinc-800/80 bg-zinc-950/85 p-3.5 sm:p-5 backdrop-blur-xl shadow-xl">
+                        <div className="flex flex-col gap-3.5 sm:gap-4 rounded-2xl sm:rounded-3xl border border-theme bg-theme-card/90 p-3.5 sm:p-5 backdrop-blur-xl shadow-xl">
                             
                             {/* Desktop View: Linha Única Contínua (4x1) */}
                             <div className="hidden lg:flex items-center justify-between gap-3.5 flex-wrap">
@@ -688,7 +688,7 @@ export function HistoryClient({
                                         placeholder="Buscar no histórico pessoal..."
                                         value={personalSearchQuery}
                                         onChange={(e) => setPersonalSearchQuery(e.target.value)}
-                                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 pl-10 pr-9 py-2.5 text-sm font-bold text-white placeholder-zinc-500 transition-colors focus:border-[#bd0df2] focus:outline-none focus:ring-1 focus:ring-[#bd0df2] min-h-[44px]"
+                                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 pl-10 pr-9 py-2.5 text-sm font-bold text-white placeholder-zinc-500 transition-colors focus:border-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-primary min-h-[44px]"
                                     />
                                     {personalSearchQuery && (
                                         <button
@@ -734,7 +734,7 @@ export function HistoryClient({
                                         className={cn(
                                             "rounded-lg px-3.5 py-2 text-sm font-bold uppercase tracking-wider transition-all min-h-[38px]",
                                             personalTypeFilter === "SIDE_QUEST"
-                                                ? "bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/40 shadow-[0_0_10px_rgba(189,13,242,0.2)] font-black"
+                                                ? "bg-theme-primary/20 text-theme-primary border border-theme-primary/40 shadow-[0_0_10px_var(--theme-glow)] font-black"
                                                 : "text-zinc-400 hover:text-white"
                                         )}
                                     >
@@ -748,7 +748,7 @@ export function HistoryClient({
                                         value={personalStatusFilter}
                                         onChange={setPersonalStatusFilter}
                                         options={PERSONAL_STATUS_OPTIONS}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                 </div>
 
@@ -758,7 +758,7 @@ export function HistoryClient({
                                         value={personalSort}
                                         onChange={setPersonalSort}
                                         options={PERSONAL_SORT_OPTIONS}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                 </div>
 
@@ -768,7 +768,7 @@ export function HistoryClient({
                                         value={personalYearFilter}
                                         onChange={setPersonalYearFilter}
                                         options={personalYearOptions}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                 </div>
 
@@ -778,7 +778,7 @@ export function HistoryClient({
                                         value={personalMonthFilter}
                                         onChange={setPersonalMonthFilter}
                                         options={MONTH_OPTIONS}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                 </div>
                             </div>
@@ -793,7 +793,7 @@ export function HistoryClient({
                                         placeholder="Buscar no histórico pessoal..."
                                         value={personalSearchQuery}
                                         onChange={(e) => setPersonalSearchQuery(e.target.value)}
-                                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 pl-10 pr-9 py-2.5 text-sm font-bold text-white placeholder-zinc-500 transition-colors focus:border-[#bd0df2] focus:outline-none min-h-[44px]"
+                                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 pl-10 pr-9 py-2.5 text-sm font-bold text-white placeholder-zinc-500 transition-colors focus:border-theme-primary focus:outline-none min-h-[44px]"
                                     />
                                     {personalSearchQuery && (
                                         <button
@@ -839,7 +839,7 @@ export function HistoryClient({
                                         className={cn(
                                             "rounded-lg px-2 py-2 text-xs font-bold uppercase tracking-wider transition-all min-h-[40px] text-center",
                                             personalTypeFilter === "SIDE_QUEST"
-                                                ? "bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/40 shadow-[0_0_10px_rgba(189,13,242,0.2)] font-black"
+                                                ? "bg-theme-primary/20 text-theme-primary border border-theme-primary/40 shadow-[0_0_10px_var(--theme-glow)] font-black"
                                                 : "text-zinc-400 hover:text-white"
                                         )}
                                     >
@@ -853,25 +853,25 @@ export function HistoryClient({
                                         value={personalStatusFilter}
                                         onChange={setPersonalStatusFilter}
                                         options={PERSONAL_STATUS_OPTIONS}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                     <AppDropdown
                                         value={personalSort}
                                         onChange={setPersonalSort}
                                         options={PERSONAL_SORT_OPTIONS}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                     <AppDropdown
                                         value={personalYearFilter}
                                         onChange={setPersonalYearFilter}
                                         options={personalYearOptions}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                     <AppDropdown
                                         value={personalMonthFilter}
                                         onChange={setPersonalMonthFilter}
                                         options={MONTH_OPTIONS}
-                                        accentColor="purple"
+                                        accentColor="theme"
                                     />
                                 </div>
                             </div>
@@ -904,8 +904,8 @@ export function HistoryClient({
                         {/* Listagem de Cards Pessoais */}
                         {isLoadingPersonal ? (
                             <div className="flex min-h-[40vh] flex-col items-center justify-center gap-4">
-                                <Loader2 className="size-10 animate-spin text-[#bd0df2]" />
-                                <span className="text-sm font-bold tracking-widest text-[#bd0df2] uppercase">
+                                <Loader2 className="size-10 animate-spin text-theme-primary" />
+                                <span className="text-sm font-bold tracking-widest text-theme-primary uppercase">
                                     Carregando Suas Quests...
                                 </span>
                             </div>
@@ -922,7 +922,7 @@ export function HistoryClient({
                                 </div>
                                 <Link
                                     href="/randomizer"
-                                    className="rounded-xl bg-[#bd0df2] px-6 py-2.5 text-xs sm:text-sm font-black uppercase tracking-wider text-white shadow-[0_0_15px_rgba(189,13,242,0.4)] hover:bg-[#bd0df2]/90 transition-all min-h-[44px] inline-flex items-center justify-center"
+                                    className="rounded-xl bg-theme-primary px-6 py-2.5 text-xs sm:text-sm font-black uppercase tracking-wider text-white shadow-[0_0_15px_var(--theme-glow)] hover:bg-theme-primary/90 transition-all min-h-[44px] inline-flex items-center justify-center"
                                 >
                                     Escolher Jogo
                                 </Link>
@@ -949,7 +949,7 @@ export function HistoryClient({
                                 {filteredPersonalHistory.map((item) => (
                                     <div
                                         key={item.id}
-                                        className="group relative flex flex-col overflow-hidden rounded-2xl border border-zinc-800/80 bg-zinc-950/80 p-4 shadow-xl hover:border-theme transition-all duration-300 backdrop-blur-md"
+                                        className="group relative flex flex-col overflow-hidden rounded-2xl border border-theme/40 bg-theme-card/85 p-4 shadow-xl hover:border-theme transition-all duration-300 backdrop-blur-md"
                                     >
                                         <div className="relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-zinc-900 border border-zinc-800 mb-3">
                                             <Image

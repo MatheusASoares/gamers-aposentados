@@ -685,9 +685,9 @@ export function RandomizerClient({
                         <div className="flex flex-col gap-6">
                             {/* Active Guild Badge Info */}
                             {activeGuild && (
-                                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-zinc-950/80 p-3.5 sm:px-5 sm:py-3.5 backdrop-blur-xl shadow-lg">
+                                <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-theme/40 bg-theme-card/85 p-3.5 sm:px-5 sm:py-3.5 backdrop-blur-xl shadow-lg">
                                     <div className="flex items-center gap-3">
-                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#bd0df2]/50 bg-[#bd0df2]/20 text-[#bd0df2] shadow-[0_0_12px_rgba(189,13,242,0.3)]">
+                                        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-theme-primary/50 bg-theme-primary/20 text-theme-primary shadow-[0_0_12px_var(--theme-glow)]">
                                             <Shield className="h-5 w-5" />
                                         </div>
                                         <div className="flex items-center gap-2">
@@ -699,7 +699,7 @@ export function RandomizerClient({
                                             </span>
                                         </div>
                                     </div>
-                                    <span className="text-xs font-bold text-zinc-300 bg-zinc-900/90 border border-white/10 px-3 py-1.5 rounded-xl">
+                                    <span className="text-xs font-bold text-zinc-300 bg-black/40 border border-theme/30 px-3 py-1.5 rounded-xl">
                                         👥 {activeGuild.activeMembers.length} {activeGuild.activeMembers.length === 1 ? "membro ativo" : "membros ativos"} • {maxPerPerson} indicações/membro
                                     </span>
                                 </div>
@@ -1215,13 +1215,13 @@ export function RandomizerClient({
                         <div>
                             <div className="glass-card border border-theme bg-theme-card group relative flex min-h-125 flex-col items-center justify-center overflow-hidden rounded-3xl p-8 shadow-2xl backdrop-blur-md lg:p-12">
                                 {/* Glow effect */}
-                                <div className="absolute -top-24 -right-24 size-64 rounded-full bg-[#bd0df2]/20 blur-[100px]"></div>
+                                <div className="absolute -top-24 -right-24 size-64 rounded-full bg-theme-primary/20 blur-[100px]"></div>
 
                                 <div className="relative z-10 flex w-full max-w-lg flex-col items-center gap-8">
                                     {/* Display Box */}
                                     <div className="flex w-full flex-col items-center gap-4">
-                                        <div className="relative flex min-h-100 w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-[#bd0df2]/30 bg-zinc-950/80 px-4 py-8 shadow-[0_0_40px_rgba(189,13,242,0.15)] backdrop-blur-sm">
-                                            <div className="absolute inset-0 bg-linear-to-t from-[#bd0df2]/10 to-transparent opacity-50"></div>
+                                        <div className="relative flex min-h-100 w-full flex-col items-center justify-center overflow-hidden rounded-2xl border border-theme/40 bg-black/50 px-4 py-8 shadow-[0_0_40px_var(--theme-glow)] backdrop-blur-sm">
+                                            <div className="absolute inset-0 bg-gradient-to-t from-theme-primary/10 to-transparent opacity-50"></div>
 
                                             {winner && winner.imageUrl && (
                                                 <div className="absolute inset-0 z-0 opacity-30 mix-blend-overlay">
@@ -1239,7 +1239,7 @@ export function RandomizerClient({
                                             <div className="relative z-10 flex w-full flex-col items-center justify-center text-center">
                                                 {isRolling ? (
                                                     <div className="flex flex-col items-center gap-6">
-                                                        <Loader2 className="h-12 w-12 animate-spin text-[#bd0df2]" />
+                                                        <Loader2 className="h-12 w-12 animate-spin text-theme-primary" />
                                                         <div className="min-h-20">
                                                             <span className="text-shadow-glow animate-pulse text-4xl font-black tracking-tighter text-white uppercase md:text-5xl">
                                                                 {cycleText || "ROLLING..."}

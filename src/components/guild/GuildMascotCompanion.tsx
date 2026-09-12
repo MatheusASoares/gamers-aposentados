@@ -334,7 +334,7 @@ export function GuildMascotCompanion({
                 );
               })()
             ) : (
-              <div className="flex h-full w-full items-center justify-center rounded-2xl border border-theme bg-zinc-950/80 p-3 text-theme-primary shadow-[0_0_20px_var(--theme-glow)]">
+              <div className="flex h-full w-full items-center justify-center rounded-2xl border border-theme bg-theme-card p-3 text-theme-primary shadow-[0_0_20px_var(--theme-glow)]">
                 <Sparkles className="h-10 w-10 animate-pulse text-theme-primary" />
               </div>
             )}

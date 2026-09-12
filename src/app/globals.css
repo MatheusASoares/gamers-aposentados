@@ -22,8 +22,20 @@
     --foreground: 0 0% 98%;
     --card: 240 6% 10%;
     --card-foreground: 0 0% 98%;
+    --popover: 240 6% 10%;
+    --popover-foreground: 0 0% 98%;
     --primary: 283 92% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 187 92% 43%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 5% 15%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 283 92% 20%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
     --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
     --ring: 283 92% 50%;
     --radius: 0.5rem;
 
@@ -44,8 +56,20 @@
     --foreground: 40 30% 95%;
     --card: 24 20% 8%;
     --card-foreground: 40 30% 95%;
+    --popover: 24 20% 8%;
+    --popover-foreground: 40 30% 95%;
     --primary: 38 92% 50%;
+    --primary-foreground: 24 25% 4%;
+    --secondary: 0 72% 51%;
+    --secondary-foreground: 40 30% 95%;
+    --muted: 24 18% 14%;
+    --muted-foreground: 38 20% 65%;
+    --accent: 38 92% 22%;
+    --accent-foreground: 40 30% 95%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 40 30% 95%;
     --border: 38 92% 35%;
+    --input: 38 92% 25%;
     --ring: 38 92% 50%;
     --radius: 0.375rem;
 
@@ -66,8 +90,20 @@
     --foreground: 210 40% 98%;
     --card: 220 50% 8%;
     --card-foreground: 210 40% 98%;
+    --popover: 220 50% 8%;
+    --popover-foreground: 210 40% 98%;
     --primary: 199 89% 60%;
+    --primary-foreground: 220 60% 3%;
+    --secondary: 45 93% 58%;
+    --secondary-foreground: 220 60% 3%;
+    --muted: 220 40% 15%;
+    --muted-foreground: 210 30% 65%;
+    --accent: 199 89% 25%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
     --border: 199 89% 40%;
+    --input: 199 89% 30%;
     --ring: 199 89% 60%;
     --radius: 0.25rem;
 
@@ -88,8 +124,20 @@
     --foreground: 120 100% 95%;
     --card: 240 60% 10%;
     --card-foreground: 120 100% 95%;
+    --popover: 240 60% 10%;
+    --popover-foreground: 120 100% 95%;
     --primary: 142 76% 50%;
+    --primary-foreground: 240 60% 5%;
+    --secondary: 38 92% 50%;
+    --secondary-foreground: 240 60% 5%;
+    --muted: 240 40% 16%;
+    --muted-foreground: 120 40% 65%;
+    --accent: 142 76% 25%;
+    --accent-foreground: 120 100% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 120 100% 95%;
     --border: 45 93% 47%;
+    --input: 45 93% 35%;
     --ring: 142 76% 50%;
     --radius: 0.125rem;
 
@@ -111,8 +159,20 @@
     --foreground: 0 0% 98%;
     --card: 240 12% 4%;
     --card-foreground: 0 0% 98%;
+    --popover: 240 12% 4%;
+    --popover-foreground: 0 0% 98%;
     --primary: 15 100% 50%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 38 92% 50%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 10% 12%;
+    --muted-foreground: 24 15% 65%;
+    --accent: 15 100% 22%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
     --border: 15 85% 35%;
+    --input: 15 85% 25%;
     --ring: 15 100% 50%;
     --radius: 0.25rem;
 
@@ -543,6 +603,67 @@ html:not([data-theme]) .glass-card,
 /* Progress Bar Glow */
 .progress-glow {
     box-shadow: 0 0 15px var(--theme-glow);
+}
+
+/* ==========================================================================
+   THEMED MENUS, POPOVERS & DIALOG SURFACES
+   ========================================================================== */
+
+/* Universal dynamic fallback for Radix poppers, dropdowns and dialogs */
+[data-radix-popper-content-wrapper] > div,
+[data-radix-dropdown-menu-content],
+[data-radix-dialog-content],
+.theme-menu {
+    background: var(--theme-card-bg) !important;
+    border-color: var(--theme-border) !important;
+}
+
+/* 1. Cyberpunk Dropdowns & Dialogs */
+html:not([data-theme]) [data-radix-popper-content-wrapper] > div,
+[data-theme="cyberpunk"] [data-radix-popper-content-wrapper] > div,
+html:not([data-theme]) [data-radix-dropdown-menu-content],
+[data-theme="cyberpunk"] [data-radix-dropdown-menu-content] {
+    background: linear-gradient(135deg, rgba(28, 10, 42, 0.98), rgba(8, 6, 18, 0.98)) !important;
+    border: 1px solid #bd0df2 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(189, 13, 242, 0.3) !important;
+}
+
+/* 2. Medieval Dropdowns & Dialogs */
+[data-theme="theme-medieval"] [data-radix-popper-content-wrapper] > div,
+[data-theme="theme-medieval"] [data-radix-dropdown-menu-content] {
+    background: linear-gradient(145deg, rgba(32, 23, 14, 0.98), rgba(16, 12, 8, 0.98)) !important;
+    border: 1px solid #d97706 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(217, 119, 6, 0.35) !important;
+    border-radius: 0.5rem !important;
+}
+
+/* 3. Space Sci-Fi Dropdowns & Dialogs */
+[data-theme="theme-space"] [data-radix-popper-content-wrapper] > div,
+[data-theme="theme-space"] [data-radix-dropdown-menu-content] {
+    background: linear-gradient(135deg, rgba(6, 22, 54, 0.98), rgba(2, 9, 28, 0.98)) !important;
+    border: 1px solid #38bdf8 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 20px rgba(56, 189, 248, 0.35) !important;
+}
+
+/* 4. Pixel Retro Dropdowns & Dialogs */
+[data-theme="theme-pixel"] [data-radix-popper-content-wrapper] > div,
+[data-theme="theme-pixel"] [data-radix-dropdown-menu-content] {
+    background: linear-gradient(145deg, rgba(8, 22, 60, 0.99), rgba(3, 10, 32, 0.99)) !important;
+    border: 3px solid #f59e0b !important;
+    box-shadow: 4px 4px 0px #000, 0 0 15px rgba(34, 197, 94, 0.4) !important;
+    border-radius: 0px !important;
+}
+
+/* 5. Almas Sombrias Dropdowns & Dialogs */
+[data-theme="theme-darksouls"] [data-radix-popper-content-wrapper] > div,
+[data-theme="theme-darksouls"] [data-radix-dropdown-menu-content],
+[data-theme="theme-ascendant"] [data-radix-popper-content-wrapper] > div,
+[data-theme="theme-ascendant"] [data-radix-dropdown-menu-content] {
+    background: linear-gradient(180deg, rgba(14, 12, 16, 0.99), rgba(5, 5, 7, 0.99)) !important;
+    border: 1px solid rgba(255, 59, 0, 0.45) !important;
+    border-top: 2px solid #ff3b00 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 59, 0, 0.25) !important;
+    border-radius: 0.25rem !important;
 }
 
 /* ==========================================================================

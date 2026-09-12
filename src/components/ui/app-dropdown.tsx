@@ -20,7 +20,7 @@ export interface AppDropdownProps<T extends string | number = string | number> {
     icon?: React.ReactNode;
     className?: string;
     menuClassName?: string;
-    accentColor?: "purple" | "amber" | "cyan" | "default";
+    accentColor?: "theme" | "purple" | "amber" | "cyan" | "default";
     ariaLabel?: string;
     disabled?: boolean;
 }
@@ -33,7 +33,7 @@ export function AppDropdown<T extends string | number = string | number>({
     icon,
     className,
     menuClassName,
-    accentColor = "purple",
+    accentColor = "theme",
     ariaLabel,
     disabled = false,
 }: AppDropdownProps<T>) {
@@ -60,12 +60,19 @@ export function AppDropdown<T extends string | number = string | number>({
                     activeIndicator: "text-cyan-400",
                 };
             case "purple":
-            default:
                 return {
                     borderFocus: "focus:border-[#bd0df2] hover:border-[#bd0df2]/60",
                     glow: "shadow-[0_0_15px_rgba(189,13,242,0.15)]",
                     activeItem: "bg-[#bd0df2]/15 text-[#bd0df2] font-black",
                     activeIndicator: "text-[#bd0df2]",
+                };
+            case "theme":
+            default:
+                return {
+                    borderFocus: "focus:border-theme-primary hover:border-theme-primary/60",
+                    glow: "shadow-[0_0_15px_var(--theme-glow)]",
+                    activeItem: "bg-theme-primary/15 text-theme-primary font-black",
+                    activeIndicator: "text-theme-primary",
                 };
         }
     };
@@ -78,10 +85,10 @@ export function AppDropdown<T extends string | number = string | number>({
                 disabled={disabled}
                 aria-label={ariaLabel || placeholder}
                 className={cn(
-                    "group relative flex items-center justify-between gap-2.5 rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition-all outline-none",
-                    "hover:bg-zinc-850 hover:text-white min-h-[44px] w-full text-left select-none cursor-pointer",
+                    "group relative flex items-center justify-between gap-2.5 rounded-xl border border-theme bg-theme-card px-3.5 sm:px-4 py-2.5 text-xs sm:text-sm font-bold text-white transition-all outline-none",
+                    "hover:bg-theme-card/90 hover:text-white min-h-[44px] w-full text-left select-none cursor-pointer",
                     accents.borderFocus,
-                    open && `border-zinc-700 bg-zinc-900 ${accents.glow}`,
+                    open && `border-theme-primary bg-theme-card ${accents.glow}`,
                     disabled && "cursor-not-allowed opacity-50",
                     className
                 )}
@@ -109,7 +116,7 @@ export function AppDropdown<T extends string | number = string | number>({
                     sideOffset={6}
                     align="start"
                     className={cn(
-                        "z-50 min-w-[180px] sm:min-w-[210px] max-h-[320px] overflow-y-auto rounded-2xl border border-zinc-800 bg-zinc-950/98 p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.95)] backdrop-blur-2xl outline-none",
+                        "z-50 min-w-[180px] sm:min-w-[210px] max-h-[320px] overflow-y-auto rounded-2xl border border-theme bg-theme-card p-1.5 shadow-[0_12px_40px_rgba(0,0,0,0.95)] backdrop-blur-2xl outline-none",
                         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 duration-150",
                         menuClassName
                     )}
@@ -124,7 +131,7 @@ export function AppDropdown<T extends string | number = string | number>({
                                     "flex cursor-pointer select-none items-center justify-between gap-3 rounded-xl px-3 sm:px-3.5 py-2.5 text-xs sm:text-sm font-bold tracking-wide outline-none transition-colors min-h-[40px]",
                                     isSelected
                                         ? accents.activeItem
-                                        : "text-zinc-300 hover:bg-zinc-800/80 hover:text-white"
+                                        : "text-zinc-300 hover:bg-white/10 hover:text-white"
                                 )}
                             >
                                 <div className="flex items-center gap-2.5 min-w-0 truncate">

@@ -57,10 +57,10 @@ export function CreateGuildModal({ isOpen, onClose }: CreateGuildModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-md border border-theme bg-zinc-950/95 p-6 backdrop-blur-xl shadow-[0_0_30px_rgba(189,13,242,0.2)]">
+            <DialogContent className="max-w-md border border-theme bg-theme-card p-6 backdrop-blur-xl shadow-[0_0_40px_var(--theme-glow)]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-lg font-black uppercase tracking-wider text-white">
-                        <Shield className="h-5 w-5 text-[#bd0df2]" />
+                        <Shield className="h-5 w-5 text-theme-primary" />
                         Criar Nova Guilda
                     </DialogTitle>
                     <DialogDescription className="text-xs text-zinc-400">
@@ -76,7 +76,7 @@ export function CreateGuildModal({ isOpen, onClose }: CreateGuildModalProps) {
                     )}
 
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-black uppercase tracking-wider text-zinc-300">
+                        <label className="text-xs font-black uppercase tracking-wider text-zinc-300">
                             Nome da Guilda *
                         </label>
                         <input
@@ -86,13 +86,13 @@ export function CreateGuildModal({ isOpen, onClose }: CreateGuildModalProps) {
                             placeholder="Ex: Clã dos Aposentados, Squad Cyberpunk..."
                             maxLength={35}
                             disabled={isLoading}
-                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-sm font-bold text-white placeholder-zinc-500 focus:border-[#bd0df2] focus:outline-none focus:ring-1 focus:ring-[#bd0df2] transition-all"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2.5 text-sm font-bold text-white placeholder-zinc-500 focus:border-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-primary transition-all"
                             required
                         />
                     </div>
 
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-black uppercase tracking-wider text-zinc-300">
+                        <label className="text-xs font-black uppercase tracking-wider text-zinc-300">
                             Lema / Descrição (Opcional)
                         </label>
                         <textarea
@@ -102,7 +102,7 @@ export function CreateGuildModal({ isOpen, onClose }: CreateGuildModalProps) {
                             rows={3}
                             maxLength={200}
                             disabled={isLoading}
-                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-[#bd0df2] focus:outline-none focus:ring-1 focus:ring-[#bd0df2] transition-all resize-none"
+                            className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-primary transition-all resize-none"
                         />
                     </div>
 
@@ -118,7 +118,7 @@ export function CreateGuildModal({ isOpen, onClose }: CreateGuildModalProps) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="flex items-center gap-1.5 rounded-xl border border-[#bd0df2] bg-[#bd0df2] px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_15px_rgba(189,13,242,0.4)] hover:bg-[#bd0df2]/90 active:scale-95 transition-all disabled:opacity-50"
+                            className="flex items-center gap-1.5 rounded-xl border border-theme-primary bg-theme-primary px-5 py-2 text-xs font-black uppercase tracking-wider text-white shadow-[0_0_15px_var(--theme-glow)] hover:brightness-110 active:scale-95 transition-all disabled:opacity-50"
                         >
                             {isLoading ? (
                                 <>

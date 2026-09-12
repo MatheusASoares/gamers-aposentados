@@ -45,8 +45,7 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
   return (
     <div
       className={cn(
-        "glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/15 shadow-2xl p-4 sm:p-6 md:p-8",
-        !bannerItem?.assetUrl && "bg-zinc-950/80"
+        "glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-theme shadow-2xl p-4 sm:p-6 md:p-8"
       )}
       data-testid="user-profile-widget"
     >
@@ -77,7 +76,7 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
       <div className="relative z-10 grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12 lg:items-center">
 
         {/* Column 1: Player Profile & Info (5 cols) in Frosted Glass Capsule */}
-        <div className="flex items-center gap-3.5 sm:gap-6 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
+        <div className="flex items-center gap-3.5 sm:gap-6 rounded-2xl border border-theme/30 bg-black/40 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
           <div className="relative shrink-0">
             <UserAvatar
               src={user.image || null}
@@ -93,7 +92,7 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
               <h2 className="truncate text-xl font-black tracking-tight text-white drop-shadow-[0_2px_12px_rgba(0,0,0,0.95)] sm:text-2xl md:text-3xl">
                 {user.name || "Gamer"}
               </h2>
-              <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-2 py-0.5 text-[10px] sm:text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
+              <span className="inline-flex items-center gap-1 shrink-0 rounded-full border border-amber-500/50 bg-amber-500/20 px-2.5 py-0.5 text-xs font-black text-amber-300 uppercase shadow-[0_0_12px_rgba(251,191,36,0.3)]">
                 <Sparkles className="h-3 w-3 sm:h-3.5 sm:w-3.5 text-amber-400" />
                 Lvl {level}
               </span>
@@ -106,7 +105,7 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
         </div>
 
         {/* Column 2: Featured Last Completed Game Showcase Card (4 cols) in Frosted Glass Capsule */}
-        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-3.5 sm:p-4 shadow-xl backdrop-blur-md lg:col-span-4">
+        <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-theme/30 bg-black/40 p-3.5 sm:p-4 shadow-xl backdrop-blur-md lg:col-span-4">
           <div className="flex items-center gap-2 text-xs font-black tracking-widest text-emerald-400 uppercase drop-shadow-sm">
             <CheckCircle2 className="h-4 w-4 text-emerald-400 shrink-0" />
             <span>Último Jogo Zerado</span>
@@ -147,10 +146,10 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
         </div>
 
         {/* Column 3: Stats Summary & Career XP (3 cols) in Frosted Glass Capsule */}
-        <div className="flex flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 shadow-xl backdrop-blur-md lg:col-span-3">
+        <div className="flex flex-col justify-between gap-3 rounded-2xl border border-theme/30 bg-black/40 p-4 shadow-xl backdrop-blur-md lg:col-span-3">
           {/* XP Progress */}
           <div className="flex flex-col gap-2">
-            <div className="flex items-center justify-between text-[11px] font-black tracking-widest uppercase">
+            <div className="flex items-center justify-between text-xs font-black tracking-widest uppercase">
               <span className="text-zinc-300">Career XP</span>
               <span className={`${tierDetails.titleColor} font-black`}>
                 {currentLevelXP}/{nextLevelXP} XP
@@ -167,12 +166,12 @@ export function UserProfileWidget({ user }: UserProfileWidgetProps) {
           {/* Stats Grid */}
           <div className="grid grid-cols-2 gap-2">
             <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/40 p-2 text-center shadow-sm">
-              <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">Zerados</span>
+              <span className="text-xs font-black tracking-widest text-zinc-400 uppercase">Zerados</span>
               <span className="text-lg sm:text-xl font-black text-white drop-shadow-md">{user.completedGamesCount}</span>
             </div>
 
             <div className="flex flex-col items-center justify-center rounded-xl border border-amber-500/30 bg-black/40 p-2 text-center shadow-sm">
-              <span className="text-[10px] font-black tracking-widest text-amber-400 uppercase">Platinas</span>
+              <span className="text-xs font-black tracking-widest text-amber-400 uppercase">Platinas</span>
               <span className="text-lg sm:text-xl font-black text-amber-300 drop-shadow-md">{user.platinumCount} 🏆</span>
             </div>
           </div>

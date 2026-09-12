@@ -61,8 +61,8 @@ function getStatusDisplay(status: string) {
             return {
                 label: "Jogando",
                 icon: Swords,
-                colors: "text-[#bd0df2] drop-shadow-[0_0_8px_rgba(189,13,242,0.6)]",
-                bg: "bg-[#bd0df2]/10 border-[#bd0df2]/30",
+                colors: "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]",
+                bg: "bg-theme-primary/10 border-theme-primary/30",
             };
         default:
             return {
@@ -127,7 +127,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                         "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-black tracking-[0.2em] uppercase shadow-lg backdrop-blur-md",
                                         isMainQuest
                                             ? "border-amber-500/30 bg-amber-500/10 text-amber-500"
-                                            : "border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2]",
+                                            : "border-theme-primary/30 bg-theme-primary/10 text-theme-primary",
                                     )}
                                 >
                                     {isMainQuest ? (
@@ -169,8 +169,8 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                     </span>
                                 </div>
                             )}
-                            <div className="pointer-events-none absolute inset-0 z-20 bg-linear-to-t from-zinc-950 via-transparent to-transparent opacity-80" />
-                            <div className="absolute bottom-5 left-5 z-30 flex items-center gap-2 rounded-xl border border-white/10 bg-zinc-950/80 px-4 py-2 backdrop-blur-md">
+                            <div className="pointer-events-none absolute inset-0 z-20 bg-gradient-to-t from-zinc-950 via-transparent to-transparent opacity-80" />
+                            <div className="absolute bottom-5 left-5 z-30 flex items-center gap-2 rounded-xl border border-theme/40 bg-black/60 px-4 py-2 backdrop-blur-md">
                                 <Trophy className="size-5 text-amber-400" />
                                 <span className="text-sm font-black tracking-widest text-amber-400 uppercase drop-shadow-[0_0_8px_rgba(251,191,36,0.5)]">
                                     Winner
@@ -189,7 +189,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                         "inline-flex items-center gap-1.5 rounded-full border px-4 py-1.5 text-xs font-black tracking-[0.2em] uppercase shadow-lg backdrop-blur-md",
                                         isMainQuest
                                             ? "border-amber-500/30 bg-amber-500/10 text-amber-500"
-                                            : "border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2]",
+                                            : "border-theme-primary/30 bg-theme-primary/10 text-theme-primary",
                                     )}
                                 >
                                     {isMainQuest ? (
@@ -215,7 +215,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                         {/* Box de Progresso dos Players */}
                         <div className="flex w-full flex-col gap-6 rounded-[2rem] border border-white/5 bg-zinc-900/40 p-6 shadow-2xl backdrop-blur-xl lg:p-8">
                             <div className="flex items-center gap-3">
-                                <Flag className="size-6 text-[#bd0df2]" />
+                                <Flag className="size-6 text-theme-primary" />
                                 <h3 className="text-base font-black tracking-widest text-zinc-300 uppercase">
                                     Status da Missão
                                 </h3>
@@ -268,7 +268,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                                     ? "bg-amber-500"
                                                                     : p.status === "DROPPED"
                                                                       ? "bg-red-500"
-                                                                      : "bg-[#bd0df2]",
+                                                                      : "bg-theme-primary",
                                                             )}
                                                             style={{
                                                                 width: `${p.progress_percentage}%`,
@@ -310,7 +310,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                                                 router.refresh();
                                                                             setIsLoading(false);
                                                                         }}
-                                                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-[#bd0df2]/30 bg-[#bd0df2]/15 py-3 text-xs font-black tracking-widest text-[#bd0df2] uppercase transition-all hover:bg-[#bd0df2]/25 hover:shadow-[0_0_15px_rgba(189,13,242,0.3)] disabled:opacity-50"
+                                                                        className="flex flex-1 items-center justify-center gap-2 rounded-xl border border-theme-primary/30 bg-theme-primary/15 py-3 text-xs font-black tracking-widest text-theme-primary uppercase transition-all hover:bg-theme-primary/25 hover:shadow-[0_0_15px_var(--theme-glow)] disabled:opacity-50"
                                                                     >
                                                                         <RotateCcw className="size-4" />
                                                                         Retomar Quest
@@ -371,7 +371,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                                 <div className="flex items-center justify-between px-1">
                                                                     <span className="text-xs font-black text-zinc-400 uppercase">
                                                                         Ajustar:{" "}
-                                                                        <span className="text-[#bd0df2]">
+                                                                        <span className="text-theme-primary">
                                                                             {percentage}%
                                                                         </span>
                                                                     </span>
@@ -390,7 +390,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                                             ),
                                                                         )
                                                                     }
-                                                                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-900 accent-[#bd0df2]"
+                                                                    className="h-2 w-full cursor-pointer appearance-none rounded-lg bg-zinc-900 accent-[var(--theme-primary)]"
                                                                 />
                                                                 <div className="mt-2 flex gap-2">
                                                                     <button
@@ -412,7 +412,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                                                                                 );
                                                                             setIsLoading(false);
                                                                         }}
-                                                                        className="flex-1 rounded-lg bg-[#bd0df2] py-3 text-xs font-black text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
+                                                                        className="flex-1 rounded-lg bg-theme-primary py-3 text-xs font-black text-white uppercase transition-all hover:brightness-110 disabled:opacity-50"
                                                                     >
                                                                         Salvar
                                                                     </button>
@@ -457,7 +457,7 @@ export function QuestHistoryCard({ data, currentUserId, priority = false }: Ques
                     {unanimous ? (
                         <div className="flex flex-col items-center justify-center rounded-2xl border border-white/5 bg-zinc-900/30 py-10 text-center backdrop-blur-sm">
                             <Crown className="mb-3 size-10 text-amber-400/50 drop-shadow-md" />
-                            <span className="text-sm font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-[0_0_8px_rgba(189,13,242,0.4)]">
+                            <span className="text-sm font-black tracking-widest text-theme-primary uppercase drop-shadow-[0_0_8px_var(--theme-glow)]">
                                 Escolha Unânime
                             </span>
                             <span className="mt-2 text-xs font-bold tracking-wider text-zinc-500">

@@ -108,13 +108,13 @@ export function BottomNav() {
                     />
 
                     {/* Sheet Content */}
-                    <div className="fixed inset-x-0 bottom-0 z-[80] rounded-t-[2rem] border-t border-[#bd0df2]/40 bg-zinc-950/95 p-5 pb-8 shadow-[0_-10px_40px_rgba(189,13,242,0.35)] backdrop-blur-2xl animate-fade-in-up">
+                    <div className="fixed inset-x-0 bottom-0 z-[80] rounded-t-[2rem] border-t border-theme-primary/40 bg-theme-card p-5 pb-8 shadow-[0_-10px_40px_var(--theme-glow)] backdrop-blur-2xl animate-fade-in-up">
                         {/* Drag Handle Bar */}
                         <div className="mx-auto mb-4 h-1.5 w-12 rounded-full bg-zinc-700/80" />
 
-                        <div className="flex items-center justify-between pb-3 border-b border-white/10">
+                        <div className="flex items-center justify-between pb-3 border-b border-theme/20">
                             <div className="flex items-center gap-2">
-                                <Sparkles className="h-4 w-4 text-[#bd0df2]" />
+                                <Sparkles className="h-4 w-4 text-theme-primary" />
                                 <h3 className="text-sm font-black uppercase tracking-wider text-white">
                                     Mais Ferramentas & Módulos
                                 </h3>
@@ -142,7 +142,7 @@ export function BottomNav() {
                                         className={cn(
                                             "flex items-center gap-3.5 rounded-2xl border p-3.5 transition-all duration-200 active:scale-95",
                                             active
-                                                ? "border-[#bd0df2] bg-[#bd0df2]/20 shadow-[0_0_20px_rgba(189,13,242,0.3)] text-white"
+                                                ? "border-theme-primary bg-theme-primary/20 shadow-[0_0_20px_var(--theme-glow)] text-white font-bold"
                                                 : "border-white/10 bg-zinc-900/60 hover:bg-zinc-800/60 text-zinc-300"
                                         )}
                                     >
@@ -168,7 +168,7 @@ export function BottomNav() {
             {/* 2. Main Mobile Bottom Navigation Bar (5 Items: 4 Core + 1 "Mais") */}
             <nav
                 aria-label="Navegação móvel principal"
-                className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-theme/40 bg-zinc-950/90 backdrop-blur-xl px-2 pt-2 pb-[max(env(safe-area-inset-bottom),10px)] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] md:hidden transition-all duration-300 select-none"
+                className="fixed bottom-0 inset-x-0 z-50 flex items-center justify-around border-t border-theme bg-theme-card/95 backdrop-blur-xl px-2 pt-2 pb-[max(env(safe-area-inset-bottom),10px)] shadow-[0_-8px_30px_rgba(0,0,0,0.8)] md:hidden transition-all duration-300 select-none"
             >
                 {PRIMARY_ITEMS.map((item) => {
                     const active = isPrimaryActive(item.href);
@@ -213,19 +213,19 @@ export function BottomNav() {
                     className={cn(
                         "relative flex flex-1 flex-col items-center justify-center gap-1 py-1.5 px-1 rounded-xl transition-all duration-300 min-h-[48px] active:scale-95 focus:outline-none",
                         isMoreActive || isMoreOpen
-                            ? "text-[#bd0df2] font-black"
+                            ? "text-theme-primary font-black"
                             : "text-zinc-500 hover:text-zinc-300 font-bold"
                     )}
                 >
                     {(isMoreActive || isMoreOpen) && (
-                        <span className="absolute -top-2 h-1 w-8 rounded-full bg-[#bd0df2] shadow-[0_0_12px_#bd0df2] animate-fade-in" />
+                        <span className="absolute -top-2 h-1 w-8 rounded-full bg-theme-primary shadow-[0_0_12px_var(--theme-glow)] animate-fade-in" />
                     )}
 
                     <MoreHorizontal
                         className={cn(
                             "h-5 w-5 transition-transform duration-200",
                             isMoreActive || isMoreOpen
-                                ? "scale-110 drop-shadow-[0_0_8px_#bd0df2]"
+                                ? "scale-110 drop-shadow-[0_0_8px_var(--theme-glow)]"
                                 : "opacity-70"
                         )}
                     />

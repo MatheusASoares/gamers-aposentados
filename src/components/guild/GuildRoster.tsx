@@ -96,11 +96,11 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
     };
 
     return (
-        <div className="rounded-2xl border border-theme bg-zinc-950/70 p-4 sm:p-6 backdrop-blur-xl shadow-xl space-y-4">
+        <div className="rounded-2xl border border-theme bg-theme-card/85 p-4 sm:p-6 backdrop-blur-xl shadow-xl space-y-4">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-zinc-800/80 pb-4">
                 <div>
                     <h2 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
-                        <Swords className="h-5 w-5 text-[#bd0df2]" />
+                        <Swords className="h-5 w-5 text-theme-primary" />
                         Quartel de Membros ({guild.members.length})
                     </h2>
                     <p className="text-xs text-zinc-400">
@@ -132,7 +132,7 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
                             className={cn(
                                 "flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border p-3.5 sm:p-4 transition-all",
                                 m.isActive
-                                    ? "border-zinc-800/90 bg-zinc-900/60 hover:border-zinc-700"
+                                    ? "border-zinc-800/90 bg-zinc-900/60 hover:border-theme/60"
                                     : "border-zinc-850 bg-zinc-950/40 opacity-75 hover:opacity-100"
                             )}
                         >
@@ -152,7 +152,7 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
                                             {m.name.slice(0, 2).toUpperCase()}
                                         </div>
                                     )}
-                                    <div className="absolute bottom-0 right-0 bg-zinc-950/90 px-1 text-[8px] font-black text-amber-400 border-t border-l border-zinc-800">
+                                    <div className="absolute bottom-0 right-0 bg-zinc-950/90 px-1 text-[10px] font-black text-amber-400 border-t border-l border-zinc-800">
                                         Nv{m.level}
                                     </div>
                                 </div>
@@ -163,16 +163,16 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
                                             {m.name}
                                         </span>
                                         {isSelf && (
-                                            <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-[9px] font-black text-zinc-400 uppercase">
+                                            <span className="rounded bg-zinc-800 px-1.5 py-0.5 text-xs font-black text-zinc-300 uppercase">
                                                 Você
                                             </span>
                                         )}
                                         {m.role === "LEADER" ? (
-                                            <span className="flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-black text-amber-400 uppercase tracking-wider">
+                                            <span className="flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 text-xs font-black text-amber-400 uppercase tracking-wider">
                                                 <Crown className="h-3 w-3" /> Líder
                                             </span>
                                         ) : (
-                                            <span className="flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800/80 px-2 py-0.5 text-[10px] font-bold text-zinc-400 uppercase tracking-wider">
+                                            <span className="flex items-center gap-1 rounded-md border border-zinc-700 bg-zinc-800/80 px-2 py-0.5 text-xs font-bold text-zinc-400 uppercase tracking-wider">
                                                 <Swords className="h-3 w-3 text-zinc-500" /> Membro
                                             </span>
                                         )}
@@ -245,13 +245,13 @@ export function GuildRoster({ guild, currentUserId }: GuildRosterProps) {
                                             <button
                                                 type="button"
                                                 disabled={isLoading}
-                                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all"
+                                                className="flex h-8 w-8 items-center justify-center rounded-lg border border-theme/40 bg-theme-card/80 text-zinc-400 hover:text-theme-primary hover:border-theme-primary/60 transition-all"
                                                 title="Opções de Membro"
                                             >
                                                 <MoreVertical className="h-4 w-4" />
                                             </button>
                                         </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end" className="w-48 border border-theme bg-zinc-950 p-1">
+                                        <DropdownMenuContent align="end" className="w-48 border border-theme bg-theme-card p-1 shadow-2xl backdrop-blur-xl">
                                             {m.role === "MEMBER" ? (
                                                 <DropdownMenuItem
                                                     onClick={() => handlePromote(m.userId, "LEADER")}

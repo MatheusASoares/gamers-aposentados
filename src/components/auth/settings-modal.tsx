@@ -238,20 +238,20 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
     return (
         <Dialog open={open} onOpenChange={handleOpenChange}>
             <DialogContent
-                className="sm:max-w-[500px] overflow-hidden border border-[#bd0df2]/30 bg-zinc-950/95 text-white shadow-[0_0_60px_rgba(189,13,242,0.25)] backdrop-blur-2xl p-0 transition-all duration-300"
+                className="sm:max-w-[500px] overflow-hidden border border-theme bg-theme-card text-white shadow-[0_0_60px_var(--theme-glow)] backdrop-blur-2xl p-0 transition-all duration-300"
             >
                 {/* Accessible Title & Description for Radix UI */}
                 <DialogTitle className="sr-only">Configurações da Conta</DialogTitle>
                 <DialogDescription className="sr-only">Gerencie seu perfil de jogador e segurança de acesso.</DialogDescription>
 
                 {/* Neon Top Accent Line */}
-                <div className="h-1.5 w-full bg-gradient-to-r from-[#bd0df2] via-cyan-400 to-[#bd0df2]" />
+                <div className="h-1.5 w-full bg-gradient-to-r from-theme-primary via-theme-secondary to-theme-primary" />
 
                 <div className="p-6 space-y-6">
                     {/* Header */}
                     <div className="space-y-1 text-left">
                         <div className="flex items-center gap-3">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-[#bd0df2]/40 bg-[#bd0df2]/15 text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.35)]">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-theme-primary/40 bg-theme-primary/15 text-theme-primary shadow-[0_0_20px_var(--theme-glow)]">
                                 <Settings className="h-5 w-5" />
                             </div>
                             <div>
@@ -270,9 +270,9 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                         <TabsList className="grid w-full grid-cols-2 rounded-xl border border-white/10 bg-zinc-900/80 p-1">
                             <TabsTrigger
                                 value="profile"
-                                className="flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-400 transition-all data-[state=active]:border data-[state=active]:border-[#bd0df2]/50 data-[state=active]:bg-[#bd0df2]/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_rgba(189,13,242,0.3)]"
+                                className="flex items-center justify-center gap-2 rounded-lg py-2.5 text-xs font-bold uppercase tracking-wider text-zinc-400 transition-all data-[state=active]:border data-[state=active]:border-theme-primary/50 data-[state=active]:bg-theme-primary/20 data-[state=active]:text-white data-[state=active]:shadow-[0_0_15px_var(--theme-glow)]"
                             >
-                                <User className="h-4 w-4 text-[#bd0df2]" />
+                                <User className="h-4 w-4 text-theme-primary" />
                                 <span>Perfil Gamer</span>
                             </TabsTrigger>
                             <TabsTrigger
@@ -359,7 +359,7 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                                 placeholder="Seu nome ou alias"
                                                 value={name}
                                                 onChange={(e) => setName(e.target.value)}
-                                                className="h-11 pl-10 bg-zinc-900/90 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#bd0df2] focus:ring-1 focus:ring-[#bd0df2] rounded-xl text-sm"
+                                                className="h-11 pl-10 bg-zinc-900/90 border-white/10 text-white placeholder:text-zinc-600 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-xl text-sm"
                                                 required
                                             />
                                         </div>
@@ -376,11 +376,11 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                                 placeholder="seu_username"
                                                 value={username}
                                                 onChange={(e) => setUsername(e.target.value)}
-                                                className="h-11 pl-10 bg-zinc-900/90 border-white/10 text-white placeholder:text-zinc-600 focus:border-[#bd0df2] focus:ring-1 focus:ring-[#bd0df2] rounded-xl text-sm"
+                                                className="h-11 pl-10 bg-zinc-900/90 border-white/10 text-white placeholder:text-zinc-600 focus:border-theme-primary focus:ring-1 focus:ring-theme-primary rounded-xl text-sm"
                                                 required
                                             />
                                         </div>
-                                        <p className="text-[11px] text-zinc-500 pl-1">
+                                        <p className="text-xs text-zinc-500 pl-1">
                                             Utilizado no seu link público de perfil e logins.
                                         </p>
                                     </div>
@@ -408,16 +408,16 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                 <div className="rounded-2xl border border-white/10 bg-zinc-900/40 p-4 space-y-3">
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-2">
-                                            <Sparkles className="h-4 w-4 text-[#bd0df2] animate-pulse" />
+                                            <Sparkles className="h-4 w-4 text-theme-primary animate-pulse" />
                                             <span className="text-xs font-black uppercase tracking-wider text-zinc-300">
                                                 Efeitos & Celebrações
                                             </span>
                                         </div>
-                                        <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-widest">
+                                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                                             Level Up VFX
                                         </span>
                                     </div>
-                                    <p className="text-[11px] text-zinc-400">
+                                    <p className="text-xs text-zinc-400">
                                         Experimente a animação épica de Level Up com partículas e efeitos sonoros adaptados ao tema ativo.
                                     </p>
                                     <Button
@@ -433,7 +433,7 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                                 }
                                             }
                                         }}
-                                        className="w-full h-10 border-[#bd0df2]/40 bg-[#bd0df2]/10 hover:bg-[#bd0df2]/20 text-[#bd0df2] hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer"
+                                        className="w-full h-10 border-theme-primary/40 bg-theme-primary/10 hover:bg-theme-primary/20 text-theme-primary hover:text-white font-bold text-xs uppercase tracking-wider rounded-xl transition cursor-pointer"
                                     >
                                         <Sparkles className="h-3.5 w-3.5 mr-2" />
                                         Testar Animação de Level Up
@@ -443,7 +443,7 @@ export function SettingsModal({ open, onOpenChange, user }: SettingsModalProps) 
                                 <Button
                                     type="submit"
                                     disabled={isPending}
-                                    className="w-full h-11 rounded-xl bg-gradient-to-r from-[#bd0df2] to-purple-600 text-white font-bold uppercase tracking-wider shadow-[0_0_20px_rgba(189,13,242,0.4)] hover:brightness-110 transition-all disabled:opacity-50 cursor-pointer"
+                                    className="w-full h-11 rounded-xl bg-theme-primary text-white font-bold uppercase tracking-wider shadow-[0_0_20px_var(--theme-glow)] hover:brightness-110 transition-all disabled:opacity-50 cursor-pointer"
                                 >
                                     {isPending ? (
                                         <>

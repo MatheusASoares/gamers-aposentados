@@ -52,7 +52,7 @@ export function JoinGuildModal({ isOpen, onClose }: JoinGuildModalProps) {
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-md border border-theme bg-zinc-950/95 p-6 backdrop-blur-xl shadow-[0_0_30px_rgba(245,158,11,0.2)]">
+            <DialogContent className="max-w-md border border-theme bg-theme-card p-6 backdrop-blur-xl shadow-[0_0_40px_var(--theme-glow)]">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2 text-lg font-black uppercase tracking-wider text-white">
                         <Link2 className="h-5 w-5 text-amber-400" />
@@ -71,7 +71,7 @@ export function JoinGuildModal({ isOpen, onClose }: JoinGuildModalProps) {
                     )}
 
                     <div className="space-y-1.5">
-                        <label className="text-[11px] font-black uppercase tracking-wider text-zinc-300">
+                        <label className="text-xs font-black uppercase tracking-wider text-zinc-300">
                             Código de Convite
                         </label>
                         <input

@@ -86,10 +86,10 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                 badge: "bg-red-500/20 border-red-500/50 text-red-500",
             };
         return {
-            border: "border-t-[#bd0df2] hover:border-[#bd0df2]/50 shadow-[0_0_20px_rgba(189,13,242,0.15)]",
-            text: "text-[#bd0df2]",
-            bg: "bg-[#bd0df2]",
-            badge: "bg-[#bd0df2]/20 border-[#bd0df2]/50 text-[#bd0df2]",
+            border: "border-t-theme-primary hover:border-theme-primary/50 shadow-[0_0_20px_var(--theme-glow)]",
+            text: "text-theme-primary",
+            bg: "bg-theme-primary",
+            badge: "bg-theme-primary/20 border-theme-primary/50 text-theme-primary",
         };
     };
     const theme = getThemeClasses();
@@ -100,7 +100,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
             style={{ animationDelay: "100ms" }}
         >
             {/* Dark/Grain/Glow Background Effects */}
-            <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-950 via-zinc-900 to-[#12001a]" />
+            <div className="absolute inset-0 z-0 bg-gradient-to-br from-black/60 via-transparent to-theme-primary/10 pointer-events-none" />
             <div
                 className="pointer-events-none absolute inset-0 z-0 opacity-[0.03] mix-blend-overlay"
                 style={{ backgroundImage: "url('/noise.svg')" }}
@@ -142,7 +142,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                             <div className="flex min-h-[9rem] sm:h-56 flex-col justify-start pb-1 sm:pb-2 min-w-0 flex-1">
                                 <div className="mb-2 sm:mb-3 flex items-center gap-2 flex-wrap">
                                     <span
-                                        className="relative z-10 flex cursor-default select-none items-center gap-1.5 sm:gap-2 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-black tracking-widest text-[#bd0df2] uppercase shadow-[0_0_15px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/20"
+                                        className="relative z-10 flex cursor-default select-none items-center gap-1.5 sm:gap-2 rounded-full border border-theme-primary/30 bg-theme-primary/10 px-3 py-1 sm:px-4 sm:py-1.5 text-xs sm:text-sm font-black tracking-widest text-theme-primary uppercase shadow-[0_0_15px_var(--theme-glow)] ring-1 ring-theme-primary/20"
                                     >
                                         <Compass className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                         Side Quest
@@ -157,7 +157,7 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                                 <p className="mt-auto text-xs sm:text-sm font-medium text-zinc-400 pb-1 truncate">
                                     Indicado por:{" "}
                                     {game.nominator ? (
-                                        <span className="font-bold text-white transition-colors hover:text-[#bd0df2]">
+                                        <span className="font-bold text-white transition-colors hover:text-theme-primary">
                                             <UserLink
                                                 userId={game.nominator.id}
                                                 name={game.nominator.name}
@@ -173,13 +173,13 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
                     </>
                 ) : (
                     <div className="absolute inset-0 flex items-center justify-center border-b border-zinc-800 bg-zinc-900">
-                        <Flame className="h-24 w-24 text-[#bd0df2]/50" />
+                        <Flame className="h-24 w-24 text-theme-primary/50" />
                     </div>
                 )}
             </div>
 
             {/* Info Side (Bottom) */}
-            <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-zinc-950/80 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
+            <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-theme-card/90 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
                 <div className="space-y-4">
                     {/* Progress & HLTB Time */}                    {progress && progress.status !== "SUGGESTED" ? (
                         <div className="space-y-3 pt-2">

@@ -125,7 +125,7 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                 className={`relative z-10 flex flex-col transition-opacity duration-300 ease-in-out md:flex-row ${isAnimating ? "scale-[0.98] opacity-0" : "scale-100 opacity-100"}`}
             >
                 {/* Left: Huge Cover & Score */}
-                <div className="relative flex aspect-[3/4] w-full items-center justify-center overflow-hidden bg-zinc-950/50 p-6 md:aspect-auto md:min-h-[450px] md:w-2/5">
+                <div className="relative flex aspect-[3/4] w-full items-center justify-center overflow-hidden bg-black/30 p-6 md:aspect-auto md:min-h-[450px] md:w-2/5">
                     {currentReview.game.cover_url ? (
                         <div className="relative h-full max-h-[500px] w-full max-w-[350px] overflow-hidden rounded-xl shadow-[0_0_40px_rgba(0,0,0,0.8)] transition-transform duration-1000 ease-out group-hover:scale-105">
                             <Image
@@ -144,14 +144,14 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                     )}
 
                     {/* Gradient overlay to seamlessly merge the image container with the right side */}
-                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-zinc-950/95 to-transparent md:inset-y-0 md:right-0 md:left-auto md:h-full md:w-32 md:bg-gradient-to-l" />
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/80 to-transparent md:inset-y-0 md:right-0 md:left-auto md:h-full md:w-32 md:bg-gradient-to-l" />
 
                     {/* Dynamic Score Badge */}
                     {(() => {
                         const badgeStyle = getRatingBadgeStyle(currentReview.rating);
                         return (
                             <div className={cn(
-                                "absolute bottom-10 left-10 z-20 flex h-24 w-24 flex-col items-center justify-center rounded-full border bg-zinc-950/90 backdrop-blur-xl transition-all duration-500 hover:scale-110 md:top-10 md:bottom-auto md:left-10",
+                                "absolute bottom-10 left-10 z-20 flex h-24 w-24 flex-col items-center justify-center rounded-full border bg-theme-card/90 backdrop-blur-xl transition-all duration-500 hover:scale-110 md:top-10 md:bottom-auto md:left-10",
                                 badgeStyle.container
                             )}>
                                 <span className={cn("text-xs font-bold tracking-widest uppercase leading-none", badgeStyle.label)}>
@@ -169,7 +169,7 @@ export function StatsGrid({ reviews }: StatsGridProps) {
                 </div>
 
                 {/* Right: Review Content */}
-                <div className="relative flex flex-1 flex-col justify-center bg-zinc-950/80 p-8 backdrop-blur-sm md:p-12 lg:p-16">
+                <div className="relative flex flex-1 flex-col justify-center bg-theme-card/90 p-8 backdrop-blur-sm md:p-12 lg:p-16">
                     {/* Header Tag */}
                     <div className="mb-6 flex items-center gap-3">
                         <div className="flex items-center gap-2 rounded-full border border-theme-primary/40 bg-theme-primary/10 px-4 py-1.5 backdrop-blur-md">

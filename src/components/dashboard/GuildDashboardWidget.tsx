@@ -132,14 +132,13 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
     return (
         <div
             className={cn(
-                "glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/15 shadow-2xl p-4 sm:p-6 md:p-8",
-                !bannerItem?.assetUrl && "bg-zinc-950/80"
+                "glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-theme shadow-2xl p-4 sm:p-6 md:p-8"
             )}
             data-testid="guild-dashboard-widget"
         >
-            {/* Dynamic Ambient Glows matching Cyber Neon Brand (#bd0df2 / Cyan) */}
-            <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full blur-[120px] bg-[#bd0df2]/20" />
-            <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full blur-[120px] bg-cyan-500/15" />
+            {/* Dynamic Ambient Glows matching active theme */}
+            <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full blur-[120px] bg-theme-primary/20" />
+            <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full blur-[120px] bg-[var(--theme-secondary)]/15" />
 
             {/* EQUIPPED HEADER BANNER COVER IMAGE */}
             {bannerItem?.assetUrl && !bannerError && (
@@ -164,7 +163,7 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
             {/* Balanced 3-Column Layout (5 - 4 - 3 Grid matching UserProfileWidget) */}
             <div className="relative z-10 grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12 lg:items-center">
                 {/* Column 1: Guild Emblem & Identity (5 cols) in Frosted Glass Capsule */}
-                <div className="flex items-center gap-3.5 sm:gap-6 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
+                <div className="flex items-center gap-3.5 sm:gap-6 rounded-2xl border border-theme/30 bg-black/40 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
                     <div className="relative shrink-0">
                         {emblemItem?.assetUrl ? (
                             <div className="relative flex h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 shrink-0 items-center justify-center transition-transform hover:scale-105">
@@ -182,21 +181,21 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                                     sizes="96px"
                                     className="object-contain drop-shadow-[0_8px_16px_rgba(0,0,0,0.95)]"
                                 />
-                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/80 bg-zinc-950/95 px-1.5 sm:px-2 py-0.5 text-[9px] sm:text-[10px] font-black text-amber-400 shadow-xl z-10 backdrop-blur-md">
-                                    <Crown className="h-2.5 w-2.5 text-amber-400" /> Nv {guild.level}
+                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/80 bg-zinc-950/95 px-2 py-0.5 text-xs font-black text-amber-400 shadow-xl z-10 backdrop-blur-md">
+                                    <Crown className="h-3 w-3 text-amber-400" /> Nv {guild.level}
                                 </div>
                             </div>
                         ) : (
                             <div
                                 className={cn(
-                                    "relative flex h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 shrink-0 items-center justify-center rounded-2xl border-2 bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-black text-[#bd0df2] shadow-2xl backdrop-blur-md",
+                                    "relative flex h-16 w-16 sm:h-20 sm:w-20 md:h-24 md:w-24 shrink-0 items-center justify-center rounded-2xl border-2 bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-black text-theme-primary shadow-2xl backdrop-blur-md",
                                     emblemItem?.cssClass ||
-                                        "border-[#bd0df2]/60 text-[#bd0df2] shadow-[0_0_25px_rgba(189,13,242,0.4)]"
+                                        "border-theme-primary/60 text-theme-primary shadow-[0_0_25px_var(--theme-glow)]"
                                 )}
                             >
                                 {renderEmblemIcon(emblemItem?.icon, "h-8 w-8 sm:h-10 sm:w-10")}
-                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/60 bg-zinc-950 px-1.5 py-0.5 text-[9px] font-black text-amber-400 shadow-md z-10">
-                                    <Crown className="h-2.5 w-2.5" /> Nv {guild.level}
+                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/60 bg-zinc-950 px-2 py-0.5 text-xs font-black text-amber-400 shadow-md z-10">
+                                    <Crown className="h-3 w-3" /> Nv {guild.level}
                                 </div>
                             </div>
                         )}
@@ -227,20 +226,20 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                 </div>
 
                 {/* Column 2: Featured Guild Mascot Showcase Card (4 cols) in Frosted Glass Capsule */}
-                <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-3.5 sm:p-4 shadow-xl backdrop-blur-md lg:col-span-4 relative overflow-visible">
-                    <div className="flex items-center gap-2 text-xs font-black tracking-widest text-[#bd0df2] uppercase drop-shadow-sm">
-                        <Sparkles className="h-4 w-4 text-[#bd0df2] shrink-0 animate-pulse" />
+                <div className="flex flex-col items-center justify-center gap-2 rounded-2xl border border-theme/30 bg-black/40 p-3.5 sm:p-4 shadow-xl backdrop-blur-md lg:col-span-4 relative overflow-visible">
+                    <div className="flex items-center gap-2 text-xs font-black tracking-widest text-theme-primary uppercase drop-shadow-sm">
+                        <Sparkles className="h-4 w-4 text-theme-primary shrink-0 animate-pulse" />
                         <span>Mascote da Sede</span>
                         {mascotItem?.gameTag && (
-                            <span className="rounded-full border border-purple-500/40 bg-purple-500/15 px-2 py-0.5 text-[9px] font-bold text-purple-300">
+                            <span className="rounded-full border border-purple-500/40 bg-purple-500/15 px-2 py-0.5 text-xs font-bold text-purple-300">
                                 {mascotItem.gameTag}
                             </span>
                         )}
                     </div>
 
-                    <div className="group relative flex aspect-[3/4] h-44 sm:h-48 w-auto flex-col items-center justify-center rounded-2xl border border-[#bd0df2]/30 bg-gradient-to-b from-zinc-950 via-zinc-900/60 to-zinc-950 shadow-[0_0_25px_rgba(189,13,242,0.2)] p-3 overflow-visible">
+                    <div className="group relative flex aspect-[3/4] h-44 sm:h-48 w-auto flex-col items-center justify-center rounded-2xl border border-theme-primary/30 bg-gradient-to-b from-zinc-950 via-zinc-900/60 to-zinc-950 shadow-[0_0_25px_var(--theme-glow)] p-3 overflow-visible">
                         {/* Ambient Pedestal Glow */}
-                        <div className="pointer-events-none absolute bottom-4 h-12 w-28 rounded-full bg-[#bd0df2]/25 blur-xl group-hover:bg-[#bd0df2]/40 transition-all" />
+                        <div className="pointer-events-none absolute bottom-4 h-12 w-28 rounded-full bg-theme-primary/25 blur-xl group-hover:bg-theme-primary/40 transition-all" />
 
                         {/* Interactive Mascot Companion */}
                         {mascotItem ? (
@@ -256,7 +255,7 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                                     <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-white drop-shadow-md text-center">
                                         {mascotItem.name}
                                     </span>
-                                    <span className="text-[10px] font-medium text-zinc-400 text-center">
+                                    <span className="text-xs font-medium text-zinc-400 text-center">
                                         Clique para interagir 🐾
                                     </span>
                                 </div>
@@ -270,18 +269,18 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                 </div>
 
                 {/* Column 3: Stats Summary & Guild XP Progress (3 cols) in Frosted Glass Capsule */}
-                <div className="flex flex-col justify-between gap-3 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 shadow-xl backdrop-blur-md lg:col-span-3">
+                <div className="flex flex-col justify-between gap-3 rounded-2xl border border-theme/30 bg-black/40 p-4 shadow-xl backdrop-blur-md lg:col-span-3">
                     {/* Guild XP Progress */}
                     <div className="flex flex-col gap-2">
-                        <div className="flex items-center justify-between text-[11px] font-black tracking-widest uppercase">
+                        <div className="flex items-center justify-between text-xs font-black tracking-widest uppercase">
                             <span className="text-zinc-300">XP da Guilda</span>
-                            <span className="text-[#bd0df2] font-black font-mono">
+                            <span className="text-theme-primary font-black font-mono">
                                 {currentLevelXP.toLocaleString("pt-BR")} / {nextLevelXP.toLocaleString("pt-BR")} XP
                             </span>
                         </div>
                         <div className="h-3 w-full overflow-hidden rounded-full bg-zinc-950 p-0.5 border border-white/10">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-purple-600 to-[#bd0df2] shadow-[0_0_12px_rgba(189,13,242,0.6)] transition-all duration-700"
+                                className="h-full rounded-full bg-theme-primary shadow-[0_0_12px_var(--theme-glow)] transition-all duration-700"
                                 style={{ width: `${progressPercentage}%` }}
                             />
                         </div>
@@ -290,7 +289,7 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                     {/* Stats Grid */}
                     <div className="grid grid-cols-2 gap-2">
                         <div className="flex flex-col items-center justify-center rounded-xl border border-white/10 bg-black/40 p-2 text-center shadow-sm">
-                            <span className="text-[10px] font-black tracking-widest text-zinc-400 uppercase">
+                            <span className="text-xs font-black tracking-widest text-zinc-400 uppercase">
                                 Zerados
                             </span>
                             <span className="text-lg sm:text-xl font-black text-white drop-shadow-md">
@@ -298,8 +297,8 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                             </span>
                         </div>
 
-                        <div className="flex flex-col items-center justify-center rounded-xl border border-[#bd0df2]/30 bg-black/40 p-2 text-center shadow-sm">
-                            <span className="text-[10px] font-black tracking-widest text-[#bd0df2] uppercase">
+                        <div className="flex flex-col items-center justify-center rounded-xl border border-theme-primary/30 bg-black/40 p-2 text-center shadow-sm">
+                            <span className="text-xs font-black tracking-widest text-theme-primary uppercase">
                                 Potes
                             </span>
                             <span className="text-lg sm:text-xl font-black text-purple-200 drop-shadow-md">
@@ -311,9 +310,9 @@ export function GuildDashboardWidget({ guild, stats }: GuildDashboardWidgetProps
                     {/* Guild HQ Action Button */}
                     <Link
                         href="/guild"
-                        className="group flex items-center justify-center gap-2 rounded-xl border border-[#bd0df2]/40 bg-gradient-to-r from-[#bd0df2]/20 via-[#bd0df2]/10 to-[#bd0df2]/20 py-2.5 px-4 text-xs font-black tracking-widest text-purple-200 uppercase shadow-[0_0_20px_rgba(189,13,242,0.2)] transition-all duration-300 hover:border-[#bd0df2] hover:bg-[#bd0df2]/30 hover:text-white hover:shadow-[0_0_30px_rgba(189,13,242,0.4)] active:scale-95"
+                        className="group flex items-center justify-center gap-2 rounded-xl border border-theme-primary/40 bg-theme-primary/20 py-2.5 px-4 text-xs font-black tracking-widest text-purple-200 uppercase shadow-[0_0_20px_var(--theme-glow)] transition-all duration-300 hover:border-theme-primary hover:bg-theme-primary/30 hover:text-white hover:shadow-[0_0_30px_var(--theme-glow)] active:scale-95"
                     >
-                        <Shield className="h-3.5 w-3.5 text-[#bd0df2] transition-transform duration-300 group-hover:scale-110" />
+                        <Shield className="h-3.5 w-3.5 text-theme-primary transition-transform duration-300 group-hover:scale-110" />
                         <span>Sede da Guilda</span>
                         <ChevronRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover:translate-x-1" />
                     </Link>

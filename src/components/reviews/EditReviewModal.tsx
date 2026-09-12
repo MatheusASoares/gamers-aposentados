@@ -254,12 +254,12 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                     </button>
                 )}
             </DialogTrigger>
-            <DialogContent className="border-zinc-800/90 bg-zinc-950/98 text-white w-[96vw] sm:max-w-4xl md:max-w-5xl max-h-[85vh] sm:max-h-[88vh] p-0 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.95)] backdrop-blur-2xl border flex flex-col md:flex-row rounded-2xl md:rounded-3xl">
+            <DialogContent className="border border-theme bg-theme-card text-white w-[96vw] sm:max-w-4xl md:max-w-5xl max-h-[85vh] sm:max-h-[88vh] p-0 overflow-hidden shadow-[0_0_60px_var(--theme-glow)] backdrop-blur-2xl flex flex-col md:flex-row rounded-2xl md:rounded-3xl">
                 <DialogTitle className="sr-only font-bold">Editar Review</DialogTitle>
                 <DialogDescription className="sr-only">Formulário para editar review de jogo</DialogDescription>
                 
                 {/* LEFT PANEL: Game Spotlight (Desktop Viewport) */}
-                <div className="hidden md:flex w-72 lg:w-80 shrink-0 bg-gradient-to-b from-zinc-900/95 to-zinc-950 p-5 lg:p-6 border-r border-zinc-800/80 flex-col justify-between relative overflow-y-auto custom-scrollbar">
+                <div className="hidden md:flex w-72 lg:w-80 shrink-0 bg-black/40 p-5 lg:p-6 border-r border-theme/40 flex-col justify-between relative overflow-y-auto custom-scrollbar">
                     
                     {coverUrl && (
                         <div
@@ -548,7 +548,7 @@ export function EditReviewModal({ review, trigger }: EditReviewModalProps) {
                         </div>
 
                         {/* Sticky Bottom Actions */}
-                        <div className="shrink-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-zinc-800/80 bg-zinc-950/95 flex items-center justify-end gap-3">
+                        <div className="shrink-0 px-5 sm:px-6 py-3.5 sm:py-4 border-t border-theme/40 bg-theme-card/95 flex items-center justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={() => setOpen(false)}

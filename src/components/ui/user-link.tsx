@@ -14,7 +14,7 @@ export function UserLink({ userId, name, username, className }: UserLinkProps) {
     return (
         <Link
             href={`/profile/${userId}`}
-            className={cn("text-white transition-colors hover:text-[#bd0df2] hover:underline", className)}
+            className={cn("text-white transition-colors hover:text-theme-primary hover:underline", className)}
         >
             {display}
         </Link>

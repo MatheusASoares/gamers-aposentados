@@ -39,7 +39,7 @@ export function Sidebar({ className }: SidebarProps) {
     return (
         <div
             className={cn(
-                "group relative flex min-h-screen w-64 flex-col border-r border-theme bg-zinc-950/90 pb-12 shadow-2xl transition-all duration-500",
+                "group relative flex min-h-screen w-64 flex-col border-r border-theme bg-theme-card/95 backdrop-blur-xl pb-12 shadow-2xl transition-all duration-500",
                 className,
             )}
         >
@@ -99,7 +99,7 @@ export function Sidebar({ className }: SidebarProps) {
                                         : "text-zinc-500 hover:bg-zinc-800/40 hover:pl-4 hover:text-zinc-300",
                                 )}
                             >
-                                <Shield className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/guild") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-[#bd0df2]")} />
+                                <Shield className={cn("h-4.5 w-4.5 shrink-0 transition-colors", isActive("/guild") ? "text-theme-primary drop-shadow-[0_0_8px_var(--theme-glow)]" : "text-theme-primary/80")} />
                                 <span className="truncate">Guild HQ</span>
                             </Button>
                         </Link>

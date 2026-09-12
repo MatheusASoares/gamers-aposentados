@@ -68,23 +68,23 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
                         align="end"
-                        className="w-56 border-white/10 bg-zinc-950/95 shadow-[0_0_30px_rgba(0,0,0,0.8)] backdrop-blur-xl"
+                        className="w-56 border border-theme bg-theme-card shadow-[0_10px_35px_rgba(0,0,0,0.8)] shadow-[0_0_20px_var(--theme-glow)] backdrop-blur-xl"
                     >
                         <DropdownMenuLabel className="text-xs font-bold tracking-widest text-zinc-400 uppercase">
                             Minha Conta
                         </DropdownMenuLabel>
-                        <DropdownMenuSeparator className="bg-white/5" />
+                        <DropdownMenuSeparator className="bg-white/10" />
                         <DropdownMenuItem
-                            className="cursor-pointer text-zinc-300 focus:bg-white/5 focus:text-white"
+                            className="cursor-pointer text-zinc-300 focus:bg-theme-primary/15 focus:text-theme-primary transition-colors"
                             asChild
                         >
                             <Link href="/guild">
-                                <Shield className="mr-2 h-4 w-4 text-[#bd0df2]" />
-                                <span className="font-medium text-[#bd0df2]">Sede da Guilda</span>
+                                <Shield className="mr-2 h-4 w-4 text-theme-primary" />
+                                <span className="font-medium text-theme-primary">Sede da Guilda</span>
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            className="cursor-pointer text-zinc-300 focus:bg-white/5 focus:text-white"
+                            className="cursor-pointer text-zinc-300 focus:bg-amber-400/15 focus:text-amber-300 transition-colors"
                             asChild
                         >
                             <Link href="/profile">
@@ -93,15 +93,15 @@ export function AuthButtons({ user }: AuthButtonsProps) {
                             </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem
-                            className="cursor-pointer text-zinc-300 focus:bg-white/5 focus:text-white"
+                            className="cursor-pointer text-zinc-300 focus:bg-theme-primary/15 focus:text-theme-primary transition-colors"
                             onClick={() => setSettingsOpen(true)}
                         >
-                            <Settings className="mr-2 h-4 w-4 text-[#bd0df2]" />
+                            <Settings className="mr-2 h-4 w-4 text-theme-primary" />
                             <span className="font-medium">Configurações</span>
                         </DropdownMenuItem>
-                        <DropdownMenuSeparator className="bg-white/5" />
+                        <DropdownMenuSeparator className="bg-white/10" />
                         <DropdownMenuItem
-                            className="cursor-pointer text-red-500 focus:bg-red-500/10 focus:text-red-400"
+                            className="cursor-pointer text-red-500 focus:bg-red-500/15 focus:text-red-400 transition-colors"
                             onClick={() => signOut({ callbackUrl: "/" })}
                         >
                             <LogOut className="mr-2 h-4 w-4" />

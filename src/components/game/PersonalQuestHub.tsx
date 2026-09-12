@@ -255,15 +255,15 @@ export function PersonalQuestHub({ currentUserId, currentUserName }: PersonalQue
     return (
         <div className="flex flex-col gap-6 sm:gap-8 w-full max-w-[1920px] mx-auto">
             {/* Header com Estética Cyberpunk */}
-            <div className="relative overflow-hidden rounded-2xl border border-theme/40 bg-zinc-950/80 p-6 sm:p-8 backdrop-blur-xl shadow-[0_0_40px_rgba(0,0,0,0.8)]">
-                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-[#bd0df2]/15 blur-3xl pointer-events-none" />
+            <div className="relative overflow-hidden rounded-3xl border border-theme bg-theme-card/90 p-6 sm:p-8 backdrop-blur-xl shadow-[0_0_40px_var(--theme-glow)]">
+                <div className="absolute -right-16 -top-16 h-64 w-64 rounded-full bg-theme-primary/15 blur-3xl pointer-events-none" />
                 <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-2">
                         <div className="flex items-center gap-2.5">
-                            <span className="rounded-md border border-[#bd0df2]/50 bg-[#bd0df2]/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-[#bd0df2]">
+                            <span className="rounded-md border border-theme-primary/50 bg-theme-primary/15 px-3 py-1 text-xs font-bold uppercase tracking-wider text-theme-primary">
                                 Hub de Quests Pessoais
                             </span>
-                            <span className="text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                            <span className="text-xs font-bold text-zinc-400 uppercase tracking-widest">
                                 • Jogador: {currentUserName}
                             </span>
                         </div>
@@ -463,7 +463,7 @@ export function PersonalQuestHub({ currentUserId, currentUserName }: PersonalQue
                     {/* CASO 2: Modo Seleção Direta */}
                     {mode === "DIRECT" && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-                            <div className="lg:col-span-7 flex flex-col gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 backdrop-blur-xl">
+                            <div className="lg:col-span-7 flex flex-col gap-4 rounded-2xl border border-theme/40 bg-theme-card/85 p-6 backdrop-blur-xl">
                                 <div className="space-y-1">
                                     <h2 className="text-base sm:text-lg font-bold uppercase tracking-wide text-zinc-200">
                                         Buscar Jogo na IGDB
@@ -480,7 +480,7 @@ export function PersonalQuestHub({ currentUserId, currentUserName }: PersonalQue
                                 </div>
                             </div>
 
-                            <div className="lg:col-span-5 flex flex-col gap-4 rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 backdrop-blur-xl">
+                            <div className="lg:col-span-5 flex flex-col gap-4 rounded-2xl border border-theme/40 bg-theme-card/85 p-6 backdrop-blur-xl">
                                 <h2 className="text-base sm:text-lg font-bold uppercase tracking-wide text-zinc-200">
                                     Jogo Selecionado
                                 </h2>
@@ -511,7 +511,7 @@ export function PersonalQuestHub({ currentUserId, currentUserName }: PersonalQue
                                             type="button"
                                             onClick={handleActivateDirect}
                                             disabled={isActivatingDirect}
-                                            className="w-full h-12 bg-gradient-to-r from-[#bd0df2] to-purple-700 hover:from-[#bd0df2]/90 hover:to-purple-600 text-white font-black uppercase tracking-wider text-xs sm:text-sm shadow-[0_0_20px_rgba(189,13,242,0.4)] transition-all active:scale-98"
+                                            className="w-full h-12 bg-theme-primary hover:bg-theme-primary/90 text-white font-black uppercase tracking-wider text-xs sm:text-sm shadow-[0_0_20px_var(--theme-glow)] transition-all active:scale-98"
                                         >
                                             {isActivatingDirect ? "Ativando Quest..." : `Ativar como Minha ${questType === "MAIN" ? "Main Quest" : "Side Quest"}`}
                                         </Button>
@@ -531,7 +531,7 @@ export function PersonalQuestHub({ currentUserId, currentUserName }: PersonalQue
                     {/* CASO 3: Modo Roleta Solo */}
                     {mode === "ROULETTE" && (
                         <div className="flex flex-col gap-6">
-                            <div className="rounded-2xl border border-zinc-800 bg-zinc-950/80 p-6 backdrop-blur-xl space-y-4">
+                            <div className="rounded-2xl border border-theme/40 bg-theme-card/85 p-6 backdrop-blur-xl space-y-4">
                                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                     <div>
                                         <h2 className="text-base sm:text-lg font-bold uppercase tracking-wide text-zinc-200">

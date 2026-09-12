@@ -253,7 +253,7 @@ export function TopDealsCarousel({
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Price Cap Filter */}
                         {onPriceCapChange && (
-                            <div className="flex flex-wrap items-center gap-1.5 bg-zinc-950/80 p-1.5 rounded-xl border border-theme/30">
+                            <div className="flex flex-wrap items-center gap-1.5 bg-theme-card/90 p-1.5 rounded-xl border border-theme/40">
                                 <span className="text-xs font-black uppercase text-zinc-400 px-1.5">Preço:</span>
                                 {priceCapOptions.map((cap) => {
                                     const isCapActive = priceCap === cap.id;
@@ -278,7 +278,7 @@ export function TopDealsCarousel({
 
                         {/* Store Filter */}
                         {onStoreFilterChange && (
-                            <div className="flex items-center gap-1.5 bg-zinc-950/80 p-1.5 rounded-xl border border-theme/30">
+                            <div className="flex items-center gap-1.5 bg-theme-card/90 p-1.5 rounded-xl border border-theme/40">
                                 <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline px-1">
                                     Loja:
                                 </span>
@@ -306,7 +306,7 @@ export function TopDealsCarousel({
                     </div>
 
                     {/* Interactive Sort Selector */}
-                    <div className="flex items-center gap-1.5 bg-zinc-950/80 p-1.5 rounded-xl border border-theme/30 self-start lg:self-auto overflow-x-auto max-w-full">
+                    <div className="flex items-center gap-1.5 bg-theme-card/90 p-1.5 rounded-xl border border-theme/40 self-start lg:self-auto overflow-x-auto max-w-full">
                         <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1 px-1.5 flex-shrink-0">
                             <ArrowUpDown className="h-3.5 w-3.5 text-theme-primary" /> Ordenar:
                         </span>

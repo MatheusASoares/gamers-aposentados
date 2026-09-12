@@ -165,7 +165,7 @@ export function GameAutocomplete({
             </div>
 
             {isOpen && results.length > 0 && (
-                <div className="custom-scrollbar absolute top-full right-0 left-0 z-50 mt-2 max-h-60 sm:max-h-80 overflow-hidden overflow-y-auto rounded-xl border border-white/10 bg-zinc-950 shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
+                <div className="custom-scrollbar absolute top-full right-0 left-0 z-50 mt-2 max-h-60 sm:max-h-80 overflow-hidden overflow-y-auto rounded-xl border border-theme bg-theme-card shadow-2xl backdrop-blur-xl animate-in fade-in zoom-in-95 duration-150">
                     <div className="flex flex-col gap-1 p-2">
                         {results.map((game) => (
                             <button

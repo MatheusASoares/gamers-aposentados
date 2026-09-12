@@ -117,9 +117,9 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
     const renderEmblemIcon = (iconName?: string, className = "h-10 w-10 sm:h-12 sm:w-12") => {
         switch (iconName) {
             case "Shield":
-                return <Shield className={cn(className, "drop-shadow-[0_0_12px_#bd0df2]")} />;
+                return <Shield className={cn(className, "drop-shadow-[0_0_12px_var(--theme-glow)]")} />;
             case "Swords":
-                return <Swords className={cn(className, "drop-shadow-[0_0_12px_#bd0df2]")} />;
+                return <Swords className={cn(className, "drop-shadow-[0_0_12px_var(--theme-glow)]")} />;
             case "Gamepad2":
                 return <Gamepad2 className={cn(className, "drop-shadow-[0_0_12px_#f59e0b]")} />;
             case "ShieldCheck":
@@ -131,7 +131,7 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
             case "Skull":
                 return <Skull className={cn(className, "drop-shadow-[0_0_12px_#a855f7]")} />;
             default:
-                return <Shield className={cn(className, "drop-shadow-[0_0_12px_#bd0df2]")} />;
+                return <Shield className={cn(className, "drop-shadow-[0_0_12px_var(--theme-glow)]")} />;
         }
     };
 
@@ -147,59 +147,50 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
         setLeaveError(null);
         try {
             const res = await leaveGuild(guild.id);
-            if (res.success) {
-                setIsLeaveModalOpen(false);
-                router.push("/");
-                router.refresh();
-            } else {
+            if (!res.success) {
                 setLeaveError(res.error || "Erro ao sair da guilda.");
+                setIsLeaving(false);
+                return;
             }
-        } catch (err: unknown) {
-            const message = err instanceof Error ? err.message : "Erro inesperado ao sair da guilda.";
-            setLeaveError(message);
-        } finally {
+            setIsLeaveModalOpen(false);
+            router.push("/guild");
+            router.refresh();
+        } catch {
+            setLeaveError("Falha na comunicação com o servidor.");
             setIsLeaving(false);
         }
     };
 
     return (
-        <div className="space-y-6 sm:space-y-8">
-            {/* 1. HERO CARD: 3-Column Guild Showcase (Proporção igualada com o Hall of Fame) */}
-            <div
-                className={cn(
-                    "glass-card animate-fade-in-up relative flex flex-col justify-center min-h-[260px] md:min-h-[320px] lg:min-h-[340px] overflow-hidden rounded-[1.5rem] border border-white/15 shadow-2xl p-4 sm:p-6 md:p-8",
-                    !bannerItem?.assetUrl && "bg-zinc-950/80"
-                )}
-                data-testid="guild-hq-hero"
-            >
-                {/* Equipped Ambient Banner Image with Live Particle Overlays */}
-                {bannerItem?.assetUrl && !bannerError && (
-                    <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden">
+        <div className="flex flex-col gap-6 sm:gap-8">
+            {/* 1. HERO BANNER & GUILD IDENTITY */}
+            <div className="relative overflow-hidden rounded-3xl border border-theme bg-theme-card/90 p-5 sm:p-8 backdrop-blur-xl shadow-2xl">
+                {/* Custom Guild Banner Background (if equipped) */}
+                {bannerItem?.assetUrl && (
+                    <div className="absolute inset-0 z-0">
                         <Image
                             src={bannerItem.assetUrl}
-                            alt={bannerItem.name || "Banner da Sede"}
+                            alt="Guild Banner"
                             fill
                             priority
                             unoptimized
-                            onError={() => setBannerError(true)}
-                            sizes="100vw"
-                            className="object-cover object-center opacity-95 transition-all duration-700 hover:scale-105"
+                            className="object-cover opacity-35 filter blur-[0.5px] scale-105 transition-all duration-700"
                         />
-                        {/* Luminous Cinematic Vignette (Subtle edge darkening while keeping central art crystal clear) */}
-                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950/70 via-black/20 to-black/30" />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent" />
+                        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-transparent to-black/80" />
                         <BannerFxOverlay effectType={bannerItem.effectType} bannerId={bannerItem.id} />
                     </div>
                 )}
 
                 {/* Ambient Glow Orbs */}
-                <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-[#bd0df2]/20 blur-[120px]" />
+                <div className="pointer-events-none absolute -top-32 -right-32 h-96 w-96 rounded-full bg-theme-primary/20 blur-[120px]" />
                 <div className="pointer-events-none absolute -bottom-32 -left-32 h-96 w-96 rounded-full bg-cyan-500/15 blur-[100px]" />
 
                 {/* 3-Column Grid: Left (Crest + Guild Name) | Center (Guild XP & Level) | Right (Invite, Mascot & Actions) */}
                 <div className="relative z-10 grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-12 lg:items-center">
                     
                     {/* COLUMN 1: LEFT - Guild Crest & Name (5 cols) in Frosted Glass Capsule */}
-                    <div className="flex items-center gap-3 sm:gap-5 lg:gap-6 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
+                    <div className="flex items-center gap-3 sm:gap-5 lg:gap-6 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 sm:p-5 backdrop-blur-md shadow-xl lg:col-span-5 min-w-0">
                         {/* Emblem Crest - Freestanding 3D Shield / Crossed Swords */}
                         {emblemItem?.assetUrl ? (
                             <div className="relative flex h-16 w-16 sm:h-24 sm:w-24 lg:h-32 lg:w-32 shrink-0 items-center justify-center transition-transform hover:scale-105">
@@ -220,18 +211,18 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                                             : "drop-shadow-[0_0_16px_rgba(245,158,11,0.5)]"
                                     )}
                                 />
-                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/80 bg-zinc-950/95 px-1.5 sm:px-2.5 py-0.5 text-[9px] sm:text-xs font-black text-amber-400 shadow-xl z-10 backdrop-blur-md">
-                                    <Crown className="h-2.5 w-2.5 sm:h-3.5 sm:w-3.5" /> Nv {guild.level}
+                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/80 bg-zinc-950/95 px-2 py-0.5 text-xs font-black text-amber-400 shadow-xl z-10 backdrop-blur-md">
+                                    <Crown className="h-3 w-3" /> Nv {guild.level}
                                 </div>
                             </div>
                         ) : (
                             <div className={cn(
-                                "relative flex h-16 w-16 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-2xl border-2 bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-black text-[#bd0df2] shadow-2xl backdrop-blur-md",
-                                emblemItem?.cssClass || "border-[#bd0df2]/60 text-[#bd0df2] shadow-[0_0_25px_rgba(189,13,242,0.4)]"
+                                "relative flex h-16 w-16 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-2xl border-2 bg-gradient-to-br from-zinc-900/90 via-zinc-950 to-black text-theme-primary shadow-2xl backdrop-blur-md",
+                                emblemItem?.cssClass || "border-theme-primary/60 text-theme-primary shadow-[0_0_25px_var(--theme-glow)]"
                             )}>
                                 {renderEmblemIcon(emblemItem?.icon, "h-8 w-8 sm:h-12 sm:w-12")}
-                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/60 bg-zinc-950 px-1.5 py-0.5 text-[9px] sm:text-xs font-black text-amber-400 shadow-md z-10">
-                                    <Crown className="h-2.5 w-2.5" /> Nv {guild.level}
+                                <div className="absolute -bottom-1 -right-1 flex items-center gap-1 rounded-full border border-amber-400/60 bg-zinc-950 px-2 py-0.5 text-xs font-black text-amber-400 shadow-md z-10">
+                                    <Crown className="h-3 w-3" /> Nv {guild.level}
                                 </div>
                             </div>
                         )}
@@ -247,10 +238,10 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                             {guild.equippedTitle && (
                                 <div className="pt-0.5 max-w-full">
                                     <span className={cn(
-                                        "inline-flex items-center gap-1 sm:gap-1.5 rounded-xl border px-2 sm:px-3 py-0.5 sm:py-1 text-[10px] sm:text-xs md:text-sm font-black uppercase tracking-wider shadow-lg backdrop-blur-md transition-all duration-300 max-w-full truncate",
-                                        titleItem?.cssClass || "border-[#bd0df2]/60 bg-[#bd0df2]/25 text-[#bd0df2] shadow-[0_0_15px_rgba(189,13,242,0.35)]"
+                                        "inline-flex items-center gap-1 sm:gap-1.5 rounded-xl border px-2.5 sm:px-3 py-1 text-xs md:text-sm font-black uppercase tracking-wider shadow-lg backdrop-blur-md transition-all duration-300 max-w-full truncate",
+                                        titleItem?.cssClass || "border-theme-primary/60 bg-theme-primary/25 text-theme-primary shadow-[0_0_15px_var(--theme-glow)]"
                                     )}>
-                                        {renderTitleIcon(titleItem?.icon, "h-3 w-3 sm:h-4 sm:w-4 shrink-0")}
+                                        {renderTitleIcon(titleItem?.icon, "h-3.5 w-3.5 sm:h-4 sm:w-4 shrink-0")}
                                         <span className="drop-shadow-sm truncate">{guild.equippedTitle}</span>
                                     </span>
                                 </div>
@@ -266,19 +257,19 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
 
                     {/* COLUMN 2: CENTER - Guild XP Progress Card (4 cols) */}
                     <div className="flex flex-col justify-center gap-3 lg:col-span-4">
-                        <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 sm:p-5 shadow-xl backdrop-blur-md">
+                        <div className="flex flex-col gap-2 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 sm:p-5 shadow-xl backdrop-blur-md">
                             <div className="flex flex-wrap items-center justify-between gap-1 text-xs font-black tracking-wider uppercase">
                                 <span className="text-zinc-300 drop-shadow-sm flex items-center gap-1.5">
-                                    <Sparkles className="h-3.5 w-3.5 text-[#bd0df2]" />
+                                    <Sparkles className="h-3.5 w-3.5 text-theme-primary" />
                                     Progresso da Guilda
                                 </span>
-                                <span className="text-[#bd0df2] font-black drop-shadow-sm font-mono">
+                                <span className="text-theme-primary font-black drop-shadow-sm font-mono">
                                     {guild.xpPoints.toLocaleString()} / {nextLevelXP.toLocaleString()} XP ({progressPercentage}%)
                                 </span>
                             </div>
                             <div className="h-3.5 w-full overflow-hidden rounded-full bg-zinc-950 p-0.5 border border-white/10">
                                 <div
-                                    className="h-full rounded-full bg-gradient-to-r from-[#bd0df2] via-purple-500 to-cyan-400 shadow-[0_0_12px_#bd0df2] transition-all duration-700"
+                                    className="h-full rounded-full bg-gradient-to-r from-theme-primary via-purple-500 to-cyan-400 shadow-[0_0_12px_var(--theme-glow)] transition-all duration-700"
                                     style={{ width: `${progressPercentage}%` }}
                                 />
                             </div>
@@ -291,11 +282,11 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
 
                     {/* COLUMN 3: RIGHT - Invite Widget & Actions (3 cols) */}
                     <div className="flex flex-col justify-center gap-3 lg:col-span-3">
-                        <div className="flex flex-col gap-3 rounded-2xl border border-white/10 bg-zinc-950/60 p-4 shadow-xl backdrop-blur-md">
+                        <div className="flex flex-col gap-3 rounded-2xl border border-theme/40 bg-theme-card/85 p-4 shadow-xl backdrop-blur-md">
                             {/* Invite Code Row */}
                             <div className="flex items-center justify-between gap-2">
                                 <div className="flex flex-col">
-                                    <span className="text-[11px] font-black uppercase tracking-widest text-zinc-400">
+                                    <span className="text-xs font-black uppercase tracking-widest text-zinc-400">
                                         Código de Convite
                                     </span>
                                     <span className="font-mono text-sm sm:text-base font-black text-amber-400 tracking-wider">
@@ -305,7 +296,7 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                                 <button
                                     type="button"
                                     onClick={handleCopyInvite}
-                                    className="flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-800/90 px-3 py-1.5 text-xs font-bold text-zinc-200 hover:border-[#bd0df2] hover:text-white transition-all active:scale-95 shadow-sm"
+                                    className="flex items-center gap-1.5 rounded-xl border border-zinc-700 bg-zinc-800/90 px-3 py-1.5 text-xs font-bold text-zinc-200 hover:border-theme-primary hover:text-white transition-all active:scale-95 shadow-sm"
                                     title="Copiar link de convite"
                                 >
                                     {copied ? (
@@ -327,9 +318,9 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                                 <button
                                     type="button"
                                     onClick={() => setIsSettingsOpen(true)}
-                                    className="flex items-center justify-center gap-2 rounded-xl border border-[#bd0df2]/50 bg-[#bd0df2]/25 py-2 px-3 text-xs font-black uppercase tracking-wider text-white hover:bg-[#bd0df2]/40 transition-all shadow-[0_0_15px_rgba(189,13,242,0.3)] active:scale-95"
+                                    className="flex items-center justify-center gap-2 rounded-xl border border-theme-primary/50 bg-theme-primary/25 py-2 px-3 text-xs font-black uppercase tracking-wider text-white hover:bg-theme-primary/40 transition-all shadow-[0_0_15px_var(--theme-glow)] active:scale-95"
                                 >
-                                    <Settings className="h-3.5 w-3.5 text-[#bd0df2]" />
+                                    <Settings className="h-3.5 w-3.5 text-theme-primary" />
                                     <span>Editar Informações</span>
                                 </button>
                             ) : (
@@ -355,7 +346,7 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
             {/* 2. CONSOLIDATED STATS GRID (Dual-Paradigm: 4x1 Desktop, 2x2 Mobile) */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 {/* Stat 1: Games Completed */}
-                <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-zinc-700 transition-all">
+                <div className="rounded-2xl border border-theme/40 bg-theme-card/85 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-theme/60 transition-all">
                     <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-400 shadow-[0_0_18px_rgba(16,185,129,0.25)]">
                         <Gamepad2 className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
@@ -370,8 +361,8 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                 </div>
 
                 {/* Stat 2: Pools Closed */}
-                <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-zinc-700 transition-all">
-                    <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border border-[#bd0df2]/40 bg-[#bd0df2]/15 text-[#bd0df2] shadow-[0_0_18px_rgba(189,13,242,0.25)]">
+                <div className="rounded-2xl border border-theme/40 bg-theme-card/85 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-theme/60 transition-all">
+                    <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border border-theme-primary/40 bg-theme-primary/15 text-theme-primary shadow-[0_0_18px_var(--theme-glow)]">
                         <Dices className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
                     <div className="flex flex-col min-w-0">
@@ -385,7 +376,7 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                 </div>
 
                 {/* Stat 3: Members Active */}
-                <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-zinc-700 transition-all">
+                <div className="rounded-2xl border border-theme/40 bg-theme-card/85 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-theme/60 transition-all">
                     <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border border-cyan-500/40 bg-cyan-500/15 text-cyan-400 shadow-[0_0_18px_rgba(6,182,212,0.25)]">
                         <Users className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
@@ -400,7 +391,7 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                 </div>
 
                 {/* Stat 4: Total Platinums */}
-                <div className="rounded-2xl border border-zinc-800/80 bg-zinc-950/60 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-zinc-700 transition-all">
+                <div className="rounded-2xl border border-theme/40 bg-theme-card/85 p-5 sm:p-6 backdrop-blur-md flex items-center gap-4 shadow-lg hover:border-theme/60 transition-all">
                     <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl border border-amber-500/40 bg-amber-500/15 text-amber-400 shadow-[0_0_18px_rgba(245,158,11,0.25)]">
                         <Trophy className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>

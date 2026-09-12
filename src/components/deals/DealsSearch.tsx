@@ -187,7 +187,7 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
 
             {/* Dropdown Results */}
             {isOpen && results.length > 0 && (
-                <div className="glass-card border border-theme bg-zinc-950/95 absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl p-1.5 shadow-2xl backdrop-blur-2xl animate-fade-in-up">
+                <div className="glass-card border border-theme bg-theme-card absolute left-0 right-0 top-full z-50 mt-2 overflow-hidden rounded-2xl p-1.5 shadow-2xl backdrop-blur-2xl animate-fade-in-up">
                     <div className="px-3 py-1.5 text-[11px] font-bold uppercase tracking-wider text-zinc-500 flex items-center justify-between border-b border-theme/20 mb-1">
                         <span>Jogos Encontrados ({results.length})</span>
                         <span className="text-zinc-400 flex items-center gap-1">
