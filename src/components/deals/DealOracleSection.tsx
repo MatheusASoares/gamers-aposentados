@@ -71,6 +71,7 @@ export function DealOracleSection({
     const [activeTab, setActiveTab] = useState<"on_sale" | "on_radar">("on_sale");
     const [dismissedTitles, setDismissedTitles] = useState<Set<string>>(new Set());
     const [justDismissedTitle, setJustDismissedTitle] = useState<string | null>(null);
+    const [justOwnedTitle, setJustOwnedTitle] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
 
     // Consulta e persistência das recomendações
@@ -179,15 +180,38 @@ export function DealOracleSection({
         }
     };
 
-    const currentItems = (activeTab === "on_sale" ? data?.onSale : data?.onRadar) || [];
-    const visibleItems = currentItems.filter(
-        (item) => !dismissedTitles.has(item.title.toLowerCase().trim()),
+    // Helper para verificar se um jogo já está na biblioteca
+    const checkIsOwned = useCallback(
+        (item: OracleGameRecommendation) => {
+            if (!isOwned) return false;
+            const gameDealId = item.steamAppId ? `steam-${item.steamAppId}` : item.title;
+            return (
+                isOwned(item.steamAppId || gameDealId) ||
+                isOwned(gameDealId) ||
+                isOwned(item.title)
+            );
+        },
+        [isOwned],
     );
 
+    // Oculta jogos já dispensados ou que o usuário marcou como possuídos
+    const isExcluded = useCallback(
+        (item: OracleGameRecommendation) => {
+            return (
+                dismissedTitles.has(item.title.toLowerCase().trim()) ||
+                checkIsOwned(item)
+            );
+        },
+        [dismissedTitles, checkIsOwned],
+    );
+
+    const currentItems = (activeTab === "on_sale" ? data?.onSale : data?.onRadar) || [];
+    const visibleItems = currentItems.filter((item) => !isExcluded(item));
+
     const onSaleCount =
-        data?.onSale?.filter((i) => !dismissedTitles.has(i.title.toLowerCase().trim())).length || 0;
+        data?.onSale?.filter((i) => !isExcluded(i)).length || 0;
     const onRadarCount =
-        data?.onRadar?.filter((i) => !dismissedTitles.has(i.title.toLowerCase().trim())).length || 0;
+        data?.onRadar?.filter((i) => !isExcluded(i)).length || 0;
 
     const rate = currencyRate?.rate ?? data?.currencyRate?.rate ?? 5.85;
 
@@ -266,6 +290,16 @@ export function DealOracleSection({
                 </div>
             </div>
 
+            {/* Notificação de jogo marcado como na biblioteca */}
+            {justOwnedTitle && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-emerald-500/40 bg-emerald-950/80 px-3.5 py-2 text-xs font-medium text-emerald-200 animate-in fade-in slide-in-from-top-1">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+                    <span>
+                        <strong className="text-white">"{justOwnedTitle}"</strong> foi adicionado à sua biblioteca e removido das dicas do Oráculo.
+                    </span>
+                </div>
+            )}
+
             {/* Notificação de jogo dispensado */}
             {justDismissedTitle && (
                 <div className="mt-3 flex items-center gap-2 rounded-xl border border-zinc-700 bg-zinc-900 px-3.5 py-2 text-xs font-medium text-zinc-300 animate-in fade-in slide-in-from-top-1">
@@ -341,9 +375,7 @@ export function DealOracleSection({
                             const favorited = isTracked
                                 ? isTracked(game.steamAppId || gameDealId)
                                 : false;
-                            const owned = isOwned
-                                ? isOwned(game.steamAppId || gameDealId)
-                                : false;
+                            const owned = checkIsOwned(game);
 
                             const priceBR = game.priceBR ?? 0;
                             const priceUS = game.priceUS ?? 0;
@@ -567,6 +599,8 @@ export function DealOracleSection({
                                                             steamAppId: game.steamAppId || null,
                                                             coverImage: game.coverImage,
                                                         });
+                                                        setJustOwnedTitle(game.title);
+                                                        setTimeout(() => setJustOwnedTitle(null), 3500);
                                                     }}
                                                     className={cn(
                                                         "flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all border",

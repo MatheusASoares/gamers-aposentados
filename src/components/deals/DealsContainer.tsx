@@ -367,11 +367,16 @@ export function DealsContainer() {
         );
     };
 
-    const isOwned = (idOrAppId: string | number) => {
-        const strId = String(idOrAppId);
-        const numAppId = typeof idOrAppId === "number" ? idOrAppId : Number(idOrAppId);
+    const isOwned = (idOrAppIdOrTitle: string | number) => {
+        const strVal = String(idOrAppIdOrTitle).trim();
+        const lowerVal = strVal.toLowerCase();
+        const numAppId = typeof idOrAppIdOrTitle === "number" ? idOrAppIdOrTitle : Number(idOrAppIdOrTitle);
         return ownedDeals.some(
-            (o) => o.id === strId || (!isNaN(numAppId) && numAppId > 0 && o.steamAppId === numAppId),
+            (o) =>
+                o.id === strVal ||
+                (!isNaN(numAppId) && numAppId > 0 && o.steamAppId === numAppId) ||
+                o.title.toLowerCase().trim() === lowerVal ||
+                (Boolean(o.slug) && o.slug?.toLowerCase().trim() === lowerVal),
         );
     };
 
@@ -383,7 +388,8 @@ export function DealsContainer() {
         coverImage?: string | null;
     }) => {
         const dealId = String(game.steamAppId || game.id);
-        const exists = isOwned(game.steamAppId || game.id);
+        const normTitle = game.title.toLowerCase().trim();
+        const exists = isOwned(game.steamAppId || game.id) || isOwned(game.title);
 
         let updated: OwnedDealItem[];
         if (exists) {
@@ -391,7 +397,8 @@ export function DealsContainer() {
                 (o) =>
                     o.id !== game.id &&
                     o.id !== dealId &&
-                    (!game.steamAppId || o.steamAppId !== game.steamAppId),
+                    (!game.steamAppId || o.steamAppId !== game.steamAppId) &&
+                    o.title.toLowerCase().trim() !== normTitle,
             );
         } else {
             const newItem: OwnedDealItem = {

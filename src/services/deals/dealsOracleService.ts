@@ -136,12 +136,35 @@ export class DealsOracleService {
                 dismissedTitles = [];
             }
 
+            // Buscar jogos possuídos (Já Tenho / Na Biblioteca)
+            let ownedTitles: string[] = [];
+            try {
+                const ownedRows = await prisma.userOwnedDeal.findMany({
+                    where: { user_id: userId },
+                    select: { title: true },
+                });
+                ownedTitles = ownedRows.map((o) => o.title.trim());
+            } catch (ownedErr) {
+                console.warn("[DealsOracleService] Failed to load owned deals for taste profile:", ownedErr);
+                ownedTitles = [];
+            }
+
             const favorites: string[] = [];
             const excludedTitles = new Set<string>(dismissedTitles);
 
+            // Jogos possuídos na biblioteca: NUNCA recomendar, mas usar como inspiração de gosto
+            for (const ot of ownedTitles) {
+                excludedTitles.add(ot.toLowerCase().trim());
+                if (!favorites.some((f) => f.toLowerCase().trim() === ot.toLowerCase().trim())) {
+                    favorites.push(ot);
+                }
+            }
+
             if (user?.favoriteGames) {
                 for (const g of user.favoriteGames) {
-                    favorites.push(g.title);
+                    if (!favorites.some((f) => f.toLowerCase().trim() === g.title.toLowerCase().trim())) {
+                        favorites.push(g.title);
+                    }
                     excludedTitles.add(g.title.toLowerCase().trim());
                 }
             }
@@ -216,8 +239,8 @@ export class DealsOracleService {
 Você é o Oráculo Curador do "Gamers Aposentados", uma guilda de jogadores experientes e adultos que amam jogos de qualidade, mas têm pouco tempo livre e odeiam enrolação.
 
 PERFIL DO JOGADOR:
-- Jogos que ele ama ou deu nota alta: ${favoritesFormatted}
-- JOGOS QUE ELE JÁ JOGOU, FAVORITOU OU DESCARTOU (ESTRITAMENTE PROIBIDO SUGERIR): ${excludedListFormatted}
+- Jogos que ele ama, possui na biblioteca ou deu nota alta (REFERÊNCIAS DE GOSTO PARA VOCÊ SE INSPIRAR): ${favoritesFormatted}
+- JOGOS QUE ELE JÁ TEM NA BIBLIOTECA, JÁ JOGOU, FAVORITOU OU DESCARTOU (ESTRITAMENTE PROIBIDO SUGERIR): ${excludedListFormatted}
 
 SUA MISSÃO:
 Selecione exatamente 10 jogos para PC disponíveis na Steam que se encaixem rigorosamente nesta DISTRIBUIÇÃO DE COTAS:
@@ -435,6 +458,37 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
     }
 
     /**
+     * Retorna os títulos (em minúsculas) que o usuário já possui ou descartou.
+     */
+    static async getUserExcludedTitles(userId?: string): Promise<Set<string>> {
+        const excluded = new Set<string>();
+        if (!userId) return excluded;
+
+        try {
+            const [dismissedRows, ownedRows] = await Promise.all([
+                prisma.$queryRaw<Array<{ game_title: string }>>`
+                    SELECT game_title FROM user_dismissed_deals WHERE user_id = ${userId}
+                `.catch(() => []),
+                prisma.userOwnedDeal.findMany({
+                    where: { user_id: userId },
+                    select: { title: true },
+                }).catch(() => []),
+            ]);
+
+            for (const d of dismissedRows) {
+                if (d.game_title) excluded.add(d.game_title.toLowerCase().trim());
+            }
+            for (const o of ownedRows) {
+                if (o.title) excluded.add(o.title.toLowerCase().trim());
+            }
+        } catch (err) {
+            console.warn("[DealsOracleService] getUserExcludedTitles error:", err);
+        }
+
+        return excluded;
+    }
+
+    /**
      * Retorna a lista completa de recomendações do Oráculo, separadas em 'onSale' e 'onRadar'.
      */
     static async getOracleRecommendations(
@@ -442,12 +496,22 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
         forceRefresh: boolean = false,
     ): Promise<OracleRecommendationsResponse> {
         const cacheKey = `deals:oracle:${userId || "guest"}`;
+        const userExclusions = await DealsOracleService.getUserExcludedTitles(userId);
 
         if (!forceRefresh) {
             // 1. Verificar cache em memória do processo
             const cached = dealsCache.get<OracleRecommendationsResponse>(cacheKey);
             if (cached) {
-                return { ...cached, cached: true };
+                const filteredRecs = cached.recommendations.filter(
+                    (r) => !userExclusions.has(r.title.toLowerCase().trim()),
+                );
+                return {
+                    ...cached,
+                    recommendations: filteredRecs,
+                    onSale: filteredRecs.filter((r) => r.isOnSale),
+                    onRadar: filteredRecs.filter((r) => !r.isOnSale),
+                    cached: true,
+                };
             }
 
             // 2. Verificar persistência permanente no PostgreSQL
@@ -470,15 +534,18 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
                                 : row.recommendations;
 
                         if (Array.isArray(recs) && recs.length > 0) {
-                            const onSale = recs.filter((r) => r.isOnSale);
-                            const onRadar = recs.filter((r) => !r.isOnSale);
+                            const filteredRecs = recs.filter(
+                                (r) => !userExclusions.has(r.title.toLowerCase().trim()),
+                            );
+                            const onSale = filteredRecs.filter((r) => r.isOnSale);
+                            const onRadar = filteredRecs.filter((r) => !r.isOnSale);
                             let currencyRate = undefined;
                             try {
                                 currencyRate = await CurrencyService.getUsdBrlRate();
                             } catch {}
 
                             const response: OracleRecommendationsResponse = {
-                                recommendations: recs,
+                                recommendations: filteredRecs,
                                 onSale,
                                 onRadar,
                                 tasteSummary: row.taste_summary || "Perfil personalizado da Guilda",
@@ -518,7 +585,7 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
             (item) => !excludedTitles.has(item.title.toLowerCase().trim()),
         );
 
-        const recommendations = filtered.length >= 6 ? filtered : enrichedItems;
+        const recommendations = filtered;
 
         const onSale = recommendations.filter((r) => r.isOnSale);
         const onRadar = recommendations.filter((r) => !r.isOnSale);
