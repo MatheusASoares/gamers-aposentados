@@ -29,6 +29,7 @@ export class DealComparator {
         currencyRate: CurrencyRate;
         isAllTimeLow?: boolean;
         source: "itad" | "steam" | "hybrid";
+        isFamilySharing?: boolean;
     }): DealComparisonResult {
         const {
             id,
@@ -41,6 +42,7 @@ export class DealComparator {
             currencyRate,
             isAllTimeLow,
             source,
+            isFamilySharing,
         } = params;
 
         const rate = currencyRate.rate;
@@ -152,6 +154,7 @@ export class DealComparator {
             isAllTimeLow: Boolean(isAllTimeLow),
             cachedAt: new Date().toISOString(),
             source,
+            isFamilySharing: isFamilySharing !== undefined ? Boolean(isFamilySharing) : undefined,
         };
     }
 
@@ -165,6 +168,7 @@ export class DealComparator {
         storeFilter: "all" | "steam" | "nuuvem" = "all",
         regionFilter: RegionAdvantageFilterType = "all",
         priceCap: PriceCapFilterType = "all",
+        familySharingOnly: boolean = false,
     ): FeaturedDealItem[] {
         const rate = currencyRate.rate;
 
@@ -216,12 +220,7 @@ export class DealComparator {
 
                 // Use strict all-time low flag from price trackers
                 const isAllTimeLow = Boolean(item.isAllTimeLow);
-
-                const steamReviews = item.steamReviews || {
-                    reviewScoreDesc: "Muito positivas",
-                    positivePercent: 88,
-                    totalReviews: 12500,
-                };
+                const steamReviews = item.steamReviews;
 
                 return {
                     ...item,
@@ -231,8 +230,14 @@ export class DealComparator {
                     absoluteSavingsBRL: Math.max(0, absoluteSavingsBRL),
                     isAllTimeLow,
                     steamReviews,
+                    isFamilySharing: item.isFamilySharing !== undefined ? Boolean(item.isFamilySharing) : undefined,
                 };
             });
+
+        // 1.5 Apply Family Sharing filter if requested
+        if (familySharingOnly) {
+            normalized = normalized.filter((item) => item.isFamilySharing === true);
+        }
 
         // 2. Apply store filter if specified
         if (storeFilter === "steam") {
@@ -271,20 +276,22 @@ export class DealComparator {
             return normalized
                 .filter((item) => item.isAllTimeLow)
                 .sort((a, b) => {
-                    const percentA = a.steamReviews?.positivePercent ?? 80;
-                    const percentB = b.steamReviews?.positivePercent ?? 80;
+                    const percentA = a.steamReviews?.positivePercent ?? 0;
+                    const percentB = b.steamReviews?.positivePercent ?? 0;
                     const totalA = a.steamReviews?.totalReviews ?? 0;
                     const totalB = b.steamReviews?.totalReviews ?? 0;
                     const savingsA = a.absoluteSavingsBRL || 0;
                     const savingsB = b.absoluteSavingsBRL || 0;
 
-                    // Prioriza aclamação alta (>= 90%) e prestígio de avaliações, ponderado pela economia regional
+                    // 1. Alta aclamação e aprovação positiva real
                     if (percentB !== percentA) {
                         return percentB - percentA;
                     }
+                    // 2. Volume de avaliações (reputação e peso comunitário)
                     if (totalB !== totalA) {
                         return totalB - totalA;
                     }
+                    // 3. Maior economia na conversão direta (R$)
                     return savingsB - savingsA;
                 });
         }

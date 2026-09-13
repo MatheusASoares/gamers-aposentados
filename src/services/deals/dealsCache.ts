@@ -87,4 +87,5 @@ export const CACHE_TTL = {
     GAME_COMPARISON: 60 * 60 * 8, // 8 hours
     FEATURED_DEALS: 60 * 60 * 24, // 24 hours
     STEAM_REVIEWS: 60 * 60 * 12, // 12 hours
+    FAMILY_SHARING: 60 * 60 * 24 * 7, // 7 days
 };

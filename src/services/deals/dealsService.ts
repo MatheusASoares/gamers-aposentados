@@ -43,7 +43,21 @@ export class DealsService {
                     results = await SteamStoreClient.searchGames(cleanQuery);
                 }
 
-                return results.slice(0, 10);
+                const topResults = results.slice(0, 10);
+                await Promise.allSettled(
+                    topResults.map(async (item) => {
+                        let appId = item.steamAppId;
+                        if (!appId && /^\d+$/.test(item.id)) {
+                            appId = Number(item.id);
+                        }
+                        if (appId) {
+                            item.steamAppId = appId;
+                            item.isFamilySharing = await SteamStoreClient.isFamilySharingSupported(appId);
+                        }
+                    }),
+                );
+
+                return topResults;
             },
             CACHE_TTL.SEARCH_RESULTS,
         );
@@ -167,14 +181,28 @@ export class DealsService {
                     source,
                 });
 
+                if (!resolvedAppId && cleanTitle) {
+                    try {
+                        const hits = await SteamStoreClient.searchGames(cleanTitle);
+                        if (hits.length > 0 && hits[0].steamAppId) {
+                            resolvedAppId = hits[0].steamAppId;
+                            comparison.steamAppId = resolvedAppId;
+                        }
+                    } catch {}
+                }
+
                 if (resolvedAppId) {
                     try {
-                        const rev = await SteamStoreClient.getAppReviewsSummary(resolvedAppId);
+                        const [rev, isFS] = await Promise.all([
+                            SteamStoreClient.getAppReviewsSummary(resolvedAppId),
+                            SteamStoreClient.isFamilySharingSupported(resolvedAppId),
+                        ]);
                         if (rev) {
                             comparison.steamReviews = rev;
                         }
+                        comparison.isFamilySharing = isFS;
                     } catch (e) {
-                        console.warn("[DealsService] Failed to fetch reviews for comparison:", e);
+                        console.warn("[DealsService] Failed to fetch reviews/family sharing for comparison:", e);
                     }
                 }
 
@@ -249,11 +277,12 @@ export class DealsService {
         storeFilter: StoreFilterType = "all",
         regionFilter: RegionAdvantageFilterType = "all",
         priceCap: PriceCapFilterType = "all",
+        familySharingOnly = false,
     ): Promise<{
         deals: FeaturedDealItem[];
         currencyRate: CurrencyRate;
     }> {
-        const cacheKey = `deals:featured_list:${filter}:${storeFilter}:${regionFilter}:${priceCap}`;
+        const cacheKey = `deals:featured_list:${filter}:${storeFilter}:${regionFilter}:${priceCap}:${familySharingOnly}`;
 
         if (forceRefresh) {
             dealsCache.deletePattern("deals:featured_list:");
@@ -322,10 +351,11 @@ export class DealsService {
                             storeUS: "Steam",
                             storeBR: "Steam",
                             isAllTimeLow: true,
+                            isFamilySharing: true,
                             steamReviews: {
                                 reviewScoreDesc: "Extremamente positivas",
-                                positivePercent: 96,
-                                totalReviews: 448000,
+                                positivePercent: 97,
+                                totalReviews: 850000,
                             },
                             dealUrlUS: "https://store.steampowered.com/app/1086940",
                             dealUrlBR: "https://store.steampowered.com/app/1086940",
@@ -346,9 +376,10 @@ export class DealsService {
                             storeUS: "Steam",
                             storeBR: "Steam",
                             isAllTimeLow: false,
+                            isFamilySharing: true,
                             steamReviews: {
-                                reviewScoreDesc: "Muito positivas",
-                                positivePercent: 92,
+                                reviewScoreDesc: "Extremamente positivas",
+                                positivePercent: 97,
                                 totalReviews: 650000,
                             },
                             dealUrlUS: "https://store.steampowered.com/app/1245620",
@@ -370,9 +401,10 @@ export class DealsService {
                             storeUS: "Steam",
                             storeBR: "Steam",
                             isAllTimeLow: true,
+                            isFamilySharing: true,
                             steamReviews: {
                                 reviewScoreDesc: "Muito positivas",
-                                positivePercent: 88,
+                                positivePercent: 92,
                                 totalReviews: 700000,
                             },
                             dealUrlUS: "https://store.steampowered.com/app/1091500",
@@ -381,42 +413,56 @@ export class DealsService {
                     ];
                 }
 
-                // 5. Resolve any missing cover images using Steam Store in parallel
-                const missingCoverDeals = deals.filter((d) => !d.coverImage);
-                if (missingCoverDeals.length > 0) {
+                // 5. Resolve missing Steam App IDs and cover images using Steam Store in parallel
+                const missingSteamDeals = deals.filter((d) => !d.steamAppId || !d.coverImage);
+                if (missingSteamDeals.length > 0) {
                     await Promise.allSettled(
-                        missingCoverDeals.map(async (deal) => {
+                        missingSteamDeals.map(async (deal) => {
                             try {
                                 const searchHits = await SteamStoreClient.searchGames(deal.title);
-                                if (searchHits.length > 0 && searchHits[0].coverImage) {
-                                    deal.coverImage = searchHits[0].coverImage;
-                                    if (!deal.steamAppId) {
+                                if (searchHits.length > 0) {
+                                    if (!deal.coverImage && searchHits[0].coverImage) {
+                                        deal.coverImage = searchHits[0].coverImage;
+                                    }
+                                    if (!deal.steamAppId && searchHits[0].steamAppId) {
                                         deal.steamAppId = searchHits[0].steamAppId;
                                     }
                                 }
                             } catch (err) {
-                                console.error(`[DealsService] Failed to resolve cover for ${deal.title}:`, err);
+                                console.error(`[DealsService] Failed to resolve Steam info for ${deal.title}:`, err);
                             }
                         }),
                     );
                 }
 
-                // 5.5 Resolve Steam review scores for items missing reviews
-                const missingReviews = deals.filter((d) => d.steamAppId && !d.steamReviews);
-                if (missingReviews.length > 0) {
+                // 5.5 Resolve Steam review scores and family sharing for items missing them
+                const itemsToEnrich = deals.filter(
+                    (d) => d.steamAppId && (!d.steamReviews || d.isFamilySharing === undefined),
+                );
+                if (itemsToEnrich.length > 0) {
                     await Promise.allSettled(
-                        missingReviews.slice(0, 16).map(async (deal) => {
+                        itemsToEnrich.map(async (deal) => {
                             if (deal.steamAppId) {
-                                const rev = await SteamStoreClient.getAppReviewsSummary(deal.steamAppId);
+                                const [rev, isFS] = await Promise.all([
+                                    !deal.steamReviews
+                                        ? SteamStoreClient.getAppReviewsSummary(deal.steamAppId)
+                                        : Promise.resolve(deal.steamReviews),
+                                    deal.isFamilySharing === undefined
+                                        ? SteamStoreClient.isFamilySharingSupported(deal.steamAppId)
+                                        : Promise.resolve(deal.isFamilySharing),
+                                ]);
                                 if (rev) {
                                     deal.steamReviews = rev;
+                                }
+                                if (isFS !== undefined) {
+                                    deal.isFamilySharing = isFS;
                                 }
                             }
                         }),
                     );
                 }
 
-                // 6. Normalize and Sort by Filter, Store, Region Advantage & Price Cap
+                // 6. Normalize and Sort by Filter, Store, Region Advantage, Price Cap & Family Sharing
                 const normalized = DealComparator.normalizeFeaturedDeals(
                     deals,
                     currencyRate,
@@ -424,6 +470,7 @@ export class DealsService {
                     storeFilter,
                     regionFilter,
                     priceCap,
+                    familySharingOnly,
                 );
 
                 return {
@@ -468,14 +515,18 @@ export class DealsService {
                 let storeBR = "Steam";
                 let storeUS = "Steam";
                 let coverImage = item.coverImage || null;
+                let steamReviews = undefined;
+                let isFamilySharing: boolean | undefined = undefined;
 
                 if (appId) {
                     if (!coverImage) {
                         coverImage = `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${appId}/header.jpg`;
                     }
-                    const [pUS, pBR] = await Promise.all([
+                    const [pUS, pBR, rev, isFS] = await Promise.all([
                         SteamStoreClient.getAppPrice(appId, "US"),
                         SteamStoreClient.getAppPrice(appId, "BR"),
+                        SteamStoreClient.getAppReviewsSummary(appId),
+                        SteamStoreClient.isFamilySharingSupported(appId),
                     ]);
 
                     if (pUS) {
@@ -491,6 +542,8 @@ export class DealsService {
                     if (discountPercent >= 60) {
                         isAllTimeLow = true;
                     }
+                    steamReviews = rev || undefined;
+                    isFamilySharing = isFS;
                 } else {
                     // Try ITAD or search
                     const comparison = await DealsService.compareGame({ title: item.title, gameId: item.id });
@@ -505,6 +558,8 @@ export class DealsService {
                         );
                         isAllTimeLow = Boolean(comparison.isAllTimeLow);
                         if (comparison.coverImage) coverImage = comparison.coverImage;
+                        if (comparison.steamReviews) steamReviews = comparison.steamReviews;
+                        if (comparison.isFamilySharing !== undefined) isFamilySharing = comparison.isFamilySharing;
                     }
                 }
 
@@ -537,6 +592,8 @@ export class DealsService {
                     winningRegion,
                     dealUrlBR: appId ? `https://store.steampowered.com/app/${appId}` : undefined,
                     dealUrlUS: appId ? `https://store.steampowered.com/app/${appId}` : undefined,
+                    steamReviews,
+                    isFamilySharing,
                 };
             }),
         );

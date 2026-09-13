@@ -1,6 +1,6 @@
 // src/services/deals/itadClient.ts
 
-import { SearchGameItem, StorePrice, StoreId, FeaturedDealItem, DealFilterType } from "@/types/deals";
+import { SearchGameItem, StorePrice, StoreId, FeaturedDealItem, DealFilterType, SteamCommunityReview } from "@/types/deals";
 import { dealsCache, CACHE_TTL } from "./dealsCache";
 
 const ITAD_API_BASE = "https://api.isthereanydeal.com";
@@ -213,6 +213,54 @@ export class ItadClient {
     }
 
     /**
+     * Resolves game info including Steam appid and reviews from ITAD.
+     */
+    static async getGameInfo(gameId: string): Promise<{ appid?: number; steamReviews?: SteamCommunityReview } | null> {
+        const apiKey = this.getApiKey();
+        if (!apiKey || !gameId) return null;
+
+        const cacheKey = `itad:game_info:${gameId}`;
+        return dealsCache.getOrSet(
+            cacheKey,
+            async () => {
+                try {
+                    const res = await fetch(`https://api.isthereanydeal.com/games/info/v2?key=${apiKey}&id=${gameId}`, {
+                        headers: { Accept: "application/json" },
+                        next: { revalidate: CACHE_TTL.GAME_COMPARISON },
+                    });
+                    if (!res.ok) return null;
+                    const data = await res.json();
+                    const steamReview = Array.isArray(data.reviews)
+                        ? data.reviews.find((r: { source?: string }) => r.source === "Steam")
+                        : undefined;
+
+                    let reviewScoreDesc = "Positivas";
+                    const score = Number(steamReview?.score || 0);
+                    if (score >= 95) reviewScoreDesc = "Extremamente positivas";
+                    else if (score >= 85) reviewScoreDesc = "Muito positivas";
+                    else if (score >= 70) reviewScoreDesc = "Ligeiramente positivas";
+                    else if (score >= 40) reviewScoreDesc = "Neutras";
+                    else if (score > 0) reviewScoreDesc = "Negativas";
+
+                    return {
+                        appid: data.appid ? Number(data.appid) : undefined,
+                        steamReviews: steamReview
+                            ? {
+                                  positivePercent: score,
+                                  reviewScoreDesc,
+                                  totalReviews: Number(steamReview.count || 0),
+                              }
+                            : undefined,
+                    };
+                } catch {
+                    return null;
+                }
+            },
+            CACHE_TTL.GAME_COMPARISON,
+        );
+    }
+
+    /**
      * Fetches featured deals from ITAD filtering for popular, base games in high speed.
      */
     static async getTopDeals(filter: DealFilterType = "best_savings"): Promise<FeaturedDealItem[]> {
@@ -339,6 +387,17 @@ export class ItadClient {
                         batchUsPrices = await ItadClient.getBatchPrices(missingUsIds, "US");
                     }
 
+                    // Resolve game info (Steam AppId & Reviews) in parallel for candidate items
+                    const gameInfoMap = new Map<string, { appid?: number; steamReviews?: SteamCommunityReview }>();
+                    await Promise.allSettled(
+                        validBRItems.map(async (item) => {
+                            const info = await ItadClient.getGameInfo(item.id);
+                            if (info) {
+                                gameInfoMap.set(item.id, info);
+                            }
+                        }),
+                    );
+
                     const featured: FeaturedDealItem[] = [];
 
                     for (const item of validBRItems) {
@@ -381,16 +440,21 @@ export class ItadClient {
 
                         if (!priceUS || priceUS <= 0 || priceBR <= 0) continue;
 
+                        const gameInfo = gameInfoMap.get(item.id);
+                        const steamAppId = gameInfo?.appid || undefined;
+                        const steamReviews = gameInfo?.steamReviews || undefined;
+
                         featured.push({
                             id: item.id,
                             title: item.title,
                             slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                            steamAppId,
                             coverImage:
                                 item.assets?.banner600 ||
                                 item.assets?.banner400 ||
                                 item.assets?.banner300 ||
                                 item.assets?.boxart ||
-                                null,
+                                (steamAppId ? `https://shared.cloudflare.steamstatic.com/store_item_assets/steam/apps/${steamAppId}/header.jpg` : null),
                             discountPercent: Number(deal.cut ?? 0),
                             priceUS,
                             priceBR,
@@ -400,6 +464,7 @@ export class ItadClient {
                             storeUS,
                             storeBR: isOfficial ? isOfficial.name : "Loja Oficial",
                             isAllTimeLow: Boolean(isAllTimeLow),
+                            steamReviews,
                             dealUrlUS,
                             dealUrlBR: deal.url || "",
                         });

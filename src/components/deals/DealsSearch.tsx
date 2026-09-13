@@ -4,16 +4,17 @@
 
 import React, { useState, useEffect, useRef, useTransition } from "react";
 import Image from "next/image";
-import { Search, Loader2, X, Gamepad2, Sparkles } from "lucide-react";
+import { Search, Loader2, X, Gamepad2, Sparkles, Users, CheckCircle2 } from "lucide-react";
 import { SearchGameItem } from "@/types/deals";
 import { cn } from "@/lib/utils";
 
 interface DealsSearchProps {
     onSelectGame: (game: SearchGameItem) => void;
+    isOwned?: (idOrAppId: string | number) => boolean;
     className?: string;
 }
 
-export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
+export function DealsSearch({ onSelectGame, isOwned, className }: DealsSearchProps) {
     const [query, setQuery] = useState("");
     const [results, setResults] = useState<SearchGameItem[]>([]);
     const [isLoading, setIsLoading] = useState(false);
@@ -198,6 +199,7 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
                     <div className="max-h-80 overflow-y-auto custom-scrollbar space-y-1">
                         {results.map((item, idx) => {
                             const isSelected = idx === selectedIndex;
+                            const owned = isOwned ? (item.steamAppId ? isOwned(item.steamAppId) : isOwned(item.id)) : false;
                             return (
                                 <button
                                     key={item.id || item.title}
@@ -229,10 +231,24 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
                                     )}
 
                                     <div className="min-w-0 flex-1">
-                                        <p className="truncate text-sm font-bold text-white">
-                                            {item.title}
-                                        </p>
-                                        <p className="text-[11px] text-zinc-400 flex items-center gap-2">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <p className="truncate text-sm font-bold text-white">
+                                                {item.title}
+                                            </p>
+                                            {item.isFamilySharing && (
+                                                <span className="inline-flex items-center gap-1 rounded-md bg-purple-950/80 border border-purple-500/40 px-1.5 py-0.5 text-xs font-bold text-purple-300">
+                                                    <Users className="h-3 w-3 text-[#bd0df2]" />
+                                                    Steam Família OK
+                                                </span>
+                                            )}
+                                            {owned && (
+                                                <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 border border-emerald-500/40 px-1.5 py-0.5 text-xs font-bold text-emerald-300">
+                                                    <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                                    Na Biblioteca
+                                                </span>
+                                            )}
+                                        </div>
+                                        <p className="text-xs text-zinc-400 flex items-center gap-2 mt-0.5">
                                             {item.steamAppId ? (
                                                 <span className="text-theme-secondary font-semibold">Steam App #{item.steamAppId}</span>
                                             ) : (
@@ -241,7 +257,7 @@ export function DealsSearch({ onSelectGame, className }: DealsSearchProps) {
                                         </p>
                                     </div>
 
-                                    <div className="text-[11px] font-bold text-theme-primary opacity-80 group-hover:opacity-100">
+                                    <div className="text-xs font-bold text-theme-primary opacity-80 group-hover:opacity-100 flex-shrink-0">
                                         Comparar →
                                     </div>
                                 </button>

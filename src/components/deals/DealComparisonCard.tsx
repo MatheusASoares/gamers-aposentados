@@ -18,6 +18,8 @@ import {
     Info,
     Heart,
     ThumbsUp,
+    Users,
+    CheckCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -34,6 +36,14 @@ interface DealComparisonCardProps {
         coverImage?: string | null;
     }) => void;
     isTracked?: boolean;
+    onToggleOwned?: (game: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => void;
+    isOwned?: boolean;
 }
 
 export function DealComparisonCard({
@@ -42,6 +52,8 @@ export function DealComparisonCard({
     isRefreshing = false,
     onToggleTrack,
     isTracked = false,
+    onToggleOwned,
+    isOwned = false,
 }: DealComparisonCardProps) {
     const {
         title,
@@ -251,24 +263,30 @@ export function DealComparisonCard({
                         </div>
                     )}
                     <div>
-                        <div className="flex items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-2">
                             <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
                                 {title}
                             </h3>
                             {steamAppId && (
-                                <span className="rounded-lg bg-zinc-900 px-2 py-0.5 text-[11px] font-bold text-zinc-400 border border-theme/20">
+                                <span className="rounded-lg bg-zinc-900 px-2 py-0.5 text-xs font-bold text-zinc-400 border border-theme/20">
                                     App #{steamAppId}
                                 </span>
                             )}
+                            {comparison.isFamilySharing && (
+                                <span className="flex items-center gap-1.5 rounded-lg bg-purple-950/80 border border-purple-500/40 px-2.5 py-0.5 text-xs font-bold text-purple-300 shadow-md backdrop-blur-sm">
+                                    <Users className="h-3.5 w-3.5 text-[#bd0df2]" />
+                                    <span>Steam Família OK</span>
+                                </span>
+                            )}
                             {comparison.isAllTimeLow && (
-                                <span className="flex items-center gap-1 rounded-lg bg-amber-500/90 px-2 py-0.5 text-[11px] font-black text-black shadow-md">
-                                    <Trophy className="h-3 w-3" /> Recorde Histórico
+                                <span className="flex items-center gap-1 rounded-lg bg-amber-500/90 px-2 py-0.5 text-xs font-black text-black shadow-md">
+                                    <Trophy className="h-3.5 w-3.5" /> Recorde Histórico
                                 </span>
                             )}
                             {comparison.steamReviews && comparison.steamReviews.totalReviews > 0 && (
                                 <span
                                     className={cn(
-                                        "flex items-center gap-1 rounded-lg px-2 py-0.5 text-[11px] font-black border backdrop-blur-sm",
+                                        "flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-black border backdrop-blur-sm",
                                         comparison.steamReviews.positivePercent >= 80
                                             ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
                                             : comparison.steamReviews.positivePercent >= 70
@@ -277,8 +295,14 @@ export function DealComparisonCard({
                                     )}
                                     title={`${comparison.steamReviews.totalReviews.toLocaleString("pt-BR")} análises na Steam`}
                                 >
-                                    <ThumbsUp className="h-3 w-3 stroke-[2.5]" />
+                                    <ThumbsUp className="h-3.5 w-3.5 stroke-[2.5]" />
                                     <span>{comparison.steamReviews.positivePercent}% {comparison.steamReviews.reviewScoreDesc}</span>
+                                </span>
+                            )}
+                            {isOwned && (
+                                <span className="flex items-center gap-1.5 rounded-lg bg-emerald-500/20 border border-emerald-500/40 px-2.5 py-0.5 text-xs font-bold text-emerald-300 shadow-md backdrop-blur-sm">
+                                    <CheckCircle2 className="h-3.5 w-3.5 text-emerald-400" />
+                                    <span>✓ Na Biblioteca</span>
                                 </span>
                             )}
                         </div>
@@ -291,6 +315,31 @@ export function DealComparisonCard({
                 </div>
 
                 <div className="flex flex-wrap items-center gap-2.5">
+                    {onToggleOwned && (
+                        <button
+                            type="button"
+                            onClick={() =>
+                                onToggleOwned({
+                                    id: comparison.id,
+                                    title: comparison.title,
+                                    steamAppId: comparison.steamAppId,
+                                    slug: comparison.slug,
+                                    coverImage: comparison.coverImage,
+                                })
+                            }
+                            className={cn(
+                                "flex items-center gap-1.5 rounded-xl border px-3 py-2 text-xs font-bold transition-all shadow-md active:scale-95",
+                                isOwned
+                                    ? "border-emerald-500/60 bg-emerald-950/60 text-emerald-300 shadow-[0_0_15px_rgba(16,185,129,0.3)]"
+                                    : "border-theme/30 bg-zinc-900/80 text-zinc-300 hover:border-emerald-400/60 hover:text-emerald-300",
+                            )}
+                            title={isOwned ? "Remover da sua biblioteca" : "Marcar que você já possui este jogo"}
+                        >
+                            <CheckCircle2 className={cn("h-4 w-4", isOwned ? "text-emerald-400" : "text-zinc-400")} />
+                            <span>{isOwned ? "Na Biblioteca" : "Já Tenho"}</span>
+                        </button>
+                    )}
+
                     {onToggleTrack && (
                         <button
                             type="button"

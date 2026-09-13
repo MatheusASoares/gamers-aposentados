@@ -79,6 +79,7 @@ model User {
   guildMemberships     GuildMember[]
   trackedDeals         UserTrackedDeal[]
   dismissedDeals       UserDismissedDeal[]
+  ownedDeals           UserOwnedDeal[]
   oracleRecommendation UserOracleRecommendation?
 
   xp_points       Int     @default(0)
@@ -435,4 +436,21 @@ model UserOracleRecommendation {
 
   @@map("user_oracle_recommendations")
 }
+
+model UserOwnedDeal {
+  id           String   @id @default(uuid())
+  user_id      String
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  deal_id      String   // ID do jogo ou steamAppId
+  steam_app_id Int?
+  title        String
+  slug         String
+  cover_image  String?
+  created_at   DateTime @default(now())
+
+  @@unique([user_id, deal_id])
+  @@index([user_id])
+  @@map("user_owned_deals")
+}
+
 

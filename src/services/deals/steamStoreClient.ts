@@ -136,6 +136,47 @@ export class SteamStoreClient {
     }
 
     /**
+     * Checks if a Steam game supports Steam Family Sharing (Category 62).
+     */
+    static async isFamilySharingSupported(appId: number): Promise<boolean> {
+        if (!appId || appId <= 0) return false;
+        const cacheKey = `steam:family_sharing:${appId}`;
+
+        return dealsCache.getOrSet(
+            cacheKey,
+            async () => {
+                try {
+                    const url = `https://store.steampowered.com/api/appdetails?appids=${appId}&filters=basic,categories`;
+                    const res = await fetch(url, {
+                        headers: {
+                            Accept: "application/json",
+                            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
+                        },
+                        signal: AbortSignal.timeout(6000),
+                        next: { revalidate: CACHE_TTL.FAMILY_SHARING },
+                    });
+
+                    if (!res.ok) return false;
+                    const data = await res.json();
+                    const appData = data[String(appId)];
+                    if (!appData?.success || !appData?.data) return false;
+
+                    const categories = appData.data.categories;
+                    if (!Array.isArray(categories)) return false;
+
+                    return categories.some(
+                        (c: { id: number; description?: string }) => c.id === 62,
+                    );
+                } catch (err) {
+                    console.error(`[SteamStoreClient] isFamilySharingSupported error for ${appId}:`, err);
+                    return false;
+                }
+            },
+            CACHE_TTL.FAMILY_SHARING,
+        );
+    }
+
+    /**
      * Fetches featured specials directly from Steam Store for US and BR, ensuring both regional prices are resolved.
      */
     static async getFeaturedSpecials(): Promise<FeaturedDealItem[]> {
@@ -145,8 +186,17 @@ export class SteamStoreClient {
             cacheKey,
             async () => {
                 try {
-                    // Fetch featured categories, live search specials, and top sellers specials in parallel for both US and BR
-                    const [resCatUS, resCatBR, resSearchBR, resSearchUS, resTopBR, resTopUS] = await Promise.all([
+                    // Fetch featured categories, live search specials, top sellers specials, and family sharing specials in parallel
+                    const [
+                        resCatUS,
+                        resCatBR,
+                        resSearchBR,
+                        resSearchUS,
+                        resTopBR,
+                        resTopUS,
+                        resFSBR,
+                        resFSUS,
+                    ] = await Promise.all([
                         fetch("https://store.steampowered.com/api/featuredcategories/?cc=us", {
                             headers: { "User-Agent": "Mozilla/5.0" },
                             next: { revalidate: CACHE_TTL.FEATURED_DEALS },
@@ -183,6 +233,20 @@ export class SteamStoreClient {
                                 next: { revalidate: CACHE_TTL.FEATURED_DEALS },
                             },
                         ).catch(() => null),
+                        fetch(
+                            "https://store.steampowered.com/search/results/?query=&start=0&count=50&specials=1&category2=62&infinite=1&cc=br",
+                            {
+                                headers: { "User-Agent": "Mozilla/5.0" },
+                                next: { revalidate: CACHE_TTL.FEATURED_DEALS },
+                            },
+                        ).catch(() => null),
+                        fetch(
+                            "https://store.steampowered.com/search/results/?query=&start=0&count=50&specials=1&category2=62&infinite=1&cc=us",
+                            {
+                                headers: { "User-Agent": "Mozilla/5.0" },
+                                next: { revalidate: CACHE_TTL.FEATURED_DEALS },
+                            },
+                        ).catch(() => null),
                     ]);
 
                     const dataCatUS = resCatUS && resCatUS.ok ? await resCatUS.json().catch(() => null) : null;
@@ -191,6 +255,8 @@ export class SteamStoreClient {
                     const dataSearchUS = resSearchUS && resSearchUS.ok ? await resSearchUS.json().catch(() => null) : null;
                     const dataTopBR = resTopBR && resTopBR.ok ? await resTopBR.json().catch(() => null) : null;
                     const dataTopUS = resTopUS && resTopUS.ok ? await resTopUS.json().catch(() => null) : null;
+                    const dataFSBR = resFSBR && resFSBR.ok ? await resFSBR.json().catch(() => null) : null;
+                    const dataFSUS = resFSUS && resFSUS.ok ? await resFSUS.json().catch(() => null) : null;
 
                     const combinedCandidates: Array<{
                         id: number;
@@ -200,9 +266,23 @@ export class SteamStoreClient {
                         priceUS?: number;
                         priceBR?: number;
                         isTopSeller?: boolean;
+                        isFamilySharing?: boolean;
                     }> = [];
 
                     const seenAppIds = new Set<number>();
+                    const familySharingAppIds = new Set<number>();
+
+                    // Collect app IDs confirmed from category2=62 results
+                    const parseFamilySharingIds = (html: string | null) => {
+                        if (!html) return;
+                        const reg = /data-ds-appid="(\d+)"/g;
+                        let m;
+                        while ((m = reg.exec(html)) !== null) {
+                            familySharingAppIds.add(Number(m[1]));
+                        }
+                    };
+                    parseFamilySharingIds(dataFSBR?.results_html || null);
+                    parseFamilySharingIds(dataFSUS?.results_html || null);
 
                     const parseSearchResults = (htmlBR: string, htmlUS: string | null, isTopSeller = false) => {
                         const usPricesMap = new Map<number, number>();
@@ -242,13 +322,19 @@ export class SteamStoreClient {
                                 priceBR: !isNaN(priceBR) && priceBR > 0 ? priceBR : undefined,
                                 priceUS: priceUS && !isNaN(priceUS) && priceUS > 0 ? priceUS : undefined,
                                 isTopSeller,
+                                isFamilySharing: familySharingAppIds.has(appId),
                             });
                         }
                     };
 
-                    // 1. Process Top Sellers specials first (Highest prestige, big records)
+                    // 1. Process Top Sellers specials first
                     if (dataTopBR?.results_html) {
                         parseSearchResults(dataTopBR.results_html, dataTopUS?.results_html || null, true);
+                    }
+
+                    // 1.5 Process Family Sharing specials
+                    if (dataFSBR?.results_html) {
+                        parseSearchResults(dataFSBR.results_html, dataFSUS?.results_html || null, false);
                     }
 
                     // 2. Process general search specials
@@ -280,6 +366,7 @@ export class SteamStoreClient {
                             priceUS: item.final_price / 100,
                             priceBR: specialsBRMap.get(item.id),
                             isTopSeller: true,
+                            isFamilySharing: familySharingAppIds.has(item.id),
                         });
                     }
 
@@ -295,10 +382,11 @@ export class SteamStoreClient {
                             priceUS: specialsUSMap.get(item.id),
                             priceBR: item.final_price / 100,
                             isTopSeller: true,
+                            isFamilySharing: familySharingAppIds.has(item.id),
                         });
                     }
 
-                    // 4. Resolve missing prices and reviews for top 80 candidates
+                    // 4. Resolve missing prices, reviews, and family sharing for top candidates
                     const candidatesToResolve = combinedCandidates.slice(0, 80);
 
                     const resolvedItems: (FeaturedDealItem | null)[] = await Promise.all(
@@ -325,7 +413,12 @@ export class SteamStoreClient {
                                 return null;
                             }
 
-                            const reviews = await SteamStoreClient.getAppReviewsSummary(candidate.id);
+                            const [reviews, isFS] = await Promise.all([
+                                SteamStoreClient.getAppReviewsSummary(candidate.id),
+                                candidate.isFamilySharing
+                                    ? Promise.resolve(true)
+                                    : SteamStoreClient.isFamilySharingSupported(candidate.id),
+                            ]);
 
                             return {
                                 id: `steam-${candidate.id}`,
@@ -344,11 +437,8 @@ export class SteamStoreClient {
                                 storeUS: "Steam",
                                 storeBR: "Steam",
                                 isAllTimeLow: candidate.isTopSeller || (candidate.discount_percent || 0) >= 50,
-                                steamReviews: reviews || {
-                                    reviewScoreDesc: "Muito positivas",
-                                    positivePercent: 86,
-                                    totalReviews: 8500,
-                                },
+                                steamReviews: reviews || undefined,
+                                isFamilySharing: isFS,
                                 dealUrlUS: `https://store.steampowered.com/app/${candidate.id}`,
                                 dealUrlBR: `https://store.steampowered.com/app/${candidate.id}`,
                             };
@@ -368,7 +458,8 @@ export class SteamStoreClient {
     }
 
     /**
-     * Fetches community review summary for a Steam game (overall score, positive %, total reviews).
+     * Fetches community review summary for a Steam game (overall score, positive %, total reviews)
+     * using global sampling (language=all & purchase_type=all) for accurate real-world statistics.
      */
     static async getAppReviewsSummary(
         appId: number,
@@ -379,12 +470,13 @@ export class SteamStoreClient {
             cacheKey,
             async () => {
                 try {
-                    const url = `https://store.steampowered.com/appreviews/${appId}?json=1&num_per_page=0&l=brazilian`;
+                    const url = `https://store.steampowered.com/appreviews/${appId}?json=1&num_per_page=0&language=all&purchase_type=all`;
                     const res = await fetch(url, {
                         headers: {
                             Accept: "application/json",
                             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
                         },
+                        signal: AbortSignal.timeout(6000),
                         next: { revalidate: CACHE_TTL.STEAM_REVIEWS },
                     });
 
@@ -396,11 +488,38 @@ export class SteamStoreClient {
                     const summary = data.query_summary;
                     const totalReviews = Number(summary.total_reviews || 0);
                     const totalPositive = Number(summary.total_positive || 0);
-                    const positivePercent =
-                        totalReviews > 0
-                            ? Math.round((totalPositive / totalReviews) * 100)
-                            : 0;
-                    const reviewScoreDesc = summary.review_score_desc || "Neutras";
+                    if (totalReviews <= 0) return null;
+
+                    const positivePercent = Math.round((totalPositive / totalReviews) * 100);
+
+                    // Accurate translation of Steam review score description to Portuguese
+                    const rawDesc = (summary.review_score_desc || "").toLowerCase();
+                    let reviewScoreDesc = "Neutras";
+
+                    if (rawDesc.includes("overwhelmingly positive") || rawDesc.includes("extremamente positiva")) {
+                        reviewScoreDesc = "Extremamente positivas";
+                    } else if (rawDesc.includes("very positive") || rawDesc.includes("muito positiva")) {
+                        reviewScoreDesc = "Muito positivas";
+                    } else if (rawDesc.includes("mostly positive") || rawDesc.includes("ligeiramente positiva")) {
+                        reviewScoreDesc = "Ligeiramente positivas";
+                    } else if (rawDesc.includes("positive") || rawDesc.includes("positiva")) {
+                        reviewScoreDesc = "Positivas";
+                    } else if (rawDesc.includes("mixed") || rawDesc.includes("neutra")) {
+                        reviewScoreDesc = "Neutras";
+                    } else if (rawDesc.includes("mostly negative") || rawDesc.includes("ligeiramente negativa")) {
+                        reviewScoreDesc = "Ligeiramente negativas";
+                    } else if (rawDesc.includes("very negative") || rawDesc.includes("muito negativa")) {
+                        reviewScoreDesc = "Muito negativas";
+                    } else if (rawDesc.includes("overwhelmingly negative") || rawDesc.includes("extremamente negativa")) {
+                        reviewScoreDesc = "Extremamente negativas";
+                    } else {
+                        // Percent-based fallback
+                        if (positivePercent >= 95) reviewScoreDesc = "Extremamente positivas";
+                        else if (positivePercent >= 80) reviewScoreDesc = "Muito positivas";
+                        else if (positivePercent >= 70) reviewScoreDesc = "Ligeiramente positivas";
+                        else if (positivePercent >= 40) reviewScoreDesc = "Neutras";
+                        else reviewScoreDesc = "Ligeiramente negativas";
+                    }
 
                     return {
                         reviewScoreDesc,

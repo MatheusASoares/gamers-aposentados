@@ -16,6 +16,8 @@ import {
     Gem,
     ArrowUpRight,
     TrendingDown,
+    Users,
+    CheckCircle2,
 } from "lucide-react";
 import {
     OracleGameRecommendation,
@@ -45,6 +47,14 @@ interface DealOracleSectionProps {
         slug?: string;
         coverImage?: string | null;
     }) => void;
+    onToggleOwned?: (deal: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => void;
+    isOwned?: (idOrAppId: string | number) => boolean;
 }
 
 export function DealOracleSection({
@@ -52,6 +62,8 @@ export function DealOracleSection({
     isTracked,
     currencyRate,
     onSelectDeal,
+    onToggleOwned,
+    isOwned,
 }: DealOracleSectionProps) {
     const [data, setData] = useState<OracleRecommendationsResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -329,6 +341,9 @@ export function DealOracleSection({
                             const favorited = isTracked
                                 ? isTracked(game.steamAppId || gameDealId)
                                 : false;
+                            const owned = isOwned
+                                ? isOwned(game.steamAppId || gameDealId)
+                                : false;
 
                             const priceBR = game.priceBR ?? 0;
                             const priceUS = game.priceUS ?? 0;
@@ -388,31 +403,64 @@ export function DealOracleSection({
                                                     -{game.discountPercent}%
                                                 </div>
                                             )}
+
+                                            {/* Bottom-Left: Steam Familia OK */}
+                                            {game.isFamilySharing && (
+                                                <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-lg bg-purple-950/90 border border-purple-500/50 px-2 py-0.5 text-xs font-bold text-purple-300 shadow-md backdrop-blur-sm">
+                                                    <Users className="h-3 w-3 text-[#bd0df2]" />
+                                                    <span>Steam Família OK</span>
+                                                </div>
+                                            )}
+
+                                            {/* Bottom-Right: Owned Badge on thumbnail */}
+                                            {owned && (
+                                                <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-lg bg-emerald-500/90 border border-emerald-400 px-2 py-0.5 text-xs font-bold text-black shadow-md backdrop-blur-sm">
+                                                    <CheckCircle2 className="h-3 w-3" />
+                                                    <span>Na Biblioteca</span>
+                                                </div>
+                                            )}
                                         </div>
 
                                         {/* Título e Avaliação Steam Obrigatória */}
                                         <div className="mt-3">
-                                            <h4 className="text-sm sm:text-base font-bold text-white line-clamp-1 group-hover:text-theme-primary transition-colors" title={game.title}>
-                                                {game.title}
-                                            </h4>
-
-                                            {/* Badge de Avaliação Steam */}
-                                            <div className="mt-1 flex items-center gap-1.5">
-                                                <span
-                                                    className={cn(
-                                                        "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold border backdrop-blur-sm",
-                                                        (game.steamReviews?.positivePercent ?? 88) >= 80
-                                                             ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                                             : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
-                                                    )}
-                                                    title={`${(game.steamReviews?.totalReviews ?? 10000).toLocaleString("pt-BR")} análises na Steam`}
-                                                >
-                                                    <ThumbsUp className="h-3 w-3 text-emerald-400 stroke-[2.5]" />
-                                                    <span>{game.steamReviews?.positivePercent ?? 88}% Positiva</span>
-                                                    <span className="font-semibold text-zinc-300 truncate max-w-[130px]">
-                                                        • {game.steamReviews?.reviewScoreDesc ?? "Muito positivas"}
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h4 className="text-sm sm:text-base font-bold text-white line-clamp-1 group-hover:text-theme-primary transition-colors" title={game.title}>
+                                                    {game.title}
+                                                </h4>
+                                                {owned && (
+                                                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 border border-emerald-500/40 px-1.5 py-0.5 text-xs font-bold text-emerald-300">
+                                                        <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                                        Na Biblioteca
                                                     </span>
-                                                </span>
+                                                )}
+                                            </div>
+
+                                            {/* Badge de Avaliação Steam (Dados Reais) */}
+                                            <div className="mt-1 flex items-center gap-1.5">
+                                                {game.steamReviews && game.steamReviews.totalReviews > 0 ? (
+                                                    <span
+                                                        className={cn(
+                                                            "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold border backdrop-blur-sm",
+                                                            game.steamReviews.positivePercent >= 80
+                                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                                                : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
+                                                        )}
+                                                        title={`${game.steamReviews.totalReviews.toLocaleString("pt-BR")} análises na Steam`}
+                                                    >
+                                                        <ThumbsUp className="h-3 w-3 text-emerald-400 stroke-[2.5]" />
+                                                        <span>{game.steamReviews.positivePercent}% Positiva</span>
+                                                        {game.steamReviews.reviewScoreDesc && (
+                                                            <span className="font-semibold text-zinc-300 truncate max-w-[130px]">
+                                                                • {game.steamReviews.reviewScoreDesc}
+                                                            </span>
+                                                        )}
+                                                    </span>
+                                                ) : (
+                                                    <span className="flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium border border-zinc-800/80 bg-zinc-900/40 text-zinc-500">
+                                                        <ThumbsUp className="h-3 w-3 opacity-40" />
+                                                        <span>Steam</span>
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
 
@@ -507,6 +555,41 @@ export function DealOracleSection({
                                         </button>
 
                                         <div className="flex items-center gap-1.5">
+                                            {/* Botão Na Biblioteca / Já Tenho */}
+                                            {onToggleOwned && (
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        onToggleOwned({
+                                                            id: gameDealId,
+                                                            title: game.title,
+                                                            steamAppId: game.steamAppId || null,
+                                                            coverImage: game.coverImage,
+                                                        });
+                                                    }}
+                                                    className={cn(
+                                                        "flex items-center gap-1 rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all border",
+                                                        owned
+                                                            ? "border-emerald-500/50 bg-emerald-500/20 text-emerald-300"
+                                                            : "border-zinc-800 bg-zinc-900 text-zinc-400 hover:text-emerald-400 hover:border-emerald-500/30",
+                                                    )}
+                                                    title={
+                                                        owned
+                                                            ? "Remover da sua biblioteca"
+                                                            : "Marcar que você já possui este jogo na sua biblioteca"
+                                                    }
+                                                >
+                                                    <CheckCircle2
+                                                        className={cn(
+                                                            "h-3.5 w-3.5",
+                                                            owned ? "text-emerald-400" : "text-zinc-400",
+                                                        )}
+                                                    />
+                                                    <span>{owned ? "Na Biblioteca" : "Já Tenho"}</span>
+                                                </button>
+                                            )}
+
                                             {/* Botão Favoritar / Monitorar Preço */}
                                             {onToggleTrack && (
                                                 <button

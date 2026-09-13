@@ -23,6 +23,7 @@ export async function GET(request: NextRequest) {
             : "historical_low";
         const validPriceCaps: PriceCapFilterType[] = ["all", "under_30", "under_60", "under_100"];
         const priceCap = validPriceCaps.includes(priceCapParam) ? priceCapParam : "all";
+        const familySharingParam = searchParams.get("familySharing") === "true";
         const forceRefresh = searchParams.get("refresh") === "true";
 
         const data = await DealsService.getFeaturedDeals(
@@ -31,6 +32,7 @@ export async function GET(request: NextRequest) {
             storeParam,
             regionParam,
             priceCap,
+            familySharingParam,
         );
         return NextResponse.json(data, {
             headers: forceRefresh

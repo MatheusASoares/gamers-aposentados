@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import Image from "next/image";
 import {
     Flame,
@@ -17,6 +17,9 @@ import {
     ShoppingBag,
     ThumbsUp,
     ArrowUpDown,
+    Users,
+    Loader2,
+    CheckCircle2,
 } from "lucide-react";
 import {
     FeaturedDealItem,
@@ -26,6 +29,7 @@ import {
     PriceCapFilterType,
     TrackedDealItem,
     CurrencyRate,
+    SteamCommunityReview,
 } from "@/types/deals";
 import { cn } from "@/lib/utils";
 import { DealOracleSection } from "./DealOracleSection";
@@ -56,6 +60,16 @@ interface TopDealsCarouselProps {
         coverImage?: string | null;
     }) => void;
     isTracked?: (idOrAppId: string | number) => boolean;
+    familySharingOnly?: boolean;
+    onToggleFamilySharing?: () => void;
+    isOwned?: (idOrAppId: string | number) => boolean;
+    onToggleOwned?: (game: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => void;
     monitoredCount?: number;
     isLoading?: boolean;
 }
@@ -74,6 +88,10 @@ export function TopDealsCarousel({
     onPriceCapChange,
     onToggleTrack,
     isTracked = () => false,
+    familySharingOnly = false,
+    onToggleFamilySharing,
+    isOwned = () => false,
+    onToggleOwned,
     monitoredCount = 0,
     isLoading = false,
 }: TopDealsCarouselProps) {
@@ -82,15 +100,30 @@ export function TopDealsCarousel({
     const [prevFilter, setPrevFilter] = useState(activeFilter);
     const [prevStore, setPrevStore] = useState(storeFilter);
     const [prevPriceCap, setPrevPriceCap] = useState(priceCap);
+    const [prevFamilySharing, setPrevFamilySharing] = useState(familySharingOnly);
+
+    // On-the-fly live Steam reviews and Family Sharing cache for cards
+    const [liveData, setLiveData] = useState<
+        Record<
+            number,
+            {
+                reviews?: SteamCommunityReview | null;
+                isFamilySharing?: boolean;
+                loading?: boolean;
+            }
+        >
+    >({});
 
     if (
         prevFilter !== activeFilter ||
         prevStore !== storeFilter ||
-        prevPriceCap !== priceCap
+        prevPriceCap !== priceCap ||
+        prevFamilySharing !== familySharingOnly
     ) {
         setPrevFilter(activeFilter);
         setPrevStore(storeFilter);
         setPrevPriceCap(priceCap);
+        setPrevFamilySharing(familySharingOnly);
         setCurrentPage(1);
     }
 
@@ -148,7 +181,16 @@ export function TopDealsCarousel({
 
     // Client-side instant sorting
     const sortedDeals = useMemo(() => {
-        const list = [...baseList];
+        let list = [...baseList];
+
+        if (familySharingOnly) {
+            list = list.filter((deal) => {
+                const appId = deal.steamAppId ? Number(deal.steamAppId) : /^\d+$/.test(deal.id) ? Number(deal.id) : null;
+                const fs = deal.isFamilySharing ?? (appId ? liveData[appId]?.isFamilySharing : undefined);
+                return fs === true;
+            });
+        }
+
         if (sortBy === "savings") {
             return list.sort((a, b) => {
                 const savA = "absoluteSavingsBRL" in a ? (a.absoluteSavingsBRL || 0) : 0;
@@ -162,9 +204,24 @@ export function TopDealsCarousel({
         }
         if (sortBy === "rating") {
             return list.sort((a, b) => {
-                const rA = "steamReviews" in a ? (a.steamReviews?.positivePercent ?? 85) : 85;
-                const rB = "steamReviews" in b ? (b.steamReviews?.positivePercent ?? 85) : 85;
-                return rB - rA;
+                const appIdA = a.steamAppId ? Number(a.steamAppId) : /^\d+$/.test(a.id) ? Number(a.id) : null;
+                const appIdB = b.steamAppId ? Number(b.steamAppId) : /^\d+$/.test(b.id) ? Number(b.id) : null;
+
+                const rA =
+                    ("steamReviews" in a && a.steamReviews?.positivePercent !== undefined)
+                        ? a.steamReviews.positivePercent
+                        : (appIdA && liveData[appIdA]?.reviews?.positivePercent !== undefined)
+                          ? liveData[appIdA]?.reviews?.positivePercent
+                          : -1;
+
+                const rB =
+                    ("steamReviews" in b && b.steamReviews?.positivePercent !== undefined)
+                        ? b.steamReviews.positivePercent
+                        : (appIdB && liveData[appIdB]?.reviews?.positivePercent !== undefined)
+                          ? liveData[appIdB]?.reviews?.positivePercent
+                          : -1;
+
+                return (rB ?? -1) - (rA ?? -1);
             });
         }
         if (sortBy === "price_asc") {
@@ -175,7 +232,7 @@ export function TopDealsCarousel({
             });
         }
         return list;
-    }, [baseList, sortBy]);
+    }, [baseList, sortBy, familySharingOnly, liveData]);
 
     const totalDeals = sortedDeals.length;
     const totalPages = Math.max(1, Math.ceil(totalDeals / ITEMS_PER_PAGE));
@@ -183,6 +240,66 @@ export function TopDealsCarousel({
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE,
     );
+
+    // Automatically fetch real Steam reviews and Family Sharing on-the-fly for visible cards if missing
+    useEffect(() => {
+        if (!paginatedDeals || paginatedDeals.length === 0) return;
+
+        const toFetch: number[] = [];
+        paginatedDeals.forEach((deal) => {
+            const appId = deal.steamAppId ? Number(deal.steamAppId) : /^\d+$/.test(deal.id) ? Number(deal.id) : null;
+            if (!appId) return;
+
+            const current = liveData[appId];
+            const hasReviews = !!(deal.steamReviews || (current && current.reviews !== undefined));
+            const hasFamily = deal.isFamilySharing !== undefined || (current && current.isFamilySharing !== undefined);
+
+            if ((!hasReviews || !hasFamily) && !current?.loading) {
+                toFetch.push(appId);
+            }
+        });
+
+        if (toFetch.length === 0) return;
+
+        // Mark as loading to prevent duplicate requests
+        setLiveData((prev) => {
+            const next = { ...prev };
+            toFetch.forEach((appId) => {
+                next[appId] = { ...next[appId], loading: true };
+            });
+            return next;
+        });
+
+        Promise.allSettled(
+            toFetch.map(async (appId) => {
+                try {
+                    const res = await fetch(`/api/deals/reviews?appId=${appId}`);
+                    if (res.ok) {
+                        const data = await res.json();
+                        return { appId, data };
+                    }
+                } catch (e) {
+                    console.error(`[TopDealsCarousel] Failed on-the-fly fetch for AppId ${appId}:`, e);
+                }
+                return { appId, data: null };
+            }),
+        ).then((results) => {
+            setLiveData((prev) => {
+                const next = { ...prev };
+                results.forEach((res) => {
+                    if (res.status === "fulfilled" && res.value) {
+                        const { appId, data } = res.value;
+                        next[appId] = {
+                            loading: false,
+                            reviews: data?.reviews ?? null,
+                            isFamilySharing: data?.isFamilySharing ?? false,
+                        };
+                    }
+                });
+                return next;
+            });
+        });
+    }, [paginatedDeals, liveData]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= totalPages) {
@@ -303,6 +420,26 @@ export function TopDealsCarousel({
                                 })}
                             </div>
                         )}
+
+                        {/* Steam Family Sharing Toggle Button */}
+                        {onToggleFamilySharing && (
+                            <button
+                                type="button"
+                                onClick={onToggleFamilySharing}
+                                className={cn(
+                                    "flex items-center gap-1.5 rounded-xl px-3 sm:px-3.5 py-1.5 text-xs font-bold transition-all border shadow-sm active:scale-95",
+                                    familySharingOnly
+                                        ? "bg-purple-950/80 border-[#bd0df2] text-white shadow-[0_0_15px_rgba(189,13,242,0.4)]"
+                                        : "bg-theme-card/90 border-theme/40 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60",
+                                )}
+                            >
+                                <Users className={cn("h-3.5 w-3.5", familySharingOnly ? "text-[#bd0df2]" : "text-zinc-400")} />
+                                <span>Steam Família OK</span>
+                                {familySharingOnly && (
+                                    <span className="h-2 w-2 rounded-full bg-[#bd0df2] animate-pulse ml-0.5" />
+                                )}
+                            </button>
+                        )}
                     </div>
 
                     {/* Interactive Sort Selector */}
@@ -340,6 +477,8 @@ export function TopDealsCarousel({
                 <DealOracleSection
                     onToggleTrack={onToggleTrack}
                     isTracked={isTracked}
+                    onToggleOwned={onToggleOwned}
+                    isOwned={isOwned}
                     currencyRate={currencyRate}
                     onSelectDeal={(game) => {
                         onSelectDeal({
@@ -397,12 +536,19 @@ export function TopDealsCarousel({
                                 const isBrWinner = deal.winningRegion === "BR";
                                 const isUsWinner = deal.winningRegion === "US";
                                 const tracked = isTracked(deal.steamAppId || deal.id);
+                                const owned = isOwned(deal.steamAppId || deal.id);
                                 const priceBR = "priceBR" in deal ? deal.priceBR : (deal as TrackedDealItem).currentPriceBR ?? 0;
                                 const priceUS = "priceUS" in deal ? deal.priceUS : (deal as TrackedDealItem).currentPriceUS ?? 0;
                                 const discountPercent = deal.discountPercent ?? 0;
                                 const savingsPercent = deal.savingsPercent ?? 0;
                                 const savingsBRL = "absoluteSavingsBRL" in deal ? (deal.absoluteSavingsBRL || 0) : 0;
                                 const convertedUSinBRL = currencyRate && priceUS > 0 ? Number((priceUS * currencyRate.rate).toFixed(2)) : 0;
+
+                                const appId = deal.steamAppId ? Number(deal.steamAppId) : /^\d+$/.test(deal.id) ? Number(deal.id) : null;
+                                const live = appId ? liveData[appId] : null;
+                                const isFamilyOk = deal.isFamilySharing ?? live?.isFamilySharing;
+                                const steamRev = deal.steamReviews || live?.reviews;
+                                const isFetchingReview = live?.loading;
 
                                 return (
                                     <div
@@ -444,32 +590,75 @@ export function TopDealsCarousel({
                                                     </div>
                                                 )}
 
-                                                {/* Top-Right: Favorite Button + Record Badge */}
-                                                <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
-                                                    {onToggleTrack && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={(e) => {
-                                                                e.stopPropagation();
-                                                                onToggleTrack({
-                                                                    id: deal.id,
-                                                                    title: deal.title,
-                                                                    steamAppId: deal.steamAppId,
-                                                                    slug: deal.slug,
-                                                                    coverImage: deal.coverImage,
-                                                                });
-                                                            }}
-                                                            title={tracked ? "Remover dos favoritos" : "Favoritar este jogo"}
-                                                            className={cn(
-                                                                "flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
-                                                                tracked
-                                                                    ? "border-pink-500/60 bg-pink-950/90 text-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.5)]"
-                                                                    : "border-white/10 bg-black/60 text-zinc-400 hover:text-pink-400 hover:border-pink-400/40",
-                                                            )}
-                                                        >
-                                                            <Heart className={cn("h-4 w-4 sm:h-3.5 sm:w-3.5", tracked && "fill-pink-500")} />
-                                                        </button>
-                                                    )}
+                                                {/* Bottom-Left: Steam Familia OK */}
+                                                {isFamilyOk === true && (
+                                                    <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-lg bg-purple-950/90 border border-purple-500/50 px-2 py-0.5 text-xs font-bold text-purple-300 shadow-md backdrop-blur-sm">
+                                                        <Users className="h-3 w-3 text-[#bd0df2]" />
+                                                        <span>Steam Família OK</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Bottom-Right: Owned Badge on thumbnail */}
+                                                {owned && (
+                                                    <div className="absolute bottom-2 right-2 flex items-center gap-1 rounded-lg bg-emerald-950/90 border border-emerald-500/50 px-2 py-0.5 text-xs font-bold text-emerald-300 shadow-md backdrop-blur-sm">
+                                                        <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                                        <span>✓ Na Biblioteca</span>
+                                                    </div>
+                                                )}
+
+                                                {/* Top-Right: Actions (Owned & Favorite) + Record Badge */}
+                                                <div className="absolute top-2 right-2 flex flex-col items-end gap-1.5">
+                                                    <div className="flex items-center gap-1">
+                                                        {onToggleOwned && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onToggleOwned({
+                                                                        id: deal.id,
+                                                                        title: deal.title,
+                                                                        steamAppId: deal.steamAppId,
+                                                                        slug: deal.slug,
+                                                                        coverImage: deal.coverImage,
+                                                                    });
+                                                                }}
+                                                                title={owned ? "Remover da biblioteca (Já possuo)" : "Marcar como já possuído (Na Biblioteca)"}
+                                                                className={cn(
+                                                                    "flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
+                                                                    owned
+                                                                        ? "border-emerald-500/60 bg-emerald-950/90 text-emerald-400 shadow-[0_0_12px_rgba(16,185,129,0.5)]"
+                                                                        : "border-white/10 bg-black/60 text-zinc-400 hover:text-emerald-400 hover:border-emerald-400/40",
+                                                                )}
+                                                            >
+                                                                <CheckCircle2 className={cn("h-4 w-4 sm:h-3.5 sm:w-3.5", owned && "stroke-[2.5]")} />
+                                                            </button>
+                                                        )}
+
+                                                        {onToggleTrack && (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    onToggleTrack({
+                                                                        id: deal.id,
+                                                                        title: deal.title,
+                                                                        steamAppId: deal.steamAppId,
+                                                                        slug: deal.slug,
+                                                                        coverImage: deal.coverImage,
+                                                                    });
+                                                                }}
+                                                                title={tracked ? "Remover dos favoritos" : "Favoritar este jogo"}
+                                                                className={cn(
+                                                                    "flex h-8 w-8 sm:h-7 sm:w-7 items-center justify-center rounded-lg border backdrop-blur-md transition-all shadow-md active:scale-90",
+                                                                    tracked
+                                                                        ? "border-pink-500/60 bg-pink-950/90 text-pink-400 shadow-[0_0_12px_rgba(236,72,153,0.5)]"
+                                                                        : "border-white/10 bg-black/60 text-zinc-400 hover:text-pink-400 hover:border-pink-400/40",
+                                                                )}
+                                                            >
+                                                                <Heart className={cn("h-4 w-4 sm:h-3.5 sm:w-3.5", tracked && "fill-pink-500")} />
+                                                            </button>
+                                                        )}
+                                                    </div>
 
                                                     {deal.isAllTimeLow && (
                                                         <span className="flex items-center gap-1 rounded-lg bg-amber-500/95 px-2 py-0.5 text-xs font-black text-black shadow-md backdrop-blur-sm">
@@ -481,28 +670,56 @@ export function TopDealsCarousel({
 
                                             {/* Info: Title and Steam Approval */}
                                             <div className="mt-2.5 space-y-2">
-                                                <h4 className="truncate text-sm sm:text-base font-bold text-white group-hover:text-theme-primary transition-colors" title={deal.title}>
-                                                    {deal.title}
-                                                </h4>
-
-                                                {/* Steam Community Reviews Badge (Obrigatório em todo card) */}
-                                                <div className="flex items-center gap-1.5">
-                                                    <span
-                                                        className={cn(
-                                                            "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold border backdrop-blur-sm",
-                                                            (deal.steamReviews?.positivePercent ?? 88) >= 80
-                                                                ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
-                                                                : "bg-cyan-500/15 text-cyan-300 border-cyan-500/30",
-                                                        )}
-                                                        title={`${(deal.steamReviews?.totalReviews ?? 10000).toLocaleString("pt-BR")} análises na Steam`}
-                                                    >
-                                                        <ThumbsUp className="h-3 w-3 text-emerald-400 stroke-[2.5]" />
-                                                        <span>{deal.steamReviews?.positivePercent ?? 88}% Positiva</span>
-                                                        <span className="font-semibold text-zinc-300 truncate max-w-[130px]">
-                                                            • {deal.steamReviews?.reviewScoreDesc ?? "Muito positivas"}
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h4 className="truncate text-sm sm:text-base font-bold text-white group-hover:text-theme-primary transition-colors" title={deal.title}>
+                                                        {deal.title}
+                                                    </h4>
+                                                    {owned && (
+                                                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/20 border border-emerald-500/40 px-2 py-0.5 text-xs font-bold text-emerald-300 shadow-sm">
+                                                            <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                                                            Na Biblioteca
                                                         </span>
-                                                    </span>
+                                                    )}
                                                 </div>
+
+                                                {/* Steam Community Reviews Badge (Obrigatório em todo card - Dados Reais da Steam) */}
+                                                {steamRev && steamRev.totalReviews > 0 ? (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span
+                                                            className={cn(
+                                                                "flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold border backdrop-blur-sm",
+                                                                steamRev.positivePercent >= 80
+                                                                    ? "bg-emerald-500/15 text-emerald-300 border-emerald-500/30"
+                                                                    : steamRev.positivePercent >= 65
+                                                                        ? "bg-cyan-500/15 text-cyan-300 border-cyan-500/30"
+                                                                        : "bg-amber-500/15 text-amber-300 border-amber-500/30",
+                                                            )}
+                                                            title={`${steamRev.totalReviews.toLocaleString("pt-BR")} análises na Steam`}
+                                                        >
+                                                            <ThumbsUp className="h-3 w-3 text-emerald-400 stroke-[2.5]" />
+                                                            <span>{steamRev.positivePercent}% Positiva</span>
+                                                            {steamRev.reviewScoreDesc && (
+                                                                <span className="font-semibold text-zinc-300 truncate max-w-[130px]">
+                                                                    • {steamRev.reviewScoreDesc}
+                                                                </span>
+                                                            )}
+                                                        </span>
+                                                    </div>
+                                                ) : isFetchingReview ? (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-bold border border-zinc-800 bg-zinc-900/60 text-zinc-400">
+                                                            <Loader2 className="h-3 w-3 animate-spin text-theme-primary" />
+                                                            <span>Consultando Steam...</span>
+                                                        </span>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center gap-1.5">
+                                                        <span className="flex items-center gap-1.5 rounded-md px-2 py-0.5 text-xs font-medium border border-zinc-800/80 bg-zinc-900/40 text-zinc-500">
+                                                            <ThumbsUp className="h-3 w-3 opacity-40" />
+                                                            <span>Steam</span>
+                                                        </span>
+                                                    </div>
+                                                )}
 
                                                 {/* Comparador Regional de Preços US x BR com Economia Explícita */}
                                                 <div className="rounded-xl bg-zinc-900/80 p-2.5 border border-theme/20 space-y-1.5">

@@ -13,6 +13,7 @@ import {
     RegionAdvantageFilterType,
     PriceCapFilterType,
     TrackedDealItem,
+    OwnedDealItem,
 } from "@/types/deals";
 import { DealsSearch } from "./DealsSearch";
 import { TopDealsCarousel } from "./TopDealsCarousel";
@@ -32,16 +33,19 @@ const QUICK_SUGGESTIONS = [
 ];
 
 const LOCAL_STORAGE_TRACKED_KEY = "ga_tracked_deals";
+const LOCAL_STORAGE_OWNED_KEY = "ga_owned_deals";
 
 export function DealsContainer() {
     const [comparison, setComparison] = useState<DealComparisonResult | null>(null);
     const [featuredDeals, setFeaturedDeals] = useState<FeaturedDealItem[]>([]);
     const [trackedDeals, setTrackedDeals] = useState<TrackedDealItem[]>([]);
+    const [ownedDeals, setOwnedDeals] = useState<OwnedDealItem[]>([]);
     const [currencyRate, setCurrencyRate] = useState<CurrencyRate | null>(null);
     const [activeFilter, setActiveFilter] = useState<DealFilterType>("historical_low");
     const [storeFilter, setStoreFilter] = useState<StoreFilterType>("all");
     const [regionFilter, setRegionFilter] = useState<RegionAdvantageFilterType>("all");
     const [priceCap, setPriceCap] = useState<PriceCapFilterType>("all");
+    const [familySharingOnly, setFamilySharingOnly] = useState(false);
 
     const [isSearching, setIsSearching] = useState(false);
     const [isLoadingFeatured, setIsLoadingFeatured] = useState(true);
@@ -138,6 +142,66 @@ export function DealsContainer() {
         };
     }, [syncTrackedDeals]);
 
+    // 2.1 Load owned deals from DB on initial mount (with localStorage fallback & sync)
+    useEffect(() => {
+        let isMounted = true;
+
+        fetch("/api/deals/owned")
+            .then((res) => (res.ok ? res.json() : null))
+            .then((data) => {
+                if (!isMounted) return;
+                if (data && data.isAuthenticated && Array.isArray(data.items)) {
+                    setOwnedDeals(data.items);
+                    localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(data.items));
+
+                    try {
+                        const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed) && parsed.length > data.items.length) {
+                                fetch("/api/deals/owned", {
+                                    method: "POST",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ syncItems: parsed }),
+                                }).catch((e) => console.error(e));
+                            }
+                        }
+                    } catch (e) {
+                        console.error(e);
+                    }
+                } else {
+                    try {
+                        const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
+                        if (raw) {
+                            const parsed = JSON.parse(raw);
+                            if (Array.isArray(parsed)) {
+                                setOwnedDeals(parsed);
+                            }
+                        }
+                    } catch (err) {
+                        console.error("Failed to load owned deals from storage:", err);
+                    }
+                }
+            })
+            .catch(() => {
+                try {
+                    const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
+                    if (raw) {
+                        const parsed = JSON.parse(raw);
+                        if (Array.isArray(parsed)) {
+                            setOwnedDeals(parsed);
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
+
     // Cooldown countdown timer
     useEffect(() => {
         if (cooldown <= 0) return;
@@ -147,13 +211,14 @@ export function DealsContainer() {
         return () => clearInterval(timer);
     }, [cooldown]);
 
-    // Fetch featured deals with filter, store, region & priceCap support
+    // Fetch featured deals with filter, store, region, priceCap & familySharing support
     const loadFeaturedDeals = useCallback(
         async (
             filter: DealFilterType = "historical_low",
             store: StoreFilterType = "all",
             region: RegionAdvantageFilterType = "all",
             priceLimit: PriceCapFilterType = "all",
+            familyOnly = false,
             forceRefresh = false,
         ) => {
             if (filter === "monitored") {
@@ -184,7 +249,7 @@ export function DealsContainer() {
             }
             try {
                 const res = await fetch(
-                    `/api/deals/featured?filter=${filter}&store=${store}&region=${region}&priceCap=${priceLimit}${forceRefresh ? "&refresh=true" : ""}`,
+                    `/api/deals/featured?filter=${filter}&store=${store}&region=${region}&priceCap=${priceLimit}&familySharing=${familyOnly}${forceRefresh ? "&refresh=true" : ""}`,
                     forceRefresh ? { cache: "no-store" } : undefined,
                 );
                 if (res.ok) {
@@ -206,8 +271,8 @@ export function DealsContainer() {
     );
 
     useEffect(() => {
-        loadFeaturedDeals(activeFilter, storeFilter, regionFilter, priceCap);
-    }, [loadFeaturedDeals, activeFilter, storeFilter, regionFilter, priceCap]);
+        loadFeaturedDeals(activeFilter, storeFilter, regionFilter, priceCap, familySharingOnly);
+    }, [loadFeaturedDeals, activeFilter, storeFilter, regionFilter, priceCap, familySharingOnly]);
 
     const handleFilterChange = (newFilter: DealFilterType) => {
         setActiveFilter(newFilter);
@@ -300,6 +365,68 @@ export function DealsContainer() {
         return trackedDeals.some(
             (p) => p.id === String(idOrAppId) || (p.steamAppId && p.steamAppId === Number(idOrAppId)),
         );
+    };
+
+    const isOwned = (idOrAppId: string | number) => {
+        const strId = String(idOrAppId);
+        const numAppId = typeof idOrAppId === "number" ? idOrAppId : Number(idOrAppId);
+        return ownedDeals.some(
+            (o) => o.id === strId || (!isNaN(numAppId) && numAppId > 0 && o.steamAppId === numAppId),
+        );
+    };
+
+    const handleToggleOwned = async (game: {
+        id: string;
+        title: string;
+        steamAppId?: number | null;
+        slug?: string;
+        coverImage?: string | null;
+    }) => {
+        const dealId = String(game.steamAppId || game.id);
+        const exists = isOwned(game.steamAppId || game.id);
+
+        let updated: OwnedDealItem[];
+        if (exists) {
+            updated = ownedDeals.filter(
+                (o) =>
+                    o.id !== game.id &&
+                    o.id !== dealId &&
+                    (!game.steamAppId || o.steamAppId !== game.steamAppId),
+            );
+        } else {
+            const newItem: OwnedDealItem = {
+                id: dealId,
+                title: game.title,
+                slug: game.slug || game.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                steamAppId: game.steamAppId || null,
+                coverImage: game.coverImage || null,
+                addedAt: new Date().toISOString(),
+            };
+            updated = [newItem, ...ownedDeals];
+        }
+
+        setOwnedDeals(updated);
+        try {
+            localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(updated));
+        } catch (e) {
+            console.error("Failed to save owned deals to localStorage:", e);
+        }
+
+        try {
+            await fetch("/api/deals/owned", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    dealId,
+                    title: game.title,
+                    steamAppId: game.steamAppId,
+                    slug: game.slug,
+                    coverImage: game.coverImage,
+                }),
+            });
+        } catch (err) {
+            console.error("Failed to sync owned status with database:", err);
+        }
     };
 
     // Manual Refresh button handler
@@ -501,7 +628,7 @@ export function DealsContainer() {
 
                 {/* Search & Control Bar */}
                 <div className="glass-card border border-theme bg-theme-card flex flex-col gap-4 rounded-2xl p-5 shadow-2xl backdrop-blur-md">
-                    <DealsSearch onSelectGame={handleSelectSearchGame} className="w-full max-w-full" />
+                    <DealsSearch onSelectGame={handleSelectSearchGame} isOwned={isOwned} className="w-full max-w-full" />
 
                     {/* Quick Suggestions */}
                     <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-theme/20">
@@ -575,6 +702,8 @@ export function DealsContainer() {
                                     isRefreshing={isSearching}
                                     onToggleTrack={handleToggleTrack}
                                     isTracked={isTracked(comparison.steamAppId || comparison.id)}
+                                    onToggleOwned={handleToggleOwned}
+                                    isOwned={isOwned(comparison.steamAppId || comparison.id)}
                                 />
                             </div>
                         )
@@ -602,6 +731,10 @@ export function DealsContainer() {
                             onRegionFilterChange={handleRegionFilterChange}
                             onToggleTrack={handleToggleTrack}
                             isTracked={isTracked}
+                            familySharingOnly={familySharingOnly}
+                            onToggleFamilySharing={() => setFamilySharingOnly((prev) => !prev)}
+                            isOwned={isOwned}
+                            onToggleOwned={handleToggleOwned}
                             monitoredCount={trackedDeals.length}
                             isLoading={isLoadingFeatured}
                         />

@@ -87,6 +87,8 @@ export interface DealComparisonResult {
     cachedAt: string;
     source: "itad" | "steam" | "hybrid";
     steamReviews?: SteamCommunityReview;
+    isFamilySharing?: boolean;
+    isOwned?: boolean;
 }
 
 export interface SearchGameItem {
@@ -96,6 +98,8 @@ export interface SearchGameItem {
     steamAppId?: number | null;
     coverImage?: string | null;
     type?: string;
+    isFamilySharing?: boolean;
+    isOwned?: boolean;
 }
 
 export interface FeaturedDealItem {
@@ -117,6 +121,8 @@ export interface FeaturedDealItem {
     dealUrlBR?: string;
     absoluteSavingsBRL?: number;
     steamReviews?: SteamCommunityReview;
+    isFamilySharing?: boolean;
+    isOwned?: boolean;
 }
 
 export interface TrackedDealItem {
@@ -137,6 +143,8 @@ export interface TrackedDealItem {
     dealUrlUS?: string;
     winningRegion?: WinningRegion;
     steamReviews?: SteamCommunityReview;
+    isFamilySharing?: boolean;
+    isOwned?: boolean;
 }
 
 export interface TrackedDealsBatchRequest {
@@ -177,6 +185,17 @@ export interface OracleGameRecommendation {
     winningRegion?: WinningRegion;
     savingsPercent?: number;
     absoluteSavingsBRL?: number;
+    isFamilySharing?: boolean;
+    isOwned?: boolean;
+}
+
+export interface OwnedDealItem {
+    id: string; // dealId or steamAppId
+    title: string;
+    slug?: string;
+    steamAppId?: number | null;
+    coverImage?: string | null;
+    addedAt?: string;
 }
 
 export interface OracleRecommendationsResponse {
