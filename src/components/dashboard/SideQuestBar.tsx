@@ -8,6 +8,7 @@ import { UserLink } from "@/components/ui/user-link";
 import Image from "next/image";
 import { HltbBadge } from "@/components/game/HltbBadge";
 import { SpecialReleaseBadge } from "@/components/game/SpecialReleaseBadge";
+import { ThemedProgressBar } from "@/components/ui/themed-progress-bar";
 
 interface SideQuestBarProps {
     progress: {
@@ -182,27 +183,25 @@ export function SideQuestBar({ progress, activePool }: SideQuestBarProps) {
             <div className="relative z-10 flex w-full flex-1 flex-col justify-between bg-theme-card/90 p-6 pt-0 backdrop-blur-sm sm:p-8 sm:pt-4">
                 <div className="space-y-4">
                     {/* Progress & HLTB Time */}                    {progress && progress.status !== "SUGGESTED" ? (
-                        <div className="space-y-3 pt-2">
-                            <div className="flex justify-between text-xs font-bold tracking-wider text-zinc-500 uppercase">
-                                <span>
-                                    Progresso{" "}
-                                    {progress.status === "COMPLETED"
-                                        ? "Finalizado"
-                                        : progress.status === "DROPPED"
-                                          ? "Dropado"
-                                          : "Atual"}{" "}
-                                    <span className="text-zinc-300">
-                                        ({progress.progress_percentage}%)
+                        <div className="pt-2">
+                            <ThemedProgressBar
+                                value={progress.progress_percentage}
+                                status={progress.status as any}
+                                label={
+                                    <span>
+                                        Progresso{" "}
+                                        {progress.status === "COMPLETED"
+                                            ? "Finalizado"
+                                            : progress.status === "DROPPED"
+                                              ? "Dropado"
+                                              : "Atual"}
                                     </span>
-                                </span>
-                                <HltbBadge hours={game.hltb_time} className="h-5" />
-                            </div>
-                            <div className="h-4 overflow-hidden rounded-full border border-zinc-800/50 bg-zinc-900">
-                                <div
-                                    className={`h-full ${theme.bg} progress-glow rounded-full transition-all duration-1000`}
-                                    style={{ width: `${progress.progress_percentage}%` }}
-                                />
-                            </div>
+                                }
+                                rightElement={<HltbBadge hours={game.hltb_time} className="h-5" />}
+                                size="md"
+                                showValue
+                                showMilestones
+                            />
                         </div>
                     ) : (
                         <div className="pt-3">

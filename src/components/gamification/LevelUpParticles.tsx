@@ -51,7 +51,7 @@ export function LevelUpParticles({ theme = "cyberpunk", className = "" }: LevelU
     // Palette per theme
     let colors: string[] = [];
     if (isDarkSouls) {
-      colors = ["#ea580c", "#f97316", "#ef4444", "#dc2626", "#d4d4d8", "#f3f4f6", "#71717a", "#451a03"];
+      colors = ["#e11d48", "#be123c", "#9f1239", "#881337", "#fda4af", "#f8fafc", "#e2e8f0", "#4c0519"];
     } else if (isMedieval) {
       colors = ["#f59e0b", "#dc2626", "#d97706", "#fbbf24", "#ef4444", "#fef08a"];
     } else if (isSpace) {

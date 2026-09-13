@@ -7,6 +7,7 @@ import { Scroll, Lock, CheckCircle2, Swords, Loader2, Compass, RotateCcw, Sparkl
 import { generateNoticeBoardAction, generateManualNoticeBoardAction, completeContractAction, uncompleteContractAction, clearNoticeBoardAction } from "@/app/lib/notice-board-actions";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { ThemedProgressBar } from "@/components/ui/themed-progress-bar";
 import {
     Dialog,
     DialogContent,
@@ -222,6 +223,12 @@ export function NoticeBoardMuralClient({
         }
 
         const hasContracts = contracts.length > 0;
+        const completedContractsCount = contracts.filter((c) => getUserProgress(c)?.status === "COMPLETED").length;
+        const totalContractsCount = contracts.length;
+        const totalCampaignPercentage = contracts.reduce((acc, c) => {
+            const p = getUserProgress(c);
+            return p?.status === "COMPLETED" ? acc + (c.progress_percentage || 0) : acc;
+        }, 0);
 
         // Mobile UX Optimization: find the current single relevant contract to show on small screens
         const activeContract = contracts.find((c) => getUserProgress(c)?.status === "AVAILABLE");
@@ -292,6 +299,18 @@ export function NoticeBoardMuralClient({
                                     {game.platform && game.hltb_time ? " | " : ""}
                                     {game.hltb_time ? `HLTB: ${game.hltb_time}h` : ""}
                                 </p>
+                            )}
+
+                            {hasContracts && (
+                                <div className="pt-2 w-full max-w-sm sm:max-w-md">
+                                    <ThemedProgressBar
+                                        value={totalCampaignPercentage}
+                                        label={`Campanha: ${completedContractsCount}/${totalContractsCount} Contratos`}
+                                        size="sm"
+                                        showValue
+                                        showMilestones
+                                    />
+                                </div>
                             )}
                         </div>
                     </div>
@@ -374,8 +393,8 @@ export function NoticeBoardMuralClient({
                                 cornerColorClass = "text-green-500/40";
                             } else {
                                 cardClasses +=
-                                    "bg-zinc-900/95 border-[#bd0df2] text-[#bd0df2] shadow-[0_0_20px_rgba(189,13,242,0.15)] ring-1 ring-[#bd0df2]/20 hover:shadow-[0_0_30px_rgba(189,13,242,0.3)] hover:scale-[1.01] ";
-                                cornerColorClass = "text-[#bd0df2]";
+                                    "bg-zinc-900/95 border-theme-primary text-theme-primary shadow-[0_0_20px_var(--theme-glow)] ring-1 ring-theme-primary/20 hover:shadow-[0_0_30px_var(--theme-glow)] hover:scale-[1.01] ";
+                                cornerColorClass = "text-theme-primary";
                             }
 
                             return (
@@ -409,7 +428,7 @@ export function NoticeBoardMuralClient({
                                                     isCompleted
                                                         ? "border border-green-500/20 bg-green-500/10 text-green-500"
                                                         : isAvailable
-                                                          ? "border border-[#bd0df2]/20 bg-[#bd0df2]/10 text-[#bd0df2]"
+                                                          ? "border border-theme-primary/30 bg-theme-primary/10 text-theme-primary"
                                                           : "bg-zinc-900 text-zinc-600"
                                                 }`}
                                             >

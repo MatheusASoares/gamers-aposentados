@@ -45,18 +45,18 @@ export function AppLogo({ theme, className, variant = "sidebar" }: AppLogoProps)
       accentText: "text-[#bd0df2]",
     },
     "theme-ascendant": {
-      glow: "bg-orange-600/30 group-hover:bg-orange-500/50",
-      border: "border-orange-600/50 group-hover:border-orange-500 group-hover:shadow-[0_0_30px_rgba(234,88,12,0.6)]",
-      badgeBg: "bg-orange-950/70 text-orange-400 border-orange-600/50",
-      badgeText: "Fogueira de Lordran 🔥",
-      accentText: "text-orange-500",
+      glow: "bg-rose-600/30 group-hover:bg-rose-500/50",
+      border: "border-rose-600/50 group-hover:border-rose-500 group-hover:shadow-[0_0_30px_rgba(225,29,72,0.6)]",
+      badgeBg: "bg-rose-950/70 text-rose-300 border-rose-600/50",
+      badgeText: "Noite de Yharnam 🩸",
+      accentText: "text-rose-500",
     },
     "theme-darksouls": {
-      glow: "bg-orange-600/30 group-hover:bg-orange-500/50",
-      border: "border-orange-600/50 group-hover:border-orange-500 group-hover:shadow-[0_0_30px_rgba(234,88,12,0.6)]",
-      badgeBg: "bg-orange-950/70 text-orange-400 border-orange-600/50",
-      badgeText: "Fogueira de Lordran 🔥",
-      accentText: "text-orange-500",
+      glow: "bg-rose-600/30 group-hover:bg-rose-500/50",
+      border: "border-rose-600/50 group-hover:border-rose-500 group-hover:shadow-[0_0_30px_rgba(225,29,72,0.6)]",
+      badgeBg: "bg-rose-950/70 text-rose-300 border-rose-600/50",
+      badgeText: "Noite de Yharnam 🩸",
+      accentText: "text-rose-500",
     },
   };
 

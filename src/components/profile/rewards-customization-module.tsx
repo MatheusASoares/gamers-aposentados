@@ -67,15 +67,15 @@ export function RewardsCustomizationModule({
           ? ["#38bdf8", "#fbbf24", "#010410"]
           : item.id === "theme-pixel"
           ? ["#22c55e", "#f59e0b", "#050716"]
-          : ["#ea580c", "#f97316", "#080606"],
+          : ["#e11d48", "#9f1239", "#040206"],
       tag:
         item.id === "theme-medieval"
-          ? "🔥 Brasas Vivas & Serif Clássico"
+          ? "🍺 Hidromel, Couro & Carvalho"
           : item.id === "theme-space"
-          ? "🛰️ Telemetria & Monospace Cósmico"
+          ? "🛰️ Telemetria & Células de Dobra"
           : item.id === "theme-pixel"
-          ? "👾 CRT Scanlines & Relevo 16-Bit"
-          : "🔥 Fogueira, Cinzas & Ferro Forjado",
+          ? "👾 CRT Scanlines & Blocos 16-Bit"
+          : "🩸 Lua de Sangue & Saw Cleaver",
     })),
   ];
 

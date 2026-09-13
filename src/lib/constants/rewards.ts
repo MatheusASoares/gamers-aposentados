@@ -245,8 +245,8 @@ export const REWARDS_CATALOG: RewardItem[] = [
     id: 'theme-ascendant',
     level: 25,
     type: 'THEME',
-    name: 'Fogueira de Lordran',
-    description: '"Mesmo na escuridão mais profunda, uma brasa ainda queima. Não ouse se tornar Hollow."',
+    name: 'Noite de Yharnam',
+    description: '"Nós nascemos do sangue, nos tornamos homens pelo sangue, somos destruídos pelo sangue. Tema o Sangue Antigo."',
     rarity: 'LEGENDARY',
   },
 ];

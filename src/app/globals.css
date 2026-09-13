@@ -152,46 +152,69 @@
     --theme-title-accent: #4ade80;
 }
 
-/* Tema 5: Almas Sombrias (Dark Souls & Fogueira de Lordran) */
+/* Tema 5: Noite de Yharnam & Sangue Carmesim (Bloodborne & Horror Vitoriano) */
 [data-theme="theme-darksouls"],
 [data-theme="theme-ascendant"] {
-    --background: 240 10% 2.5%;
-    --foreground: 0 0% 98%;
-    --card: 240 12% 4%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 12% 4%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 15 100% 50%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 38 92% 50%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 10% 12%;
-    --muted-foreground: 24 15% 65%;
-    --accent: 15 100% 22%;
-    --accent-foreground: 0 0% 98%;
+    --background: 260 20% 2%;
+    --foreground: 210 40% 98%;
+    --card: 260 25% 4%;
+    --card-foreground: 210 40% 98%;
+    --popover: 260 25% 4%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 346 84% 50%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 345 80% 28%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 260 15% 10%;
+    --muted-foreground: 215 20% 65%;
+    --accent: 346 84% 20%;
+    --accent-foreground: 210 40% 98%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 15 85% 35%;
-    --input: 15 85% 25%;
-    --ring: 15 100% 50%;
+    --border: 346 80% 28%;
+    --input: 346 80% 18%;
+    --ring: 346 84% 50%;
     --radius: 0.25rem;
 
-    --theme-primary: #ff3b00;
-    --theme-primary-rgb: 255, 59, 0;
-    --theme-secondary: #f59e0b;
-    --theme-secondary-rgb: 245, 158, 11;
-    --theme-bg: #030304;
-    --theme-card-bg: rgba(10, 10, 13, 0.98);
-    --theme-border: rgba(255, 59, 0, 0.45);
-    --theme-glow: rgba(255, 59, 0, 0.65);
-    --theme-title-accent: #ff7a00;
+    --theme-primary: #e11d48;
+    --theme-primary-rgb: 225, 29, 72;
+    --theme-secondary: #9f1239;
+    --theme-secondary-rgb: 159, 18, 57;
+    --theme-bg: #040206;
+    --theme-card-bg: linear-gradient(180deg, rgba(16, 6, 12, 0.98), rgba(6, 2, 6, 0.99));
+    --theme-border: rgba(225, 29, 72, 0.35);
+    --theme-glow: rgba(225, 29, 72, 0.65);
+    --theme-title-accent: #fda4af;
 }
+
 
 /* ==========================================================================
    THEME AMBIENT BACKGROUNDS & PARTICLES (body::before & body::after)
    ========================================================================== */
 
 /* 1. Cyber Neon: Holographic Matrix Grid & Neon Plasma */
+html:not([data-theme]),
+html:not([data-theme]) body,
+[data-theme="cyberpunk"],
+[data-theme="cyberpunk"] body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Cpath d='M3 3L12 28L17 18L27 13L3 3Z' fill='%23050508' stroke='%23000000' stroke-width='2.5' stroke-linejoin='round'/%3E%3Cpath d='M3 3L12 28L17 18L27 13L3 3Z' fill='%230a0814' stroke='%2306b6d4' stroke-width='1.75' stroke-linejoin='round'/%3E%3Cpath d='M5 6L11 23L14.5 16.5L22 13L5 6Z' fill='%23bd0df2' fill-opacity='0.45'/%3E%3Cpath d='M5 6L14.5 16.5' stroke='%2322d3ee' stroke-width='1.5' stroke-linecap='round'/%3E%3Ccircle cx='3' cy='3' r='2' fill='%2322d3ee' stroke='%23000000' stroke-width='0.75'/%3E%3Ccircle cx='3' cy='3' r='1' fill='%23ffffff'/%3E%3C/svg%3E") 3 3, auto;
+}
+
+html:not([data-theme]) a,
+html:not([data-theme]) button,
+html:not([data-theme]) [role="button"],
+html:not([data-theme]) input[type="submit"],
+html:not([data-theme]) select,
+html:not([data-theme]) .cursor-pointer,
+[data-theme="cyberpunk"] a,
+[data-theme="cyberpunk"] button,
+[data-theme="cyberpunk"] [role="button"],
+[data-theme="cyberpunk"] input[type="submit"],
+[data-theme="cyberpunk"] select,
+[data-theme="cyberpunk"] .cursor-pointer {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Ccircle cx='16' cy='16' r='11' stroke='%23000000' stroke-width='3.5' opacity='0.8'/%3E%3Ccircle cx='16' cy='16' r='10' stroke='%23bd0df2' stroke-width='2' stroke-dasharray='4 2' fill='%23bd0df2' fill-opacity='0.2'/%3E%3Ccircle cx='16' cy='16' r='5' stroke='%2306b6d4' stroke-width='1.75' fill='none'/%3E%3Cline x1='16' y1='2' x2='16' y2='9' stroke='%2306b6d4' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='16' y1='23' x2='16' y2='30' stroke='%2306b6d4' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='2' y1='16' x2='9' y2='16' stroke='%2306b6d4' stroke-width='2.5' stroke-linecap='round'/%3E%3Cline x1='23' y1='16' x2='30' y2='16' stroke='%2306b6d4' stroke-width='2.5' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23ffffff' stroke='%2306b6d4' stroke-width='1'/%3E%3C/svg%3E") 16 16, pointer !important;
+}
+
 html:not([data-theme]) body::before,
 [data-theme="cyberpunk"] body::before {
     content: " ";
@@ -202,16 +225,46 @@ html:not([data-theme]) body::before,
     bottom: 0;
     right: 0;
     background-image: 
-        radial-gradient(circle at 90% 10%, rgba(189, 13, 242, 0.2) 0%, transparent 50%),
-        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.18) 0%, transparent 50%),
-        linear-gradient(rgba(189, 13, 242, 0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(6, 182, 212, 0.04) 1px, transparent 1px);
+        radial-gradient(circle at 90% 10%, rgba(189, 13, 242, 0.26) 0%, transparent 50%),
+        radial-gradient(circle at 10% 90%, rgba(6, 182, 212, 0.22) 0%, transparent 50%),
+        linear-gradient(rgba(189, 13, 242, 0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.05) 1px, transparent 1px);
     background-size: 100% 100%, 100% 100%, 32px 32px, 32px 32px;
     z-index: 0;
     pointer-events: none;
 }
 
+html:not([data-theme]) body::after,
+[data-theme="cyberpunk"] body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: linear-gradient(rgba(189, 13, 242, 0) 50%, rgba(6, 182, 212, 0.03) 50%);
+    background-size: 100% 4px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.35;
+}
+
 /* 2. Medieval: Campfire Floating Embers & Dark Parchment Ambient */
+[data-theme="theme-medieval"],
+[data-theme="theme-medieval"] body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Cpath d='M2 2L4 4L18 18L19 21L16 20L2 6L2 2Z' stroke='%23000000' stroke-width='3' stroke-linejoin='round'/%3E%3Cline x1='18' y1='18' x2='27' y2='27' stroke='%23000000' stroke-width='4' stroke-linecap='round'/%3E%3Cpath d='M2 2L4 3.5L18 17.5L17.5 18.5L3.5 4L2 2Z' fill='%23ffffff' stroke='%23cbd5e1' stroke-width='0.75'/%3E%3Cpath d='M2 2L3.5 4L17.5 18.5L16.5 19.5L2 5L2 2Z' fill='%2394a3b8'/%3E%3Cline x1='3' y1='3' x2='14' y2='14' stroke='%23fbbf24' stroke-width='1.25' stroke-linecap='round'/%3E%3Cpath d='M13 21L21 13L23 15L15 23Z' fill='%23d97706' stroke='%2378350f' stroke-width='1' stroke-linejoin='round'/%3E%3Ccircle cx='17' cy='17' r='1.5' fill='%23fbbf24'/%3E%3Cline x1='18' y1='18' x2='26' y2='26' stroke='%2378350f' stroke-width='2.75' stroke-linecap='round'/%3E%3Cline x1='20' y1='19' x2='19' y2='20' stroke='%23d97706' stroke-width='0.75'/%3E%3Cline x1='23' y1='22' x2='22' y2='23' stroke='%23d97706' stroke-width='0.75'/%3E%3Ccircle cx='27' cy='27' r='2.75' fill='%23dc2626' stroke='%23f59e0b' stroke-width='1'/%3E%3Ccircle cx='2.5' cy='2.5' r='1.5' fill='%23fef08a' stroke='%23d97706' stroke-width='0.5'/%3E%3C/svg%3E") 2 2, auto;
+}
+
+[data-theme="theme-medieval"] a,
+[data-theme="theme-medieval"] button,
+[data-theme="theme-medieval"] [role="button"],
+[data-theme="theme-medieval"] input[type="submit"],
+[data-theme="theme-medieval"] select,
+[data-theme="theme-medieval"] .cursor-pointer {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Cpath d='M16 2C13 6 10 9 10 13C10 17.5 13 20 16 20C19 20 22 17.5 22 13C22 9 19 6 16 2Z' stroke='%23000000' stroke-width='2.5' stroke-linejoin='round'/%3E%3Crect x='13.5' y='18' width='5' height='12' rx='1.5' stroke='%23000000' stroke-width='2.5'/%3E%3Cpath d='M16 2C13 6 10 9 10 13C10 17.5 13 20 16 20C19 20 22 17.5 22 13C22 9 19 6 16 2Z' fill='%23ea580c'/%3E%3Cpath d='M16 6C14 9 12 11 12 14C12 17 14 18.5 16 18.5C18 18.5 20 17 20 14C20 11 18 9 16 6Z' fill='%23f59e0b'/%3E%3Cpath d='M16 10C15 12 14 13 14 15C14 16.5 15 17.5 16 17.5C17 17.5 18 16.5 18 15C18 13 17 12 16 10Z' fill='%23fef08a'/%3E%3Crect x='13' y='18' width='6' height='4' rx='1' fill='%23d97706' stroke='%2378350f' stroke-width='0.75'/%3E%3Crect x='14' y='22' width='4' height='8' rx='1' fill='%2378350f'/%3E%3Cline x1='14' y1='25' x2='18' y2='25' stroke='%23d97706' stroke-width='0.75'/%3E%3Cline x1='14' y1='28' x2='18' y2='28' stroke='%23d97706' stroke-width='0.75'/%3E%3Ccircle cx='16' cy='3' r='1.5' fill='%23ffffff'/%3E%3C/svg%3E") 16 2, pointer !important;
+}
+
 [data-theme="theme-medieval"] body::before {
     content: " ";
     display: block;
@@ -229,7 +282,35 @@ html:not([data-theme]) body::before,
     pointer-events: none;
 }
 
+[data-theme="theme-medieval"] body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: radial-gradient(circle at 50% 50%, transparent 60%, rgba(13, 10, 7, 0.55) 100%);
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
 /* 3. Space: Sci-Fi Telemetry Grid & Orbit Starfield Dust */
+[data-theme="theme-space"],
+[data-theme="theme-space"] body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Cpath d='M3 3L11 27L16 19L26 18L3 3Z' stroke='%23000000' stroke-width='3' stroke-linejoin='round'/%3E%3Cline x1='16' y1='19' x2='26' y2='26' stroke='%23000000' stroke-width='3' stroke-linecap='round'/%3E%3Cpath d='M3 3L11 27L16 19L26 18L3 3Z' fill='%23030d22' stroke='%2338bdf8' stroke-width='1.75' stroke-linejoin='round'/%3E%3Cpath d='M5 7L11 22L14.5 17L22 16.5L5 7Z' fill='%230284c7' fill-opacity='0.4'/%3E%3Cline x1='4' y1='4' x2='15' y2='17' stroke='%23fbbf24' stroke-width='1.25' stroke-linecap='round'/%3E%3Cline x1='16' y1='19' x2='25' y2='25' stroke='%2338bdf8' stroke-width='1.5' stroke-dasharray='2 2'/%3E%3Ccircle cx='3' cy='3' r='2' fill='%23ffffff' stroke='%2338bdf8' stroke-width='1'/%3E%3C/svg%3E") 3 3, auto;
+}
+
+[data-theme="theme-space"] a,
+[data-theme="theme-space"] button,
+[data-theme="theme-space"] [role="button"],
+[data-theme="theme-space"] input[type="submit"],
+[data-theme="theme-space"] select,
+[data-theme="theme-space"] .cursor-pointer {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Crect x='4' y='4' width='24' height='24' rx='4' stroke='%23000000' stroke-width='3.5' opacity='0.75'/%3E%3Cpath d='M6 12V6H12' stroke='%2338bdf8' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M20 6H26V12' stroke='%2338bdf8' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M26 20V26H20' stroke='%2338bdf8' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M12 26H6V20' stroke='%2338bdf8' stroke-width='2.25' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='16' r='6' stroke='%23fbbf24' stroke-width='1.5' stroke-dasharray='3 2' fill='%230284c7' fill-opacity='0.2'/%3E%3Cline x1='16' y1='6' x2='16' y2='9' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='16' y1='23' x2='16' y2='26' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='6' y1='16' x2='9' y2='16' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round'/%3E%3Cline x1='23' y1='16' x2='26' y2='16' stroke='%2338bdf8' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='2' fill='%23ffffff' stroke='%23fbbf24' stroke-width='0.75'/%3E%3C/svg%3E") 16 16, pointer !important;
+}
+
 [data-theme="theme-space"] body::before {
     content: " ";
     display: block;
@@ -249,7 +330,38 @@ html:not([data-theme]) body::before,
     pointer-events: none;
 }
 
+[data-theme="theme-space"] body::after {
+    content: " ";
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background: 
+        radial-gradient(circle at 50% 50%, transparent 65%, rgba(1, 4, 16, 0.6) 100%),
+        linear-gradient(rgba(56, 189, 248, 0) 50%, rgba(56, 189, 248, 0.02) 50%);
+    background-size: 100% 100%, 100% 6px;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0.45;
+}
+
 /* 4. Pixel Retro: CRT Scanlines & Screen Glass Vignette */
+[data-theme="theme-pixel"],
+[data-theme="theme-pixel"] body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none' shape-rendering='crispEdges'%3E%3Cpath d='M4 4h4v2h2v2h2v2h2v2h2v2h2v2h2v2h2v4h-4v2h-2v2h-2v4h-4v-6h-2v-4h-2v-4h-2v-6h2v-2z' fill='%23000000' opacity='0.7' transform='translate(2,2)'/%3E%3Cpath d='M2 2h4v2h2v2h2v2h2v2h2v2h2v2h2v2h2v4h-4v2h-2v2h-2v4h-4v-6h-2v-4h-2v-4h-2v-6h2v-2z' fill='%23000000'/%3E%3Cpath d='M4 4h2v2h2v2h2v2h2v2h2v2h2v2h-2v2h-2v2h-2v4h-2v-4h-2v-4h-2v-4h-2v-4h2v-2z' fill='%23ffffff'/%3E%3Cpath d='M6 6h2v2h2v2h2v2h2v2' stroke='%2322c55e' stroke-width='2'/%3E%3C/svg%3E") 2 2, auto;
+}
+
+[data-theme="theme-pixel"] a,
+[data-theme="theme-pixel"] button,
+[data-theme="theme-pixel"] [role="button"],
+[data-theme="theme-pixel"] input[type="submit"],
+[data-theme="theme-pixel"] select,
+[data-theme="theme-pixel"] .cursor-pointer {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none' shape-rendering='crispEdges'%3E%3Cpath d='M10 2h4v8h4v2h2v2h2v7h-2v2h-2v2h-11v-2h-2v-8h1v-9h2v-3z' fill='%23000000' opacity='0.7' transform='translate(2,2)'/%3E%3Cpath d='M9 1h6v8h4v2h2v2h2v7h-2v2h-2v2h-11v-2h-2v-8h1v-9h2v-3z' fill='%23000000'/%3E%3Cpath d='M11 3h2v7h2v2h2v2h2v5h-2v2h-2v1h-7v-1h-1v-8h2v-8z' fill='%23ffffff'/%3E%3Cpath d='M9 20h8v2h-8z' fill='%2322c55e'/%3E%3Cpath d='M9 22h8v2h-8z' fill='%23f59e0b'/%3E%3C/svg%3E") 12 2, pointer !important;
+}
+
 [data-theme="theme-pixel"] body::before {
     content: " ";
     display: block;
@@ -274,14 +386,36 @@ html:not([data-theme]) body::before,
     left: 0;
     bottom: 0;
     right: 0;
-    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%);
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
     background-size: 100% 4px;
     z-index: 999;
     pointer-events: none;
-    opacity: 0.4;
+    opacity: 0.28;
 }
 
-/* 5. Almas Sombrias: Bonfire Ember Glow & Ash Atmosphere */
+/* 5. Noite de Yharnam: Blood Moon Eclipse & Victorian Mist Atmosphere */
+[data-theme="theme-darksouls"],
+[data-theme="theme-darksouls"] body,
+[data-theme="theme-ascendant"],
+[data-theme="theme-ascendant"] body {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Cpath d='M3 3L7 3L18 14L19 12L22 15L20 17L23 20L19 22L17 20L15 22L3 10L3 3Z' stroke='%23000000' stroke-width='3' stroke-linejoin='round'/%3E%3Cline x1='19' y1='22' x2='28' y2='29' stroke='%23000000' stroke-width='4.5' stroke-linecap='round'/%3E%3Cpath d='M3 3L7 3L18 14L19 12L22 15L20 17L23 20L19 22L17 20L15 22L3 10L3 3Z' fill='%23e2e8f0' stroke='%2394a3b8' stroke-width='0.75'/%3E%3Cpath d='M3 3L5 3L15 13L16 11L19 14L17 16L20 19L18 20L3 7L3 3Z' fill='%23334155'/%3E%3Cpath d='M4 5L8 7L6 10L11 12L8 15L14 17L12 20' stroke='%23e11d48' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M7 9L11 10L9 13' stroke='%23fda4af' stroke-width='0.75' stroke-linecap='round'/%3E%3Cline x1='19' y1='22' x2='27' y2='28' stroke='%23d6d3d1' stroke-width='3' stroke-linecap='round'/%3E%3Cline x1='20' y1='22' x2='22' y2='24' stroke='%2378716c' stroke-width='1'/%3E%3Cline x1='23' y1='24' x2='25' y2='26' stroke='%2378716c' stroke-width='1'/%3E%3Ccircle cx='28' cy='29' r='2.25' fill='%239f1239' stroke='%23e11d48' stroke-width='1'/%3E%3Ccircle cx='3' cy='3' r='1.5' fill='%23ffffff' stroke='%23e11d48' stroke-width='0.75'/%3E%3C/svg%3E") 3 3, auto;
+}
+
+[data-theme="theme-darksouls"] a,
+[data-theme="theme-darksouls"] button,
+[data-theme="theme-darksouls"] [role="button"],
+[data-theme="theme-darksouls"] input[type="submit"],
+[data-theme="theme-darksouls"] select,
+[data-theme="theme-darksouls"] .cursor-pointer,
+[data-theme="theme-ascendant"] a,
+[data-theme="theme-ascendant"] button,
+[data-theme="theme-ascendant"] [role="button"],
+[data-theme="theme-ascendant"] input[type="submit"],
+[data-theme="theme-ascendant"] select,
+[data-theme="theme-ascendant"] .cursor-pointer {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 32 32' fill='none'%3E%3Cpath d='M16 2L11 9H21L16 2ZM16 9V24M9 14C9 19 12 23 16 23C20 23 23 19 23 14M12 27H20' stroke='%23000000' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Cpath d='M16 2L11 9H21L16 2Z' fill='%23e11d48' stroke='%23fda4af' stroke-width='0.75'/%3E%3Cpath d='M16 9V24' stroke='%23e11d48' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M9 14C9 19 12 23 16 23C20 23 23 19 23 14' stroke='%23e11d48' stroke-width='2.5' stroke-linecap='round'/%3E%3Cpath d='M12 27H20' stroke='%23be123c' stroke-width='2' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='15' r='3.5' fill='%234c0519' stroke='%23e11d48' stroke-width='1'/%3E%3Ccircle cx='16' cy='15' r='1.75' fill='%23ffffff'/%3E%3Ccircle cx='16' cy='2' r='1.5' fill='%23ffffff' stroke='%23e11d48' stroke-width='0.5'/%3E%3C/svg%3E") 16 2, pointer !important;
+}
+
 [data-theme="theme-darksouls"] body::before,
 [data-theme="theme-ascendant"] body::before {
     content: " ";
@@ -292,11 +426,11 @@ html:not([data-theme]) body::before,
     bottom: 0;
     right: 0;
     background-image: 
-        radial-gradient(ellipse at 50% 100%, rgba(255, 59, 0, 0.26) 0%, rgba(234, 88, 12, 0.12) 35%, transparent 70%),
-        radial-gradient(circle at 10% 20%, rgba(185, 28, 28, 0.08) 0%, transparent 45%),
-        radial-gradient(circle at 90% 25%, rgba(245, 158, 11, 0.07) 0%, transparent 40%),
-        radial-gradient(circle at 50% 30%, rgba(0, 0, 0, 0.85) 0%, transparent 80%);
-    animation: bonfirePulse 5s ease-in-out infinite alternate;
+        radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.28) 0%, rgba(159, 18, 57, 0.12) 35%, transparent 65%),
+        radial-gradient(ellipse at 50% 100%, rgba(14, 4, 10, 0.95) 0%, transparent 70%),
+        radial-gradient(circle at 15% 30%, rgba(225, 29, 72, 0.06) 0%, transparent 40%),
+        radial-gradient(circle at 85% 35%, rgba(159, 18, 57, 0.06) 0%, transparent 40%);
+    animation: bloodMoonPulse 6s ease-in-out infinite alternate;
     z-index: 0;
     pointer-events: none;
 }
@@ -311,19 +445,20 @@ html:not([data-theme]) body::before,
     bottom: 0;
     right: 0;
     background-image:
-        radial-gradient(1.5px 1.5px at 15% 85%, rgba(255, 110, 0, 0.65), transparent),
-        radial-gradient(2px 2px at 48% 90%, rgba(255, 59, 0, 0.75), transparent),
-        radial-gradient(1.5px 1.5px at 52% 82%, rgba(255, 160, 0, 0.7), transparent),
-        radial-gradient(1px 1px at 78% 88%, rgba(255, 100, 0, 0.55), transparent),
-        radial-gradient(2px 2px at 32% 65%, rgba(255, 75, 0, 0.6), transparent),
-        radial-gradient(1.5px 1.5px at 68% 55%, rgba(255, 125, 0, 0.55), transparent),
-        radial-gradient(1px 1px at 85% 40%, rgba(255, 150, 0, 0.45), transparent);
+        radial-gradient(1.5px 1.5px at 20% 80%, rgba(225, 29, 72, 0.65), transparent),
+        radial-gradient(2px 2px at 45% 92%, rgba(244, 63, 94, 0.7), transparent),
+        radial-gradient(1.5px 1.5px at 55% 75%, rgba(225, 29, 72, 0.6), transparent),
+        radial-gradient(1px 1px at 80% 85%, rgba(251, 113, 133, 0.5), transparent),
+        radial-gradient(2px 2px at 30% 60%, rgba(190, 18, 60, 0.55), transparent),
+        radial-gradient(1.5px 1.5px at 70% 50%, rgba(225, 29, 72, 0.5), transparent),
+        radial-gradient(1px 1px at 88% 35%, rgba(244, 63, 94, 0.4), transparent);
     background-size: 100% 100%;
-    animation: ashFlakesRise 7s ease-in-out infinite alternate;
+    animation: bloodMistRise 8s ease-in-out infinite alternate;
     z-index: 0;
     pointer-events: none;
-    opacity: 0.7;
+    opacity: 0.65;
 }
+
 
 /* ==========================================================================
    THEMED GLASS CARDS, BUTTONS & TYPOGRAPHY TRANSFORMATIONS
@@ -332,10 +467,19 @@ html:not([data-theme]) body::before,
 /* 1. Cyberpunk Theme */
 html:not([data-theme]) .glass-card,
 [data-theme="cyberpunk"] .glass-card {
+    position: relative;
     background: linear-gradient(135deg, rgba(28, 10, 42, 0.96), rgba(8, 6, 18, 0.96)) !important;
-    border: 2px solid #bd0df2 !important;
+    border: 1px solid rgba(189, 13, 242, 0.5) !important;
     border-left: 5px solid #06b6d4 !important;
     box-shadow: inset 0 0 20px rgba(189, 13, 242, 0.25), 0 0 30px rgba(189, 13, 242, 0.45), 0 0 12px rgba(6, 182, 212, 0.3) !important;
+    transition: all 0.25s ease !important;
+}
+
+html:not([data-theme]) .glass-card:hover,
+[data-theme="cyberpunk"] .glass-card:hover {
+    border-color: #bd0df2 !important;
+    border-left-color: #22d3ee !important;
+    box-shadow: inset 0 0 25px rgba(189, 13, 242, 0.35), 0 0 38px rgba(189, 13, 242, 0.6), 0 0 16px rgba(6, 182, 212, 0.45) !important;
 }
 
 [data-theme="cyberpunk"] h1,
@@ -348,18 +492,100 @@ html:not([data-theme]) .glass-card,
     font-family: 'Audiowide', sans-serif !important;
     letter-spacing: 0.08em !important;
     text-shadow: 0 0 12px rgba(189, 13, 242, 0.5) !important;
+    transition: text-shadow 0.2s ease;
+}
+
+[data-theme="cyberpunk"] h1:hover,
+[data-theme="cyberpunk"] h2:hover {
+    text-shadow: -1.5px 0 #06b6d4, 1.5px 0 #bd0df2, 0 0 20px rgba(189, 13, 242, 0.85) !important;
 }
 
 [data-theme="cyberpunk"] button:not(.no-theme) {
     clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    transition: all 0.2s ease;
+}
+
+[data-theme="cyberpunk"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover {
+    text-shadow: -1px 0 #06b6d4, 1px 0 #bd0df2;
+    box-shadow: 0 0 20px rgba(189, 13, 242, 0.55), 0 0 10px rgba(6, 182, 212, 0.35) !important;
+}
+
+[data-theme="cyberpunk"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):active {
+    transform: scale(0.98);
+    text-shadow: -2px 0 #06b6d4, 2px 0 #bd0df2;
+}
+
+/* Scrollbar Cyberdeck do Cyber Neon */
+[data-theme="cyberpunk"] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+[data-theme="cyberpunk"] ::-webkit-scrollbar-track {
+    background: #09090b;
+}
+[data-theme="cyberpunk"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #bd0df2, #06b6d4);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(189, 13, 242, 0.6);
+}
+[data-theme="cyberpunk"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #d946ef, #22d3ee);
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.8);
+}
+
+/* Barra de Progresso Cyberdeck do Cyber Neon */
+html:not([data-theme]) .themed-progress-track,
+[data-theme="cyberpunk"] .themed-progress-track {
+    background: rgba(10, 8, 20, 0.95) !important;
+    border: 1.5px solid rgba(189, 13, 242, 0.65) !important;
+    border-left: 5px solid #06b6d4 !important;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.95), 0 0 16px rgba(189, 13, 242, 0.35) !important;
+    border-radius: 0.375rem !important;
+}
+
+html:not([data-theme]) .themed-progress-fill,
+[data-theme="cyberpunk"] .themed-progress-fill {
+    background: linear-gradient(90deg, #bd0df2 0%, #d946ef 45%, #06b6d4 100%) !important;
+    box-shadow: 0 0 20px rgba(189, 13, 242, 0.95), 0 0 14px rgba(6, 182, 212, 0.8) !important;
+    border-radius: 2px !important;
+}
+
+html:not([data-theme]) .themed-progress-edge,
+[data-theme="cyberpunk"] .themed-progress-edge {
+    width: 5px !important;
+    background: #22d3ee !important;
+    box-shadow: 0 0 12px #22d3ee, 0 0 24px #06b6d4, 0 0 35px #bd0df2 !important;
+    border-radius: 2px !important;
+}
+
+html:not([data-theme]) .themed-progress-completed,
+[data-theme="cyberpunk"] .themed-progress-completed {
+    background: linear-gradient(90deg, #10b981 0%, #22c55e 100%) !important;
+    box-shadow: 0 0 20px rgba(34, 197, 94, 0.85) !important;
+}
+
+html:not([data-theme]) .themed-progress-dropped,
+[data-theme="cyberpunk"] .themed-progress-dropped {
+    background: linear-gradient(90deg, #ef4444 0%, #f43f5e 100%) !important;
+    box-shadow: 0 0 18px rgba(239, 68, 68, 0.8) !important;
 }
 
 /* 2. Medieval (The Witcher 3 / Dark Fantasy) */
 [data-theme="theme-medieval"] .glass-card {
-    background: linear-gradient(145deg, rgba(32, 23, 14, 0.96), rgba(16, 12, 8, 0.96)) !important;
+    position: relative;
+    background: linear-gradient(145deg, rgba(38, 26, 16, 0.97), rgba(18, 12, 8, 0.98)) !important;
     border: 2px solid #d97706 !important;
-    box-shadow: inset 0 0 15px rgba(217, 119, 6, 0.25), 0 0 30px rgba(217, 119, 6, 0.4) !important;
-    border-radius: 0.5rem !important;
+    outline: 1px solid rgba(245, 158, 11, 0.25);
+    outline-offset: -5px;
+    box-shadow: inset 0 0 25px rgba(217, 119, 6, 0.2), 0 0 35px rgba(0, 0, 0, 0.9), 0 0 15px rgba(245, 158, 11, 0.25) !important;
+    border-radius: 0.75rem !important;
+    transition: all 0.3s ease !important;
+}
+
+[data-theme="theme-medieval"] .glass-card:hover {
+    border-color: #fbbf24 !important;
+    outline-color: rgba(251, 191, 36, 0.4);
+    box-shadow: inset 0 0 30px rgba(217, 119, 6, 0.3), 0 0 45px rgba(0, 0, 0, 0.95), 0 0 25px rgba(245, 158, 11, 0.45) !important;
 }
 
 [data-theme="theme-medieval"] h1,
@@ -382,17 +608,164 @@ html:not([data-theme]) .glass-card,
     font-family: 'Cinzel', ui-serif, Georgia, serif;
 }
 
-[data-theme="theme-medieval"] button:not(.no-theme) {
-    border: 1px solid #f59e0b !important;
-    box-shadow: 0 0 15px rgba(245, 158, 11, 0.35) !important;
+[data-theme="theme-medieval"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]) {
+    border: 1.5px solid #d97706 !important;
+    background: linear-gradient(180deg, #382012, #1a0e07) !important;
+    color: #fef08a !important;
+    box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.25), 0 0 15px rgba(245, 158, 11, 0.35) !important;
+    border-radius: 0.5rem !important;
+    transition: all 0.2s ease;
+}
+
+[data-theme="theme-medieval"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover {
+    border-color: #fbbf24 !important;
+    box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.4), 0 0 25px rgba(245, 158, 11, 0.6) !important;
+    color: #ffffff !important;
+}
+
+/* Barra de Progresso - Frasco Alquímico de Hidromel & Elixir de Mana */
+[data-theme="theme-medieval"] .themed-progress-track {
+    background: radial-gradient(ellipse at 50% 50%, rgba(38, 20, 10, 0.98) 0%, rgba(14, 8, 4, 0.99) 100%) !important;
+    border: 2px solid #b45309 !important;
+    outline: 1px solid rgba(245, 158, 11, 0.35) !important;
+    outline-offset: 1px;
+    border-radius: 9999px !important; /* Silhueta de ampola / frasco de vidro arredondada */
+    box-shadow: 
+        inset 0 3px 6px rgba(0, 0, 0, 0.95),
+        inset 0 -2px 4px rgba(217, 119, 6, 0.25),
+        0 0 16px rgba(217, 119, 6, 0.35),
+        0 2px 8px rgba(0, 0, 0, 0.8) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Reflexo de vidro cristalino do frasco no topo */
+[data-theme="theme-medieval"] .themed-progress-track::after {
+    content: "";
+    position: absolute;
+    top: 1px;
+    left: 8px;
+    right: 8px;
+    height: 38%;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.45) 0%, rgba(255, 255, 255, 0.08) 75%, transparent 100%);
+    border-radius: 9999px;
+    pointer-events: none;
+    z-index: 5;
+}
+
+[data-theme="theme-medieval"] .themed-progress-fill {
+    background: 
+        /* Micro bolhas de hidromel efervescente */
+        radial-gradient(circle at 45% 25%, rgba(255, 255, 255, 0.9) 1px, transparent 1.6px),
+        radial-gradient(circle at 20% 65%, rgba(254, 240, 138, 0.75) 1.5px, transparent 2px),
+        radial-gradient(circle at 80% 45%, rgba(254, 240, 138, 0.8) 1.2px, transparent 1.8px),
+        /* Fluido viscoso de mel, ouro e mana mágica */
+        linear-gradient(180deg, #fef08a 0%, #fbbf24 20%, #d97706 60%, #78350f 100%) !important;
+    background-size: 18px 18px, 24px 24px, 20px 20px, 100% 100% !important;
+    animation: meadBubbles 5s linear infinite;
+    box-shadow: 
+        0 0 22px rgba(245, 158, 11, 0.95),
+        inset 0 1px 2px rgba(255, 255, 255, 0.7),
+        inset 0 -3px 5px rgba(120, 53, 15, 0.85) !important;
+    border-radius: 9999px !important;
+}
+
+[data-theme="theme-medieval"] .themed-progress-edge {
+    width: 9px !important;
+    height: 100% !important;
+    background: radial-gradient(ellipse at center, #ffffff 0%, #fef08a 45%, #f59e0b 100%) !important;
+    border-radius: 9999px !important;
+    box-shadow: 
+        0 0 12px #ffffff,
+        0 0 22px #fbbf24,
+        0 0 32px #d97706 !important;
+}
+
+[data-theme="theme-medieval"] .themed-progress-completed {
+    background: 
+        radial-gradient(circle at 45% 25%, rgba(255, 255, 255, 0.9) 1px, transparent 1.6px),
+        radial-gradient(circle at 20% 65%, rgba(167, 243, 208, 0.8) 1.5px, transparent 2px),
+        radial-gradient(circle at 80% 45%, rgba(110, 231, 183, 0.75) 1.2px, transparent 1.8px),
+        linear-gradient(180deg, #a7f3d0 0%, #34d399 20%, #059669 60%, #064e3b 100%) !important;
+    background-size: 18px 18px, 24px 24px, 20px 20px, 100% 100% !important;
+    animation: meadBubbles 5s linear infinite;
+    box-shadow: 0 0 25px rgba(16, 185, 129, 0.9), inset 0 1px 2px rgba(255, 255, 255, 0.7) !important;
+}
+
+[data-theme="theme-medieval"] .themed-progress-dropped {
+    background: 
+        radial-gradient(circle at 45% 25%, rgba(255, 255, 255, 0.8) 1px, transparent 1.6px),
+        radial-gradient(circle at 20% 65%, rgba(254, 202, 202, 0.65) 1.5px, transparent 2px),
+        linear-gradient(180deg, #fca5a5 0%, #ef4444 20%, #991b1b 60%, #450a0a 100%) !important;
+    background-size: 18px 18px, 24px 24px, 100% 100% !important;
+    animation: meadBubbles 6s linear infinite;
+    box-shadow: 0 0 20px rgba(220, 38, 38, 0.85), inset 0 1px 2px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Graduações de volume alquímico do frasco */
+[data-theme="theme-medieval"] .themed-progress-milestones {
+    display: flex;
+    align-items: center;
+}
+[data-theme="theme-medieval"] .themed-progress-milestone {
+    height: 55% !important;
+    width: 2px !important;
+    background: rgba(217, 119, 6, 0.7) !important;
+    box-shadow: 0 0 4px rgba(245, 158, 11, 0.8), inset 0 0 2px rgba(0, 0, 0, 0.9) !important;
+    border-radius: 1px !important;
+}
+
+/* Selo de Cera & Medalhão de Bronze no valor da porcentagem */
+[data-theme="theme-medieval"] .themed-progress-value {
+    background: linear-gradient(180deg, #382012, #1a0e07);
+    border: 1px solid #d97706;
+    box-shadow: inset 0 1px 0 rgba(254, 240, 138, 0.3), 0 0 10px rgba(217, 119, 6, 0.4);
+    padding: 1.5px 8px;
+    border-radius: 9999px;
+    letter-spacing: 0.08em;
+    color: #fef08a !important;
+    text-shadow: 0 0 8px rgba(245, 158, 11, 0.7);
+}
+
+/* Scrollbar em Carvalho e Bronze */
+[data-theme="theme-medieval"] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+[data-theme="theme-medieval"] ::-webkit-scrollbar-track {
+    background: #0d0a07;
+}
+[data-theme="theme-medieval"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #d97706, #78350f);
+    border-radius: 4px;
+    box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+}
+[data-theme="theme-medieval"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #fbbf24, #92400e);
+    box-shadow: 0 0 15px rgba(251, 191, 36, 0.7);
 }
 
 /* 3. Space (Starfield & Sci-Fi Cockpit HUD) */
 [data-theme="theme-space"] .glass-card {
-    background: linear-gradient(135deg, rgba(6, 22, 54, 0.96), rgba(2, 9, 28, 0.96)) !important;
-    border: 2px solid #38bdf8 !important;
-    box-shadow: inset 0 0 20px rgba(56, 189, 248, 0.3), 0 0 30px rgba(56, 189, 248, 0.5) !important;
-    clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px)) !important;
+    position: relative;
+    background: linear-gradient(135deg, rgba(4, 18, 48, 0.97), rgba(1, 8, 24, 0.98)) !important;
+    border: 1.5px solid #38bdf8 !important;
+    border-left: 5px solid #0284c7 !important;
+    border-radius: 0.375rem !important;
+    box-shadow: 
+        inset 0 0 25px rgba(56, 189, 248, 0.18),
+        0 0 35px rgba(0, 0, 0, 0.9),
+        0 0 15px rgba(56, 189, 248, 0.3) !important;
+    transition: all 0.25s ease !important;
+}
+
+[data-theme="theme-space"] .glass-card:hover {
+    border-color: #7dd3fc !important;
+    border-left-color: #38bdf8 !important;
+    box-shadow: 
+        inset 0 0 35px rgba(56, 189, 248, 0.28),
+        0 0 45px rgba(0, 0, 0, 0.95),
+        0 0 25px rgba(56, 189, 248, 0.5) !important;
 }
 
 [data-theme="theme-space"] h1,
@@ -417,19 +790,147 @@ html:not([data-theme]) .glass-card,
     letter-spacing: 0.05em;
 }
 
-[data-theme="theme-space"] button:not(.no-theme) {
-    clip-path: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px) !important;
-    border: 1px solid #38bdf8 !important;
+[data-theme="theme-space"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]) {
+    border: 1.5px solid #38bdf8 !important;
+    background: linear-gradient(180deg, #062244, #021124) !important;
+    color: #e0f2fe !important;
+    box-shadow: inset 0 1px 0 rgba(224, 242, 254, 0.25), 0 0 15px rgba(56, 189, 248, 0.35) !important;
+    border-radius: 0.375rem !important;
+    font-family: 'Rajdhani', ui-monospace, monospace !important;
     letter-spacing: 0.12em !important;
     text-transform: uppercase !important;
+    transition: all 0.2s ease;
+}
+
+[data-theme="theme-space"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover {
+    border-color: #7dd3fc !important;
+    box-shadow: inset 0 1px 0 rgba(224, 242, 254, 0.45), 0 0 25px rgba(56, 189, 248, 0.65), 0 0 10px rgba(251, 191, 36, 0.4) !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 8px #38bdf8;
+}
+
+[data-theme="theme-space"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):active {
+    transform: scale(0.98);
+    box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.6) !important;
+}
+
+/* Barra de Progresso - Células de Dobra Hiperespacial Segmentada */
+[data-theme="theme-space"] .themed-progress-track {
+    background: rgba(2, 8, 22, 0.98) !important;
+    border: 1.5px solid #0284c7 !important;
+    border-left: 4px solid #38bdf8 !important;
+    border-radius: 3px !important;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.95), 0 0 15px rgba(56, 189, 248, 0.3) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="theme-space"] .themed-progress-fill {
+    background: 
+        /* Segmentos de matriz de LED discretos: blocos de 8px com vão escuro de 2px */
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 8px,
+            rgba(1, 4, 16, 0.95) 8px,
+            rgba(1, 4, 16, 0.95) 10px
+        ),
+        linear-gradient(90deg, #0369a1 0%, #0284c7 35%, #38bdf8 80%, #e0f2fe 100%) !important;
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.9), inset 0 1px 0 rgba(255, 255, 255, 0.5) !important;
+    border-radius: 1px !important;
+}
+
+[data-theme="theme-space"] .themed-progress-edge {
+    width: 6px !important;
+    height: 100% !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 12px #ffffff, 0 0 24px #38bdf8, 0 0 35px #fbbf24 !important;
+    border-radius: 1px !important;
+}
+
+[data-theme="theme-space"] .themed-progress-completed {
+    background: 
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 8px,
+            rgba(1, 4, 16, 0.95) 8px,
+            rgba(1, 4, 16, 0.95) 10px
+        ),
+        linear-gradient(90deg, #059669 0%, #10b981 50%, #6ee7b7 100%) !important;
+    box-shadow: 0 0 22px rgba(16, 185, 129, 0.9) !important;
+}
+
+[data-theme="theme-space"] .themed-progress-dropped {
+    background: 
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 8px,
+            rgba(1, 4, 16, 0.95) 8px,
+            rgba(1, 4, 16, 0.95) 10px
+        ),
+        linear-gradient(90deg, #dc2626 0%, #f97316 50%, #fbbf24 100%) !important;
+    box-shadow: 0 0 20px rgba(239, 68, 68, 0.85) !important;
+}
+
+/* Agulhas de Calibração Métricas (Marcos 25%, 50%, 75%) */
+[data-theme="theme-space"] .themed-progress-milestones {
+    display: flex;
+    align-items: center;
+}
+[data-theme="theme-space"] .themed-progress-milestone {
+    height: 100% !important;
+    width: 2px !important;
+    background: #fbbf24 !important;
+    box-shadow: 0 0 6px rgba(251, 191, 36, 0.9), 0 0 12px rgba(56, 189, 248, 0.5) !important;
+}
+
+/* Visor Digital de Telemetria na Porcentagem */
+[data-theme="theme-space"] .themed-progress-value {
+    font-family: 'Orbitron', 'Rajdhani', monospace !important;
+    background: rgba(3, 15, 38, 0.95);
+    border: 1px solid #38bdf8;
+    box-shadow: inset 0 0 6px rgba(56, 189, 248, 0.3), 0 0 10px rgba(56, 189, 248, 0.4);
+    padding: 1px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.12em;
+    color: #e0f2fe !important;
+    text-shadow: 0 0 8px rgba(56, 189, 248, 0.8);
+}
+
+/* Scrollbar Espacial Criogênica */
+[data-theme="theme-space"] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+[data-theme="theme-space"] ::-webkit-scrollbar-track {
+    background: #010410;
+}
+[data-theme="theme-space"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #38bdf8, #0369a1);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.6);
+}
+[data-theme="theme-space"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #7dd3fc, #0284c7);
+    box-shadow: 0 0 15px rgba(56, 189, 248, 0.85);
 }
 
 /* 4. Pixel Retro (Chrono Trigger & Arcade 16-Bit) */
 [data-theme="theme-pixel"] .glass-card {
     background: linear-gradient(145deg, rgba(8, 22, 60, 0.98), rgba(3, 10, 32, 0.98)) !important;
     border: 4px solid #f59e0b !important;
-    box-shadow: 5px 5px 0px #000, -4px -4px 0px #06b6d4, inset 0 0 0 2px #22c55e !important;
+    outline: 2px solid #22c55e !important;
+    outline-offset: -6px;
+    box-shadow: 5px 5px 0px #000000, -3px -3px 0px #06b6d4 !important;
     border-radius: 0px !important;
+    transition: box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+[data-theme="theme-pixel"] .glass-card:hover {
+    border-color: #fbbf24 !important;
+    box-shadow: 6px 6px 0px #000000, -4px -4px 0px #22c55e !important;
 }
 
 [data-theme="theme-pixel"] h1,
@@ -482,12 +983,22 @@ html:not([data-theme]) .glass-card,
 
 [data-theme="theme-pixel"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]) {
     border-radius: 0px !important;
-    border: 3px solid #f59e0b !important;
+    border: 3px solid #22c55e !important;
+    background: #051a0e !important;
+    color: #4ade80 !important;
     box-shadow: 4px 4px 0px #000 !important;
     font-family: 'Press Start 2P', monospace !important;
     font-size: 0.72rem !important;
-    letter-spacing: 0.03em !important;
-    transition: transform 0.05s ease, box-shadow 0.05s ease;
+    letter-spacing: 0.04em !important;
+    text-transform: uppercase !important;
+    transition: transform 0.05s ease, box-shadow 0.05s ease, border-color 0.15s ease;
+}
+
+[data-theme="theme-pixel"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover {
+    border-color: #f59e0b !important;
+    color: #ffffff !important;
+    box-shadow: 4px 4px 0px #000, 0 0 14px rgba(34, 197, 94, 0.6) !important;
+    text-shadow: 0 0 8px #22c55e;
 }
 
 [data-theme="theme-pixel"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):active {
@@ -495,14 +1006,138 @@ html:not([data-theme]) .glass-card,
     box-shadow: 1px 1px 0px #000 !important;
 }
 
-/* 5. Almas Sombrias (Dark Souls & Fogueira de Lordran) */
+/* Barra de Progresso - Blocos de HP 16-Bit Discretos */
+[data-theme="theme-pixel"] .themed-progress-track {
+    background: #040817 !important;
+    border: 3px solid #000000 !important;
+    outline: 2px solid #f59e0b !important;
+    outline-offset: 1px;
+    box-shadow: 3px 3px 0px #000000 !important;
+    border-radius: 0px !important;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="theme-pixel"] .themed-progress-fill {
+    background: 
+        /* Divisórias pretas de pixel entre cada bloco de vida (blocos de 10px + vão preto de 3px) */
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 10px,
+            #000000 10px,
+            #000000 13px
+        ),
+        /* Chanfro 16-bit: brilho superior, verde fósforo médio, base escura */
+        linear-gradient(180deg, #86efac 0%, #22c55e 45%, #15803d 100%) !important;
+    box-shadow: 0 0 10px rgba(34, 197, 94, 0.75) !important;
+    border-radius: 0px !important;
+}
+
+[data-theme="theme-pixel"] .themed-progress-edge {
+    width: 4px !important;
+    height: 100% !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 8px #22c55e, 0 0 14px #ffffff !important;
+    border-radius: 0px !important;
+}
+
+[data-theme="theme-pixel"] .themed-progress-completed {
+    background: 
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 10px,
+            #000000 10px,
+            #000000 13px
+        ),
+        linear-gradient(180deg, #fef08a 0%, #22c55e 50%, #166534 100%) !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.9) !important;
+}
+
+[data-theme="theme-pixel"] .themed-progress-dropped {
+    background: 
+        repeating-linear-gradient(
+            90deg,
+            transparent 0px,
+            transparent 10px,
+            #000000 10px,
+            #000000 13px
+        ),
+        linear-gradient(180deg, #fca5a5 0%, #ef4444 50%, #991b1b 100%) !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.8) !important;
+}
+
+/* Divisores de Checkpoint Arcade (Marcos 25%, 50%, 75%) */
+[data-theme="theme-pixel"] .themed-progress-milestones {
+    display: flex;
+    align-items: center;
+}
+[data-theme="theme-pixel"] .themed-progress-milestone {
+    height: 100% !important;
+    width: 3px !important;
+    background: #f59e0b !important;
+    box-shadow: 0 0 4px #000000 !important;
+    border-radius: 0px !important;
+}
+
+/* Placar Arcade na Porcentagem */
+[data-theme="theme-pixel"] .themed-progress-value {
+    font-family: 'Press Start 2P', monospace !important;
+    background: #000000;
+    border: 2px solid #22c55e;
+    box-shadow: 3px 3px 0px #000000, 0 0 8px rgba(34, 197, 94, 0.5);
+    padding: 2px 6px;
+    border-radius: 0px !important;
+    font-size: 0.65rem !important;
+    line-height: 1.2 !important;
+    color: #4ade80 !important;
+    text-shadow: 1px 1px 0px #000000;
+}
+
+/* Scrollbar Pixelada Retrô */
+[data-theme="theme-pixel"] ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+}
+[data-theme="theme-pixel"] ::-webkit-scrollbar-track {
+    background: #030614;
+    border: 2px solid #000000;
+}
+[data-theme="theme-pixel"] ::-webkit-scrollbar-thumb {
+    background: #22c55e;
+    border: 2px solid #000000;
+    border-radius: 0px;
+    box-shadow: inset 1px 1px 0px #86efac, inset -1px -1px 0px #15803d;
+}
+[data-theme="theme-pixel"] ::-webkit-scrollbar-thumb:hover {
+    background: #f59e0b;
+    box-shadow: inset 1px 1px 0px #fef08a, inset -1px -1px 0px #b45309;
+}
+
+/* 5. Noite de Yharnam (Bloodborne & Horror Vitoriano) */
 [data-theme="theme-darksouls"] .glass-card,
 [data-theme="theme-ascendant"] .glass-card {
-    background: linear-gradient(180deg, rgba(14, 12, 16, 0.98), rgba(5, 5, 7, 0.99)) !important;
-    border: 1px solid rgba(255, 59, 0, 0.35) !important;
-    border-top: 2px solid #ff3b00 !important;
-    box-shadow: inset 0 0 25px rgba(0, 0, 0, 0.95), 0 0 35px rgba(0, 0, 0, 0.95), 0 0 15px rgba(255, 59, 0, 0.25) !important;
+    position: relative;
+    background: linear-gradient(180deg, rgba(16, 6, 12, 0.98), rgba(6, 2, 6, 0.99)) !important;
+    border: 1.5px solid rgba(225, 29, 72, 0.35) !important;
+    border-top: 2.5px solid #e11d48 !important;
+    box-shadow: 
+        inset 0 0 25px rgba(0, 0, 0, 0.95),
+        0 0 35px rgba(0, 0, 0, 0.95),
+        0 0 16px rgba(225, 29, 72, 0.25) !important;
     border-radius: 0.25rem !important;
+    transition: all 0.25s ease !important;
+}
+
+[data-theme="theme-darksouls"] .glass-card:hover,
+[data-theme="theme-ascendant"] .glass-card:hover {
+    border-top-color: #fda4af !important;
+    border-color: rgba(225, 29, 72, 0.55) !important;
+    box-shadow: 
+        inset 0 0 35px rgba(225, 29, 72, 0.2),
+        0 0 45px rgba(0, 0, 0, 0.98),
+        0 0 25px rgba(225, 29, 72, 0.45) !important;
 }
 
 [data-theme="theme-darksouls"] h1,
@@ -522,8 +1157,8 @@ html:not([data-theme]) .glass-card,
     font-family: 'Cinzel', Georgia, serif !important;
     letter-spacing: 0.14em !important;
     text-transform: uppercase !important;
-    color: #f8fafc !important; /* Pure solid high-contrast bone white */
-    text-shadow: 2px 2px 4px #000, 0 0 20px rgba(255, 59, 0, 0.6) !important;
+    color: #f8fafc !important; /* Pure cold lunar silver / bone white */
+    text-shadow: 2px 2px 4px #000, 0 0 20px rgba(225, 29, 72, 0.7) !important;
 }
 
 [data-theme="theme-darksouls"] body,
@@ -533,16 +1168,17 @@ html:not([data-theme]) .glass-card,
 [data-theme="theme-ascendant"] span,
 [data-theme="theme-ascendant"] p {
     font-family: var(--font-sans), system-ui, sans-serif;
-    color: #e2e8f0; /* Crisp bone white for 100% WCAG AAA accessibility */
+    color: #e2e8f0; /* Crisp pale silver for 100% WCAG AAA accessibility */
 }
 
 [data-theme="theme-darksouls"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]),
 [data-theme="theme-ascendant"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]) {
     border-radius: 0.25rem !important;
-    border: 1px solid #ff3b00 !important;
-    background: linear-gradient(180deg, #2b1108, #0a0605) !important;
-    color: #f8fafc !important;
-    box-shadow: 0 0 18px rgba(255, 59, 0, 0.4) !important;
+    border: 1.5px solid rgba(225, 29, 72, 0.4) !important;
+    border-top: 2.5px solid #e11d48 !important;
+    background: linear-gradient(180deg, #20060e, #0a0205) !important;
+    color: #fce7f3 !important;
+    box-shadow: 0 0 18px rgba(225, 29, 72, 0.35) !important;
     font-weight: 800 !important;
     letter-spacing: 0.1em !important;
     text-transform: uppercase !important;
@@ -551,8 +1187,108 @@ html:not([data-theme]) .glass-card,
 
 [data-theme="theme-darksouls"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover,
 [data-theme="theme-ascendant"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):hover {
-    box-shadow: 0 0 28px rgba(255, 59, 0, 0.75), inset 0 0 10px rgba(255, 90, 0, 0.3) !important;
-    border-color: #ff5722 !important;
+    box-shadow: 0 0 28px rgba(225, 29, 72, 0.75), inset 0 0 12px rgba(225, 29, 72, 0.4) !important;
+    border-top-color: #fda4af !important;
+    border-color: #f43f5e !important;
+    color: #ffffff !important;
+    text-shadow: 0 0 10px rgba(225, 29, 72, 0.85);
+}
+
+[data-theme="theme-darksouls"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):active,
+[data-theme="theme-ascendant"] button:not(.no-theme, [title], .group\/btn, [class*="hover:text-"]):active {
+    transform: scale(0.98);
+}
+
+/* Barra de Progresso - Transfusão de Sangue Antigo de Yharnam */
+[data-theme="theme-darksouls"] .themed-progress-track,
+[data-theme="theme-ascendant"] .themed-progress-track {
+    background: #060206 !important;
+    border: 1.5px solid rgba(225, 29, 72, 0.4) !important;
+    border-top: 2px solid #e11d48 !important;
+    border-radius: 2px !important;
+    box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.98), 0 0 14px rgba(225, 29, 72, 0.3) !important;
+    position: relative;
+    overflow: hidden;
+}
+
+[data-theme="theme-darksouls"] .themed-progress-fill,
+[data-theme="theme-ascendant"] .themed-progress-fill {
+    background: linear-gradient(90deg, #4c0519 0%, #881337 30%, #be123c 60%, #e11d48 85%, #fda4af 100%) !important;
+    box-shadow: 0 0 22px rgba(225, 29, 72, 0.85), inset 0 1px 0 rgba(253, 164, 175, 0.6) !important;
+    border-radius: 1px !important;
+}
+
+[data-theme="theme-darksouls"] .themed-progress-edge,
+[data-theme="theme-ascendant"] .themed-progress-edge {
+    width: 6px !important;
+    height: 100% !important;
+    background: #fda4af !important;
+    box-shadow: 0 0 10px #ffffff, 0 0 20px #e11d48, 0 0 30px #be123c !important;
+    border-radius: 1px !important;
+}
+
+/* PREY SLAUGHTERED - Carmesim Radiante e Prata */
+[data-theme="theme-darksouls"] .themed-progress-completed,
+[data-theme="theme-ascendant"] .themed-progress-completed {
+    background: linear-gradient(90deg, #9f1239 0%, #e11d48 50%, #fda4af 100%) !important;
+    box-shadow: 0 0 22px rgba(225, 29, 72, 0.9) !important;
+}
+
+/* CORRODED / NIGHTMARE SLAIN - Sangue Coagulado Escurecido */
+[data-theme="theme-darksouls"] .themed-progress-dropped,
+[data-theme="theme-ascendant"] .themed-progress-dropped {
+    background: linear-gradient(90deg, #1c050b 0%, #3f0713 50%, #4c0519 100%) !important;
+    box-shadow: 0 0 18px rgba(76, 5, 25, 0.85) !important;
+}
+
+/* Runas de Caryll (Marcos 25%, 50%, 75%) */
+[data-theme="theme-darksouls"] .themed-progress-milestones,
+[data-theme="theme-ascendant"] .themed-progress-milestones {
+    display: flex;
+    align-items: center;
+}
+[data-theme="theme-darksouls"] .themed-progress-milestone,
+[data-theme="theme-ascendant"] .themed-progress-milestone {
+    height: 100% !important;
+    width: 2px !important;
+    background: #e11d48 !important;
+    box-shadow: 0 0 6px #fda4af !important;
+}
+
+/* Placar Solene em Ferro Vitoriano na Porcentagem */
+[data-theme="theme-darksouls"] .themed-progress-value,
+[data-theme="theme-ascendant"] .themed-progress-value {
+    font-family: 'Cinzel', Georgia, serif !important;
+    background: #0c0409;
+    border: 1px solid #e11d48;
+    box-shadow: inset 0 0 6px rgba(225, 29, 72, 0.3), 0 0 10px rgba(225, 29, 72, 0.4);
+    padding: 1px 8px;
+    border-radius: 2px;
+    letter-spacing: 0.1em;
+    color: #fce7f3 !important;
+    text-shadow: 0 0 8px rgba(225, 29, 72, 0.8);
+}
+
+/* Scrollbar em Sangue Carmesim e Ônix */
+[data-theme="theme-darksouls"] ::-webkit-scrollbar,
+[data-theme="theme-ascendant"] ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+[data-theme="theme-darksouls"] ::-webkit-scrollbar-track,
+[data-theme="theme-ascendant"] ::-webkit-scrollbar-track {
+    background: #040206;
+}
+[data-theme="theme-darksouls"] ::-webkit-scrollbar-thumb,
+[data-theme="theme-ascendant"] ::-webkit-scrollbar-thumb {
+    background: linear-gradient(180deg, #e11d48, #4c0519);
+    border-radius: 2px;
+    box-shadow: 0 0 10px rgba(225, 29, 72, 0.6);
+}
+[data-theme="theme-darksouls"] ::-webkit-scrollbar-thumb:hover,
+[data-theme="theme-ascendant"] ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, #fda4af, #881337);
+    box-shadow: 0 0 15px rgba(253, 164, 175, 0.85);
 }
 
 @layer base {
@@ -654,15 +1390,15 @@ html:not([data-theme]) [data-radix-dropdown-menu-content],
     border-radius: 0px !important;
 }
 
-/* 5. Almas Sombrias Dropdowns & Dialogs */
+/* 5. Noite de Yharnam Dropdowns & Dialogs */
 [data-theme="theme-darksouls"] [data-radix-popper-content-wrapper] > div,
 [data-theme="theme-darksouls"] [data-radix-dropdown-menu-content],
 [data-theme="theme-ascendant"] [data-radix-popper-content-wrapper] > div,
 [data-theme="theme-ascendant"] [data-radix-dropdown-menu-content] {
-    background: linear-gradient(180deg, rgba(14, 12, 16, 0.99), rgba(5, 5, 7, 0.99)) !important;
-    border: 1px solid rgba(255, 59, 0, 0.45) !important;
-    border-top: 2px solid #ff3b00 !important;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95), 0 0 20px rgba(255, 59, 0, 0.25) !important;
+    background: linear-gradient(180deg, rgba(16, 6, 12, 0.99), rgba(6, 2, 6, 0.99)) !important;
+    border: 1px solid rgba(225, 29, 72, 0.45) !important;
+    border-top: 2px solid #e11d48 !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.95), 0 0 20px rgba(225, 29, 72, 0.3) !important;
     border-radius: 0.25rem !important;
 }
 
@@ -909,27 +1645,68 @@ html:not([data-theme]) [data-radix-dropdown-menu-content],
     animation: spinSlow 8s linear infinite;
 }
 
-@keyframes bonfirePulse {
+@keyframes bloodMoonPulse {
     0% {
-        opacity: 0.8;
-        filter: brightness(0.95);
+        opacity: 0.75;
+        filter: brightness(0.9);
     }
     100% {
         opacity: 1;
-        filter: brightness(1.25);
+        filter: brightness(1.2);
     }
 }
 
-@keyframes ashFlakesRise {
+@keyframes bloodMistRise {
     0% {
         transform: translateY(0px);
-        opacity: 0.45;
+        opacity: 0.4;
     }
     100% {
-        transform: translateY(-24px);
-        opacity: 0.85;
+        transform: translateY(-20px);
+        opacity: 0.8;
     }
 }
+
+@keyframes meadBubbles {
+    0% {
+        background-position: 0px 0px, 0px 0px, 0px 0px, 0% 0%;
+    }
+    100% {
+        background-position: 18px -36px, -24px -48px, 20px -40px, 0% 0%;
+    }
+}
+
+/* ==========================================================================
+   THEMED PROGRESS BAR SYSTEM
+   ========================================================================== */
+.themed-progress-track {
+    background: var(--theme-card-bg);
+    border: 1px solid var(--theme-border);
+    border-radius: var(--radius);
+    box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.6);
+}
+
+.themed-progress-fill {
+    background: var(--theme-primary);
+    box-shadow: 0 0 12px var(--theme-glow);
+    border-radius: var(--radius);
+}
+
+.themed-progress-edge {
+    background: #ffffff;
+    box-shadow: 0 0 8px #ffffff;
+}
+
+.themed-progress-completed {
+    background: linear-gradient(90deg, #10b981 0%, #22c55e 100%) !important;
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.6) !important;
+}
+
+.themed-progress-dropped {
+    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%) !important;
+    box-shadow: 0 0 15px rgba(239, 68, 68, 0.5) !important;
+}
+
 
 
 
