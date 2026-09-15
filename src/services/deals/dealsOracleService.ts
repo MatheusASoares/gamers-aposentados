@@ -1,5 +1,6 @@
 // src/services/deals/dealsOracleService.ts
 
+import { GoogleGenAI } from "@google/genai";
 import { prisma } from "@/lib/prisma";
 import {
     OracleGameRecommendation,
@@ -139,10 +140,9 @@ export class DealsOracleService {
             // Buscar jogos possuídos (Já Tenho / Na Biblioteca)
             let ownedTitles: string[] = [];
             try {
-                const ownedRows = await prisma.userOwnedDeal.findMany({
-                    where: { user_id: userId },
-                    select: { title: true },
-                });
+                const ownedRows = await prisma.$queryRaw<Array<{ title: string }>>`
+                    SELECT title FROM user_owned_deals WHERE user_id = ${userId}
+                `;
                 ownedTitles = ownedRows.map((o) => o.title.trim());
             } catch (ownedErr) {
                 console.warn("[DealsOracleService] Failed to load owned deals for taste profile:", ownedErr);
@@ -220,20 +220,34 @@ export class DealsOracleService {
     }
 
     /**
-     * Consulta o Gemini Flash para obter as 10 recomendações estruturadas em cotas.
+     * Consulta o Gemini Flash para obter as recomendações estruturadas em cotas.
+     * Utiliza o SDK oficial com thinkingBudget: 0 para respostas ultrarrápidas (< 5s),
+     * suporta contagem dinâmica para completar vagas faltantes e evita repetições.
      */
     private static async queryGeminiForRecommendations(
         favorites: string[],
         excludedTitles: Set<string>,
+        count: number = 10,
+        currentTitlesOnScreen: string[] = [],
     ): Promise<RawOracleItem[]> {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
             console.warn("[DealsOracleService] GEMINI_API_KEY not found, using fallback portfolio.");
-            return FALLBACK_ORACLE_ITEMS;
+            return FALLBACK_ORACLE_ITEMS.slice(0, count);
         }
 
-        const excludedListFormatted = Array.from(excludedTitles).slice(0, 30).join(", ");
+        const randomSeed = Math.floor(Math.random() * 1000000);
+        const excludedListFormatted = Array.from(excludedTitles).slice(0, 40).join(", ");
         const favoritesFormatted = favorites.join(", ");
+        const onScreenFormatted = currentTitlesOnScreen.slice(0, 15).join(", ");
+
+        let quotaInstruction = `1. [3x AAA]: Superproduções consagradas ou clássicos AAA refinados que combinam com o gosto dele.
+2. [4x INDIE]: Jogos independentes aclamados com notas muito altas na Steam (>= 85% de aprovação).
+3. [3x HIDDEN_GEM]: Pérolas cultas menos conhecidas pelo mainstream, mas verdadeiras obras-primas.`;
+
+        if (count < 10) {
+            quotaInstruction = `Selecione exatamente ${count} jogos variados para PC distribuídos de forma equilibrada entre as categorias 'AAA', 'INDIE' e 'HIDDEN_GEM'.`;
+        }
 
         const prompt = `
 Você é o Oráculo Curador do "Gamers Aposentados", uma guilda de jogadores experientes e adultos que amam jogos de qualidade, mas têm pouco tempo livre e odeiam enrolação.
@@ -241,13 +255,14 @@ Você é o Oráculo Curador do "Gamers Aposentados", uma guilda de jogadores exp
 PERFIL DO JOGADOR:
 - Jogos que ele ama, possui na biblioteca ou deu nota alta (REFERÊNCIAS DE GOSTO PARA VOCÊ SE INSPIRAR): ${favoritesFormatted}
 - JOGOS QUE ELE JÁ TEM NA BIBLIOTECA, JÁ JOGOU, FAVORITOU OU DESCARTOU (ESTRITAMENTE PROIBIDO SUGERIR): ${excludedListFormatted}
+${onScreenFormatted ? `- JOGOS QUE JÁ ESTÃO SENDO EXIBIDOS NA TELA (NÃO REPETIR NESTA RODADA): ${onScreenFormatted}` : ""}
+
+SESSÃO DE GARIMPO #${randomSeed}:
+Explore recomendações diversificadas, criativas e autênticas. Não traga sempre os mesmos títulos óbvios; varie entre clássicos cultuados, indie hits e joias escondidas.
 
 SUA MISSÃO:
-Selecione exatamente 10 jogos para PC disponíveis na Steam que se encaixem rigorosamente nesta DISTRIBUIÇÃO DE COTAS:
-
-1. [3x AAA]: Superproduções consagradas ou clássicos AAA refinados que combinam com o gosto dele.
-2. [4x INDIE]: Jogos independentes aclamados com notas muito altas na Steam (>= 85% de aprovação).
-3. [3x HIDDEN_GEM]: Pérolas cultas menos conhecidas pelo mainstream, mas verdadeiras obras-primas.
+Selecione exatamente ${count} jogos para PC disponíveis na Steam que se encaixem rigorosamente nesta distribuição:
+${quotaInstruction}
 
 REGRAS RÍGIDAS DE FILTRAGEM (PADRÃO GAMER APOSENTADO):
 - PROIBIDO sugerir jogos 'Live-Service', Free-to-play, MMOs infinitos, battle royales ou que dependam de passe de batalha.
@@ -256,7 +271,7 @@ REGRAS RÍGIDAS DE FILTRAGEM (PADRÃO GAMER APOSENTADO):
 - O campo 'category' DEVE ser exatamente 'AAA', 'INDIE' ou 'HIDDEN_GEM'.
 
 SAÍDA OBRIGATÓRIA:
-Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato exato:
+Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este formato exato:
 [
   {
     "title": "Nome Exato na Steam",
@@ -268,38 +283,29 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
 `;
 
         try {
-            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
-
-            const res = await fetch(geminiUrl, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                signal: AbortSignal.timeout(12000),
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: prompt }] }],
-                    generationConfig: {
-                        responseMimeType: "application/json",
-                        temperature: 0.7,
+            const ai = new GoogleGenAI({ apiKey });
+            const response = await ai.models.generateContent({
+                model: "gemini-2.5-flash",
+                contents: prompt,
+                config: {
+                    responseMimeType: "application/json",
+                    temperature: 0.95,
+                    thinkingConfig: {
+                        thinkingBudget: 0,
                     },
-                }),
+                },
             });
 
-            if (!res.ok) {
-                const errText = await res.text();
-                console.warn(`[DealsOracleService] Gemini call failed (${res.status}):`, errText);
-                return FALLBACK_ORACLE_ITEMS;
-            }
-
-            const data = await res.json();
-            const textOutput = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-            if (!textOutput) return FALLBACK_ORACLE_ITEMS;
+            const textOutput = response.text;
+            if (!textOutput) return FALLBACK_ORACLE_ITEMS.slice(0, count);
 
             const parsed = JSON.parse(textOutput);
             const items: RawOracleItem[] = Array.isArray(parsed)
                 ? parsed
                 : parsed?.results || parsed?.recommendations || [];
 
-            if (items.length >= 6) {
-                return items.slice(0, 10).map((item) => ({
+            if (items.length >= Math.min(count, 3)) {
+                return items.slice(0, count).map((item) => ({
                     title: String(item.title || "").trim(),
                     category: ["AAA", "INDIE", "HIDDEN_GEM"].includes(item.category)
                         ? item.category
@@ -309,10 +315,10 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
                 }));
             }
 
-            return FALLBACK_ORACLE_ITEMS;
+            return FALLBACK_ORACLE_ITEMS.slice(0, count);
         } catch (err) {
             console.error("[DealsOracleService] queryGemini error:", err);
-            return FALLBACK_ORACLE_ITEMS;
+            return FALLBACK_ORACLE_ITEMS.slice(0, count);
         }
     }
 
@@ -469,10 +475,9 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
                 prisma.$queryRaw<Array<{ game_title: string }>>`
                     SELECT game_title FROM user_dismissed_deals WHERE user_id = ${userId}
                 `.catch(() => []),
-                prisma.userOwnedDeal.findMany({
-                    where: { user_id: userId },
-                    select: { title: true },
-                }).catch(() => []),
+                prisma.$queryRaw<Array<{ title: string }>>`
+                    SELECT title FROM user_owned_deals WHERE user_id = ${userId}
+                `.catch(() => []),
             ]);
 
             for (const d of dismissedRows) {
@@ -571,21 +576,77 @@ Retorne APENAS um JSON válido contendo uma lista de 10 objetos com este formato
         const { favorites, excludedTitles, tasteSummary } =
             await DealsOracleService.getUserTasteProfile(userId);
 
-        // 2. Consultar Gemini Flash (APENAS se forceRefresh=true ou usuário nunca gerou nada na vida)
-        const rawItems = await DealsOracleService.queryGeminiForRecommendations(
-            favorites,
-            excludedTitles,
-        );
+        // Se forceRefresh=true, recuperar jogos válidos atualmente na tela para preservar e só repor as vagas faltantes
+        let currentSurviving: OracleGameRecommendation[] = [];
+        if (forceRefresh) {
+            const cached = dealsCache.get<OracleRecommendationsResponse>(cacheKey);
+            if (cached?.recommendations) {
+                currentSurviving = cached.recommendations.filter(
+                    (r) => !userExclusions.has(r.title.toLowerCase().trim()),
+                );
+            } else if (userId) {
+                try {
+                    const savedRows = await prisma.$queryRaw<Array<{ recommendations: any }>>`
+                        SELECT recommendations FROM user_oracle_recommendations WHERE user_id = ${userId}
+                    `;
+                    if (savedRows && savedRows.length > 0) {
+                        const recs =
+                            typeof savedRows[0].recommendations === "string"
+                                ? JSON.parse(savedRows[0].recommendations)
+                                : savedRows[0].recommendations;
+                        if (Array.isArray(recs)) {
+                            currentSurviving = recs.filter(
+                                (r: OracleGameRecommendation) =>
+                                    !userExclusions.has(r.title.toLowerCase().trim()),
+                            );
+                        }
+                    }
+                } catch {}
+            }
+        }
 
-        // 3. Enriquecer com preços reais da Steam
-        const enrichedItems = await DealsOracleService.enrichWithSteamData(rawItems);
+        let recommendations: OracleGameRecommendation[] = [];
 
-        // 4. Filtrar qualquer jogo que possa ter colidido com exclusão
-        const filtered = enrichedItems.filter(
-            (item) => !excludedTitles.has(item.title.toLowerCase().trim()),
-        );
+        // Caso 1: Usuário já tem jogos na tela (ex: 6 ou 7) e precisa apenas repor os espaços faltantes
+        if (currentSurviving.length > 0 && currentSurviving.length < 10) {
+            const neededCount = 10 - currentSurviving.length;
+            const currentTitles = currentSurviving.map((s) => s.title);
 
-        const recommendations = filtered;
+            const rawItems = await DealsOracleService.queryGeminiForRecommendations(
+                favorites,
+                excludedTitles,
+                neededCount,
+                currentTitles,
+            );
+
+            const enrichedItems = await DealsOracleService.enrichWithSteamData(rawItems);
+            const filteredNew = enrichedItems.filter(
+                (item) =>
+                    !excludedTitles.has(item.title.toLowerCase().trim()) &&
+                    !currentSurviving.some(
+                        (s) => s.title.toLowerCase().trim() === item.title.toLowerCase().trim(),
+                    ),
+            );
+
+            recommendations = [...currentSurviving, ...filteredNew].slice(0, 10);
+        } else {
+            // Caso 2: Tela cheia (10 jogos) atualizando para nova safra, ou primeira consulta do usuário
+            const currentTitles = currentSurviving.length >= 10 ? currentSurviving.map((s) => s.title) : [];
+
+            const rawItems = await DealsOracleService.queryGeminiForRecommendations(
+                favorites,
+                excludedTitles,
+                10,
+                currentTitles,
+            );
+
+            const enrichedItems = await DealsOracleService.enrichWithSteamData(rawItems);
+            const filtered = enrichedItems.filter(
+                (item) => !excludedTitles.has(item.title.toLowerCase().trim()),
+            );
+
+            recommendations = filtered.length > 0 ? filtered : enrichedItems;
+        }
 
         const onSale = recommendations.filter((r) => r.isOnSale);
         const onRadar = recommendations.filter((r) => !r.isOnSale);
