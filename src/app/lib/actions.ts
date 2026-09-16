@@ -7,6 +7,7 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { authRateLimiter, getClientIp } from "@/lib/rate-limiter";
+import { getFounderGuildSlugs } from "@/lib/randomizer-players";
 
 const RegisterSchema = z.object({
     username: z.string().min(3),
@@ -55,7 +56,7 @@ export async function register(prevState: string | undefined, formData: FormData
 
         // Associar à guilda dos Fundadores se existir
         const founderGuild = await prisma.guild.findFirst({
-            where: { slug: { in: ["fundadores", "aposentados"] } },
+            where: { slug: { in: getFounderGuildSlugs() } },
         });
         if (founderGuild) {
             await prisma.guildMember.create({

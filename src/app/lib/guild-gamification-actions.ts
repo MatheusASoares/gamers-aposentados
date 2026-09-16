@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { QuestType } from "@prisma/client";
 import { getActiveGuild } from "@/app/lib/guild-actions";
 import { GUILD_REWARDS_CATALOG, isGuildRewardUnlocked } from "@/lib/constants/guild-rewards";
 import { calculateGuildLevelFromXP } from "@/lib/guild-xp-engine";
@@ -20,12 +21,12 @@ interface GuildGamificationInput {
         game: {
           id: string;
           title: string;
-          quest_type: any;
+          quest_type: QuestType;
           hltb_time: number | null;
         };
       }>;
-      reviews: Array<any>;
-      contractProgresses: Array<any>;
+      reviews: Array<{ id?: string } | unknown>;
+      contractProgresses: Array<{ id?: string } | unknown>;
     };
   }>;
 }
@@ -351,32 +352,11 @@ export async function equipGuildCosmeticsAction({
       updateData.equipped_mascot = mascot;
     }
 
-    const updates: string[] = [];
-    const values: any[] = [];
-    let paramIndex = 1;
-
-    if (banner !== undefined) {
-      updates.push(`"equipped_banner" = $${paramIndex++}`);
-      values.push(banner);
-    }
-    if (emblem !== undefined) {
-      updates.push(`"equipped_emblem" = $${paramIndex++}`);
-      values.push(emblem);
-    }
-    if (title !== undefined) {
-      updates.push(`"equipped_title" = $${paramIndex++}`);
-      values.push(title);
-    }
-    if (mascot !== undefined) {
-      updates.push(`"equipped_mascot" = $${paramIndex++}`);
-      values.push(mascot);
-    }
-
-    if (updates.length > 0) {
-      updates.push(`"updated_at" = NOW()`);
-      values.push(activeGuild.id);
-      const sql = `UPDATE "guilds" SET ${updates.join(", ")} WHERE "id" = $${paramIndex}`;
-      await prisma.$executeRawUnsafe(sql, ...values);
+    if (Object.keys(updateData).length > 0) {
+      await prisma.guild.update({
+        where: { id: activeGuild.id },
+        data: updateData,
+      });
     }
 
     revalidatePath("/guild", "page");

@@ -4,7 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { cookies } from "next/headers";
 import { revalidatePath } from "next/cache";
-import { GuildRole } from "@prisma/client";
+import { GuildRole, Prisma } from "@prisma/client";
+import { getFounderGuildSlugs } from "@/lib/randomizer-players";
 
 export interface GuildSummaryDTO {
     id: string;
@@ -81,7 +82,7 @@ export async function getUserGuilds(): Promise<GuildSummaryDTO[]> {
             equippedTitle: m.guild.equipped_title,
             equippedBanner: m.guild.equipped_banner,
             equippedEmblem: m.guild.equipped_emblem,
-            equippedMascot: (m.guild as any).equipped_mascot || null,
+            equippedMascot: m.guild.equipped_mascot || null,
             memberCount: m.guild.members.length,
             activeMemberCount: m.guild.members.filter((mem) => mem.is_active).length,
             myRole: m.role,
@@ -143,7 +144,7 @@ export async function getActiveGuild(): Promise<ActiveGuildDetailsDTO | null> {
         // Fallback 1: Verificar se é membro da "Guilda dos Fundadores"
         const founderGuild = await prisma.guild.findFirst({
             where: {
-                slug: { in: ["fundadores", "aposentados"] },
+                slug: { in: getFounderGuildSlugs() },
                 members: { some: { user_id: userId } },
             },
             include: {
@@ -767,9 +768,28 @@ export async function getGuildStats(guildId: string) {
     }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function mapToActiveGuildDetails(guild: any, currentUserId: string): ActiveGuildDetailsDTO {
-    const myMembership = guild.members.find((m: any) => m.user_id === currentUserId);
+type ActiveGuildQueryPayload = Prisma.GuildGetPayload<{
+    include: {
+        members: {
+            include: {
+                user: {
+                    select: {
+                        id: true;
+                        name: true;
+                        username: true;
+                        image: true;
+                        level: true;
+                        xp_points: true;
+                        equipped_title: true;
+                    };
+                };
+            };
+        };
+    };
+}>;
+
+function mapToActiveGuildDetails(guild: ActiveGuildQueryPayload, currentUserId: string): ActiveGuildDetailsDTO {
+    const myMembership = guild.members.find((m) => m.user_id === currentUserId);
     return {
         id: guild.id,
         name: guild.name,
@@ -785,11 +805,11 @@ function mapToActiveGuildDetails(guild: any, currentUserId: string): ActiveGuild
         equippedEmblem: guild.equipped_emblem,
         equippedMascot: guild.equipped_mascot || null,
         memberCount: guild.members.length,
-        activeMemberCount: guild.members.filter((m: any) => m.is_active).length,
+        activeMemberCount: guild.members.filter((m) => m.is_active).length,
         myRole: myMembership?.role || "MEMBER",
         myIsActive: myMembership?.is_active ?? true,
         isOwner: guild.owner_id === currentUserId,
-        members: guild.members.map((m: any) => ({
+        members: guild.members.map((m) => ({
             id: m.id,
             userId: m.user_id,
             name: m.user.name || m.user.username || "Gamer",

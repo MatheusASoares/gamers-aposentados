@@ -123,7 +123,10 @@ export async function equipFrame(frameUrl: string | null): Promise<{ success: bo
       }
     }
 
-    await prisma.$executeRaw`UPDATE users SET equipped_frame = ${frameUrl} WHERE id = ${session.user.id}`;
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { equipped_frame: frameUrl },
+    });
 
     revalidatePath("/", "layout");
     return { success: true };
@@ -149,7 +152,10 @@ export async function equipBanner(bannerId: string | null): Promise<{ success: b
       }
     }
 
-    await prisma.$executeRaw`UPDATE users SET equipped_banner = ${bannerId} WHERE id = ${session.user.id}`;
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { equipped_banner: bannerId },
+    });
 
     revalidatePath("/", "layout");
     return { success: true };
@@ -175,7 +181,10 @@ export async function equipTheme(themeId: string): Promise<{ success: boolean; e
       }
     }
 
-    await prisma.$executeRaw`UPDATE users SET equipped_theme = ${themeId} WHERE id = ${session.user.id}`;
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: { equipped_theme: themeId },
+    });
 
     try {
       const cookieStore = await cookies();

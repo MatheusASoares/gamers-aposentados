@@ -286,6 +286,7 @@ model CampaignContract {
   updated_at DateTime @updatedAt
 
   @@unique([game_id, sequence_order])
+  @@index([guild_id, sequence_order])
   @@map("campaign_contracts")
 }
 
@@ -327,6 +328,7 @@ model SpecialGameProposal {
   created_at       DateTime       @default(now())
   updated_at       DateTime       @updatedAt
 
+  @@index([proposer_id])
   @@index([guild_id, quest_type, status])
   @@index([quest_type, status])
   @@map("special_game_proposals")
@@ -410,6 +412,7 @@ model UserTrackedDeal {
 
   @@unique([user_id, deal_id])
   @@index([user_id])
+  @@index([deal_id])
   @@map("user_tracked_deals")
 }
 
@@ -450,6 +453,7 @@ model UserOwnedDeal {
 
   @@unique([user_id, deal_id])
   @@index([user_id])
+  @@index([deal_id])
   @@map("user_owned_deals")
 }
 

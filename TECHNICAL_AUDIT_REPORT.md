@@ -227,43 +227,51 @@ Apesar de a suíte de testes pontuais passar com sucesso, esta auditoria técnic
 
 ---
 
-### 3.3 Índices Ausentes no Banco de Dados (`schema.prisma`)
+### 3.3 Índices Ausentes no Banco de Dados (`schema.prisma`) [RESOLVIDO]
 - **Arquivo:** [`prisma/schema.prisma`](file:///c:/Users/mathe/Desktop/gamers-aposentados/prisma/schema.prisma)
-- **Gravidade:** **Média**
-- **Campos Faltantes:**
-  1. `SpecialGameProposal`: Lacks index on `proposer_id`. Buscas de propostas criadas por um usuário realizam Seq Scan na tabela `special_game_proposals`.
-  2. `UserTrackedDeal`: Possui índice em `user_id`, mas queries que buscam por `deal_id` ou `steam_app_id` isoladamente realizam varredura sequencial.
-  3. `CampaignContract`: Falta índice composto em `[guild_id, sequence_order]` para otimização do Mural de Contratos em guildas com alta densidade de contratos.
-- **Remediação:** Adicionar as diretivas `@@index([proposer_id])`, `@@index([deal_id])` e `@@index([guild_id, sequence_order])` no `schema.prisma`.
+- **Gravidade:** **Média** (Status: **Resolvido / Aplicado no Banco**)
+- **Índices Criados e Sincronizados:**
+  1. `SpecialGameProposal`: Adicionado `@@index([proposer_id])`, eliminando a necessidade de `Seq Scan` ao filtrar propostas de jogos especiais por usuário criador.
+  2. `UserTrackedDeal` & `UserOwnedDeal`: Adicionado `@@index([deal_id])` em ambas as tabelas de deals, otimizando consultas pontuais por `deal_id` / `steamAppId` para verificação de status entre múltiplos usuários.
+  3. `CampaignContract`: Adicionado índice composto `@@index([guild_id, sequence_order])`, garantindo varredura de índice btree de alta performance para a renderização sequencial do Mural de Contratos.
+- **Validação:** Verificado via catálogo interno do PostgreSQL (`pg_indexes`) e compilação do TypeScript validada.
 
 ---
 
 ## 4. 🧹 Qualidade de Código e Inconsistências Arquiteturais
 
-### 4.1 Inconsistência de Acesso a Dados: Mistura de Prisma ORM com `$executeRaw`
-- **Arquivo e Linhas:** [`src/app/lib/gamification-actions.ts:125, 153, 180`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/gamification-actions.ts#L125)
-- **Detalhes:**
-  Enquanto títulos são atualizados via `prisma.user.update(...)`, molduras, banners e temas são atualizados via SQL cru:
-  ```typescript
-  await prisma.$executeRaw`UPDATE users SET equipped_frame = ${frameUrl} WHERE id = ${session.user.id}`;
-  await prisma.$executeRaw`UPDATE users SET equipped_banner = ${bannerId} WHERE id = ${session.user.id}`;
-  await prisma.$executeRaw`UPDATE users SET equipped_theme = ${themeId} WHERE id = ${session.user.id}`;
-  ```
-  Esses campos já existem formalmente no modelo `User` do `schema.prisma` (`equipped_frame`, `equipped_banner`, `equipped_theme`). O uso de raw query ignora o middleware do Prisma, invalida o type-checking e gera inconsistências com o cache de sessão do NextAuth.
+### 4.1 Inconsistência de Acesso a Dados: Mistura de Prisma ORM com `$executeRaw` [RESOLVIDO]
+- **Arquivo e Linhas:** [`src/app/lib/gamification-actions.ts:126, 152, 178`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/gamification-actions.ts#L126)
+- **Status:** **Resolvido / Padronizado**
+- **Solução Aplicada:** As queries SQL cruas (`prisma.$executeRaw`) nas ações `equipFrame`, `equipBanner` e `equipTheme` foram substituídas pela API tipada oficial do Prisma ORM (`prisma.user.update(...)`), garantindo type-safety estrito, execução de middlewares do Prisma e coerência arquitetural com `equipTitle`.
+- **Validação:** Compilação do TypeScript validada via `npx tsc --noEmit` (Code 0) e persistência em banco testada com sucesso.
 
 ---
 
-### 4.2 Proliferação de Tipos `any` em Ações de Guilda
-- **Arquivos e Linhas:**
-  - [`src/app/lib/guild-actions.ts:84, 756, 772, 776`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/guild-actions.ts#L84)
-  - [`src/app/lib/guild-gamification-actions.ts:179`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/guild-gamification-actions.ts#L179)
-- **Detalhes:** Uso explícito de `(m: any) => m.is_active` e retornos tipados como `any[]`, suprimindo a segurança estática provida pelo TypeScript e gerando warnings no linter.
+### 4.2 Proliferação de Tipos `any` em Ações de Guilda [RESOLVIDO]
+- **Arquivos:**
+  - [`src/app/lib/guild-actions.ts:84, 768-806`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/guild-actions.ts#L84)
+  - [`src/app/lib/guild-gamification-actions.ts:23, 27, 28, 350-360`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/guild-gamification-actions.ts#L23)
+- **Status:** **Resolvido / Tipagem Estrita**
+- **Solução Aplicada:**
+  1. `guild-actions.ts`: Removido o cast `(m.guild as any).equipped_mascot`. A função `mapToActiveGuildDetails` foi tipada estritamente com `Prisma.GuildGetPayload` e todos os `(m: any)` e comentários de supressão do ESLint foram eliminados.
+  2. `guild-gamification-actions.ts`: Substituídos os campos `any` em `GuildGamificationInput` por enums e tipos reais do Prisma (`QuestType`). Em `equipGuildCosmetic`, a concatenação de SQL cru com `values: any[]` foi substituída por `prisma.guild.update` tipado.
+- **Validação:** Compilação do TypeScript validada via `npx tsc --noEmit` (Code 0) e ESLint executado com zero warnings/erros.
 
 ---
 
-### 4.3 Acoplamento Rígido a Identificadores Pessoais
-- **Arquivos:** [`src/lib/randomizer-players.ts`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/lib/randomizer-players.ts) e [`src/app/lib/actions.ts:50`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/actions.ts#L50)
-- **Detalhes:** E-mails pessoais (`matheus31also@gmail.com`, `lucasedu17gomes@gmail.com`) e nomes de guilda fundadora (`"fundadores"`, `"aposentados"`) estão hardcoded no código TypeScript em vez de serem parametrizados por variáveis de ambiente ou pela tabela de permissões no banco.
+### 4.3 Acoplamento Rígido a Identificadores Pessoais [RESOLVIDO]
+- **Arquivos:**
+  - [`src/lib/randomizer-players.ts`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/lib/randomizer-players.ts)
+  - [`src/app/lib/actions.ts:58`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/actions.ts#L58)
+  - [`src/app/lib/guild-actions.ts:146`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/app/lib/guild-actions.ts#L146)
+  - [`.env.example`](file:///c:/Users/mathe/Desktop/gamers-aposentados/.env.example)
+- **Status:** **Resolvido / Parametrizado**
+- **Solução Aplicada:**
+  1. `randomizer-players.ts`: Criadas funções de resolução dinâmica `getRandomizerPlayerEmails()`, `getFounderGuildSlugs()` e `getPlayerDisplayNames()`, permitindo configuração via `.env` (`RANDOMIZER_PLAYER_EMAILS`, `FOUNDER_GUILD_SLUGS`, `PLAYER_DISPLAY_NAMES_JSON`) mantendo fallbacks padrão retrocompatíveis.
+  2. `actions.ts` e `guild-actions.ts`: Substituídos os arrays estáticos hardcoded por chamadas a `getFounderGuildSlugs()`.
+  3. `.env.example`: Novas variáveis documentadas com instruções claras de uso.
+- **Validação:** Compilação do TypeScript validada via `npx tsc --noEmit` (Code 0) e testes de injeção de ambiente executados com 100% de sucesso.
 
 ---
 
