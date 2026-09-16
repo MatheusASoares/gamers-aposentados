@@ -72,6 +72,8 @@ interface TopDealsCarouselProps {
     }) => void;
     monitoredCount?: number;
     isLoading?: boolean;
+    isAuthenticated?: boolean;
+    onRequireLogin?: () => void;
 }
 
 export function TopDealsCarousel({
@@ -94,6 +96,8 @@ export function TopDealsCarousel({
     onToggleOwned,
     monitoredCount = 0,
     isLoading = false,
+    isAuthenticated = true,
+    onRequireLogin,
 }: TopDealsCarouselProps) {
     const [currentPage, setCurrentPage] = useState(1);
     const [sortBy, setSortBy] = useState<SortOption>("savings");
@@ -479,6 +483,8 @@ export function TopDealsCarousel({
                     isTracked={isTracked}
                     onToggleOwned={onToggleOwned}
                     isOwned={isOwned}
+                    isAuthenticated={isAuthenticated}
+                    onRequireLogin={onRequireLogin}
                     currencyRate={currencyRate}
                     onSelectDeal={(game) => {
                         onSelectDeal({
@@ -614,6 +620,10 @@ export function TopDealsCarousel({
                                                                 type="button"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
+                                                                    if (!isAuthenticated) {
+                                                                        onRequireLogin?.();
+                                                                        return;
+                                                                    }
                                                                     onToggleOwned({
                                                                         id: deal.id,
                                                                         title: deal.title,
@@ -639,6 +649,10 @@ export function TopDealsCarousel({
                                                                 type="button"
                                                                 onClick={(e) => {
                                                                     e.stopPropagation();
+                                                                    if (!isAuthenticated) {
+                                                                        onRequireLogin?.();
+                                                                        return;
+                                                                    }
                                                                     onToggleTrack({
                                                                         id: deal.id,
                                                                         title: deal.title,

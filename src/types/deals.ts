@@ -206,4 +206,5 @@ export interface OracleRecommendationsResponse {
     generatedAt: string;
     cached: boolean;
     currencyRate?: CurrencyRate;
+    dismissedTitles?: string[];
 }

@@ -11,6 +11,13 @@ export async function POST(request: Request) {
         const session = await auth();
         const userId = session?.user?.id;
 
+        if (!userId) {
+            return NextResponse.json(
+                { success: false, error: "Você precisa estar autenticado para dispensar recomendações", isAuthenticated: false },
+                { status: 401 },
+            );
+        }
+
         const body = await request.json().catch(() => ({}));
         const { title, steamAppId } = body;
 

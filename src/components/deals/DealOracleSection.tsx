@@ -55,6 +55,8 @@ interface DealOracleSectionProps {
         coverImage?: string | null;
     }) => void;
     isOwned?: (idOrAppId: string | number) => boolean;
+    isAuthenticated?: boolean;
+    onRequireLogin?: () => void;
 }
 
 export function DealOracleSection({
@@ -64,6 +66,8 @@ export function DealOracleSection({
     onSelectDeal,
     onToggleOwned,
     isOwned,
+    isAuthenticated = true,
+    onRequireLogin,
 }: DealOracleSectionProps) {
     const [data, setData] = useState<OracleRecommendationsResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -97,6 +101,19 @@ export function DealOracleSection({
                         localStorage.setItem(LOCAL_STORAGE_ORACLE_KEY, JSON.stringify(json));
                     } catch (e) {
                         console.error("Failed to cache oracle deals:", e);
+                    }
+
+                    if (Array.isArray(json.dismissedTitles) && json.dismissedTitles.length > 0) {
+                        setDismissedTitles((prev) => {
+                            const merged = new Set([...prev, ...json.dismissedTitles]);
+                            try {
+                                localStorage.setItem(
+                                    LOCAL_STORAGE_DISMISSED_KEY,
+                                    JSON.stringify(Array.from(merged)),
+                                );
+                            } catch {}
+                            return merged;
+                        });
                     }
 
                     if (forceRefresh) {
@@ -148,14 +165,17 @@ export function DealOracleSection({
             console.error("[DealOracleSection] Error restoring cached oracle:", err);
         }
 
-        // Se NÃO tiver dados no localStorage, busca silenciosamente no backend via GET (carrega do PostgreSQL se já gerado, sem chamar IA)
-        if (!hasLocalData) {
-            handleConsult(false);
-        }
+        // Sempre busca no backend para sincronizar exclusões e recomendações persistidas no PostgreSQL
+        handleConsult(false);
     }, [handleConsult]);
 
     // Marcar como "Já joguei esse"
     const handleDismiss = async (game: OracleGameRecommendation) => {
+        if (!isAuthenticated) {
+            onRequireLogin?.();
+            return;
+        }
+
         const titleKey = game.title.toLowerCase().trim();
         const updatedDismissed = new Set([...dismissedTitles, titleKey]);
         setDismissedTitles(updatedDismissed);
@@ -166,8 +186,31 @@ export function DealOracleSection({
             localStorage.setItem(LOCAL_STORAGE_DISMISSED_KEY, JSON.stringify(Array.from(updatedDismissed)));
         } catch {}
 
+        // Atualizar estado em memória e cache do localStorage para não reaparecer no reload
+        if (data) {
+            const updatedData: OracleRecommendationsResponse = {
+                ...data,
+                recommendations: (data.recommendations || []).filter(
+                    (r) => r.title.toLowerCase().trim() !== titleKey,
+                ),
+                onSale: (data.onSale || []).filter(
+                    (r) => r.title.toLowerCase().trim() !== titleKey,
+                ),
+                onRadar: (data.onRadar || []).filter(
+                    (r) => r.title.toLowerCase().trim() !== titleKey,
+                ),
+                dismissedTitles: Array.from(updatedDismissed),
+            };
+            setData(updatedData);
+            try {
+                localStorage.setItem(LOCAL_STORAGE_ORACLE_KEY, JSON.stringify(updatedData));
+            } catch (e) {
+                console.error("Failed to update cached oracle recommendations:", e);
+            }
+        }
+
         try {
-            await fetch("/api/deals/oracle/dismiss", {
+            const res = await fetch("/api/deals/oracle/dismiss", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -175,6 +218,9 @@ export function DealOracleSection({
                     steamAppId: game.steamAppId,
                 }),
             });
+            if (!res.ok && res.status === 401) {
+                onRequireLogin?.();
+            }
         } catch (err) {
             console.error("[DealOracleSection] Failed to dismiss game:", err);
         }
@@ -184,9 +230,9 @@ export function DealOracleSection({
     const checkIsOwned = useCallback(
         (item: OracleGameRecommendation) => {
             if (!isOwned) return false;
-            const gameDealId = item.steamAppId ? `steam-${item.steamAppId}` : item.title;
+            const gameDealId = item.steamAppId ? String(item.steamAppId) : item.title;
             return (
-                isOwned(item.steamAppId || gameDealId) ||
+                (item.steamAppId ? isOwned(item.steamAppId) : false) ||
                 isOwned(gameDealId) ||
                 isOwned(item.title)
             );
@@ -371,9 +417,9 @@ export function DealOracleSection({
                 {!isLoading && visibleItems.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
                         {visibleItems.map((game, idx) => {
-                            const gameDealId = game.steamAppId ? `steam-${game.steamAppId}` : game.title;
+                            const gameDealId = game.steamAppId ? String(game.steamAppId) : game.title;
                             const favorited = isTracked
-                                ? isTracked(game.steamAppId || gameDealId)
+                                ? isTracked(game.steamAppId || gameDealId) || isTracked(gameDealId)
                                 : false;
                             const owned = checkIsOwned(game);
 
@@ -593,6 +639,10 @@ export function DealOracleSection({
                                                     type="button"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
+                                                        if (!isAuthenticated) {
+                                                            onRequireLogin?.();
+                                                            return;
+                                                        }
                                                         onToggleOwned({
                                                             id: gameDealId,
                                                             title: game.title,
@@ -630,6 +680,10 @@ export function DealOracleSection({
                                                     type="button"
                                                     onClick={(e) => {
                                                         e.stopPropagation();
+                                                        if (!isAuthenticated) {
+                                                            onRequireLogin?.();
+                                                            return;
+                                                        }
                                                         onToggleTrack({
                                                             id: gameDealId,
                                                             title: game.title,

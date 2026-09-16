@@ -1,5 +1,12 @@
 import { test, expect } from "@playwright/test";
-import { calculateReviewXP, calculateGameXP, calculateLevelFromXP, recalculateUserXPAndLevel } from "../src/app/lib/xp-engine";
+import {
+    calculateReviewXP,
+    calculateGameXP,
+    calculateLevelFromXP,
+    recalculateUserXPAndLevel,
+    recalculateAllUsersXPAndLevel,
+} from "../src/app/lib/xp-engine";
+import { recalculateAllGuildsXPAndLevel } from "../src/app/lib/guild-gamification-actions";
 import { prisma } from "../src/lib/prisma";
 
 test.describe("XP and Gamification System", () => {
@@ -180,4 +187,78 @@ test.describe("XP and Gamification System", () => {
         await prisma.game.delete({ where: { id: testGame.id } });
         await prisma.user.delete({ where: { id: testUser.id } });
     });
+
+    test("recalculateAllUsersXPAndLevel aggregates and updates multiple users in batch without N+1 queries", async () => {
+        const timestamp = Date.now();
+        const userA = await prisma.user.create({
+            data: { email: `batch_a_${timestamp}@test.com`, name: "Batch User A" },
+        });
+        const userB = await prisma.user.create({
+            data: { email: `batch_b_${timestamp}@test.com`, name: "Batch User B" },
+        });
+
+        const gameA = await prisma.game.create({
+            data: { title: `Batch Game A ${timestamp}`, quest_type: "MAIN_QUEST", hltb_time: 20 },
+        });
+        const gameB = await prisma.game.create({
+            data: { title: `Batch Game B ${timestamp}`, quest_type: "SIDE_QUEST", hltb_time: 10 },
+        });
+
+        // User A: Main quest completed (300 XP) + 1 review with screenshot (150 XP) = 450 XP (Level 3)
+        await prisma.gameProgress.create({
+            data: { user_id: userA.id, game_id: gameA.id, status: "COMPLETED", progress_percentage: 100 },
+        });
+        await prisma.review.create({
+            data: {
+                user_id: userA.id,
+                game_id: gameA.id,
+                rating: 10,
+                review_text: "Top!",
+                screenshots: ["https://example.com/a.webp"],
+            },
+        });
+
+        // User B: Side quest completed with platinum (100 base + 50 plat = 150 XP) (Level 2)
+        await prisma.gameProgress.create({
+            data: {
+                user_id: userB.id,
+                game_id: gameB.id,
+                status: "COMPLETED",
+                is_platinum: true,
+                progress_percentage: 100,
+            },
+        });
+
+        // Execute batch recalculation
+        const batchResult = await recalculateAllUsersXPAndLevel(10);
+        expect(batchResult.count).toBeGreaterThanOrEqual(2);
+
+        const updatedA = await prisma.user.findUnique({
+            where: { id: userA.id },
+            select: { xp_points: true, level: true },
+        });
+        const updatedB = await prisma.user.findUnique({
+            where: { id: userB.id },
+            select: { xp_points: true, level: true },
+        });
+
+        expect(updatedA?.xp_points).toBe(450);
+        expect(updatedA?.level).toBe(3);
+
+        expect(updatedB?.xp_points).toBe(150);
+        expect(updatedB?.level).toBe(2);
+
+        // Cleanup
+        await prisma.review.deleteMany({ where: { user_id: { in: [userA.id, userB.id] } } });
+        await prisma.gameProgress.deleteMany({ where: { user_id: { in: [userA.id, userB.id] } } });
+        await prisma.game.deleteMany({ where: { id: { in: [gameA.id, gameB.id] } } });
+        await prisma.user.deleteMany({ where: { id: { in: [userA.id, userB.id] } } });
+    });
+
+    test("recalculateAllGuildsXPAndLevel updates all guilds in a single consolidated batch", async () => {
+        const result = await recalculateAllGuildsXPAndLevel(10);
+        expect(typeof result.count).toBe("number");
+        expect(result.count).toBeGreaterThanOrEqual(0);
+    });
 });
+

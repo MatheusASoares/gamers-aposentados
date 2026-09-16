@@ -207,7 +207,7 @@ export function calculateReviewXP({
  * Recalculates and updates total XP, level, and default title for a given user.
  */
 export async function recalculateUserXPAndLevel(userId: string) {
-  const [completedProgresses, userReviews] = await Promise.all([
+  const [completedProgresses, userReviews, currentUser] = await Promise.all([
     prisma.gameProgress.findMany({
       where: {
         user_id: userId,
@@ -221,6 +221,10 @@ export async function recalculateUserXPAndLevel(userId: string) {
       where: {
         user_id: userId,
       },
+    }),
+    prisma.user.findUnique({
+      where: { id: userId },
+      select: { equipped_title: true, level: true },
     }),
   ]);
 
@@ -245,11 +249,6 @@ export async function recalculateUserXPAndLevel(userId: string) {
 
   const { level } = calculateLevelFromXP(totalXP);
 
-  const currentUser = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { equipped_title: true, level: true },
-  });
-
   // If no title is equipped or user leveled up, assign default title if none set
   const titleToSet = currentUser?.equipped_title || getRankTierTitle(level);
 
@@ -264,4 +263,105 @@ export async function recalculateUserXPAndLevel(userId: string) {
 
   return { totalXP, level };
 }
+
+/**
+ * Recalculates and updates total XP, level, and default title for ALL users in batch.
+ * Completely eliminates N+1 query loops by:
+ * 1. Fetching users, completed game progress, and reviews in 3 consolidated parallel queries.
+ * 2. Aggregating XP and calculating levels in-memory with full mathematical fidelity.
+ * 3. Persisting updates in chunked database transactions.
+ */
+export async function recalculateAllUsersXPAndLevel(chunkSize = 50): Promise<{ count: number }> {
+  const [users, allProgresses, allReviews] = await Promise.all([
+    prisma.user.findMany({
+      select: {
+        id: true,
+        equipped_title: true,
+        level: true,
+      },
+    }),
+    prisma.gameProgress.findMany({
+      where: {
+        status: "COMPLETED",
+      },
+      select: {
+        user_id: true,
+        is_platinum: true,
+        game: {
+          select: {
+            hltb_time: true,
+            quest_type: true,
+          },
+        },
+      },
+    }),
+    prisma.review.findMany({
+      select: {
+        user_id: true,
+        review_text: true,
+        screenshots: true,
+      },
+    }),
+  ]);
+
+  if (users.length === 0) {
+    return { count: 0 };
+  }
+
+  // Agrupa game XP por usuário
+  const gameXPByUser = new Map<string, number>();
+  for (const progress of allProgresses) {
+    const gameXP = calculateGameXP({
+      hltbHours: progress.game.hltb_time,
+      questType: progress.game.quest_type,
+      isPlatinum: progress.is_platinum,
+      failedRollsCount: 0,
+    });
+    gameXPByUser.set(progress.user_id, (gameXPByUser.get(progress.user_id) || 0) + gameXP);
+  }
+
+  // Agrupa review XP por usuário
+  const reviewXPByUser = new Map<string, number>();
+  for (const review of allReviews) {
+    const reviewXP = calculateReviewXP({
+      reviewText: review.review_text,
+      screenshots: review.screenshots,
+    });
+    reviewXPByUser.set(review.user_id, (reviewXPByUser.get(review.user_id) || 0) + reviewXP);
+  }
+
+  // Monta atualizações em lote
+  const updates = users.map((user) => {
+    const totalXP = (gameXPByUser.get(user.id) || 0) + (reviewXPByUser.get(user.id) || 0);
+    const { level } = calculateLevelFromXP(totalXP);
+    const titleToSet = user.equipped_title || getRankTierTitle(level);
+
+    return {
+      id: user.id,
+      xp_points: totalXP,
+      level,
+      equipped_title: titleToSet,
+    };
+  });
+
+  // Executa as atualizações em lotes gerenciados (chunks) para não sobrecarregar conexões
+  for (let i = 0; i < updates.length; i += chunkSize) {
+    const chunk = updates.slice(i, i + chunkSize);
+    await prisma.$transaction(
+      chunk.map((item) =>
+        prisma.user.update({
+          where: { id: item.id },
+          data: {
+            xp_points: item.xp_points,
+            level: item.level,
+            equipped_title: item.equipped_title,
+          },
+        })
+      )
+    );
+  }
+
+  return { count: updates.length };
+}
+
 

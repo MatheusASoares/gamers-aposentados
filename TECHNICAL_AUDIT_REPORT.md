@@ -212,17 +212,18 @@ Apesar de a suíte de testes pontuais passar com sucesso, esta auditoria técnic
 
 ---
 
-### 3.2 Monólito de Client Component no `RandomizerClient.tsx` (92 KB / 1471 Linhas)
+### 3.2 Monólito de Client Component no `RandomizerClient.tsx` [RESOLVIDO]
 - **Arquivo:** [`src/components/game/RandomizerClient.tsx`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/game/RandomizerClient.tsx)
-- **Gravidade:** **Média**
-- **Causa Raiz:** O arquivo centraliza múltiplas responsabilidades desproporcionais:
-  - Síntese de áudio procedural via Web Audio API (`AudioContext`, osciladores de som de dados rolando);
-  - Animação de roleta e slots visuais;
-  - Busca de dados de HLTB e autopreenchimento de capas IGDB;
-  - Modais de votação de pausa ativa e jogos especiais;
-  - Gerenciamento de cotas de membros e snapshot de cancelamento.
-- **Impacto:** O payload JavaScript enviado para a página `/randomizer` é excessivamente pesado, aumentando o tempo de hidratação e degradando o Time to Interactive (TTI) em dispositivos móveis.
-- **Remediação:** Modularizar o componente em submódulos dedicados (`RandomizerAudio.ts`, `RandomizerSlots.tsx`, `RandomizerNominationGrid.tsx`, `SpecialGameModal.tsx`).
+- **Gravidade:** **Média** (Status: **Resolvido / Modularizado**)
+- **Causa Raiz Anterior:** O arquivo centralizava múltiplas responsabilidades desproporcionais (cabeçalho com alternador de missões, gerenciamento de indicações de múltiplos membros com cancelamento por snapshot, modais de pausa ativa com busca IGDB e jogos incompletos, display com animação de roleta temática e overlay full-screen).
+- **Impacto Mitigado:** O monólito de 1472 linhas e 92 KB foi reduzido em ~75% para um coordenador de ~500 linhas (23 KB). As responsabilidades foram isoladas em 6 submódulos dedicados em [`src/components/game/randomizer/`](file:///c:/Users/mathe/Desktop/gamers-aposentados/src/components/game/randomizer):
+  - `ThemedEmblemIcon.tsx`: Emblemas visuais temáticos de RPG/Espaço/Pixel/Cyberpunk;
+  - `RandomizerHeader.tsx`: Título, subtítulo, switcher Main/Side e faixas de alerta;
+  - `RandomizerNominations.tsx`: Pool de candidatos, indicações dos membros, integração HLTB e salvamento com snapshot;
+  - `RandomizerSpecialGameCard.tsx`: Pausa ativa, banner de votação, seleção de jogos passados e busca IGDB;
+  - `RandomizerDisplayBox.tsx`: Caixa de display principal, vencedor com arte cinemática e botões de sorteio/emergência;
+  - `RandomizerRollOverlay.tsx`: Overlay full-screen temático com backgrounds animados e cycling de nomes.
+  - `types.ts`: Tipos compartilhados com integridade estrita de tipagem TypeScript.
 
 ---
 

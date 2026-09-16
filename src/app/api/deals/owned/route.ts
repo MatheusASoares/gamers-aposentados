@@ -107,14 +107,16 @@ export async function POST(request: NextRequest) {
         }
 
         const cleanDealId = String(dealId);
+        const numSteamAppId = steamAppId ? Number(steamAppId) : /^\d+$/.test(cleanDealId) ? Number(cleanDealId) : null;
 
         // Check if deal is already marked as owned
-        const existing = await prisma.userOwnedDeal.findUnique({
+        const existing = await prisma.userOwnedDeal.findFirst({
             where: {
-                user_id_deal_id: {
-                    user_id: session.user.id,
-                    deal_id: cleanDealId,
-                },
+                user_id: session.user.id,
+                OR: [
+                    { deal_id: cleanDealId },
+                    ...(numSteamAppId ? [{ steam_app_id: numSteamAppId }, { deal_id: String(numSteamAppId) }] : []),
+                ],
             },
         });
 

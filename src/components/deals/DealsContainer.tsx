@@ -20,8 +20,17 @@ import { TopDealsCarousel } from "./TopDealsCarousel";
 import { DealComparisonCard } from "./DealComparisonCard";
 import { ComparisonSkeleton, FeaturedDealsSkeleton } from "./DealsSkeleton";
 import { SteamSaleCountdownCard } from "./SteamSaleCountdownCard";
-import { Sparkles, AlertCircle, Zap, RefreshCw, Check } from "lucide-react";
+import { Sparkles, AlertCircle, Zap, RefreshCw, Check, Lock, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+} from "@/components/ui/dialog";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const QUICK_SUGGESTIONS = [
@@ -36,6 +45,12 @@ const LOCAL_STORAGE_TRACKED_KEY = "ga_tracked_deals";
 const LOCAL_STORAGE_OWNED_KEY = "ga_owned_deals";
 
 export function DealsContainer() {
+    const router = useRouter();
+    const { data: session, status } = useSession();
+    const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+    const [serverAuth, setServerAuth] = useState<boolean | null>(null);
+    const isAuthenticated = status === "authenticated" || serverAuth === true;
+
     const [comparison, setComparison] = useState<DealComparisonResult | null>(null);
     const [featuredDeals, setFeaturedDeals] = useState<FeaturedDealItem[]>([]);
     const [trackedDeals, setTrackedDeals] = useState<TrackedDealItem[]>([]);
@@ -79,121 +94,131 @@ export function DealsContainer() {
         }
     }, []);
 
-    // 2. Load tracked deals from DB favorites on initial mount (with localStorage fallback & sync)
+    // 2. Load tracked deals from DB favorites on initial mount (with resilient localStorage sync)
     useEffect(() => {
         let isMounted = true;
+
+        // Read local storage FIRST before fetching or overwriting!
+        let localItems: TrackedDealItem[] = [];
+        try {
+            const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    localItems = parsed;
+                }
+            }
+        } catch (e) {
+            console.error("Error reading tracked deals from storage:", e);
+        }
+
+        if (localItems.length > 0) {
+            setTrackedDeals(localItems);
+        }
 
         fetch("/api/deals/favorites")
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 if (!isMounted) return;
-                if (data && data.isAuthenticated && Array.isArray(data.items)) {
-                    setTrackedDeals(data.items);
-                    localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(data.items));
+                if (data && data.isAuthenticated) {
+                    setServerAuth(true);
+                    const dbItems: TrackedDealItem[] = Array.isArray(data.items) ? data.items : [];
+                    const dbIds = new Set(dbItems.map((i) => String(i.steamAppId || i.id)));
 
-                    // If localStorage had items that were not yet in DB, sync them
-                    try {
-                        const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
-                        if (raw) {
-                            const parsed = JSON.parse(raw);
-                            if (Array.isArray(parsed) && parsed.length > data.items.length) {
-                                fetch("/api/deals/favorites", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ syncItems: parsed }),
-                                }).catch((e) => console.error(e));
-                            }
-                        }
-                    } catch (e) {
-                        console.error(e);
+                    const missingInDb = localItems.filter(
+                        (loc) => !dbIds.has(String(loc.steamAppId || loc.id)),
+                    );
+
+                    if (missingInDb.length > 0) {
+                        const merged = [...dbItems, ...missingInDb];
+                        setTrackedDeals(merged);
+                        localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(merged));
+                        fetch("/api/deals/favorites", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ syncItems: missingInDb }),
+                        }).catch((e) => console.error(e));
+                    } else {
+                        setTrackedDeals(dbItems);
+                        localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(dbItems));
                     }
                 } else {
-                    // Fallback to localStorage if guest or offline
-                    try {
-                        const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
-                        if (raw) {
-                            const parsed = JSON.parse(raw);
-                            if (Array.isArray(parsed)) {
-                                setTrackedDeals(parsed);
-                                syncTrackedDeals(parsed);
-                            }
-                        }
-                    } catch (err) {
-                        console.error("Failed to load tracked deals from storage:", err);
+                    if (data) setServerAuth(false);
+                    if (localItems.length > 0) {
+                        setTrackedDeals(localItems);
                     }
                 }
             })
-            .catch(() => {
-                try {
-                    const raw = localStorage.getItem(LOCAL_STORAGE_TRACKED_KEY);
-                    if (raw) {
-                        const parsed = JSON.parse(raw);
-                        if (Array.isArray(parsed)) {
-                            setTrackedDeals(parsed);
-                        }
-                    }
-                } catch (e) {
-                    console.error(e);
+            .catch((err) => {
+                console.error("Failed to load tracked deals:", err);
+                if (localItems.length > 0) {
+                    setTrackedDeals(localItems);
                 }
             });
 
         return () => {
             isMounted = false;
         };
-    }, [syncTrackedDeals]);
+    }, []);
 
-    // 2.1 Load owned deals from DB on initial mount (with localStorage fallback & sync)
+    // 2.1 Load owned deals from DB on initial mount (with resilient localStorage sync)
     useEffect(() => {
         let isMounted = true;
+
+        let localOwned: OwnedDealItem[] = [];
+        try {
+            const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed)) {
+                    localOwned = parsed;
+                }
+            }
+        } catch (e) {
+            console.error("Error reading owned deals from storage:", e);
+        }
+
+        if (localOwned.length > 0) {
+            setOwnedDeals(localOwned);
+        }
 
         fetch("/api/deals/owned")
             .then((res) => (res.ok ? res.json() : null))
             .then((data) => {
                 if (!isMounted) return;
-                if (data && data.isAuthenticated && Array.isArray(data.items)) {
-                    setOwnedDeals(data.items);
-                    localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(data.items));
+                if (data && data.isAuthenticated) {
+                    setServerAuth(true);
+                    const dbOwned: OwnedDealItem[] = Array.isArray(data.items) ? data.items : [];
+                    const dbIds = new Set(dbOwned.map((o) => String(o.steamAppId || o.id)));
 
-                    try {
-                        const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
-                        if (raw) {
-                            const parsed = JSON.parse(raw);
-                            if (Array.isArray(parsed) && parsed.length > data.items.length) {
-                                fetch("/api/deals/owned", {
-                                    method: "POST",
-                                    headers: { "Content-Type": "application/json" },
-                                    body: JSON.stringify({ syncItems: parsed }),
-                                }).catch((e) => console.error(e));
-                            }
-                        }
-                    } catch (e) {
-                        console.error(e);
+                    const missingInDb = localOwned.filter(
+                        (loc) => !dbIds.has(String(loc.steamAppId || loc.id)),
+                    );
+
+                    if (missingInDb.length > 0) {
+                        const merged = [...dbOwned, ...missingInDb];
+                        setOwnedDeals(merged);
+                        localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(merged));
+                        fetch("/api/deals/owned", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ syncItems: missingInDb }),
+                        }).catch((e) => console.error(e));
+                    } else {
+                        setOwnedDeals(dbOwned);
+                        localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(dbOwned));
                     }
                 } else {
-                    try {
-                        const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
-                        if (raw) {
-                            const parsed = JSON.parse(raw);
-                            if (Array.isArray(parsed)) {
-                                setOwnedDeals(parsed);
-                            }
-                        }
-                    } catch (err) {
-                        console.error("Failed to load owned deals from storage:", err);
+                    if (data) setServerAuth(false);
+                    if (localOwned.length > 0) {
+                        setOwnedDeals(localOwned);
                     }
                 }
             })
-            .catch(() => {
-                try {
-                    const raw = localStorage.getItem(LOCAL_STORAGE_OWNED_KEY);
-                    if (raw) {
-                        const parsed = JSON.parse(raw);
-                        if (Array.isArray(parsed)) {
-                            setOwnedDeals(parsed);
-                        }
-                    }
-                } catch (e) {
-                    console.error(e);
+            .catch((err) => {
+                console.error("Failed to load owned deals:", err);
+                if (localOwned.length > 0) {
+                    setOwnedDeals(localOwned);
                 }
             });
 
@@ -294,6 +319,11 @@ export function DealsContainer() {
         slug?: string;
         coverImage?: string | null;
     }) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+
         const dealId = String(game.steamAppId || game.id);
         const exists = trackedDeals.some(
             (p) =>
@@ -352,12 +382,25 @@ export function DealsContainer() {
                 if (data.isTracked && !exists) {
                     syncTrackedDeals(updated);
                 }
+            } else {
+                // Rollback optimistic state
+                setTrackedDeals(trackedDeals);
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(trackedDeals));
+                } catch {}
+                if (res.status === 401) {
+                    setIsLoginModalOpen(true);
+                } else {
+                    setErrorMessage("Não foi possível salvar seu favorito na nuvem.");
+                }
             }
         } catch (err) {
             console.error("Failed to sync favorite with database:", err);
-            if (!exists) {
-                syncTrackedDeals(updated);
-            }
+            setTrackedDeals(trackedDeals);
+            try {
+                localStorage.setItem(LOCAL_STORAGE_TRACKED_KEY, JSON.stringify(trackedDeals));
+            } catch {}
+            setErrorMessage("Erro de rede ao salvar favorito.");
         }
     };
 
@@ -387,6 +430,11 @@ export function DealsContainer() {
         slug?: string;
         coverImage?: string | null;
     }) => {
+        if (!isAuthenticated) {
+            setIsLoginModalOpen(true);
+            return;
+        }
+
         const dealId = String(game.steamAppId || game.id);
         const normTitle = game.title.toLowerCase().trim();
         const exists = isOwned(game.steamAppId || game.id) || isOwned(game.title);
@@ -420,7 +468,7 @@ export function DealsContainer() {
         }
 
         try {
-            await fetch("/api/deals/owned", {
+            const res = await fetch("/api/deals/owned", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
@@ -431,8 +479,24 @@ export function DealsContainer() {
                     coverImage: game.coverImage,
                 }),
             });
+            if (!res.ok) {
+                setOwnedDeals(ownedDeals);
+                try {
+                    localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(ownedDeals));
+                } catch {}
+                if (res.status === 401) {
+                    setIsLoginModalOpen(true);
+                } else {
+                    setErrorMessage("Não foi possível salvar na sua biblioteca.");
+                }
+            }
         } catch (err) {
             console.error("Failed to sync owned status with database:", err);
+            setOwnedDeals(ownedDeals);
+            try {
+                localStorage.setItem(LOCAL_STORAGE_OWNED_KEY, JSON.stringify(ownedDeals));
+            } catch {}
+            setErrorMessage("Erro de rede ao atualizar biblioteca.");
         }
     };
 
@@ -744,10 +808,45 @@ export function DealsContainer() {
                             onToggleOwned={handleToggleOwned}
                             monitoredCount={trackedDeals.length}
                             isLoading={isLoadingFeatured}
+                            isAuthenticated={isAuthenticated}
+                            onRequireLogin={() => setIsLoginModalOpen(true)}
                         />
                     )}
                 </div>
             </div>
+
+            {/* Modal de Exigência de Login para Ações de Persistência */}
+            <Dialog open={isLoginModalOpen} onOpenChange={setIsLoginModalOpen}>
+                <DialogContent className="max-w-md border-theme bg-zinc-950/95 text-white shadow-2xl backdrop-blur-2xl">
+                    <DialogHeader className="space-y-3">
+                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#bd0df2]/15 border border-[#bd0df2]/40 shadow-[0_0_20px_rgba(189,13,242,0.3)]">
+                            <Lock className="h-6 w-6 text-[#bd0df2]" />
+                        </div>
+                        <DialogTitle className="text-center text-base sm:text-lg font-black tracking-tight text-white">
+                            Faça Login para Salvar Seus Jogos
+                        </DialogTitle>
+                        <DialogDescription className="text-center text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                            Para adicionar jogos aos seus favoritos, sincronizar sua biblioteca ou descartar recomendações do Oráculo, você precisa estar conectado à sua conta.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4 flex flex-col sm:flex-row gap-2.5">
+                        <Button
+                            onClick={() => router.push("/login")}
+                            className="w-full bg-[#bd0df2] hover:bg-[#bd0df2]/90 text-white font-black text-xs sm:text-sm shadow-[0_0_15px_rgba(189,13,242,0.4)]"
+                        >
+                            <LogIn className="mr-1.5 h-4 w-4" />
+                            Entrar na Minha Conta
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            onClick={() => setIsLoginModalOpen(false)}
+                            className="w-full border border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800 text-xs sm:text-sm font-semibold"
+                        >
+                            Apenas Visualizar
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

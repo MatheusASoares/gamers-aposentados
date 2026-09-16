@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { isRandomizerPlayer } from "@/lib/randomizer-players";
 import {
   recalculateUserXPAndLevel as recalculateUserXPAndLevelLogic,
+  recalculateAllUsersXPAndLevel,
 } from "@/app/lib/xp-engine";
 
 export async function recalculateUserXPAndLevel(userId: string) {
@@ -198,6 +199,7 @@ export async function equipTheme(themeId: string): Promise<{ success: boolean; e
 /**
  * Backfill script helper to recalculate XP & Levels for all users.
  * Protected: Requires active session from an authorized administrator.
+ * Optimized: Uses batch aggregation and chunked transactions, eliminating N+1 queries.
  */
 export async function runBackfillXP(): Promise<{ success: boolean; count?: number; error?: string }> {
   const session = await auth();
@@ -206,19 +208,18 @@ export async function runBackfillXP(): Promise<{ success: boolean; count?: numbe
   }
 
   try {
-    const users = await prisma.user.findMany({ select: { id: true } });
-    for (const u of users) {
-      await recalculateUserXPAndLevel(u.id);
-    }
+    const { count } = await recalculateAllUsersXPAndLevel();
     try {
       revalidatePath("/");
       revalidatePath("/profile");
+      revalidatePath("/leaderboard");
     } catch {
       // Ignored outside Next.js request context (e.g. scripts/CLI)
     }
-    return { success: true, count: users.length };
+    return { success: true, count };
   } catch (error) {
     console.error("[runBackfillXP] Error:", error);
     return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 }
+

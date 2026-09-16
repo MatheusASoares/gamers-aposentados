@@ -515,6 +515,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                     recommendations: filteredRecs,
                     onSale: filteredRecs.filter((r) => r.isOnSale),
                     onRadar: filteredRecs.filter((r) => !r.isOnSale),
+                    dismissedTitles: Array.from(userExclusions),
                     cached: true,
                 };
             }
@@ -559,6 +560,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                                     : new Date().toISOString(),
                                 cached: true,
                                 currencyRate,
+                                dismissedTitles: Array.from(userExclusions),
                             };
 
                             // Salvar de volta na memória para respostas instantâneas (< 1ms)
@@ -664,6 +666,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
             generatedAt: new Date().toISOString(),
             cached: false,
             currencyRate,
+            dismissedTitles: Array.from(excludedTitles),
         };
 
         // Cache por 12 horas em memória
@@ -708,6 +711,31 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                 `;
             } catch (err) {
                 console.warn("[DealsOracleService] Failed to persist dismissed deal in db:", err);
+            }
+
+            try {
+                const savedRows = await prisma.$queryRaw<Array<{ recommendations: any }>>`
+                    SELECT recommendations FROM user_oracle_recommendations WHERE user_id = ${userId}
+                `;
+                if (savedRows && savedRows.length > 0) {
+                    const recs =
+                        typeof savedRows[0].recommendations === "string"
+                            ? JSON.parse(savedRows[0].recommendations)
+                            : savedRows[0].recommendations;
+                    if (Array.isArray(recs)) {
+                        const updatedRecs = recs.filter(
+                            (r: OracleGameRecommendation) => r.title.toLowerCase().trim() !== normalizedTitle,
+                        );
+                        const updatedJson = JSON.stringify(updatedRecs);
+                        await prisma.$executeRaw`
+                            UPDATE user_oracle_recommendations
+                            SET recommendations = ${updatedJson}::jsonb
+                            WHERE user_id = ${userId}
+                        `;
+                    }
+                }
+            } catch (recErr) {
+                console.warn("[DealsOracleService] Failed to remove dismissed deal from user_oracle_recommendations:", recErr);
             }
         }
 
