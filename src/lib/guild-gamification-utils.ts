@@ -1,4 +1,5 @@
 import { QuestType } from "@prisma/client";
+import { calculateGuildLevelFromXP } from "./guild-xp-engine";
 
 export interface GuildGameXPParams {
   questType: QuestType;
@@ -81,5 +82,122 @@ export function calculateGuildGameXP({
     platinumBonusXP,
     totalMemberXP,
     coopSynergyBonusXP,
+  };
+}
+
+export interface GuildGamificationInput {
+  members: Array<{
+    user_id: string;
+    is_active: boolean;
+    user: {
+      gameProgress: Array<{
+        is_platinum: boolean;
+        game: {
+          id: string;
+          title: string;
+          quest_type: QuestType;
+          hltb_time: number | null;
+        };
+      }>;
+      reviews: Array<{ id?: string } | unknown>;
+      contractProgresses: Array<{ id?: string } | unknown>;
+    };
+  }>;
+}
+
+export interface GuildGamificationBreakdown {
+  gamesXP: number;
+  coopSynergyXP: number;
+  reviewsXP: number;
+  contractsXP: number;
+  coopGamesCount: number;
+}
+
+export interface GuildGamificationResult {
+  totalGuildXP: number;
+  newLevel: number;
+  breakdown: GuildGamificationBreakdown;
+}
+
+
+/**
+ * Pure calculation helper for guild gamification data.
+ * Computes individual game quest XP, co-op synergy bonus, reviews, contracts, and guild level.
+ */
+export function computeGuildGamificationData(
+  guild: GuildGamificationInput
+): GuildGamificationResult {
+  let gamesXP = 0;
+  let reviewsXP = 0;
+  let contractsXP = 0;
+
+  // Rastreia jogos completados por membro para calcular o Bônus de Sinergia Co-op
+  // Mapeamento: gameId -> { game: Game, userIds: Set<string>, baseGameXP: number, coopBonusXP: number }
+  const gameCompletionsMap = new Map<
+    string,
+    {
+      title: string;
+      userIds: Set<string>;
+      coopBonusXP: number;
+    }
+  >();
+
+  for (const member of guild.members) {
+    // 1. Quests Zeradas (Dinâmico: Base de honra + horas HLTB + platina proporcional)
+    for (const progress of member.user.gameProgress) {
+      const calc = calculateGuildGameXP({
+        questType: progress.game.quest_type,
+        hltbHours: progress.game.hltb_time,
+        isPlatinum: progress.is_platinum,
+      });
+
+      gamesXP += calc.totalMemberXP;
+
+      // Registra para análise de co-op (conclusão em dupla/grupo)
+      const gameId = progress.game.id;
+      const existing = gameCompletionsMap.get(gameId);
+      if (existing) {
+        existing.userIds.add(member.user_id);
+      } else {
+        gameCompletionsMap.set(gameId, {
+          title: progress.game.title,
+          userIds: new Set([member.user_id]),
+          coopBonusXP: calc.coopSynergyBonusXP,
+        });
+      }
+    }
+
+    // 2. Reviews Publicadas (+100 XP cada)
+    reviewsXP += member.user.reviews.length * GUILD_XP_CONSTANTS.REVIEW_XP;
+
+    // 3. Contratos de Mural Concluídos (+50 XP cada)
+    contractsXP += member.user.contractProgresses.length * GUILD_XP_CONSTANTS.CONTRACT_XP;
+  }
+
+  // 4. Bônus de Sinergia Co-op (+25% do valor base para cada quest completada por 2+ membros)
+  let coopSynergyXP = 0;
+  let coopGamesCount = 0;
+
+  for (const [, item] of gameCompletionsMap) {
+    if (item.userIds.size >= 2) {
+      coopSynergyXP += item.coopBonusXP;
+      coopGamesCount++;
+    }
+  }
+
+  const totalGuildXP = gamesXP + coopSynergyXP + reviewsXP + contractsXP;
+  const activeMemberCount = Math.max(2, guild.members.filter((m) => m.is_active).length);
+  const newLevel = calculateGuildLevelFromXP(totalGuildXP, activeMemberCount);
+
+  return {
+    totalGuildXP,
+    newLevel,
+    breakdown: {
+      gamesXP,
+      coopSynergyXP,
+      reviewsXP,
+      contractsXP,
+      coopGamesCount,
+    },
   };
 }
