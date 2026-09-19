@@ -39,12 +39,25 @@ test.describe("Deals Oracle AI Service & Steam Integration", () => {
 
     test("dismissGame correctly marks a game as dismissed and evicts it from recommendations", async () => {
         const testGameTitle = "Persona 5 Royal";
-        await DealsOracleService.dismissGame(undefined, testGameTitle);
+        await DealsOracleService.dismissGame(undefined, testGameTitle, undefined, "already_played");
 
         // Subsequent query should not crash and should succeed
         const refreshed = await DealsOracleService.getOracleRecommendations(undefined, false);
         expect(refreshed).toBeDefined();
         expect(refreshed.recommendations.length).toBeGreaterThanOrEqual(6);
+    });
+
+    test("dismissGame with not_interested reason registers negative preference and evicts game", async () => {
+        const testGameTitle = "NieR: Automata";
+        await DealsOracleService.dismissGame(undefined, testGameTitle, undefined, "not_interested");
+
+        const profile = await DealsOracleService.getUserTasteProfile();
+        expect(profile.notInterestedTitles).toBeDefined();
+        expect(Array.isArray(profile.notInterestedTitles)).toBe(true);
+
+        const refreshed = await DealsOracleService.getOracleRecommendations(undefined, false);
+        expect(refreshed).toBeDefined();
+        expect(refreshed.recommendations.some((r) => r.title.toLowerCase() === testGameTitle.toLowerCase())).toBe(false);
     });
 
     test("refreshRecommendationsPrices revalidates steam prices and stamps priceCheckedAt", async () => {

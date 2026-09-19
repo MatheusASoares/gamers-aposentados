@@ -8,6 +8,7 @@ import {
     Flame,
     Radar,
     ThumbsUp,
+    ThumbsDown,
     Heart,
     ExternalLink,
     Check,
@@ -76,6 +77,7 @@ export function DealOracleSection({
     const [activeTab, setActiveTab] = useState<"on_sale" | "on_radar">("on_sale");
     const [dismissedTitles, setDismissedTitles] = useState<Set<string>>(new Set());
     const [justDismissedTitle, setJustDismissedTitle] = useState<string | null>(null);
+    const [justNotInterestedTitle, setJustNotInterestedTitle] = useState<string | null>(null);
     const [justOwnedTitle, setJustOwnedTitle] = useState<string | null>(null);
     const [priceCheckSuccessMsg, setPriceCheckSuccessMsg] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
@@ -245,6 +247,7 @@ export function DealOracleSection({
                 body: JSON.stringify({
                     title: game.title,
                     steamAppId: game.steamAppId,
+                    reason: "already_played",
                 }),
             });
             if (!res.ok && res.status === 401) {
@@ -252,6 +255,64 @@ export function DealOracleSection({
             }
         } catch (err) {
             console.error("[DealOracleSection] Failed to dismiss game:", err);
+        }
+    };
+
+    // Marcar como "Não tenho interesse" (retroalimentação negativa / treino da IA)
+    const handleNotInterested = async (game: OracleGameRecommendation) => {
+        if (!isAuthenticated) {
+            onRequireLogin?.();
+            return;
+        }
+
+        const titleKey = game.title.toLowerCase().trim();
+        const updatedDismissed = new Set([...dismissedTitles, titleKey]);
+        setDismissedTitles(updatedDismissed);
+        setJustNotInterestedTitle(game.title);
+        setTimeout(() => setJustNotInterestedTitle(null), 3500);
+
+        try {
+            localStorage.setItem(LOCAL_STORAGE_DISMISSED_KEY, JSON.stringify(Array.from(updatedDismissed)));
+        } catch {}
+
+        // Atualizar estado em memória e cache do localStorage para não reaparecer no reload
+        if (data) {
+            const updatedData: OracleRecommendationsResponse = {
+                ...data,
+                recommendations: (data.recommendations || []).filter(
+                    (r) => r.title.toLowerCase().trim() !== titleKey,
+                ),
+                onSale: (data.onSale || []).filter(
+                    (r) => r.title.toLowerCase().trim() !== titleKey,
+                ),
+                onRadar: (data.onRadar || []).filter(
+                    (r) => r.title.toLowerCase().trim() !== titleKey,
+                ),
+                dismissedTitles: Array.from(updatedDismissed),
+            };
+            setData(updatedData);
+            try {
+                localStorage.setItem(LOCAL_STORAGE_ORACLE_KEY, JSON.stringify(updatedData));
+            } catch (e) {
+                console.error("Failed to update cached oracle recommendations:", e);
+            }
+        }
+
+        try {
+            const res = await fetch("/api/deals/oracle/dismiss", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    title: game.title,
+                    steamAppId: game.steamAppId,
+                    reason: "not_interested",
+                }),
+            });
+            if (!res.ok && res.status === 401) {
+                onRequireLogin?.();
+            }
+        } catch (err) {
+            console.error("[DealOracleSection] Failed to dismiss game as not interested:", err);
         }
     };
 
@@ -418,6 +479,16 @@ export function DealOracleSection({
                 </div>
             )}
 
+            {/* Notificação de jogo marcado como não interessado (treino de IA) */}
+            {justNotInterestedTitle && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-rose-500/40 bg-rose-950/80 px-3.5 py-2 text-xs font-medium text-rose-200 animate-in fade-in slide-in-from-top-1">
+                    <ThumbsDown className="h-4 w-4 text-rose-400 flex-shrink-0" />
+                    <span>
+                        <strong className="text-white">"{justNotInterestedTitle}"</strong> descartado. O Oráculo aprenderá a evitar recomendações similares no próximo garimpo.
+                    </span>
+                </div>
+            )}
+
             <div className="mt-4 space-y-4">
                 {/* Seletor de Sub-Abas (No Preço vs No Radar) */}
                 <div className="flex items-center gap-2">
@@ -536,13 +607,28 @@ export function DealOracleSection({
                                                 {renderTierBadge(game.tier)}
                                             </div>
 
-                                            {/* Badge de Desconto em Destaque no Canto Superior Direito */}
-                                            {game.discountPercent !== undefined && game.discountPercent > 0 && (
-                                                <div className="absolute top-2 right-2 z-10 flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2 py-0.5 text-xs font-black text-black shadow-lg backdrop-blur-sm">
-                                                    <TrendingDown className="h-3.5 w-3.5 stroke-[3]" />
-                                                    -{game.discountPercent}%
-                                                </div>
-                                            )}
+                                            {/* Top-Right: Badge de Desconto + Botão Não Tenho Interesse (Opção A) */}
+                                            <div className="absolute top-2 right-2 z-10 flex items-center gap-1.5">
+                                                {game.discountPercent !== undefined && game.discountPercent > 0 && (
+                                                    <div className="flex items-center gap-1 rounded-lg bg-emerald-500/95 px-2 py-0.5 text-xs font-black text-black shadow-lg backdrop-blur-sm">
+                                                        <TrendingDown className="h-3.5 w-3.5 stroke-[3]" />
+                                                        -{game.discountPercent}%
+                                                    </div>
+                                                )}
+
+                                                <button
+                                                    type="button"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        handleNotInterested(game);
+                                                    }}
+                                                    className="flex h-6 w-6 sm:h-7 sm:w-7 items-center justify-center rounded-lg bg-black/70 hover:bg-rose-600/90 border border-white/20 hover:border-rose-400 text-zinc-300 hover:text-white transition-all duration-200 shadow-md backdrop-blur-md active:scale-90 group/dismiss"
+                                                    title="Não tenho interesse (ensina o Oráculo a evitar jogos desse estilo)"
+                                                    aria-label={`Não tenho interesse em ${game.title}`}
+                                                >
+                                                    <ThumbsDown className="h-3 w-3 sm:h-3.5 sm:w-3.5 group-hover/dismiss:scale-110 transition-transform text-zinc-300 group-hover/dismiss:text-white" />
+                                                </button>
+                                            </div>
 
                                             {/* Bottom-Left: Steam Familia */}
                                             {game.isFamilySharing && (

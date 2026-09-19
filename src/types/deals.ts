@@ -210,3 +210,5 @@ export interface OracleRecommendationsResponse {
     currencyRate?: CurrencyRate;
     dismissedTitles?: string[];
 }
+
+export type DismissDealReason = "already_played" | "not_interested";

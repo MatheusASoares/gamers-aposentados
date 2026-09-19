@@ -19,7 +19,7 @@ export async function POST(request: Request) {
         }
 
         const body = await request.json().catch(() => ({}));
-        const { title, steamAppId } = body;
+        const { title, steamAppId, reason } = body;
 
         if (!title || typeof title !== "string") {
             return NextResponse.json(
@@ -28,15 +28,19 @@ export async function POST(request: Request) {
             );
         }
 
+        const validReason = reason === "not_interested" ? "not_interested" : "already_played";
+
         await DealsOracleService.dismissGame(
             userId,
             title,
             steamAppId ? Number(steamAppId) : undefined,
+            validReason,
         );
 
         return NextResponse.json({
             success: true,
             dismissed: title,
+            reason: validReason,
         });
     } catch (error) {
         console.error("[API /api/deals/oracle/dismiss] POST Error:", error);

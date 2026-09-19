@@ -7,6 +7,7 @@ import {
     OracleRecommendationsResponse,
     OracleGameTier,
     WinningRegion,
+    DismissDealReason,
 } from "@/types/deals";
 import { dealsCache } from "./dealsCache";
 import { SteamStoreClient } from "./steamStoreClient";
@@ -103,6 +104,7 @@ export class DealsOracleService {
                     "sea of stars",
                     "elden ring",
                 ]),
+                notInterestedTitles: [] as string[],
                 tasteSummary: "Aventureiro veterano com paixão por RPGs, Indies aclamados e Metroidvanias.",
             };
         }
@@ -128,13 +130,23 @@ export class DealsOracleService {
 
             // Buscar jogos descartados/já jogados no banco
             let dismissedTitles: string[] = [];
+            let notInterestedTitles: string[] = [];
             try {
-                const dismissedRows = await prisma.$queryRaw<Array<{ game_title: string }>>`
-                    SELECT game_title FROM user_dismissed_deals WHERE user_id = ${userId}
+                const dismissedRows = await prisma.$queryRaw<Array<{ game_title: string; reason: string | null }>>`
+                    SELECT game_title, reason FROM user_dismissed_deals WHERE user_id = ${userId}
                 `;
-                dismissedTitles = dismissedRows.map((r) => r.game_title.toLowerCase().trim());
+                for (const r of dismissedRows) {
+                    if (r.game_title) {
+                        const norm = r.game_title.toLowerCase().trim();
+                        dismissedTitles.push(norm);
+                        if (r.reason === "not_interested") {
+                            notInterestedTitles.push(norm);
+                        }
+                    }
+                }
             } catch {
                 dismissedTitles = [];
+                notInterestedTitles = [];
             }
 
             // Buscar jogos possuídos (Já Tenho / Na Biblioteca)
@@ -204,16 +216,22 @@ export class DealsOracleService {
                 );
             }
 
+            const tasteSummary = notInterestedTitles.length > 0
+                ? `Perfil calibrado com base em ${favorites.length} jogos curtidos e ${notInterestedTitles.length} ${notInterestedTitles.length === 1 ? "preferência negativa aprendida" : "preferências negativas aprendidas"}.`
+                : `Perfil calibrado com base em ${favorites.length} jogos curtidos e histórico de jogatina.`;
+
             return {
                 favorites: favorites.slice(0, 8),
                 excludedTitles,
-                tasteSummary: `Perfil calibrado com base em ${favorites.length} jogos curtidos e histórico de jogatina.`,
+                notInterestedTitles,
+                tasteSummary,
             };
         } catch (err) {
             console.error("[DealsOracleService] getUserTasteProfile error:", err);
             return {
                 favorites: ["Chrono Trigger", "Castlevania: Symphony of the Night", "Hades"],
                 excludedTitles: new Set<string>(),
+                notInterestedTitles: [] as string[],
                 tasteSummary: "Perfil clássico de Gamer Aposentado.",
             };
         }
@@ -229,6 +247,7 @@ export class DealsOracleService {
         excludedTitles: Set<string>,
         count: number = 10,
         currentTitlesOnScreen: string[] = [],
+        notInterestedTitles: string[] = [],
     ): Promise<RawOracleItem[]> {
         const apiKey = process.env.GEMINI_API_KEY;
         if (!apiKey) {
@@ -240,6 +259,7 @@ export class DealsOracleService {
         const excludedListFormatted = Array.from(excludedTitles).slice(0, 40).join(", ");
         const favoritesFormatted = favorites.join(", ");
         const onScreenFormatted = currentTitlesOnScreen.slice(0, 15).join(", ");
+        const notInterestedFormatted = notInterestedTitles.slice(0, 20).join(", ");
 
         let quotaInstruction = `1. [3x AAA]: Superproduções consagradas ou clássicos AAA refinados que combinam com o gosto dele.
 2. [4x INDIE]: Jogos independentes aclamados com notas muito altas na Steam (>= 85% de aprovação).
@@ -255,8 +275,12 @@ Você é o Oráculo Curador do "Gamers Aposentados", uma guilda de jogadores exp
 PERFIL DO JOGADOR:
 - Jogos que ele ama, possui na biblioteca ou deu nota alta (REFERÊNCIAS DE GOSTO PARA VOCÊ SE INSPIRAR): ${favoritesFormatted}
 - JOGOS QUE ELE JÁ TEM NA BIBLIOTECA, JÁ JOGOU, FAVORITOU OU DESCARTOU (ESTRITAMENTE PROIBIDO SUGERIR): ${excludedListFormatted}
-${onScreenFormatted ? `- JOGOS QUE JÁ ESTÃO SENDO EXIBIDOS NA TELA (NÃO REPETIR NESTA RODADA): ${onScreenFormatted}` : ""}
-
+${onScreenFormatted ? `- JOGOS QUE JÁ ESTÃO SENDO EXIBIDOS NA TELA (NÃO REPETIR NESTA RODADA): ${onScreenFormatted}\n` : ""}${
+    notInterestedFormatted
+        ? `- RETROALIMENTAÇÃO NEGATIVA / APRENDIZADO DE AVERSÃO (O USUÁRIO MARCOU "NÃO TENHO INTERESSE"): ${notInterestedFormatted}
+  [DIRETRIZ CRÍTICA DE APRENDIZADO]: Analise os temas, gêneros, mecânicas, ritmo de jogo ou estilo visual desses títulos rejeitados e EVITE sugerir outros jogos similares ou da mesma fórmula. Dê preferência a abordagens que contrastem com essas aversões e converjam com os favoritos.\n`
+        : ""
+}
 SESSÃO DE GARIMPO #${randomSeed}:
 Explore recomendações diversificadas, criativas e autênticas. Não traga sempre os mesmos títulos óbvios; varie entre clássicos cultuados, indie hits e joias escondidas.
 
@@ -764,7 +788,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
         }
 
         // 4. Extrair perfil e histórico de exclusão para nova geração (ou fallback)
-        const { favorites, excludedTitles, tasteSummary } =
+        const { favorites, excludedTitles, notInterestedTitles, tasteSummary } =
             await DealsOracleService.getUserTasteProfile(userId);
 
         // Se forceRefresh=true, recuperar jogos válidos atualmente na tela para preservar e só repor as vagas faltantes
@@ -815,6 +839,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                 excludedTitles,
                 neededCount,
                 currentTitles,
+                notInterestedTitles,
             );
 
             const enrichedItems = await DealsOracleService.enrichWithSteamData(rawItems);
@@ -836,6 +861,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                 excludedTitles,
                 10,
                 currentTitles,
+                notInterestedTitles,
             );
 
             const enrichedItems = await DealsOracleService.enrichWithSteamData(rawItems);
@@ -897,6 +923,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
         userId: string | null | undefined,
         gameTitle: string,
         steamAppId?: number,
+        reason: DismissDealReason = "already_played",
     ): Promise<void> {
         const normalizedTitle = gameTitle.toLowerCase().trim();
 
@@ -904,8 +931,10 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
             try {
                 await prisma.$executeRaw`
                     INSERT INTO user_dismissed_deals (id, user_id, game_title, steam_app_id, reason, created_at)
-                    VALUES (gen_random_uuid(), ${userId}, ${normalizedTitle}, ${steamAppId || null}, 'already_played', NOW())
-                    ON CONFLICT (user_id, game_title) DO NOTHING
+                    VALUES (gen_random_uuid(), ${userId}, ${normalizedTitle}, ${steamAppId || null}, ${reason}, NOW())
+                    ON CONFLICT (user_id, game_title) DO UPDATE SET
+                        reason = EXCLUDED.reason,
+                        created_at = NOW()
                 `;
             } catch (err) {
                 console.warn("[DealsOracleService] Failed to persist dismissed deal in db:", err);
