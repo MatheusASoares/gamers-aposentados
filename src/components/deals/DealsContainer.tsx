@@ -703,7 +703,7 @@ export function DealsContainer() {
 
                     {/* Quick Suggestions */}
                     <div className="flex flex-wrap items-center gap-2 pt-2 border-t border-theme/20">
-                        <span className="text-xs font-bold text-zinc-400 flex items-center gap-1.5 mr-1">
+                        <span className="text-xs font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 mr-1">
                             <Zap className="h-3.5 w-3.5 text-theme-primary" /> Sugestões Rápidas:
                         </span>
                         {QUICK_SUGGESTIONS.map((item) => (
@@ -716,7 +716,7 @@ export function DealsContainer() {
                                         steamAppId: item.steamAppId,
                                     })
                                 }
-                                className="rounded-xl border border-theme/30 bg-zinc-900/60 px-3 py-1.5 text-xs font-bold text-zinc-300 transition-all hover:border-theme-primary hover:bg-theme-primary/10 hover:text-white"
+                                className="rounded-xl border border-theme/30 bg-zinc-900/60 px-3 py-1.5 text-xs font-extrabold uppercase tracking-wider text-zinc-300 transition-all hover:border-theme-primary hover:bg-theme-primary/10 hover:text-white active:scale-95"
                             >
                                 {item.title}
                             </button>

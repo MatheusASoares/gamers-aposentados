@@ -20,7 +20,9 @@ import {
     Users,
     Loader2,
     CheckCircle2,
+    Tag,
 } from "lucide-react";
+
 import {
     FeaturedDealItem,
     DealFilterType,
@@ -139,44 +141,72 @@ export function TopDealsCarousel({
     }> = [
         {
             id: "historical_low",
-            label: "Recordes (ATL)",
+            label: "RECORDES (ATL)",
             icon: <Trophy className="h-4 w-4 text-amber-400 flex-shrink-0" />,
         },
         {
             id: "highest_cut",
-            label: "Super Descontos",
+            label: "SUPER DESCONTOS",
             icon: <Flame className="h-4 w-4 text-orange-400 flex-shrink-0" />,
         },
         {
             id: "oracle",
-            label: "Oráculo",
+            label: "ORÁCULO",
             icon: <Sparkles className="h-4 w-4 text-[#bd0df2] flex-shrink-0" />,
         },
         {
             id: "monitored",
-            label: "Favoritos",
+            label: "FAVORITOS",
             icon: <Heart className="h-4 w-4 text-pink-400 fill-pink-400/30 flex-shrink-0" />,
             badge: monitoredCount,
         },
     ];
 
-    const sortOptions: Array<{ id: SortOption; label: string }> = [
-        { id: "savings", label: "Maior Economia (US x BR)" },
-        { id: "discount", label: "Maior Desconto (% OFF)" },
-        { id: "rating", label: "Melhor Avaliação Steam" },
-        { id: "price_asc", label: "Menor Preço (R$)" },
+    const sortOptions: Array<{
+        id: SortOption;
+        label: string;
+        icon: (isActive: boolean) => React.ReactNode;
+    }> = [
+        {
+            id: "savings",
+            label: "MAIOR ECONOMIA",
+            icon: (isActive: boolean) => (
+                <TrendingDown className={cn("h-4 w-4 flex-shrink-0", isActive ? "text-black" : "text-emerald-400")} />
+            ),
+        },
+        {
+            id: "discount",
+            label: "MAIOR DESCONTO",
+            icon: (isActive: boolean) => (
+                <Flame className={cn("h-4 w-4 flex-shrink-0", isActive ? "text-black" : "text-orange-400")} />
+            ),
+        },
+        {
+            id: "rating",
+            label: "MELHOR NOTA",
+            icon: (isActive: boolean) => (
+                <ThumbsUp className={cn("h-4 w-4 flex-shrink-0", isActive ? "text-black" : "text-cyan-400")} />
+            ),
+        },
+        {
+            id: "price_asc",
+            label: "MENOR PREÇO",
+            icon: (isActive: boolean) => (
+                <Tag className={cn("h-4 w-4 flex-shrink-0", isActive ? "text-black" : "text-purple-400")} />
+            ),
+        },
     ];
 
     const priceCapOptions: Array<{ id: PriceCapFilterType; label: string }> = [
-        { id: "all", label: "Qualquer Preço" },
-        { id: "under_30", label: "Até R$ 30" },
-        { id: "under_60", label: "Até R$ 60" },
-        { id: "under_100", label: "Até R$ 100" },
+        { id: "all", label: "TODOS" },
+        { id: "under_30", label: "ATÉ R$ 30" },
+        { id: "under_60", label: "ATÉ R$ 60" },
+        { id: "under_100", label: "ATÉ R$ 100" },
     ];
 
     const storeOptions: Array<{ id: StoreFilterType; label: string; icon: React.ReactNode }> = [
-        { id: "all", label: "Todas as Lojas", icon: <ShoppingBag className="h-3.5 w-3.5" /> },
-        { id: "steam", label: "Só Steam", icon: <Gamepad2 className="h-3.5 w-3.5 text-cyan-400" /> },
+        { id: "all", label: "TODAS AS LOJAS", icon: <ShoppingBag className="h-3.5 w-3.5 flex-shrink-0" /> },
+        { id: "steam", label: "SÓ STEAM", icon: <Gamepad2 className="h-3.5 w-3.5 text-cyan-400 flex-shrink-0" /> },
     ];
 
     const isMonitoredTab = activeFilter === "monitored";
@@ -345,10 +375,10 @@ export function TopDealsCarousel({
                                     onClick={() => onFilterChange(opt.id)}
                                     disabled={isLoading}
                                     className={cn(
-                                        "flex items-center justify-center lg:justify-start gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-all duration-300 whitespace-nowrap active:scale-95",
+                                        "flex items-center justify-center lg:justify-start gap-2 rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-extrabold uppercase tracking-wider transition-all duration-200 whitespace-nowrap active:scale-95 border",
                                         isActive
-                                            ? "border border-theme-primary bg-theme-primary/20 text-white shadow-[0_0_15px_var(--theme-glow)]"
-                                            : "border border-transparent text-zinc-400 hover:text-white hover:bg-zinc-800/40",
+                                            ? "border-theme-primary bg-theme-primary/20 text-white shadow-[0_0_15px_var(--theme-glow)]"
+                                            : "border-theme/20 bg-zinc-900/60 text-zinc-400 hover:text-white hover:bg-zinc-800/60 hover:border-theme/40",
                                     )}
                                 >
                                     {opt.icon}
@@ -370,111 +400,131 @@ export function TopDealsCarousel({
 
             {/* Sub-Filters & Ordenação Bar (Only shown on deals tabs, not on oracle tab) */}
             {!isOracleTab && (
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pt-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                        {/* Price Cap Filter */}
+                <div className="rounded-2xl border border-theme/40 bg-theme-card/95 p-3.5 sm:p-4 backdrop-blur-xl shadow-lg space-y-3.5">
+                    {/* Linha 1: Filtros de Garimpo (Preço, Loja e Família) */}
+                    <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+                        {/* Bloco de Preço */}
                         {onPriceCapChange && (
-                            <div className="flex flex-wrap items-center gap-1.5 bg-theme-card/90 p-1.5 rounded-xl border border-theme/40">
-                                <span className="text-xs font-black uppercase text-zinc-400 px-1.5">Preço:</span>
-                                {priceCapOptions.map((cap) => {
-                                    const isCapActive = priceCap === cap.id;
-                                    return (
-                                        <button
-                                            key={cap.id}
-                                            type="button"
-                                            onClick={() => onPriceCapChange(cap.id)}
-                                            className={cn(
-                                                "rounded-lg px-2.5 sm:px-3 py-1.5 text-xs font-bold transition-all",
-                                                isCapActive
-                                                    ? "bg-theme-primary/25 text-white border border-theme-primary shadow-sm"
-                                                    : "text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60 border border-transparent",
-                                            )}
-                                        >
-                                            {cap.label}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-                        )}
-
-                        {/* Store Filter */}
-                        {onStoreFilterChange && (
-                            <div className="flex items-center gap-1.5 bg-theme-card/90 p-1.5 rounded-xl border border-theme/40">
-                                <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider hidden sm:inline px-1">
-                                    Loja:
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                                <span className="text-xs font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5 flex-shrink-0">
+                                    <Tag className="h-3.5 w-3.5 text-theme-primary" /> Preço:
                                 </span>
-                                {storeOptions.map((storeOpt) => {
-                                    const isStoreActive = storeFilter === storeOpt.id;
-                                    return (
-                                        <button
-                                            key={storeOpt.id}
-                                            type="button"
-                                            onClick={() => onStoreFilterChange(storeOpt.id)}
-                                            className={cn(
-                                                "flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-bold transition-all",
-                                                isStoreActive
-                                                    ? "bg-zinc-800 text-white border border-theme/40 shadow-sm"
-                                                    : "text-zinc-500 hover:text-zinc-300 hover:bg-zinc-900/60 border border-transparent",
-                                            )}
-                                        >
-                                            {storeOpt.icon}
-                                            <span>{storeOpt.label}</span>
-                                        </button>
-                                    );
-                                })}
+                                {/* Mobile: 2x2 grid / Desktop: flex row 4x1 */}
+                                <div className="grid grid-cols-2 sm:flex sm:flex-row sm:items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-theme/30">
+                                    {priceCapOptions.map((cap) => {
+                                        const isCapActive = priceCap === cap.id;
+                                        return (
+                                            <button
+                                                key={cap.id}
+                                                type="button"
+                                                onClick={() => onPriceCapChange(cap.id)}
+                                                className={cn(
+                                                    "flex items-center justify-center rounded-lg px-3 py-2 sm:py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 border",
+                                                    isCapActive
+                                                        ? "bg-theme-primary text-black border-theme-primary font-black shadow-[0_0_12px_var(--theme-glow)]"
+                                                        : "bg-zinc-900/70 border-theme/20 text-zinc-400 hover:text-white hover:bg-zinc-800/70 hover:border-theme/40",
+                                                )}
+                                            >
+                                                {cap.label}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 
-                        {/* Steam Family Sharing Toggle Button */}
-                        {onToggleFamilySharing && (
-                            <button
-                                type="button"
-                                onClick={onToggleFamilySharing}
-                                className={cn(
-                                    "flex items-center gap-1.5 rounded-xl px-3 sm:px-3.5 py-1.5 text-xs font-bold transition-all border shadow-sm active:scale-95",
-                                    familySharingOnly
-                                        ? "bg-purple-950/80 border-[#bd0df2] text-white shadow-[0_0_15px_rgba(189,13,242,0.4)]"
-                                        : "bg-theme-card/90 border-theme/40 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-900/60",
-                                )}
-                            >
-                                <Users className={cn("h-3.5 w-3.5", familySharingOnly ? "text-[#bd0df2]" : "text-zinc-400")} />
-                                <span>Steam Família OK</span>
-                                {familySharingOnly && (
-                                    <span className="h-2 w-2 rounded-full bg-[#bd0df2] animate-pulse ml-0.5" />
-                                )}
-                            </button>
-                        )}
-                    </div>
+                        {/* Bloco de Loja e Família (Sem sobreposição no mobile) */}
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
+                            {/* Loja */}
+                            {onStoreFilterChange && (
+                                <div className="flex items-center gap-1.5 p-1 rounded-xl bg-black/40 border border-theme/30 w-full sm:w-auto">
+                                    {storeOptions.map((storeOpt) => {
+                                        const isStoreActive = storeFilter === storeOpt.id;
+                                        return (
+                                            <button
+                                                key={storeOpt.id}
+                                                type="button"
+                                                onClick={() => onStoreFilterChange(storeOpt.id)}
+                                                className={cn(
+                                                    "flex-1 sm:flex-initial flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 sm:py-1.5 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 border",
+                                                    isStoreActive
+                                                        ? "bg-theme-primary text-black border-theme-primary font-black shadow-[0_0_12px_var(--theme-glow)]"
+                                                        : "bg-zinc-900/70 border-theme/20 text-zinc-400 hover:text-white hover:bg-zinc-800/70 hover:border-theme/40",
+                                                )}
+                                            >
+                                                {storeOpt.icon}
+                                                <span className="whitespace-nowrap">{storeOpt.label}</span>
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+                            )}
 
-                    {/* Interactive Sort Selector */}
-                    <div className="flex items-center gap-1.5 bg-theme-card/90 p-1.5 rounded-xl border border-theme/40 self-start lg:self-auto overflow-x-auto max-w-full">
-                        <span className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1 px-1.5 flex-shrink-0">
-                            <ArrowUpDown className="h-3.5 w-3.5 text-theme-primary" /> Ordenar:
-                        </span>
-                        {sortOptions.map((opt) => {
-                            const isSortActive = sortBy === opt.id;
-                            return (
+                            {/* Steam Family Sharing Toggle Button */}
+                            {onToggleFamilySharing && (
                                 <button
-                                    key={opt.id}
                                     type="button"
-                                    onClick={() => {
-                                        setSortBy(opt.id);
-                                        setCurrentPage(1);
-                                    }}
+                                    onClick={onToggleFamilySharing}
                                     className={cn(
-                                        "whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-bold transition-all",
-                                        isSortActive
-                                            ? "bg-theme-primary text-black font-extrabold shadow-sm"
-                                            : "text-zinc-400 hover:text-white hover:bg-zinc-900/60 border border-transparent",
+                                        "flex items-center justify-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 border shadow-sm active:scale-95 w-full sm:w-auto",
+                                        familySharingOnly
+                                            ? "bg-purple-950/90 border-[#bd0df2] text-white font-black shadow-[0_0_15px_rgba(189,13,242,0.4)]"
+                                            : "bg-zinc-900/70 border-theme/30 text-zinc-400 hover:text-white hover:bg-zinc-800/70 hover:border-theme/50",
                                     )}
                                 >
-                                    {opt.label}
+                                    <Users className={cn("h-3.5 w-3.5", familySharingOnly ? "text-[#bd0df2]" : "text-zinc-400")} />
+                                    <span className="whitespace-nowrap">STEAM FAMÍLIA</span>
+                                    {familySharingOnly && (
+                                        <span className="h-2 w-2 rounded-full bg-[#bd0df2] animate-pulse ml-0.5" />
+                                    )}
                                 </button>
-                            );
-                        })}
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Linha Divisória Sutil */}
+                    <div className="border-t border-theme/20" />
+
+                    {/* Linha 2: Barra de Ordenação Dedicada (4x1 no Desktop, 2x2 no Mobile) */}
+                    <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                            <span className="text-xs font-black uppercase tracking-wider text-zinc-400 flex items-center gap-1.5">
+                                <ArrowUpDown className="h-3.5 w-3.5 text-theme-primary" /> Ordenar Por:
+                            </span>
+                            <span className="text-xs text-zinc-400 font-bold hidden sm:inline uppercase">
+                                {totalDeals} {isMonitoredTab ? "FAVORITOS FILTRADOS" : "OFERTAS ENCONTRADAS"}
+                            </span>
+                        </div>
+
+                        {/* Grid Dual-Paradigm: 2x2 no Mobile (< lg), 4x1 no Desktop (lg / xl) */}
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-2">
+                            {sortOptions.map((opt) => {
+                                const isSortActive = sortBy === opt.id;
+                                return (
+                                    <button
+                                        key={opt.id}
+                                        type="button"
+                                        onClick={() => {
+                                            setSortBy(opt.id);
+                                            setCurrentPage(1);
+                                        }}
+                                        className={cn(
+                                            "flex items-center justify-center gap-1.5 sm:gap-2 rounded-xl px-2.5 sm:px-3 py-2.5 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 active:scale-95 border",
+                                            isSortActive
+                                                ? "bg-theme-primary text-black border-theme-primary font-black shadow-[0_0_15px_var(--theme-glow)]"
+                                                : "bg-zinc-900/70 border-theme/20 text-zinc-400 hover:text-white hover:bg-zinc-800/70 hover:border-theme/40",
+                                        )}
+                                    >
+                                        {opt.icon(isSortActive)}
+                                        <span className="whitespace-nowrap">{opt.label}</span>
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
                 </div>
             )}
+
 
             {/* Deal Oracle Section (Preserved in DOM to prevent unmounting and refetching on tab switch) */}
             <div className={cn(!isOracleTab && "hidden")}>

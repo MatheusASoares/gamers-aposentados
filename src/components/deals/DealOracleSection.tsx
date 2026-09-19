@@ -359,7 +359,7 @@ export function DealOracleSection({
                         onClick={() => handleConsult(false, true)}
                         disabled={isRefreshingPrices || isRefreshing || isLoading}
                         className={cn(
-                            "flex items-center gap-1.5 sm:gap-2 rounded-xl border border-orange-500/40 bg-orange-950/30 px-3.5 py-2 text-xs sm:text-sm font-bold text-orange-200 transition-all hover:bg-orange-900/40 hover:border-orange-500 hover:text-white shadow-sm active:scale-95",
+                            "flex items-center gap-1.5 sm:gap-2 rounded-xl border border-orange-500/40 bg-orange-950/30 px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider text-orange-200 transition-all duration-200 hover:bg-orange-900/40 hover:border-orange-500 hover:text-white shadow-sm active:scale-95",
                             (isRefreshingPrices || isRefreshing || isLoading) && "opacity-60 cursor-not-allowed",
                         )}
                         title="Verificar ofertas e preços da Steam em tempo real para estes 10 jogos"
@@ -367,7 +367,7 @@ export function DealOracleSection({
                         <Flame
                             className={cn("h-4 w-4 text-orange-400", isRefreshingPrices && "animate-spin")}
                         />
-                        <span>{isRefreshingPrices ? "Checando Steam..." : "Checar Ofertas"}</span>
+                        <span>{isRefreshingPrices ? "CHECANDO STEAM..." : "CHECAR OFERTAS"}</span>
                     </button>
 
                     {/* Botão de Novo Garimpo (Gemini AI) */}
@@ -376,7 +376,7 @@ export function DealOracleSection({
                         onClick={() => handleConsult(true, false)}
                         disabled={isRefreshing || isRefreshingPrices || isLoading}
                         className={cn(
-                            "flex items-center gap-1.5 sm:gap-2 rounded-xl border border-theme/40 bg-zinc-900/90 px-3.5 py-2 text-xs sm:text-sm font-extrabold text-zinc-200 transition-all hover:border-theme-primary hover:text-white hover:bg-zinc-800 shadow-sm active:scale-95",
+                            "flex items-center gap-1.5 sm:gap-2 rounded-xl border border-theme/40 bg-zinc-900/90 px-3.5 py-2 text-xs font-extrabold uppercase tracking-wider text-zinc-200 transition-all duration-200 hover:border-theme-primary hover:text-white hover:bg-zinc-800 shadow-sm active:scale-95",
                             (isRefreshing || isRefreshingPrices || isLoading) && "opacity-60 cursor-not-allowed",
                         )}
                         title="Buscar novos jogos com a IA do Oráculo"
@@ -384,7 +384,7 @@ export function DealOracleSection({
                         <Sparkles
                             className={cn("h-4 w-4 text-theme-primary", isRefreshing && "animate-spin")}
                         />
-                        <span>{isRefreshing ? "Garimpando..." : "Novo Garimpo"}</span>
+                        <span>{isRefreshing ? "GARIMPANDO..." : "NOVO GARIMPO"}</span>
                     </button>
                 </div>
             </div>
@@ -425,14 +425,14 @@ export function DealOracleSection({
                         type="button"
                         onClick={() => setActiveTab("on_sale")}
                         className={cn(
-                            "flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all border",
+                            "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 border active:scale-95",
                             activeTab === "on_sale"
                                 ? "border-orange-500/50 bg-orange-500/20 text-orange-300 shadow-sm"
-                                : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40",
+                                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60",
                         )}
                     >
                         <Flame className="h-4 w-4 text-orange-400" />
-                        <span>Em Promoção</span>
+                        <span>EM PROMOÇÃO</span>
                         <span className="ml-1 rounded-full bg-orange-500/30 px-2 py-0.5 text-xs font-black text-orange-300">
                             {onSaleCount}
                         </span>
@@ -442,14 +442,14 @@ export function DealOracleSection({
                         type="button"
                         onClick={() => setActiveTab("on_radar")}
                         className={cn(
-                            "flex items-center gap-2 rounded-xl px-4 py-2 text-xs sm:text-sm font-bold transition-all border",
+                            "flex items-center gap-2 rounded-xl px-4 py-2 text-xs font-extrabold uppercase tracking-wider transition-all duration-200 border active:scale-95",
                             activeTab === "on_radar"
                                 ? "border-cyan-500/50 bg-cyan-500/20 text-cyan-300 shadow-sm"
-                                : "border-zinc-800 bg-zinc-900/40 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/40",
+                                : "border-zinc-800 bg-zinc-900/60 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-800/60",
                         )}
                     >
                         <Radar className="h-4 w-4 text-cyan-400" />
-                        <span>No Radar</span>
+                        <span>NO RADAR</span>
                         <span className="ml-1 rounded-full bg-cyan-500/30 px-2 py-0.5 text-xs font-black text-cyan-300">
                             {onRadarCount}
                         </span>
