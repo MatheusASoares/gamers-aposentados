@@ -69,6 +69,7 @@ test.describe("Deals Oracle AI Service & Steam Integration", () => {
         expect(updated[0].steamAppId).toBe(588650);
         expect(updated[0].priceCheckedAt).toBeTruthy();
         expect(typeof updated[0].isOnSale).toBe("boolean");
+        expect(typeof updated[0].isFamilySharing).toBe("boolean");
     });
 
     test("getOracleRecommendations with refreshPrices updates pricesUpdatedAt timestamp", async () => {

@@ -273,9 +273,9 @@ export function DealComparisonCard({
                                 </span>
                             )}
                             {comparison.isFamilySharing && (
-                                <span className="flex items-center gap-1.5 rounded-lg bg-purple-950/80 border border-purple-500/40 px-2.5 py-0.5 text-xs font-bold text-purple-300 shadow-md backdrop-blur-sm">
+                                <span className="flex items-center gap-1.5 rounded-lg bg-purple-950/90 border border-[#bd0df2]/50 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-purple-200 shadow-md backdrop-blur-sm">
                                     <Users className="h-3.5 w-3.5 text-[#bd0df2]" />
-                                    <span>Steam Família OK</span>
+                                    <span>STEAM FAMÍLIA</span>
                                 </span>
                             )}
                             {comparison.isAllTimeLow && (

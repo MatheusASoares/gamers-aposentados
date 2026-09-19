@@ -364,13 +364,17 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                     let winningRegion: WinningRegion = "EQUAL";
                     let savingsPercent = 0;
                     let absoluteSavingsBRL = 0;
+                    let isFamilySharing = false;
 
                     if (steamAppId) {
-                        const [priceObjBR, priceObjUS, reviewObj] = await Promise.all([
+                        const [priceObjBR, priceObjUS, reviewObj, isFS] = await Promise.all([
                             SteamStoreClient.getAppPrice(steamAppId, "BR"),
                             SteamStoreClient.getAppPrice(steamAppId, "US"),
                             SteamStoreClient.getAppReviewsSummary(steamAppId),
+                            SteamStoreClient.isFamilySharingSupported(steamAppId),
                         ]);
+
+                        isFamilySharing = isFS;
 
                         if (priceObjBR) {
                             priceBR = priceObjBR.currentPrice;
@@ -442,6 +446,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                         winningRegion,
                         savingsPercent,
                         absoluteSavingsBRL,
+                        isFamilySharing,
                         priceCheckedAt: new Date().toISOString(),
                         dealUrl: steamAppId
                             ? `https://store.steampowered.com/app/${steamAppId}`
@@ -507,9 +512,12 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                         };
                     }
 
-                    const [priceObjBR, priceObjUS] = await Promise.all([
+                    const [priceObjBR, priceObjUS, isFS] = await Promise.all([
                         SteamStoreClient.getAppPrice(steamAppId, "BR"),
                         SteamStoreClient.getAppPrice(steamAppId, "US"),
+                        item.isFamilySharing !== undefined
+                            ? Promise.resolve(item.isFamilySharing)
+                            : SteamStoreClient.isFamilySharingSupported(steamAppId),
                     ]);
 
                     let priceBR = priceObjBR?.currentPrice ?? item.priceBR;
@@ -546,15 +554,15 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                             absoluteSavingsBRL = Number((priceUsInBrl - priceBrInBrl).toFixed(2));
                             savingsPercent =
                                 priceUsInUsd > 0
-                                    ? Math.min(100, Math.round(((priceUsInUsd - priceBrInUsd) / priceUsInUsd) * 100))
-                                    : 0;
+                                ? Math.min(100, Math.round(((priceUsInUsd - priceBrInUsd) / priceUsInUsd) * 100))
+                                : 0;
                         } else {
                             winningRegion = "US";
                             absoluteSavingsBRL = Number((priceBrInBrl - priceUsInBrl).toFixed(2));
                             savingsPercent =
                                 priceBrInUsd > 0
-                                    ? Math.min(100, Math.round(((priceBrInUsd - priceUsInUsd) / priceBrInUsd) * 100))
-                                    : 0;
+                                ? Math.min(100, Math.round(((priceBrInUsd - priceUsInUsd) / priceBrInUsd) * 100))
+                                : 0;
                         }
                     }
 
@@ -572,6 +580,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                         winningRegion,
                         savingsPercent,
                         absoluteSavingsBRL,
+                        isFamilySharing: isFS,
                         priceCheckedAt: nowIso,
                     };
                 } catch (err) {

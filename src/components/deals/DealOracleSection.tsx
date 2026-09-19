@@ -544,11 +544,11 @@ export function DealOracleSection({
                                                 </div>
                                             )}
 
-                                            {/* Bottom-Left: Steam Familia OK */}
+                                            {/* Bottom-Left: Steam Familia */}
                                             {game.isFamilySharing && (
-                                                <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-lg bg-purple-950/90 border border-purple-500/50 px-2 py-0.5 text-xs font-bold text-purple-300 shadow-md backdrop-blur-sm">
+                                                <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-lg bg-purple-950/90 border border-[#bd0df2]/50 px-2 py-0.5 text-xs font-black uppercase tracking-wider text-purple-200 shadow-md backdrop-blur-sm">
                                                     <Users className="h-3 w-3 text-[#bd0df2]" />
-                                                    <span>Steam Família OK</span>
+                                                    <span>STEAM FAMÍLIA</span>
                                                 </div>
                                             )}
 
