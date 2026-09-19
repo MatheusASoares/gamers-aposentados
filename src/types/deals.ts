@@ -187,6 +187,7 @@ export interface OracleGameRecommendation {
     absoluteSavingsBRL?: number;
     isFamilySharing?: boolean;
     isOwned?: boolean;
+    priceCheckedAt?: string;
 }
 
 export interface OwnedDealItem {
@@ -204,6 +205,7 @@ export interface OracleRecommendationsResponse {
     onRadar: OracleGameRecommendation[];
     tasteSummary: string;
     generatedAt: string;
+    pricesUpdatedAt?: string;
     cached: boolean;
     currencyRate?: CurrencyRate;
     dismissedTitles?: string[];

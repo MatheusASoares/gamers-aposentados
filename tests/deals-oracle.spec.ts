@@ -46,4 +46,37 @@ test.describe("Deals Oracle AI Service & Steam Integration", () => {
         expect(refreshed).toBeDefined();
         expect(refreshed.recommendations.length).toBeGreaterThanOrEqual(6);
     });
+
+    test("refreshRecommendationsPrices revalidates steam prices and stamps priceCheckedAt", async () => {
+        const sampleRecommendations = [
+            {
+                title: "Dead Cells",
+                tier: "INDIE" as const,
+                pitch: "Combate ágil estilo rogue-lite.",
+                highlightReason: "Ação rápida e progressão constante",
+                steamAppId: 588650,
+                isOnSale: false,
+                priceBR: 47.49,
+                regularPriceBR: 47.49,
+                dealUrl: "https://store.steampowered.com/app/588650",
+            },
+        ];
+
+        const updated = await DealsOracleService.refreshRecommendationsPrices(sampleRecommendations);
+
+        expect(updated).toBeDefined();
+        expect(updated.length).toBe(1);
+        expect(updated[0].steamAppId).toBe(588650);
+        expect(updated[0].priceCheckedAt).toBeTruthy();
+        expect(typeof updated[0].isOnSale).toBe("boolean");
+    });
+
+    test("getOracleRecommendations with refreshPrices updates pricesUpdatedAt timestamp", async () => {
+        const result = await DealsOracleService.getOracleRecommendations(undefined, false, true);
+
+        expect(result).toBeDefined();
+        expect(result.pricesUpdatedAt).toBeTruthy();
+        expect(result.recommendations.length).toBeGreaterThanOrEqual(1);
+    });
 });
+

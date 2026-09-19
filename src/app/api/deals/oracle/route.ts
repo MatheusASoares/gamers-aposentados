@@ -13,8 +13,13 @@ export async function GET(request: Request) {
 
         const { searchParams } = new URL(request.url);
         const forceRefresh = searchParams.get("forceRefresh") === "true";
+        const refreshPrices = searchParams.get("refreshPrices") === "true";
 
-        const oracleData = await DealsOracleService.getOracleRecommendations(userId, forceRefresh);
+        const oracleData = await DealsOracleService.getOracleRecommendations(
+            userId,
+            forceRefresh,
+            refreshPrices,
+        );
 
         return NextResponse.json({
             success: true,
@@ -30,12 +35,33 @@ export async function GET(request: Request) {
     }
 }
 
-export async function POST() {
+export async function POST(request: Request) {
     try {
         const session = await auth();
         const userId = session?.user?.id;
 
-        const oracleData = await DealsOracleService.getOracleRecommendations(userId, true);
+        const { searchParams } = new URL(request.url);
+        let refreshPrices = searchParams.get("refreshPrices") === "true";
+        let forceRefresh = searchParams.get("forceRefresh") === "true";
+
+        try {
+            const body = await request.json();
+            if (body?.refreshPrices) refreshPrices = true;
+            if (body?.forceRefresh) forceRefresh = true;
+        } catch {
+            // Corpo opcional
+        }
+
+        // Se nenhum parâmetro específico foi passado no POST, assume forceRefresh por padrão
+        if (!refreshPrices && !forceRefresh) {
+            forceRefresh = true;
+        }
+
+        const oracleData = await DealsOracleService.getOracleRecommendations(
+            userId,
+            forceRefresh,
+            refreshPrices,
+        );
 
         return NextResponse.json({
             success: true,
@@ -50,3 +76,4 @@ export async function POST() {
         );
     }
 }
+

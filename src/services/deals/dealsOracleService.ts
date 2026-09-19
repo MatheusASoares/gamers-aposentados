@@ -442,6 +442,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                         winningRegion,
                         savingsPercent,
                         absoluteSavingsBRL,
+                        priceCheckedAt: new Date().toISOString(),
                         dealUrl: steamAppId
                             ? `https://store.steampowered.com/app/${steamAppId}`
                             : `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`,
@@ -454,6 +455,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                         pitch: item.pitch,
                         highlightReason: item.highlight_reason,
                         isOnSale: false,
+                        priceCheckedAt: new Date().toISOString(),
                         dealUrl: `https://store.steampowered.com/search/?term=${encodeURIComponent(item.title)}`,
                     };
                 }
@@ -461,6 +463,128 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
         );
 
         return enriched;
+    }
+
+    /**
+     * Revalida os preços e promoções ao vivo na Steam para uma lista existente de recomendações.
+     * Não invoca a IA Gemini (zero custo de tokens), executando rapidamente via chamadas paralelas na Steam.
+     */
+    static async refreshRecommendationsPrices(
+        recs: OracleGameRecommendation[],
+    ): Promise<OracleGameRecommendation[]> {
+        if (!Array.isArray(recs) || recs.length === 0) {
+            return [];
+        }
+
+        let rate = 5.85;
+        try {
+            const currencyData = await CurrencyService.getUsdBrlRate();
+            if (currencyData?.rate) {
+                rate = currencyData.rate;
+            }
+        } catch (e) {
+            console.warn("[DealsOracleService] Failed to fetch currency rate for price refresh, using fallback:", e);
+        }
+
+        const nowIso = new Date().toISOString();
+
+        const updated = await Promise.all(
+            recs.map(async (item): Promise<OracleGameRecommendation> => {
+                try {
+                    let steamAppId = item.steamAppId;
+
+                    if (!steamAppId && item.title) {
+                        const searchResults = await SteamStoreClient.searchGames(item.title);
+                        if (searchResults[0]?.steamAppId) {
+                            steamAppId = searchResults[0].steamAppId;
+                        }
+                    }
+
+                    if (!steamAppId) {
+                        return {
+                            ...item,
+                            priceCheckedAt: nowIso,
+                        };
+                    }
+
+                    const [priceObjBR, priceObjUS] = await Promise.all([
+                        SteamStoreClient.getAppPrice(steamAppId, "BR"),
+                        SteamStoreClient.getAppPrice(steamAppId, "US"),
+                    ]);
+
+                    let priceBR = priceObjBR?.currentPrice ?? item.priceBR;
+                    let regularPriceBR = priceObjBR?.regularPrice ?? item.regularPriceBR ?? priceBR;
+                    let priceUS = priceObjUS?.currentPrice ?? item.priceUS;
+                    let regularPriceUS = priceObjUS?.regularPrice ?? item.regularPriceUS ?? priceUS;
+                    let discountPercent = priceObjBR?.discountPercent || priceObjUS?.discountPercent || 0;
+
+                    if (!discountPercent || discountPercent <= 0) {
+                        discountPercent = 0;
+                        if (priceBR !== undefined && regularPriceBR !== undefined && regularPriceBR > priceBR) {
+                            discountPercent = Math.round(((regularPriceBR - priceBR) / regularPriceBR) * 100);
+                        }
+                    }
+
+                    let winningRegion: WinningRegion = item.winningRegion || "EQUAL";
+                    let savingsPercent = item.savingsPercent || 0;
+                    let absoluteSavingsBRL = item.absoluteSavingsBRL || 0;
+
+                    if (priceBR !== undefined && priceUS !== undefined) {
+                        const priceUsInUsd = priceUS;
+                        const priceBrInUsd = CurrencyService.convertBrlToUsd(priceBR, rate);
+                        const priceUsInBrl = CurrencyService.convertUsdToBrl(priceUS, rate);
+                        const priceBrInBrl = priceBR;
+
+                        const diffUsd = Number((priceUsInUsd - priceBrInUsd).toFixed(2));
+
+                        if (Math.abs(diffUsd) < 0.05 || (priceUsInUsd === 0 && priceBrInBrl === 0)) {
+                            winningRegion = "EQUAL";
+                            savingsPercent = 0;
+                            absoluteSavingsBRL = 0;
+                        } else if (priceBrInUsd < priceUsInUsd) {
+                            winningRegion = "BR";
+                            absoluteSavingsBRL = Number((priceUsInBrl - priceBrInBrl).toFixed(2));
+                            savingsPercent =
+                                priceUsInUsd > 0
+                                    ? Math.min(100, Math.round(((priceUsInUsd - priceBrInUsd) / priceUsInUsd) * 100))
+                                    : 0;
+                        } else {
+                            winningRegion = "US";
+                            absoluteSavingsBRL = Number((priceBrInBrl - priceUsInBrl).toFixed(2));
+                            savingsPercent =
+                                priceBrInUsd > 0
+                                    ? Math.min(100, Math.round(((priceBrInUsd - priceUsInUsd) / priceBrInUsd) * 100))
+                                    : 0;
+                        }
+                    }
+
+                    const isOnSale = discountPercent > 0;
+
+                    return {
+                        ...item,
+                        steamAppId,
+                        priceBR,
+                        regularPriceBR,
+                        priceUS,
+                        regularPriceUS,
+                        discountPercent,
+                        isOnSale,
+                        winningRegion,
+                        savingsPercent,
+                        absoluteSavingsBRL,
+                        priceCheckedAt: nowIso,
+                    };
+                } catch (err) {
+                    console.warn(`[DealsOracleService] Failed to refresh prices for ${item.title}:`, err);
+                    return {
+                        ...item,
+                        priceCheckedAt: nowIso,
+                    };
+                }
+            }),
+        );
+
+        return updated;
     }
 
     /**
@@ -495,15 +619,17 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
 
     /**
      * Retorna a lista completa de recomendações do Oráculo, separadas em 'onSale' e 'onRadar'.
+     * Suporta revalidação automática ou sob demanda de preços na Steam.
      */
     static async getOracleRecommendations(
         userId?: string,
         forceRefresh: boolean = false,
+        refreshPrices: boolean = false,
     ): Promise<OracleRecommendationsResponse> {
         const cacheKey = `deals:oracle:${userId || "guest"}`;
         const userExclusions = await DealsOracleService.getUserExcludedTitles(userId);
 
-        if (!forceRefresh) {
+        if (!forceRefresh && !refreshPrices) {
             // 1. Verificar cache em memória do processo
             const cached = dealsCache.get<OracleRecommendationsResponse>(cacheKey);
             if (cached) {
@@ -519,62 +645,116 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                     cached: true,
                 };
             }
+        }
 
-            // 2. Verificar persistência permanente no PostgreSQL
-            if (userId) {
-                try {
-                    const savedRows = await prisma.$queryRaw<Array<{
-                        recommendations: any;
-                        taste_summary: string | null;
-                        generated_at: Date;
-                    }>>`
-                        SELECT recommendations, taste_summary, generated_at
-                        FROM user_oracle_recommendations
-                        WHERE user_id = ${userId}
-                    `;
-                    if (savedRows && savedRows.length > 0) {
-                        const row = savedRows[0];
-                        const recs: OracleGameRecommendation[] =
-                            typeof row.recommendations === "string"
-                                ? JSON.parse(row.recommendations)
-                                : row.recommendations;
+        // 2. Verificar persistência permanente no PostgreSQL (se não for forceRefresh com IA)
+        if (!forceRefresh && userId) {
+            try {
+                const savedRows = await prisma.$queryRaw<Array<{
+                    recommendations: any;
+                    taste_summary: string | null;
+                    generated_at: Date;
+                }>>`
+                    SELECT recommendations, taste_summary, generated_at
+                    FROM user_oracle_recommendations
+                    WHERE user_id = ${userId}
+                `;
+                if (savedRows && savedRows.length > 0) {
+                    const row = savedRows[0];
+                    let recs: OracleGameRecommendation[] =
+                        typeof row.recommendations === "string"
+                            ? JSON.parse(row.recommendations)
+                            : row.recommendations;
 
-                        if (Array.isArray(recs) && recs.length > 0) {
-                            const filteredRecs = recs.filter(
-                                (r) => !userExclusions.has(r.title.toLowerCase().trim()),
-                            );
-                            const onSale = filteredRecs.filter((r) => r.isOnSale);
-                            const onRadar = filteredRecs.filter((r) => !r.isOnSale);
-                            let currencyRate = undefined;
+                    if (Array.isArray(recs) && recs.length > 0) {
+                        // Checar se os preços estão desatualizados (mais de 30 min ou nunca verificados)
+                        const lastChecked = recs[0]?.priceCheckedAt
+                            ? new Date(recs[0].priceCheckedAt).getTime()
+                            : 0;
+                        const isPriceStale =
+                            refreshPrices ||
+                            !lastChecked ||
+                            Date.now() - lastChecked > 30 * 60 * 1000;
+
+                        if (isPriceStale) {
                             try {
-                                currencyRate = await CurrencyService.getUsdBrlRate();
-                            } catch {}
-
-                            const response: OracleRecommendationsResponse = {
-                                recommendations: filteredRecs,
-                                onSale,
-                                onRadar,
-                                tasteSummary: row.taste_summary || "Perfil personalizado da Guilda",
-                                generatedAt: row.generated_at
-                                    ? new Date(row.generated_at).toISOString()
-                                    : new Date().toISOString(),
-                                cached: true,
-                                currencyRate,
-                                dismissedTitles: Array.from(userExclusions),
-                            };
-
-                            // Salvar de volta na memória para respostas instantâneas (< 1ms)
-                            dealsCache.set(cacheKey, response, 12 * 60 * 60 * 1000);
-                            return response;
+                                recs = await DealsOracleService.refreshRecommendationsPrices(recs);
+                                const updatedJson = JSON.stringify(recs);
+                                await prisma.$executeRaw`
+                                    UPDATE user_oracle_recommendations
+                                    SET recommendations = ${updatedJson}::jsonb
+                                    WHERE user_id = ${userId}
+                                `;
+                            } catch (refreshErr) {
+                                console.warn("[DealsOracleService] Error refreshing prices from Steam:", refreshErr);
+                            }
                         }
+
+                        const filteredRecs = recs.filter(
+                            (r) => !userExclusions.has(r.title.toLowerCase().trim()),
+                        );
+                        const onSale = filteredRecs.filter((r) => r.isOnSale);
+                        const onRadar = filteredRecs.filter((r) => !r.isOnSale);
+                        let currencyRate = undefined;
+                        try {
+                            currencyRate = await CurrencyService.getUsdBrlRate();
+                        } catch {}
+
+                        const latestCheckedAt =
+                            recs.find((r) => r.priceCheckedAt)?.priceCheckedAt ||
+                            new Date().toISOString();
+
+                        const response: OracleRecommendationsResponse = {
+                            recommendations: filteredRecs,
+                            onSale,
+                            onRadar,
+                            tasteSummary: row.taste_summary || "Perfil personalizado da Guilda",
+                            generatedAt: row.generated_at
+                                ? new Date(row.generated_at).toISOString()
+                                : new Date().toISOString(),
+                            pricesUpdatedAt: latestCheckedAt,
+                            cached: !isPriceStale && !refreshPrices,
+                            currencyRate,
+                            dismissedTitles: Array.from(userExclusions),
+                        };
+
+                        // Salvar na memória por 30 minutos (1800 segundos)
+                        dealsCache.set(cacheKey, response, 30 * 60);
+                        return response;
                     }
-                } catch (dbErr) {
-                    console.warn("[DealsOracleService] Failed reading saved recommendations from DB:", dbErr);
                 }
+            } catch (dbErr) {
+                console.warn("[DealsOracleService] Failed reading saved recommendations from DB:", dbErr);
             }
         }
 
-        // 1. Extrair perfil e histórico de exclusão
+        // 3. Usuário anônimo/visitante com cache em memória
+        if (!forceRefresh && !userId) {
+            const cached = dealsCache.get<OracleRecommendationsResponse>(cacheKey);
+            if (cached && cached.recommendations?.length > 0) {
+                let recs = cached.recommendations;
+                if (refreshPrices) {
+                    try {
+                        recs = await DealsOracleService.refreshRecommendationsPrices(recs);
+                    } catch {}
+                }
+                const filteredRecs = recs.filter(
+                    (r) => !userExclusions.has(r.title.toLowerCase().trim()),
+                );
+                const response: OracleRecommendationsResponse = {
+                    ...cached,
+                    recommendations: filteredRecs,
+                    onSale: filteredRecs.filter((r) => r.isOnSale),
+                    onRadar: filteredRecs.filter((r) => !r.isOnSale),
+                    pricesUpdatedAt: new Date().toISOString(),
+                    cached: !refreshPrices,
+                };
+                dealsCache.set(cacheKey, response, 30 * 60);
+                return response;
+            }
+        }
+
+        // 4. Extrair perfil e histórico de exclusão para nova geração (ou fallback)
         const { favorites, excludedTitles, tasteSummary } =
             await DealsOracleService.getUserTasteProfile(userId);
 
@@ -603,6 +783,13 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                             );
                         }
                     }
+                } catch {}
+            }
+
+            // Atualizar os preços dos jogos sobreviventes para garantir cotações novas
+            if (currentSurviving.length > 0) {
+                try {
+                    currentSurviving = await DealsOracleService.refreshRecommendationsPrices(currentSurviving);
                 } catch {}
             }
         }
@@ -658,19 +845,21 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
             currencyRate = await CurrencyService.getUsdBrlRate();
         } catch {}
 
+        const nowIso = new Date().toISOString();
         const response: OracleRecommendationsResponse = {
             recommendations,
             onSale,
             onRadar,
             tasteSummary,
-            generatedAt: new Date().toISOString(),
+            generatedAt: nowIso,
+            pricesUpdatedAt: nowIso,
             cached: false,
             currencyRate,
             dismissedTitles: Array.from(excludedTitles),
         };
 
-        // Cache por 12 horas em memória
-        dealsCache.set(cacheKey, response, 12 * 60 * 60 * 1000);
+        // Cache por 30 minutos em memória (1800 segundos)
+        dealsCache.set(cacheKey, response, 30 * 60);
 
         // Persistência permanente no PostgreSQL
         if (userId) {
@@ -752,7 +941,7 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                 onSale: updatedRecs.filter((r) => r.isOnSale),
                 onRadar: updatedRecs.filter((r) => !r.isOnSale),
             };
-            dealsCache.set(cacheKey, updatedResponse, 12 * 60 * 60 * 1000);
+            dealsCache.set(cacheKey, updatedResponse, 30 * 60);
         }
     }
 }

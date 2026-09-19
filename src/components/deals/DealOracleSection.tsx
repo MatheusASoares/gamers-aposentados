@@ -72,69 +72,96 @@ export function DealOracleSection({
     const [data, setData] = useState<OracleRecommendationsResponse | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
+    const [isRefreshingPrices, setIsRefreshingPrices] = useState(false);
     const [activeTab, setActiveTab] = useState<"on_sale" | "on_radar">("on_sale");
     const [dismissedTitles, setDismissedTitles] = useState<Set<string>>(new Set());
     const [justDismissedTitle, setJustDismissedTitle] = useState<string | null>(null);
     const [justOwnedTitle, setJustOwnedTitle] = useState<string | null>(null);
+    const [priceCheckSuccessMsg, setPriceCheckSuccessMsg] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<string | null>(null);
+    const [pricesUpdatedAt, setPricesUpdatedAt] = useState<string | null>(null);
 
-    // Consulta e persistência das recomendações
-    const handleConsult = useCallback(async (forceRefresh: boolean = false) => {
-        try {
-            if (forceRefresh) {
-                setIsRefreshing(true);
-            } else {
-                setIsLoading(true);
-            }
+    // Consulta e persistência das recomendações (com suporte a checagem rápida de preços da Steam)
+    const handleConsult = useCallback(
+        async (forceRefresh: boolean = false, refreshPrices: boolean = false) => {
+            try {
+                if (refreshPrices) {
+                    setIsRefreshingPrices(true);
+                } else if (forceRefresh) {
+                    setIsRefreshing(true);
+                } else {
+                    setIsLoading(true);
+                }
 
-            const url = forceRefresh ? "/api/deals/oracle?forceRefresh=true" : "/api/deals/oracle";
-            const res = await fetch(url, {
-                method: forceRefresh ? "POST" : "GET",
-            });
+                let url = "/api/deals/oracle";
+                if (forceRefresh) {
+                    url = "/api/deals/oracle?forceRefresh=true";
+                } else if (refreshPrices) {
+                    url = "/api/deals/oracle?refreshPrices=true";
+                }
 
-            if (res.ok) {
-                const json = await res.json();
-                if (json.success) {
-                    setData(json);
-                    setLastUpdated(json.generatedAt || new Date().toISOString());
-                    try {
-                        localStorage.setItem(LOCAL_STORAGE_ORACLE_KEY, JSON.stringify(json));
-                    } catch (e) {
-                        console.error("Failed to cache oracle deals:", e);
-                    }
+                const res = await fetch(url, {
+                    method: forceRefresh ? "POST" : "GET",
+                });
 
-                    if (Array.isArray(json.dismissedTitles) && json.dismissedTitles.length > 0) {
-                        setDismissedTitles((prev) => {
-                            const merged = new Set([...prev, ...json.dismissedTitles]);
-                            try {
-                                localStorage.setItem(
-                                    LOCAL_STORAGE_DISMISSED_KEY,
-                                    JSON.stringify(Array.from(merged)),
-                                );
-                            } catch {}
-                            return merged;
-                        });
-                    }
+                if (res.ok) {
+                    const json = await res.json();
+                    if (json.success) {
+                        setData(json);
+                        setLastUpdated(json.generatedAt || new Date().toISOString());
+                        setPricesUpdatedAt(json.pricesUpdatedAt || null);
 
-                    if (forceRefresh) {
-                        setDismissedTitles(new Set());
+                        if (refreshPrices) {
+                            const onSaleTotal = json.onSale?.length || 0;
+                            setPriceCheckSuccessMsg(
+                                onSaleTotal > 0
+                                    ? `Preços atualizados! ${onSaleTotal} ${onSaleTotal === 1 ? "jogo está em promoção" : "jogos estão em promoção"} na Steam neste momento.`
+                                    : "Preços verificados na Steam em tempo real!",
+                            );
+                            setTimeout(() => setPriceCheckSuccessMsg(null), 4000);
+                        }
+
                         try {
-                            localStorage.removeItem(LOCAL_STORAGE_DISMISSED_KEY);
-                        } catch {}
-                    }
+                            localStorage.setItem(LOCAL_STORAGE_ORACLE_KEY, JSON.stringify(json));
+                        } catch (e) {
+                            console.error("Failed to cache oracle deals:", e);
+                        }
 
-                    if (json.onSale?.length === 0 && json.onRadar?.length > 0) {
-                        setActiveTab("on_radar");
+                        if (Array.isArray(json.dismissedTitles) && json.dismissedTitles.length > 0) {
+                            setDismissedTitles((prev) => {
+                                const merged = new Set([...prev, ...json.dismissedTitles]);
+                                try {
+                                    localStorage.setItem(
+                                        LOCAL_STORAGE_DISMISSED_KEY,
+                                        JSON.stringify(Array.from(merged)),
+                                    );
+                                } catch {}
+                                return merged;
+                            });
+                        }
+
+                        if (forceRefresh) {
+                            setDismissedTitles(new Set());
+                            try {
+                                localStorage.removeItem(LOCAL_STORAGE_DISMISSED_KEY);
+                            } catch {}
+                        }
+
+                        if (json.onSale?.length === 0 && json.onRadar?.length > 0) {
+                            setActiveTab("on_radar");
+                        }
                     }
                 }
+            } catch (err) {
+                console.error("[DealOracleSection] Failed to load oracle:", err);
+            } finally {
+                setIsLoading(false);
+                setIsRefreshing(false);
+                setIsRefreshingPrices(false);
             }
-        } catch (err) {
-            console.error("[DealOracleSection] Failed to load oracle:", err);
-        } finally {
-            setIsLoading(false);
-            setIsRefreshing(false);
-        }
-    }, []);
+        },
+        [],
+    );
 
     // 1. Carregamento imediato do localStorage ou consulta inicial automática
     useEffect(() => {
@@ -155,6 +182,7 @@ export function DealOracleSection({
                 if (parsed && Array.isArray(parsed.recommendations) && parsed.recommendations.length > 0) {
                     setData(parsed);
                     setLastUpdated(parsed.generatedAt || null);
+                    setPricesUpdatedAt(parsed.pricesUpdatedAt || null);
                     hasLocalData = true;
                     if (parsed.onSale?.length === 0 && parsed.onRadar?.length > 0) {
                         setActiveTab("on_radar");
@@ -165,9 +193,10 @@ export function DealOracleSection({
             console.error("[DealOracleSection] Error restoring cached oracle:", err);
         }
 
-        // Sempre busca no backend para sincronizar exclusões e recomendações persistidas no PostgreSQL
+        // Sempre busca no backend para sincronizar exclusões e revalidar preços que tiverem mais de 30 minutos
         handleConsult(false);
     }, [handleConsult]);
+
 
     // Marcar como "Já joguei esse"
     const handleDismiss = async (game: OracleGameRecommendation) => {
@@ -302,8 +331,14 @@ export function DealOracleSection({
                         </span>
                         {lastUpdated && (
                             <span className="text-xs font-semibold text-zinc-300 hidden sm:inline-flex items-center gap-1.5 rounded-md border border-theme/30 bg-black/40 px-2.5 py-0.5 shadow-sm">
+                                <span className="h-1.5 w-1.5 rounded-full bg-purple-400 inline-block" />
+                                Garimpo: {new Date(lastUpdated).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })}
+                            </span>
+                        )}
+                        {pricesUpdatedAt && (
+                            <span className="text-xs font-semibold text-zinc-300 hidden sm:inline-flex items-center gap-1.5 rounded-md border border-emerald-500/30 bg-emerald-950/20 px-2.5 py-0.5 shadow-sm">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 inline-block animate-pulse" />
-                                Garimpo salvo • {new Date(lastUpdated).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" })} às {new Date(lastUpdated).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
+                                Preços ao vivo: {new Date(pricesUpdatedAt).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" })}
                             </span>
                         )}
                     </div>
@@ -317,24 +352,51 @@ export function DealOracleSection({
                     </p>
                 </div>
 
-                <div className="flex items-center gap-2 self-start md:self-auto flex-shrink-0">
+                <div className="flex items-center gap-2 self-start md:self-auto flex-shrink-0 flex-wrap sm:flex-nowrap">
+                    {/* Botão de Checar Ofertas da Steam em tempo real */}
                     <button
                         type="button"
-                        onClick={() => handleConsult(true)}
-                        disabled={isRefreshing || isLoading}
+                        onClick={() => handleConsult(false, true)}
+                        disabled={isRefreshingPrices || isRefreshing || isLoading}
                         className={cn(
-                            "flex items-center gap-2 rounded-xl border border-theme/40 bg-zinc-900/90 px-4 py-2 text-xs sm:text-sm font-extrabold text-zinc-200 transition-all hover:border-theme-primary hover:text-white hover:bg-zinc-800 shadow-sm active:scale-95",
-                            (isRefreshing || isLoading) && "opacity-60 cursor-not-allowed",
+                            "flex items-center gap-1.5 sm:gap-2 rounded-xl border border-orange-500/40 bg-orange-950/30 px-3.5 py-2 text-xs sm:text-sm font-bold text-orange-200 transition-all hover:bg-orange-900/40 hover:border-orange-500 hover:text-white shadow-sm active:scale-95",
+                            (isRefreshingPrices || isRefreshing || isLoading) && "opacity-60 cursor-not-allowed",
                         )}
-                        title="Atualizar recomendações do Oráculo"
+                        title="Verificar ofertas e preços da Steam em tempo real para estes 10 jogos"
                     >
-                        <RefreshCw
-                            className={cn("h-4 w-4 text-theme-primary", (isRefreshing || isLoading) && "animate-spin")}
+                        <Flame
+                            className={cn("h-4 w-4 text-orange-400", isRefreshingPrices && "animate-spin")}
                         />
-                        <span>{isRefreshing ? "Atualizando..." : "Atualizar Garimpo"}</span>
+                        <span>{isRefreshingPrices ? "Checando Steam..." : "Checar Ofertas"}</span>
+                    </button>
+
+                    {/* Botão de Novo Garimpo (Gemini AI) */}
+                    <button
+                        type="button"
+                        onClick={() => handleConsult(true, false)}
+                        disabled={isRefreshing || isRefreshingPrices || isLoading}
+                        className={cn(
+                            "flex items-center gap-1.5 sm:gap-2 rounded-xl border border-theme/40 bg-zinc-900/90 px-3.5 py-2 text-xs sm:text-sm font-extrabold text-zinc-200 transition-all hover:border-theme-primary hover:text-white hover:bg-zinc-800 shadow-sm active:scale-95",
+                            (isRefreshing || isRefreshingPrices || isLoading) && "opacity-60 cursor-not-allowed",
+                        )}
+                        title="Buscar novos jogos com a IA do Oráculo"
+                    >
+                        <Sparkles
+                            className={cn("h-4 w-4 text-theme-primary", isRefreshing && "animate-spin")}
+                        />
+                        <span>{isRefreshing ? "Garimpando..." : "Novo Garimpo"}</span>
                     </button>
                 </div>
             </div>
+
+            {/* Notificação de preços atualizados com sucesso */}
+            {priceCheckSuccessMsg && (
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-950/80 px-3.5 py-2 text-xs font-medium text-orange-200 animate-in fade-in slide-in-from-top-1">
+                    <Flame className="h-4 w-4 text-orange-400 flex-shrink-0" />
+                    <span>{priceCheckSuccessMsg}</span>
+                </div>
+            )}
+
 
             {/* Notificação de jogo marcado como na biblioteca */}
             {justOwnedTitle && (
