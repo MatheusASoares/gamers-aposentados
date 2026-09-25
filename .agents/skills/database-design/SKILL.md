@@ -1,9 +1,7 @@
 ---
 name: database-design
-description: "Database design principles and decision-making. Schema design, indexing strategy, ORM selection, serverless databases."
-risk: safe
-source: community
-date_added: "2026-02-27"
+description: Database design principles and decision-making. Schema design, indexing strategy, ORM selection, serverless databases.
+allowed-tools: Read, Write, Edit, Glob, Grep
 ---
 
 # Database Design
@@ -52,6 +50,3 @@ Before designing schema:
 ❌ Use SELECT * in production
 ❌ Store JSON when structured data is better
 ❌ Ignore N+1 queries
-
-## When to Use
-This skill is applicable to execute the workflow or actions described in the overview.
