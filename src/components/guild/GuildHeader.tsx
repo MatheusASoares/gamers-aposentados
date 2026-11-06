@@ -7,6 +7,7 @@ import {
     Crown,
     Copy,
     Check,
+    Plus,
     Settings,
     LogOut,
     Sparkles,
@@ -37,6 +38,7 @@ import {
 } from "@/components/ui/dialog";
 import { type ActiveGuildDetailsDTO, leaveGuild } from "@/app/lib/guild-actions";
 import { GuildSettingsModal } from "./GuildSettingsModal";
+import { CreateGuildModal } from "./CreateGuildModal";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { getGuildLevelProgress } from "@/lib/guild-xp-engine";
@@ -58,11 +60,12 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
     const router = useRouter();
     const isLeader = guild.myRole === "LEADER";
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [copied, setCopied] = useState(false);
     const [isLeaving, setIsLeaving] = useState(false);
     const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
     const [leaveError, setLeaveError] = useState<string | null>(null);
-    const [bannerError, setBannerError] = useState(false);
+
 
     // XP calculation via guild engine (adapted to active members)
     const activeMembers = Math.max(2, guild.members.filter((m) => m.isActive).length);
@@ -314,6 +317,16 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                             </div>
 
                             {/* Actions Buttons */}
+
+                                <button
+                                    type="button"
+                                    onClick={() => setIsCreateOpen(true)}
+                                    className="flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-zinc-900/80 hover:bg-zinc-800 py-2 px-3 text-xs font-bold text-zinc-300 hover:text-white transition-all active:scale-95"
+                                    title="Criar outra guilda"
+                                >
+                                    <Plus className="h-3.5 w-3.5 text-theme-primary" />
+                                    <span>Nova Guilda</span>
+                                </button>
                             {isLeader ? (
                                 <button
                                     type="button"
@@ -411,6 +424,12 @@ export function GuildHeader({ guild, stats, currentUserId }: GuildHeaderProps) {
                 guild={guild}
                 isOpen={isSettingsOpen}
                 onClose={() => setIsSettingsOpen(false)}
+            />
+
+            {/* Create Guild Modal */}
+            <CreateGuildModal
+                isOpen={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
             />
 
             {/* Cyberpunk Leave Guild Modal */}

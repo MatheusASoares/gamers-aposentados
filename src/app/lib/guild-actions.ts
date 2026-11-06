@@ -21,6 +21,10 @@ export interface GuildSummaryDTO {
     equippedBanner: string | null;
     equippedEmblem: string | null;
     equippedMascot?: string | null;
+    questMode: string;
+    mainQuestNominations: number;
+    sideQuestNominations: number;
+    maxActiveQuests: number;
     memberCount: number;
     activeMemberCount: number;
     myRole: GuildRole;
@@ -83,6 +87,10 @@ export async function getUserGuilds(): Promise<GuildSummaryDTO[]> {
             equippedBanner: m.guild.equipped_banner,
             equippedEmblem: m.guild.equipped_emblem,
             equippedMascot: m.guild.equipped_mascot || null,
+            questMode: m.guild.quest_mode ?? "MAIN_AND_SIDE",
+            mainQuestNominations: m.guild.main_quest_nominations ?? 2,
+            sideQuestNominations: m.guild.side_quest_nominations ?? 3,
+            maxActiveQuests: m.guild.max_active_quests ?? 2,
             memberCount: m.guild.members.length,
             activeMemberCount: m.guild.members.filter((mem) => mem.is_active).length,
             myRole: m.role,
@@ -262,6 +270,9 @@ export async function createGuild(data: {
     name: string;
     description?: string;
     avatarUrl?: string;
+    questMode?: "ONLY_MAIN" | "MAIN_AND_SIDE";
+    mainQuestNominations?: number;
+    sideQuestNominations?: number;
 }) {
     const session = await auth();
     const userId = session?.user?.id;
@@ -305,6 +316,10 @@ export async function createGuild(data: {
                     level: 1,
                     xp_points: 0,
                     equipped_title: "Guilda Recruta",
+                    quest_mode: data.questMode || "MAIN_AND_SIDE",
+                    main_quest_nominations: data.mainQuestNominations ? Math.min(Math.max(data.mainQuestNominations, 1), 10) : 2,
+                    side_quest_nominations: data.sideQuestNominations ? Math.min(Math.max(data.sideQuestNominations, 1), 10) : 3,
+                    max_active_quests: data.questMode === "ONLY_MAIN" ? 1 : 2,
                     members: {
                         create: [
                             {
@@ -451,7 +466,14 @@ export async function toggleMemberActiveStatus(guildId: string, targetUserId: st
  */
 export async function updateGuildSettings(
     guildId: string,
-    data: { name?: string; description?: string; inviteCode?: string }
+    data: {
+        name?: string;
+        description?: string;
+        inviteCode?: string;
+        questMode?: "ONLY_MAIN" | "MAIN_AND_SIDE";
+        mainQuestNominations?: number;
+        sideQuestNominations?: number;
+    }
 ) {
     const session = await auth();
     const currentUserId = session?.user?.id;
@@ -471,7 +493,16 @@ export async function updateGuildSettings(
             return { success: false, error: "Apenas líderes podem editar a guilda." };
         }
 
-        const updateData: { name?: string; description?: string | null; slug?: string; invite_code?: string } = {};
+        const updateData: {
+            name?: string;
+            description?: string | null;
+            slug?: string;
+            invite_code?: string;
+            quest_mode?: string;
+            main_quest_nominations?: number;
+            side_quest_nominations?: number;
+            max_active_quests?: number;
+        } = {};
         if (data.name) {
             const trimmed = data.name.trim();
             if (trimmed.length < 3 || trimmed.length > 35) {
@@ -515,6 +546,19 @@ export async function updateGuildSettings(
 
         if (data.description !== undefined) {
             updateData.description = data.description.trim() || null;
+        }
+
+        if (data.questMode) {
+            updateData.quest_mode = data.questMode;
+            updateData.max_active_quests = data.questMode === "ONLY_MAIN" ? 1 : 2;
+        }
+
+        if (typeof data.mainQuestNominations === "number") {
+            updateData.main_quest_nominations = Math.min(Math.max(Math.round(data.mainQuestNominations), 1), 10);
+        }
+
+        if (typeof data.sideQuestNominations === "number") {
+            updateData.side_quest_nominations = Math.min(Math.max(Math.round(data.sideQuestNominations), 1), 10);
         }
 
         await prisma.guild.update({
@@ -804,6 +848,10 @@ function mapToActiveGuildDetails(guild: ActiveGuildQueryPayload, currentUserId: 
         equippedBanner: guild.equipped_banner,
         equippedEmblem: guild.equipped_emblem,
         equippedMascot: guild.equipped_mascot || null,
+        questMode: guild.quest_mode ?? "MAIN_AND_SIDE",
+        mainQuestNominations: guild.main_quest_nominations ?? 2,
+        sideQuestNominations: guild.side_quest_nominations ?? 3,
+        maxActiveQuests: guild.max_active_quests ?? 2,
         memberCount: guild.members.length,
         activeMemberCount: guild.members.filter((m) => m.is_active).length,
         myRole: myMembership?.role || "MEMBER",

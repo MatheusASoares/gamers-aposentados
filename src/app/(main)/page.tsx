@@ -6,13 +6,14 @@ import { StatsGrid } from "@/components/dashboard/StatsGrid";
 import { RecentActivity, ActivityEvent } from "@/components/dashboard/RecentGames";
 import { UserProfileWidget } from "@/components/dashboard/UserProfileWidget";
 import { GuildDashboardWidget } from "@/components/dashboard/GuildDashboardWidget";
+import { GuildOnboardingBanner } from "@/components/dashboard/GuildOnboardingBanner";
 import { Leaderboard, PlayerStats } from "@/components/dashboard/Leaderboard";
 import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
 import { getPendingSpecialGameProposals } from "@/app/lib/special-game-actions";
 import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast";
-import { isGuildMaster } from "@/lib/permissions";
+
 import { getActiveGuild, getGuildStats } from "@/app/lib/guild-actions";
 
 export default async function DashboardPage() {
@@ -20,7 +21,7 @@ export default async function DashboardPage() {
 
     const userId = session?.user?.id || "";
     const activeGuild = await getActiveGuild();
-    const isMaster = isGuildMaster(session?.user) || (activeGuild?.members.some((m) => m.userId === userId && m.role === "LEADER") ?? false);
+
 
     interface RawReview {
         id: string;
@@ -407,9 +408,13 @@ export default async function DashboardPage() {
             )}
 
             {/* Guild Gamification Banner */}
-            {activeGuild && (
+            {activeGuild ? (
                 <div className="w-full">
                     <GuildDashboardWidget guild={activeGuild} stats={guildStats} />
+                </div>
+            ) : (
+                <div className="w-full">
+                    <GuildOnboardingBanner />
                 </div>
             )}
 

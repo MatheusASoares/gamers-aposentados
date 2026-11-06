@@ -14,6 +14,7 @@ const eslintConfig = defineConfig([
             "@typescript-eslint/no-explicit-any": "warn",
             "@typescript-eslint/no-require-imports": "warn",
             "@next/next/no-img-element": "off",
+            "react-hooks/set-state-in-effect": "warn",
         },
     },
     // Override default ignores of eslint-config-next.

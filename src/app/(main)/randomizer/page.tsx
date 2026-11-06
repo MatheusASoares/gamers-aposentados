@@ -50,6 +50,9 @@ export default async function RandomizerPage() {
                                       level: activeGuild.level,
                                       myRole: activeGuild.myRole,
                                       myIsActive: activeGuild.myIsActive,
+                                      questMode: activeGuild.questMode,
+                                      mainQuestNominations: activeGuild.mainQuestNominations,
+                                      sideQuestNominations: activeGuild.sideQuestNominations,
                                       activeMembers: activeGuild.members
                                           .filter((m) => m.isActive)
                                           .map((m) => ({

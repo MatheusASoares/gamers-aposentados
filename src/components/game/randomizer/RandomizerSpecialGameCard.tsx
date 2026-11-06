@@ -49,13 +49,15 @@ export function RandomizerSpecialGameCard({
     const [selectedPastGameId, setSelectedPastGameId] = useState<string>("");
     const [isPastDropdownOpen, setIsPastDropdownOpen] = useState(false);
 
-    // Reset local selection when questType changes
-    useEffect(() => {
+    // Reset local selection during render when questType changes (React 19 pattern)
+    const [prevQuestType, setPrevQuestType] = useState(questType);
+    if (prevQuestType !== questType) {
+        setPrevQuestType(questType);
         setSelectedPastGameId("");
         setSelectedSearchedGame(null);
         setSpecialGameSearchOpen(false);
         setIsPastDropdownOpen(false);
-    }, [questType]);
+    }
 
     const handleProposeSearchGame = async () => {
         if (!selectedSearchedGame) return;

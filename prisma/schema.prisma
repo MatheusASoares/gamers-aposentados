@@ -370,6 +370,12 @@ model Guild {
   equipped_title  String?
   equipped_mascot String?
 
+  // Regras de Jogo e Sorteios Customizáveis
+  quest_mode             String         @default("MAIN_AND_SIDE") // "ONLY_MAIN" | "MAIN_AND_SIDE"
+  main_quest_nominations Int            @default(2) // Indicações por membro em Main Quest (ex: 2, 4)
+  side_quest_nominations Int            @default(3) // Indicações por membro em Side Quest (ex: 3)
+  max_active_quests      Int            @default(2) // Quantas quests ativas simultâneas (1 ou 2)
+
   created_at      DateTime       @default(now())
   updated_at      DateTime       @updatedAt
 

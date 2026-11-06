@@ -544,10 +544,10 @@ Retorne APENAS um JSON válido contendo uma lista de ${count} objetos com este f
                             : SteamStoreClient.isFamilySharingSupported(steamAppId),
                     ]);
 
-                    let priceBR = priceObjBR?.currentPrice ?? item.priceBR;
-                    let regularPriceBR = priceObjBR?.regularPrice ?? item.regularPriceBR ?? priceBR;
-                    let priceUS = priceObjUS?.currentPrice ?? item.priceUS;
-                    let regularPriceUS = priceObjUS?.regularPrice ?? item.regularPriceUS ?? priceUS;
+                    const priceBR = priceObjBR?.currentPrice ?? item.priceBR;
+                    const regularPriceBR = priceObjBR?.regularPrice ?? item.regularPriceBR ?? priceBR;
+                    const priceUS = priceObjUS?.currentPrice ?? item.priceUS;
+                    const regularPriceUS = priceObjUS?.regularPrice ?? item.regularPriceUS ?? priceUS;
                     let discountPercent = priceObjBR?.discountPercent || priceObjUS?.discountPercent || 0;
 
                     if (!discountPercent || discountPercent <= 0) {

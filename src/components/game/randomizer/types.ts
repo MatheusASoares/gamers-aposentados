@@ -14,6 +14,9 @@ export interface ActiveGuildContext {
     myRole: "LEADER" | "MEMBER";
     myIsActive: boolean;
     activeMembers: Array<{ id: string; userId: string; name: string; role: "LEADER" | "MEMBER" }>;
+    questMode?: string;
+    mainQuestNominations?: number;
+    sideQuestNominations?: number;
 }
 
 export interface WinnerData {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Settings, Sparkles, Loader2, Link2, Shield } from "lucide-react";
+import { Settings, Sparkles, Loader2, Link2, Shield, Dices, Layers } from "lucide-react";
 import {
     Dialog,
     DialogContent,
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/dialog";
 import { updateGuildSettings, type ActiveGuildDetailsDTO } from "@/app/lib/guild-actions";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 interface GuildSettingsModalProps {
     guild: ActiveGuildDetailsDTO;
@@ -24,6 +25,11 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
     const [inviteCode, setInviteCode] = useState(guild.inviteCode);
     const [isCustomCode, setIsCustomCode] = useState(false);
     const [description, setDescription] = useState(guild.description || "");
+    const [questMode, setQuestMode] = useState<"ONLY_MAIN" | "MAIN_AND_SIDE">(
+        (guild.questMode as "ONLY_MAIN" | "MAIN_AND_SIDE") || "MAIN_AND_SIDE"
+    );
+    const [mainNominations, setMainNominations] = useState<number>(guild.mainQuestNominations || 2);
+    const [sideNominations, setSideNominations] = useState<number>(guild.sideQuestNominations || 3);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +39,9 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
             setName(guild.name);
             setInviteCode(guild.inviteCode);
             setDescription(guild.description || "");
+            setQuestMode((guild.questMode as "ONLY_MAIN" | "MAIN_AND_SIDE") || "MAIN_AND_SIDE");
+            setMainNominations(guild.mainQuestNominations || 2);
+            setSideNominations(guild.sideQuestNominations || 3);
             setIsCustomCode(false);
             setError(null);
         }
@@ -83,6 +92,9 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
                 name: name.trim(),
                 inviteCode: inviteCode.trim(),
                 description: description.trim() || undefined,
+                questMode,
+                mainQuestNominations: mainNominations,
+                sideQuestNominations: questMode === "MAIN_AND_SIDE" ? sideNominations : 0,
             });
 
             if (res.success) {
@@ -100,7 +112,7 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
 
     return (
         <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-            <DialogContent className="max-w-md border border-theme bg-theme-card p-6 backdrop-blur-2xl shadow-[0_0_40px_var(--theme-glow)] rounded-2xl">
+            <DialogContent className="max-w-lg border border-theme bg-theme-card p-6 backdrop-blur-2xl shadow-[0_0_40px_var(--theme-glow)] rounded-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle className="flex items-center gap-2.5 text-lg font-black uppercase tracking-wider text-white">
                         <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-theme-primary/40 bg-theme-primary/15 text-theme-primary">
@@ -109,7 +121,7 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
                         Configurações da Guilda
                     </DialogTitle>
                     <DialogDescription className="text-xs text-zinc-300 font-medium">
-                        Altere as informações públicas, código de convite e lema do seu esquadrão.
+                        Altere as informações públicas, código de convite e regras de quests do esquadrão.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -171,12 +183,111 @@ export function GuildSettingsModal({ guild, isOpen, onClose }: GuildSettingsModa
                         <textarea
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            rows={3}
+                            rows={2}
                             maxLength={200}
                             disabled={isLoading}
                             className="w-full rounded-xl border border-zinc-800 bg-zinc-900/90 px-3.5 py-2 text-xs text-zinc-200 placeholder-zinc-500 focus:border-theme-primary focus:outline-none focus:ring-1 focus:ring-theme-primary transition-all resize-none"
                             placeholder="Lema ou descrição do esquadrão..."
                         />
+                    </div>
+
+                    {/* Seção de Regras de Jogo Customizáveis */}
+                    <div className="rounded-2xl border border-theme/40 bg-zinc-900/60 p-4 space-y-3.5">
+                        <div className="flex items-center gap-2 pb-1 border-b border-white/5">
+                            <Dices className="h-4 w-4 text-theme-primary" />
+                            <span className="text-xs font-black uppercase tracking-wider text-white">
+                                Regras de Quests & Sorteio
+                            </span>
+                        </div>
+
+                        {/* Modo de Quests */}
+                        <div className="space-y-1.5">
+                            <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-400">
+                                Modo de Jogo da Guilda
+                            </label>
+                            <div className="grid grid-cols-2 gap-2">
+                                <button
+                                    type="button"
+                                    onClick={() => setQuestMode("ONLY_MAIN")}
+                                    className={cn(
+                                        "flex flex-col items-start p-2.5 rounded-xl border text-left transition-all",
+                                        questMode === "ONLY_MAIN"
+                                            ? "border-theme-primary bg-theme-primary/15 shadow-[0_0_15px_var(--theme-glow)] text-white"
+                                            : "border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-zinc-200"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                                        <Layers className="h-3.5 w-3.5 text-amber-400" />
+                                        1 Quest por Vez
+                                    </div>
+                                    <span className="text-[10px] text-zinc-500 mt-1">
+                                        Foco total em 1 jogo (Apenas Main Quest)
+                                    </span>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => setQuestMode("MAIN_AND_SIDE")}
+                                    className={cn(
+                                        "flex flex-col items-start p-2.5 rounded-xl border text-left transition-all",
+                                        questMode === "MAIN_AND_SIDE"
+                                            ? "border-theme-primary bg-theme-primary/15 shadow-[0_0_15px_var(--theme-glow)] text-white"
+                                            : "border-zinc-800 bg-zinc-900/80 text-zinc-400 hover:text-zinc-200"
+                                    )}
+                                >
+                                    <div className="flex items-center gap-1.5 font-bold text-xs">
+                                        <Sparkles className="h-3.5 w-3.5 text-theme-primary" />
+                                        Main + Side Quest
+                                    </div>
+                                    <span className="text-[10px] text-zinc-500 mt-1">
+                                        2 jogos em paralelo (Clássico)
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Cotas de Indicações */}
+                        <div className="space-y-2 pt-1">
+                            <div className="flex items-center justify-between">
+                                <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-300">
+                                    Indicações por Membro (Main Quest)
+                                </label>
+                                <span className="text-xs font-black text-amber-400 px-2 py-0.5 rounded-md bg-amber-400/10 border border-amber-400/20">
+                                    {mainNominations} jogos / membro
+                                </span>
+                            </div>
+                            <input
+                                type="range"
+                                min={1}
+                                max={6}
+                                step={1}
+                                value={mainNominations}
+                                onChange={(e) => setMainNominations(Number(e.target.value))}
+                                className="w-full accent-amber-400 cursor-pointer"
+                            />
+                        </div>
+
+                        {questMode === "MAIN_AND_SIDE" && (
+                            <div className="space-y-2 pt-2 border-t border-white/5">
+                                <div className="flex items-center justify-between">
+                                    <label className="text-[11px] font-bold uppercase tracking-wider text-zinc-300">
+                                        Indicações por Membro (Side Quest)
+                                    </label>
+                                    <span className="text-xs font-black text-[#bd0df2] px-2 py-0.5 rounded-md bg-[#bd0df2]/10 border border-[#bd0df2]/20">
+                                        {sideNominations} jogos / membro
+                                    </span>
+                                </div>
+                                <input
+                                    type="range"
+                                    min={1}
+                                    max={6}
+                                    step={1}
+                                    value={sideNominations}
+                                    onChange={(e) => setSideNominations(Number(e.target.value))}
+                                    className="w-full accent-[#bd0df2] cursor-pointer"
+                                />
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-white/5">

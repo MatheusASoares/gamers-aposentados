@@ -8,12 +8,14 @@ interface RandomizerHeaderProps {
     questType: QuestType;
     onQuestTypeChange: (type: QuestType) => void;
     saveStatus: { success?: boolean; message?: string } | null;
+    isOnlyMain?: boolean;
 }
 
 export function RandomizerHeader({
     questType,
     onQuestTypeChange,
     saveStatus,
+    isOnlyMain = false,
 }: RandomizerHeaderProps) {
     return (
         <>
@@ -27,6 +29,14 @@ export function RandomizerHeader({
                         May the RNG be in your favor, Commander.
                     </p>
                 </div>
+                {isOnlyMain ? (
+                    <div className="flex items-center gap-2 rounded-2xl border border-amber-400/40 bg-amber-400/10 px-4 py-3 text-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.15)] backdrop-blur-md">
+                        <Trophy className="h-4 w-4 text-amber-400" />
+                        <span className="text-xs font-black uppercase tracking-wider">
+                            Modo da Guilda: Apenas Main Quest (1 Jogo)
+                        </span>
+                    </div>
+                ) : (
                 <div className="relative flex w-full rounded-2xl border border-white/5 bg-zinc-900/40 p-1.5 shadow-xl backdrop-blur-md sm:inline-flex sm:w-[400px]">
                     <div
                         className={cn(
@@ -83,6 +93,7 @@ export function RandomizerHeader({
                         </span>
                     </button>
                 </div>
+                )}
             </div>
 
             {/* Alert Notification */}

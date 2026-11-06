@@ -17,32 +17,33 @@ export async function Header() {
         : [null, []];
 
     return (
-        <header className="sticky top-0 z-[60] flex h-16 w-full items-center justify-between border-b border-theme bg-theme-card px-3 sm:px-4 md:px-6 backdrop-blur-md transition-colors duration-400 select-none gap-2">
-            {/* Desktop Left: Breadcrumbs + GuildSwitcher */}
-            <div className="hidden items-center gap-4 md:flex min-w-0">
-                <Breadcrumbs />
-                {user && (
-                    <div className="border-l border-zinc-800/80 pl-4">
-                        <GuildSwitcher activeGuild={activeGuild} userGuilds={userGuilds} />
-                    </div>
-                )}
-            </div>
+        <header className="sticky top-0 z-[60] flex w-full flex-col border-b border-theme bg-theme-card/95 backdrop-blur-md transition-colors duration-400 select-none pt-[env(safe-area-inset-top,0px)]">
+            <div className="flex h-16 w-full items-center justify-between px-3 sm:px-4 md:px-6 gap-2">
+                {/* Desktop Left: Breadcrumbs + GuildSwitcher */}
+                <div className="hidden items-center gap-4 md:flex min-w-0">
+                    <Breadcrumbs />
+                    {user && (
+                        <div className="border-l border-zinc-800/80 pl-4">
+                            <GuildSwitcher activeGuild={activeGuild} userGuilds={userGuilds} />
+                        </div>
+                    )}
+                </div>
 
-            {/* Mobile: Compact Logo + Flexible Centered GuildSwitcher */}
-            <div className="flex flex-1 items-center justify-between gap-2 min-w-0 md:hidden">
-                <AppLogo theme={equippedTheme} variant="compact" />
-                {user && (
-                    <div className="flex-1 min-w-0 flex items-center justify-center px-1">
-                        <GuildSwitcher activeGuild={activeGuild} userGuilds={userGuilds} />
-                    </div>
-                )}
-            </div>
+                {/* Mobile: Compact Logo + Flexible Centered GuildSwitcher */}
+                <div className="flex flex-1 items-center justify-between gap-2 min-w-0 md:hidden">
+                    <AppLogo theme={equippedTheme} variant="compact" />
+                    {user && (
+                        <div className="flex-1 min-w-0 flex items-center justify-center px-1">
+                            <GuildSwitcher activeGuild={activeGuild} userGuilds={userGuilds} />
+                        </div>
+                    )}
+                </div>
 
-            {/* Right Controls: User Profile / Auth */}
-            <div className="flex shrink-0 items-center gap-2 md:gap-4">
-                <AuthButtons user={user} />
+                {/* Right Controls: User Profile / Auth */}
+                <div className="flex shrink-0 items-center gap-2 md:gap-4">
+                    <AuthButtons user={user} />
+                </div>
             </div>
         </header>
     );
 }
-

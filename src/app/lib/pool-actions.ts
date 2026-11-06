@@ -226,7 +226,26 @@ export async function saveSelections(
     const isTestEnv = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
     const isTestUser = isTestEnv && session.user.email?.toLowerCase().endsWith("@test.com");
     const typeEnum = questType === "MAIN" ? "MAIN_QUEST" : "SIDE_QUEST";
-    const maxPerPerson = isTestUser ? (questType === "MAIN" ? 4 : 6) : (questType === "MAIN" ? 2 : 3);
+    const targetGuild = await prisma.guild.findUnique({
+        where: { id: guildId },
+        select: {
+            quest_mode: true,
+            main_quest_nominations: true,
+            side_quest_nominations: true,
+        },
+    });
+
+    if (targetGuild?.quest_mode === "ONLY_MAIN" && questType === "SIDE") {
+        return {
+            success: false,
+            error: "Esta guilda está configurada para jogar apenas Main Quests.",
+        };
+    }
+
+    const guildQuota = questType === "MAIN"
+        ? (targetGuild?.main_quest_nominations ?? 2)
+        : (targetGuild?.side_quest_nominations ?? 3);
+    const maxPerPerson = isTestUser ? guildQuota * 2 : guildQuota;
 
     if (games.length > maxPerPerson) {
         return {
@@ -409,7 +428,7 @@ export async function executeRoll(
 
         if (!poolBefore) return { success: false, error: "Pote não encontrado." };
 
-        const guildId = poolBefore.guild_id;
+
         const activeMembers = poolBefore.guild?.members || [];
         const isLeader = activeMembers.some((m) => m.user_id === userId && m.role === "LEADER");
 
@@ -441,11 +460,13 @@ export async function executeRoll(
             const typeEnum = pool.type;
             const isTestEnv = process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test";
             const isTestUser = isTestEnv && session.user.email?.toLowerCase().endsWith("@test.com");
-            const maxPerPerson = typeEnum === "MAIN_QUEST" ? 2 : 3;
+            const guildQuota = typeEnum === "MAIN_QUEST"
+                ? (poolBefore.guild?.main_quest_nominations ?? 2)
+                : (poolBefore.guild?.side_quest_nominations ?? 3);
             const activeMemberCount = activeMembers.length > 0 ? activeMembers.length : 2;
             const totalRequired = isTestUser
                 ? (typeEnum === "MAIN_QUEST" ? 4 : 6)
-                : maxPerPerson * activeMemberCount;
+                : guildQuota * activeMemberCount;
 
             // Se NÃO for sorteio forçado de emergência, exige a cota cheia proporcional
             if (!options?.forceEmergency && pool.entries.length < totalRequired) {

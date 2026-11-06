@@ -3,9 +3,8 @@ import { redirect } from "next/navigation";
 import { getActiveGuild, getGuildStats } from "@/app/lib/guild-actions";
 import { GuildHeader } from "@/components/guild/GuildHeader";
 import { GuildRoster } from "@/components/guild/GuildRoster";
-import { Shield } from "lucide-react";
+import { GuildEmptyState } from "@/components/guild/GuildEmptyState";
 import { Metadata } from "next";
-import Link from "next/link";
 
 import { GuildRewardsCustomizationModule } from "@/components/guild/GuildRewardsCustomizationModule";
 import { GuildMascotCompanion } from "@/components/guild/GuildMascotCompanion";
@@ -28,29 +27,7 @@ export default async function GuildPage() {
     const activeGuild = await getActiveGuild();
 
     if (!activeGuild) {
-        return (
-            <div className="flex min-h-[70vh] flex-col items-center justify-center p-6 text-center select-none">
-                <div className="flex h-20 w-20 items-center justify-center rounded-3xl border border-[#bd0df2]/40 bg-[#bd0df2]/15 text-[#bd0df2] shadow-[0_0_30px_rgba(189,13,242,0.3)] mb-6">
-                    <Shield className="h-10 w-10" />
-                </div>
-
-                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-wider text-white mb-2">
-                    Nenhuma Guilda Selecionada
-                </h1>
-                <p className="text-sm text-zinc-400 max-w-md mb-8">
-                    Você ainda não faz parte de nenhuma guilda ou nenhuma está ativa no momento. Crie um novo esquadrão ou entre com o código de convite dos seus amigos.
-                </p>
-
-                <div className="flex flex-wrap items-center justify-center gap-3">
-                    <Link
-                        href="/"
-                        className="rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-2.5 text-xs font-bold text-zinc-300 hover:text-white transition-all"
-                    >
-                        Voltar ao Dashboard
-                    </Link>
-                </div>
-            </div>
-        );
+        return <GuildEmptyState />;
     }
 
     const stats = (await getGuildStats(activeGuild.id)) || {
@@ -67,7 +44,6 @@ export default async function GuildPage() {
                 (r.name.toLowerCase() === activeGuild.equippedMascot?.toLowerCase() ||
                     r.assetUrl === activeGuild.equippedMascot ||
                     r.id === activeGuild.equippedMascot ||
-                    activeGuild.equippedMascot?.toLowerCase().includes(r.name.toLowerCase()) ||
                     r.name.toLowerCase().includes(activeGuild.equippedMascot?.toLowerCase() || ""))
         )
         : GUILD_REWARDS_CATALOG.find((r) => r.type === "MASCOT" && r.level <= Math.max(2, activeGuild.level)) || GUILD_REWARDS_CATALOG.find((r) => r.type === "MASCOT") || null;
@@ -100,14 +76,14 @@ export default async function GuildPage() {
                 )}
             </div>
 
-            {/* 1. HERO HEADER: 3-Column Guild Showcase (Proporção igualada com o Hall of Fame) */}
+            {/* 1. HERO HEADER: 3-Column Guild Showcase */}
             <GuildHeader
                 guild={activeGuild}
                 stats={stats}
                 currentUserId={session.user.id}
             />
 
-            {/* 2. Armário de Recompensas e Customização de Prestígio (Estilo Hall of Fame) */}
+            {/* 2. Armário de Recompensas e Customização de Prestígio */}
             <GuildRewardsCustomizationModule
                 guildLevel={activeGuild.level}
                 guildName={activeGuild.name}
@@ -118,7 +94,7 @@ export default async function GuildPage() {
                 equippedMascot={activeGuild.equippedMascot}
             />
 
-            {/* 4. Quartel de Membros com Gerenciamento e Toggle Ativo/Inativo */}
+            {/* 3. Quartel de Membros com Gerenciamento e Toggle Ativo/Inativo */}
             <GuildRoster
                 guild={activeGuild}
                 currentUserId={session.user.id}

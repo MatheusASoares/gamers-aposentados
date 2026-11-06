@@ -56,7 +56,8 @@ export function RandomizerClient({
     const { data: session } = useSession();
     const equippedTheme = session?.user?.equipped_theme || "cyberpunk";
 
-    const [questType, setQuestType] = useState<QuestType>("SIDE");
+    const isOnlyMain = activeGuild?.questMode === "ONLY_MAIN";
+    const [questType, setQuestType] = useState<QuestType>(isOnlyMain ? "MAIN" : "SIDE");
 
     // Pool state
     const [poolId, setPoolId] = useState<string | null>(null);
@@ -101,12 +102,13 @@ export function RandomizerClient({
         (process.env.NODE_ENV === "development" || process.env.NODE_ENV === "test") &&
         currentUserEmail.endsWith("@test.com");
     const activeMemberCount = activeGuild?.activeMembers?.length || 2;
+    const guildQuota = questType === "MAIN"
+        ? (activeGuild?.mainQuestNominations ?? 2)
+        : (activeGuild?.sideQuestNominations ?? 3);
     const requiredTotal = isTestUser
-        ? questType === "MAIN"
-            ? 4
-            : 6
-        : (questType === "MAIN" ? 2 : 3) * activeMemberCount;
-    const maxPerPerson = isTestUser ? requiredTotal : questType === "MAIN" ? 2 : 3;
+        ? (questType === "MAIN" ? 4 : 6)
+        : guildQuota * activeMemberCount;
+    const maxPerPerson = isTestUser ? requiredTotal : guildQuota;
 
     // Determine the "other" user's name from pool entries or from the prop
     const otherUserName =
@@ -538,6 +540,7 @@ export function RandomizerClient({
                     questType={questType}
                     onQuestTypeChange={(t) => setQuestType(t)}
                     saveStatus={saveStatus}
+                    isOnlyMain={isOnlyMain}
                 />
 
                 {isLoading ? (
