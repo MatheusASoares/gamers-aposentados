@@ -873,3 +873,134 @@ function mapToActiveGuildDetails(guild: ActiveGuildQueryPayload, currentUserId: 
     };
 }
 
+
+
+export interface GuildRadarDTO {
+    guildId: string;
+    guildName: string;
+    guildSlug: string;
+    guildLevel: number;
+    equippedEmblem: string | null;
+    questMode: string;
+    members: Array<{
+        id: string;
+        name: string;
+        image: string | null;
+        level: number;
+    }>;
+    activeGames: Array<{
+        poolId: string;
+        questType: "MAIN" | "SIDE";
+        gameId: string;
+        title: string;
+        coverUrl: string | null;
+    }>;
+}
+
+/**
+ * Retorna as outras guildas e seus jogos ativos para exibição no Radar da Comunidade.
+ */
+export async function getOtherGuildsRadar(currentGuildId?: string): Promise<GuildRadarDTO[]> {
+    try {
+        const guilds = await prisma.guild.findMany({
+            where: currentGuildId ? { id: { not: currentGuildId } } : undefined,
+            include: {
+                members: {
+                    where: { is_active: true },
+                    include: {
+                        user: {
+                            select: {
+                                id: true,
+                                name: true,
+                                username: true,
+                                image: true,
+                                level: true,
+                            },
+                        },
+                    },
+                    orderBy: [
+                        { role: "asc" },
+                        { joined_at: "asc" },
+                    ],
+                },
+                pools: {
+                    where: { winner_game_id: { not: null } },
+                    orderBy: { created_at: "desc" },
+                    include: {
+                        winner_game: {
+                            select: {
+                                id: true,
+                                title: true,
+                                cover_url: true,
+                            },
+                        },
+                    },
+                },
+            },
+            orderBy: {
+                level: "desc",
+            },
+        });
+
+        return guilds.map((g) => {
+            const latestMain = g.pools.find((p) => p.type === "MAIN_QUEST" && p.winner_game);
+            const latestSide = g.quest_mode !== "ONLY_MAIN"
+                ? g.pools.find((p) => p.type === "SIDE_QUEST" && p.winner_game)
+                : undefined;
+
+            const activeGames: GuildRadarDTO["activeGames"] = [];
+            if (latestMain?.winner_game) {
+                activeGames.push({
+                    poolId: latestMain.id,
+                    questType: "MAIN",
+                    gameId: latestMain.winner_game.id,
+                    title: latestMain.winner_game.title,
+                    coverUrl: latestMain.winner_game.cover_url,
+                });
+            }
+            if (latestSide?.winner_game) {
+                activeGames.push({
+                    poolId: latestSide.id,
+                    questType: "SIDE",
+                    gameId: latestSide.winner_game.id,
+                    title: latestSide.winner_game.title,
+                    coverUrl: latestSide.winner_game.cover_url,
+                });
+            }
+
+            return {
+                guildId: g.id,
+                guildName: g.name,
+                guildSlug: g.slug,
+                guildLevel: g.level,
+                equippedEmblem: g.equipped_emblem,
+                questMode: g.quest_mode,
+                members: g.members.map((m) => ({
+                    id: m.id,
+                    name: m.user.name || m.user.username || "Gamer",
+                    image: m.user.image,
+                    level: m.user.level || 1,
+                })),
+                activeGames,
+            };
+        });
+    } catch (error) {
+        console.error("Erro ao buscar radar de outras guildas:", error);
+        return [];
+    }
+}
+
+/**
+ * Retorna uma lista leve de todas as guildas para o seletor no histórico de quests.
+ */
+export async function getAllGuildsForSelector(): Promise<Array<{ id: string; name: string; slug: string; level: number }>> {
+    try {
+        const guilds = await prisma.guild.findMany({
+            select: { id: true, name: true, slug: true, level: true },
+            orderBy: { name: "asc" },
+        });
+        return guilds;
+    } catch {
+        return [];
+    }
+}
