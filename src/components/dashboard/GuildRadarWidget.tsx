@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Radio, Shield, Gamepad2, Users, ChevronRight, Layers, Sparkles } from "lucide-react";
+import { Radio, Shield, Gamepad2, ChevronRight } from "lucide-react";
 import type { GuildRadarDTO } from "@/app/lib/guild-actions";
 
 interface GuildRadarWidgetProps {
@@ -25,7 +25,7 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                     <div>
                         <h3 className="text-base sm:text-lg font-black uppercase tracking-wider text-white flex items-center gap-2">
                             Radar das Guildas
-                            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] tracking-normal">
+                            <span className="text-xs font-bold px-2 py-0.5 rounded-full border border-[#bd0df2]/30 bg-[#bd0df2]/10 text-[#bd0df2] tracking-normal">
                                 {guilds.length} {guilds.length === 1 ? "esquadrão" : "esquadrões"}
                             </span>
                         </h3>
@@ -62,16 +62,16 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                                         <Shield className="h-4 w-4" />
                                     </div>
                                     <div className="flex flex-col min-w-0">
-                                        <span className="text-xs font-black uppercase tracking-wider text-white truncate group-hover:text-theme-primary transition-colors">
+                                        <span className="text-sm font-bold uppercase tracking-wider text-white truncate group-hover:text-theme-primary transition-colors">
                                             {g.guildName}
                                         </span>
-                                        <span className="text-[10px] font-bold text-zinc-400">
+                                        <span className="text-xs font-semibold text-zinc-400">
                                             Nv. {g.guildLevel} • {g.questMode === "ONLY_MAIN" ? "1 Quest" : "Main + Side"}
                                         </span>
                                     </div>
                                 </div>
 
-                                <span className="shrink-0 text-[10px] font-bold px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-white/5">
+                                <span className="shrink-0 text-xs font-bold px-2 py-0.5 rounded-md bg-zinc-800/80 text-zinc-300 border border-white/5">
                                     {g.members.length} {g.members.length === 1 ? "membro" : "membros"}
                                 </span>
                             </div>
@@ -98,7 +98,7 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
 
                                         <div className="flex flex-col min-w-0 flex-1 justify-center">
                                             <span
-                                                className={`inline-block w-fit text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded ${
+                                                className={`inline-block w-fit text-xs font-black uppercase tracking-wider px-2 py-0.5 rounded ${
                                                     primaryGame.questType === "MAIN"
                                                         ? "bg-amber-400/20 text-amber-400 border border-amber-400/30"
                                                         : "bg-[#bd0df2]/20 text-[#bd0df2] border border-[#bd0df2]/30"
@@ -106,7 +106,7 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                                             >
                                                 {primaryGame.questType === "MAIN" ? "Main Quest" : "Side Quest"}
                                             </span>
-                                            <span className="text-xs font-bold text-white line-clamp-2 leading-tight">
+                                            <span className="text-sm font-bold text-white line-clamp-2 leading-tight">
                                                 {primaryGame.title}
                                             </span>
                                         </div>
@@ -117,7 +117,7 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                                         <span className="text-xs font-bold text-zinc-400">
                                             Aguardando sorteio
                                         </span>
-                                        <span className="text-[10px] text-zinc-500">
+                                        <span className="text-xs text-zinc-500">
                                             Nenhum jogo ativo no momento
                                         </span>
                                     </div>
@@ -125,8 +125,8 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
 
                                 {/* Jogo secundário se houver (Side Quest em paralelo) */}
                                 {secondaryGame && (
-                                    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/40 border border-white/5 text-[11px]">
-                                        <span className="text-[#bd0df2] font-black text-[9px] uppercase tracking-wider">
+                                    <div className="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg bg-zinc-900/40 border border-white/5 text-xs">
+                                        <span className="text-[#bd0df2] font-black text-xs uppercase tracking-wider">
                                             Side:
                                         </span>
                                         <span className="text-zinc-300 font-bold truncate flex-1">
@@ -143,7 +143,7 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                                     {g.members.slice(0, 4).map((m) => (
                                         <div
                                             key={m.id}
-                                            className="relative h-6 w-6 rounded-full border-2 border-zinc-900 overflow-hidden bg-zinc-800 shrink-0"
+                                            className="relative h-7 w-7 rounded-full border-2 border-zinc-900 overflow-hidden bg-zinc-800 shrink-0"
                                             title={`${m.name} (Nv. ${m.level})`}
                                         >
                                             {m.image ? (
@@ -151,18 +151,18 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                                                     src={m.image}
                                                     alt={m.name}
                                                     fill
-                                                    sizes="24px"
+                                                    sizes="28px"
                                                     className="object-cover"
                                                 />
                                             ) : (
-                                                <div className="flex h-full w-full items-center justify-center text-[10px] font-black text-white bg-theme-primary/30">
+                                                <div className="flex h-full w-full items-center justify-center text-xs font-black text-white bg-theme-primary/30">
                                                     {m.name.charAt(0).toUpperCase()}
                                                 </div>
                                             )}
                                         </div>
                                     ))}
                                     {g.members.length > 4 && (
-                                        <div className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-zinc-900 bg-zinc-800 text-[9px] font-black text-zinc-400">
+                                        <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-zinc-900 bg-zinc-800 text-xs font-black text-zinc-400">
                                             +{g.members.length - 4}
                                         </div>
                                     )}
@@ -171,10 +171,10 @@ export function GuildRadarWidget({ guilds }: GuildRadarWidgetProps) {
                                 {/* Link Ver Histórico */}
                                 <Link
                                     href={`/quests?guildId=${g.guildId}`}
-                                    className="inline-flex items-center gap-1 text-[11px] font-bold text-zinc-400 hover:text-white transition-colors group-hover:text-theme-primary"
+                                    className="inline-flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white transition-colors group-hover:text-theme-primary"
                                 >
                                     <span>Histórico</span>
-                                    <ChevronRight className="h-3 w-3" />
+                                    <ChevronRight className="h-3.5 w-3.5" />
                                 </Link>
                             </div>
                         </div>

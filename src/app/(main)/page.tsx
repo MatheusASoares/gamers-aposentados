@@ -8,20 +8,19 @@ import { UserProfileWidget } from "@/components/dashboard/UserProfileWidget";
 import { GuildDashboardWidget } from "@/components/dashboard/GuildDashboardWidget";
 import { GuildOnboardingBanner } from "@/components/dashboard/GuildOnboardingBanner";
 import { Leaderboard, PlayerStats } from "@/components/dashboard/Leaderboard";
-import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 import { TrackedDealsAlert } from "@/components/dashboard/TrackedDealsAlert";
 import { getPendingSpecialGameProposals } from "@/app/lib/special-game-actions";
 import { ActivePauseVotingBanner } from "@/components/game/ActivePauseVotingBanner";
 import { ActivePauseVotingToast } from "@/components/game/ActivePauseVotingToast";
+import { GuildRadarWidget } from "@/components/dashboard/GuildRadarWidget";
 
-import { getActiveGuild, getGuildStats } from "@/app/lib/guild-actions";
+import { getActiveGuild, getGuildStats, getOtherGuildsRadar } from "@/app/lib/guild-actions";
 
 export default async function DashboardPage() {
     const session = await auth();
 
     const userId = session?.user?.id || "";
     const activeGuild = await getActiveGuild();
-
 
     interface RawReview {
         id: string;
@@ -47,27 +46,32 @@ export default async function DashboardPage() {
         activeUsers,
         pendingProposals,
         guildStats,
+        otherGuilds,
     ] = await Promise.all([
-        // Active Main Quest
-        prisma.pool.findFirst({
-            where: {
-                ...(activeGuild ? { guild_id: activeGuild.id } : {}),
-                type: "MAIN_QUEST",
-                winner_game_id: { not: null },
-            },
-            orderBy: { created_at: "desc" },
-            include: { winner_game: { include: { nominator: true } } },
-        }),
-        // Active Side Quest
-        prisma.pool.findFirst({
-            where: {
-                ...(activeGuild ? { guild_id: activeGuild.id } : {}),
-                type: "SIDE_QUEST",
-                winner_game_id: { not: null },
-            },
-            orderBy: { created_at: "desc" },
-            include: { winner_game: { include: { nominator: true } } },
-        }),
+        // Active Main Quest (Strictly Guild Isolated)
+        activeGuild
+            ? prisma.pool.findFirst({
+                  where: {
+                      guild_id: activeGuild.id,
+                      type: "MAIN_QUEST",
+                      winner_game_id: { not: null },
+                  },
+                  orderBy: { created_at: "desc" },
+                  include: { winner_game: { include: { nominator: true } } },
+              })
+            : Promise.resolve(null),
+        // Active Side Quest (Strictly Guild Isolated)
+        activeGuild && activeGuild.questMode !== "ONLY_MAIN"
+            ? prisma.pool.findFirst({
+                  where: {
+                      guild_id: activeGuild.id,
+                      type: "SIDE_QUEST",
+                      winner_game_id: { not: null },
+                  },
+                  orderBy: { created_at: "desc" },
+                  include: { winner_game: { include: { nominator: true } } },
+              })
+            : Promise.resolve(null),
         // [BY DESIGN]: Random Reviews (ORDER BY RANDOM) seleciona 5 reviews aleatórias de todo o histórico da comunidade.
         // O volume de dados é controlado (< centenas de linhas) com tempo de execução < 1ms, mantendo rotatividade histórica.
         prisma.$queryRaw<RawReview[]>`
@@ -85,56 +89,81 @@ export default async function DashboardPage() {
             JOIN users u ON r.user_id = u.id
             ORDER BY RANDOM() LIMIT 5
         `,
-        // Recent Pools (Global Activity)
-        prisma.pool.findMany({
-            where: { winner_game_id: { not: null } },
-            orderBy: { created_at: "desc" },
-            take: 5,
-            include: { winner_game: true },
-        }),
-        // Recent Reviews (Global Activity)
-        prisma.review.findMany({
-            orderBy: { updated_at: "desc" },
-            take: 5,
-            include: { game: true, user: true },
-        }),
-        // Recent Progress (Global Activity)
-        prisma.gameProgress.findMany({
-            where: { status: { in: ["ACTIVE", "COMPLETED", "DROPPED"] } },
-            orderBy: { updated_at: "desc" },
-            take: 10,
-            include: { game: true, user: true },
-        }),
-        // Recent Nominations (Global Activity)
-        prisma.game.findMany({
-            where: { nominated_by_id: { not: null } },
-            orderBy: { created_at: "desc" },
-            take: 5,
-            include: { nominator: true },
-        }),
-        // Completed progress for medals count
-        prisma.gameProgress.findMany({
-            where: {
-                status: "COMPLETED",
-                ...(activeGuild && activeGuild.members.length > 0
-                    ? { user_id: { in: activeGuild.members.map((m) => m.userId) } }
-                    : { user: { email: { in: RANDOMIZER_PLAYER_EMAILS } } }),
-            },
-            include: {
-                game: true,
-                user: true,
-            },
-        }),
-        // Fetch active players details
-        prisma.user.findMany({
-            where: activeGuild && activeGuild.members.length > 0
-                ? { id: { in: activeGuild.members.filter((m) => m.isActive).map((m) => m.userId) } }
-                : { email: { in: RANDOMIZER_PLAYER_EMAILS } },
-        }),
+        // Recent Pools (Strictly Guild Isolated)
+        activeGuild
+            ? prisma.pool.findMany({
+                  where: {
+                      guild_id: activeGuild.id,
+                      winner_game_id: { not: null },
+                  },
+                  orderBy: { created_at: "desc" },
+                  take: 5,
+                  include: { winner_game: true },
+              })
+            : Promise.resolve([]),
+        // Recent Reviews (Strictly Guild Members)
+        activeGuild && activeGuild.members.length > 0
+            ? prisma.review.findMany({
+                  where: {
+                      user_id: { in: activeGuild.members.map((m) => m.userId) },
+                  },
+                  orderBy: { updated_at: "desc" },
+                  take: 5,
+                  include: { game: true, user: true },
+              })
+            : Promise.resolve([]),
+        // Recent Progress (Strictly Guild Members)
+        activeGuild && activeGuild.members.length > 0
+            ? prisma.gameProgress.findMany({
+                  where: {
+                      user_id: { in: activeGuild.members.map((m) => m.userId) },
+                      status: { in: ["ACTIVE", "COMPLETED", "DROPPED"] },
+                  },
+                  orderBy: { updated_at: "desc" },
+                  take: 10,
+                  include: { game: true, user: true },
+              })
+            : Promise.resolve([]),
+        // Recent Nominations (Strictly Guild Members)
+        activeGuild && activeGuild.members.length > 0
+            ? prisma.game.findMany({
+                  where: {
+                      nominated_by_id: { in: activeGuild.members.map((m) => m.userId) },
+                  },
+                  orderBy: { created_at: "desc" },
+                  take: 5,
+                  include: { nominator: true },
+              })
+            : Promise.resolve([]),
+        // Completed progress for medals count (Strictly Guild Members)
+        activeGuild && activeGuild.members.length > 0
+            ? prisma.gameProgress.findMany({
+                  where: {
+                      status: "COMPLETED",
+                      user_id: { in: activeGuild.members.map((m) => m.userId) },
+                  },
+                  include: {
+                      game: true,
+                      user: true,
+                  },
+              })
+            : Promise.resolve([]),
+        // Fetch active players details (Strictly Guild Active Members)
+        activeGuild && activeGuild.members.length > 0
+            ? prisma.user.findMany({
+                  where: {
+                      id: {
+                          in: activeGuild.members.filter((m) => m.isActive).map((m) => m.userId),
+                      },
+                  },
+              })
+            : Promise.resolve([]),
         // Fetch pending special game proposals for active pause voting
         getPendingSpecialGameProposals(undefined, activeGuild?.id),
         // Fetch guild statistics if active guild exists
         activeGuild ? getGuildStats(activeGuild.id) : Promise.resolve(null),
+        // Fetch multiverse radar of other guilds
+        getOtherGuildsRadar(activeGuild?.id),
     ]);
 
     // --- Block 2: Dependent Data Fetching (Parallel) ---
@@ -354,16 +383,20 @@ export default async function DashboardPage() {
           }
         : null;
 
-    // Compute all members for Global Leaderboard tab
-    const allDbUsers = await prisma.user.findMany({
-        include: {
-            gameProgress: {
-                where: { status: "COMPLETED" },
-                include: { game: true },
-            },
-        },
-        orderBy: { xp_points: "desc" },
-    });
+    // Compute members for Guild Leaderboard tab (Strictly Guild Members)
+    const allDbUsers =
+        activeGuild && activeGuild.members.length > 0
+            ? await prisma.user.findMany({
+                  where: { id: { in: activeGuild.members.map((m) => m.userId) } },
+                  include: {
+                      gameProgress: {
+                          where: { status: "COMPLETED" },
+                          include: { game: true },
+                      },
+                  },
+                  orderBy: { xp_points: "desc" },
+              })
+            : [];
 
     const allMembersStats = allDbUsers.map((u) => {
         const gold = u.gameProgress.filter((p) => p.game.quest_type === "MAIN_QUEST").length;
@@ -383,7 +416,7 @@ export default async function DashboardPage() {
     });
 
     return (
-        <div className="mx-auto w-full max-w-[1920px] space-y-6 sm:space-y-8 px-2 sm:px-6 py-3 sm:py-8 md:px-8 lg:px-12 lg:py-12">
+        <div className="mx-auto w-full max-w-[1920px] space-y-6 px-2 py-3 sm:space-y-8 sm:px-6 sm:py-8 md:px-8 lg:px-12 lg:py-12">
             {/* Active Pause Quorum Voting Banner */}
             <ActivePauseVotingBanner
                 proposals={pendingProposals}
@@ -392,10 +425,7 @@ export default async function DashboardPage() {
             />
 
             {/* Active Pause Quorum Floating Toast Notification */}
-            <ActivePauseVotingToast
-                proposals={pendingProposals}
-                currentUserId={userId}
-            />
+            <ActivePauseVotingToast proposals={pendingProposals} currentUserId={userId} />
 
             {/* Deals Tracker Subtle All-Time Low Alert */}
             <TrackedDealsAlert />
@@ -425,11 +455,11 @@ export default async function DashboardPage() {
                     progress={mainQuestProgress}
                     userName={session?.user?.name ?? "Comandante"}
                 />
-                <SideQuestBar
-                    activePool={latestSidePool}
-                    progress={sideQuestProgress}
-                />
+                <SideQuestBar activePool={latestSidePool} progress={sideQuestProgress} />
             </div>
+
+            {/* Multiverse: Guild Radar */}
+            <GuildRadarWidget guilds={otherGuilds} />
 
             {/* Row 3: Stats Cards Grid */}
             <StatsGrid reviews={randomReviewsForStats} />

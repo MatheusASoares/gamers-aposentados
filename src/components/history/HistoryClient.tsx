@@ -36,6 +36,7 @@ interface HistoryClientProps {
     currentUserId: string;
     activeGuildId?: string;
     activeGuildName?: string;
+    availableGuilds?: Array<{ id: string; name: string; slug: string; level: number }>;
 }
 
 const MONTH_OPTIONS: AppDropdownOption<number | "ALL">[] = [
@@ -89,8 +90,12 @@ export function HistoryClient({
     currentUserId,
     activeGuildId,
     activeGuildName,
+    availableGuilds = [],
 }: HistoryClientProps) {
     const [activeTab, setActiveTab] = useState<"GUILD" | "PERSONAL">("GUILD");
+
+    // Guild Selection State
+    const [selectedGuildId, setSelectedGuildId] = useState<string | undefined>(activeGuildId);
 
     // Guild History State & Filters
     const [guildData, setGuildData] = useState<QuestHistoryData[]>(initialData);
@@ -112,7 +117,7 @@ export function HistoryClient({
     const [personalMonthFilter, setPersonalMonthFilter] = useState<number | "ALL">("ALL");
     const [personalSort, setPersonalSort] = useState<"RECENT" | "RATING" | "PROGRESS" | "TITLE">("RECENT");
 
-    // Fetch Guild data when year or type changes
+    // Fetch Guild data when year, type or selected guild changes
     useEffect(() => {
         if (activeTab !== "GUILD") return;
 
@@ -120,7 +125,7 @@ export function HistoryClient({
         const fetchData = async () => {
             setIsLoadingGuild(true);
             try {
-                const newData = await getQuestHistoryByYear(guildYearFilter, guildQuestType, activeGuildId);
+                const newData = await getQuestHistoryByYear(guildYearFilter, guildQuestType, selectedGuildId);
                 if (isMounted) setGuildData(newData);
             } catch (error) {
                 console.error("Failed to fetch history:", error);
@@ -134,7 +139,7 @@ export function HistoryClient({
         return () => {
             isMounted = false;
         };
-    }, [guildYearFilter, guildQuestType, activeTab, activeGuildId]);
+    }, [guildYearFilter, guildQuestType, activeTab, selectedGuildId]);
 
     // Fetch Personal history when switching to PERSONAL tab
     useEffect(() => {
@@ -170,6 +175,21 @@ export function HistoryClient({
         });
         return list;
     }, [availableYears]);
+
+    // Guild Dropdown Options
+    const guildOptions = useMemo<AppDropdownOption<string>[]>(() => {
+        if (!availableGuilds || availableGuilds.length === 0) {
+            return [{ value: activeGuildId || "default", label: `🛡️ ${activeGuildName || "Minha Guilda"}` }];
+        }
+        return availableGuilds.map((g) => ({
+            value: g.id,
+            label: `🛡️ ${g.name} (Nv. ${g.level})`,
+        }));
+    }, [availableGuilds, activeGuildId, activeGuildName]);
+
+    const currentSelectedGuild = useMemo(() => {
+        return availableGuilds?.find((g) => g.id === selectedGuildId) || { name: activeGuildName || "Guilda" };
+    }, [availableGuilds, selectedGuildId, activeGuildName]);
 
     // Unique Years for Personal Filter
     const personalYearOptions = useMemo<AppDropdownOption<number | "ALL">[]>(() => {
@@ -378,11 +398,11 @@ export function HistoryClient({
                         </div>
 
                         <h1 className="text-shadow-glow text-2xl sm:text-4xl lg:text-5xl font-black tracking-tight text-white uppercase">
-                            {activeTab === "GUILD" ? "Histórico da Guilda" : "Meu Histórico Pessoal"}
+                            {activeTab === "GUILD" ? `Histórico • ${currentSelectedGuild.name}` : "Meu Histórico Pessoal"}
                         </h1>
                         <p className="text-xs sm:text-sm lg:text-base font-bold tracking-wide text-zinc-400 max-w-2xl hidden sm:block">
                             {activeTab === "GUILD"
-                                ? "Registro auditável dos sorteios, indicações e campanhas conquistadas pela dupla oficial (Matheus & Lucas)."
+                                ? `Registro auditável dos sorteios, indicações e campanhas conquistadas pela guilda ${currentSelectedGuild.name}.`
                                 : "Acompanhe todos os jogos que você iniciou, completou ou dropou na sua jornada pessoal."}
                         </p>
                     </div>
@@ -396,6 +416,19 @@ export function HistoryClient({
                             
                             {/* Desktop View: Linha Única Contínua (4x1) */}
                             <div className="hidden lg:flex items-center justify-between gap-3.5 flex-wrap">
+                                {/* Guild Selector (quando houver múltiplas guildas) */}
+                                {guildOptions.length > 1 && (
+                                    <div className="w-56 shrink-0">
+                                        <AppDropdown
+                                            value={selectedGuildId || guildOptions[0].value}
+                                            onChange={(val) => setSelectedGuildId(val as string)}
+                                            options={guildOptions}
+                                            accentColor="purple"
+                                            ariaLabel="Selecione a Guilda"
+                                        />
+                                    </div>
+                                )}
+
                                 {/* Search Input */}
                                 <div className="relative flex-1 min-w-[240px] max-w-xs">
                                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
@@ -501,6 +534,19 @@ export function HistoryClient({
 
                             {/* Mobile View: Layout Tátil com 2x2 Dropdowns */}
                             <div className="flex lg:hidden flex-col gap-3">
+                                {/* Guild Selector Mobile (quando houver múltiplas guildas) */}
+                                {guildOptions.length > 1 && (
+                                    <div className="w-full">
+                                        <AppDropdown
+                                            value={selectedGuildId || guildOptions[0].value}
+                                            onChange={(val) => setSelectedGuildId(val as string)}
+                                            options={guildOptions}
+                                            accentColor="purple"
+                                            ariaLabel="Selecione a Guilda"
+                                        />
+                                    </div>
+                                )}
+
                                 {/* Search Bar Mobile */}
                                 <div className="relative w-full">
                                     <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />

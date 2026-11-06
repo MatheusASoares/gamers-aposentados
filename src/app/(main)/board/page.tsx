@@ -40,10 +40,10 @@ export default async function ContractsPage() {
 
     // 2. Buscar os pools mais recentes ativos como fallback se o usuário não tiver quest ativa
     const [latestMainPool, latestSidePool] = await Promise.all([
-        !userActiveMainProgress
+        !userActiveMainProgress && activeGuild
             ? prisma.pool.findFirst({
                   where: {
-                      ...(activeGuild ? { guild_id: activeGuild.id } : {}),
+                      guild_id: activeGuild.id,
                       type: "MAIN_QUEST",
                       winner_game_id: { not: null },
                   },
@@ -51,10 +51,10 @@ export default async function ContractsPage() {
                   include: { winner_game: true },
               })
             : null,
-        !userActiveSideProgress
+        !userActiveSideProgress && activeGuild && activeGuild.questMode !== "ONLY_MAIN"
             ? prisma.pool.findFirst({
                   where: {
-                      ...(activeGuild ? { guild_id: activeGuild.id } : {}),
+                      guild_id: activeGuild.id,
                       type: "SIDE_QUEST",
                       winner_game_id: { not: null },
                   },
