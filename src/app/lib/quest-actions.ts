@@ -3,7 +3,6 @@
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
-import { RANDOMIZER_PLAYER_EMAILS } from "@/lib/randomizer-players";
 
 import { recalculateUserXPAndLevel } from "@/app/lib/gamification-actions";
 import { ensureUserContractProgress } from "@/services/notice-board-progression";
@@ -218,14 +217,24 @@ export async function getRandomizerStatus(
     try {
         let guildId = targetGuildId;
         if (!guildId) {
-            const founderGuild = await prisma.guild.findFirst({ where: { slug: { in: ["fundadores", "aposentados"] } } });
-            guildId = founderGuild?.id;
+            try {
+                const { getActiveGuild } = await import("@/app/lib/guild-actions");
+                const activeGuild = await getActiveGuild();
+                guildId = activeGuild?.id;
+            } catch {
+                // Fallback se executado fora do ciclo de requisição
+            }
+        }
+
+        // Se o usuário não possui guilda ativa selecionada, não há guilda para travar
+        if (!guildId) {
+            return { locked: false };
         }
 
         // Acha qual é o jogo atual da quest type selecionada na guilda (pegamos da pool com vencedor mais recente)
         const lastPool = await prisma.pool.findFirst({
             where: {
-                ...(guildId ? { guild_id: guildId } : {}),
+                guild_id: guildId,
                 type: questType,
                 winner_game_id: { not: null },
             },
@@ -239,21 +248,15 @@ export async function getRandomizerStatus(
         const activeGameId = lastPool.winner_game_id;
 
         // Obter membros ativos da guilda
-        let activeUserIds: string[] = [];
-        if (guildId) {
-            const activeMembers = await prisma.guildMember.findMany({
-                where: { guild_id: guildId, is_active: true },
-                select: { user_id: true },
-            });
-            activeUserIds = activeMembers.map((m) => m.user_id);
-        }
+        const activeMembers = await prisma.guildMember.findMany({
+            where: { guild_id: guildId, is_active: true },
+            select: { user_id: true },
+        });
+        const activeUserIds = activeMembers.map((m) => m.user_id);
 
+        // Se a guilda não possui membros ativos, o sorteador não é travado
         if (activeUserIds.length === 0) {
-            const activeUsers = await prisma.user.findMany({
-                where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
-                select: { id: true },
-            });
-            activeUserIds = activeUsers.map((u) => u.id);
+            return { locked: false };
         }
 
         // Verifica se algum membro ativo ainda está com esse jogo ACTIVE
@@ -324,22 +327,35 @@ export async function joinQuest(gameId: string): Promise<{ success: boolean; err
                     return { success: true };
                 }
 
-                // Regra 2.1: "se ele for dropped pelos 2 players, pode participar novamente"
-                const activeUsers = await tx.user.findMany({
-                    where: { email: { in: RANDOMIZER_PLAYER_EMAILS } },
-                    select: { id: true },
-                });
-                const activeUserIds = activeUsers.map((u) => u.id);
+                // Regra 2.1: "se ele for dropped por todos os membros ativos da guilda, pode participar novamente"
+                let targetUserIds: string[] = [];
+                try {
+                    const { getActiveGuild } = await import("@/app/lib/guild-actions");
+                    const activeGuild = await getActiveGuild();
+                    if (activeGuild?.id) {
+                        const activeMembers = await tx.guildMember.findMany({
+                            where: { guild_id: activeGuild.id, is_active: true },
+                            select: { user_id: true },
+                        });
+                        targetUserIds = activeMembers.map((m) => m.user_id);
+                    }
+                } catch {
+                    // Fallback
+                }
+
+                if (targetUserIds.length === 0) {
+                    targetUserIds = [session.user.id];
+                }
 
                 const allProgresses = await tx.gameProgress.findMany({
                     where: {
                         game_id: gameId,
-                        user_id: { in: activeUserIds },
+                        user_id: { in: targetUserIds },
                     },
                 });
 
                 const droppedCount = allProgresses.filter((p) => p.status === "DROPPED").length;
-                if (droppedCount >= activeUserIds.length) {
+                if (droppedCount >= targetUserIds.length) {
                     await tx.gameProgress.update({
                         where: { id: existing.id },
                         data: {
@@ -353,7 +369,7 @@ export async function joinQuest(gameId: string): Promise<{ success: boolean; err
                 } else {
                     return {
                         success: false,
-                        error: "Este jogo não pode ser iniciado porque não foi abandonado (dropped) por ambos os jogadores oficiais.",
+                        error: "Este jogo não pode ser iniciado porque não foi abandonado (dropped) por todos os membros ativos da guilda.",
                     };
                 }
             }

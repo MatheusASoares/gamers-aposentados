@@ -222,12 +222,12 @@ export function RandomizerClient({
         }
     };
 
-    const fetchPastIncompleteGames = async () => {
-        const res = await getPastIncompleteGames();
+    const fetchPastIncompleteGames = useCallback(async () => {
+        const res = await getPastIncompleteGames(activeGuild?.id);
         if (res.success && res.games) {
             setPastIncompleteGames(res.games);
         }
-    };
+    }, [activeGuild?.id]);
 
     // Load initial data on mount and on questType change
     useEffect(() => {
@@ -237,10 +237,10 @@ export function RandomizerClient({
 
         fetchPastIncompleteGames();
 
-        getPendingSpecialGameProposals(questType).then((proposals) => {
+        getPendingSpecialGameProposals(questType, activeGuild?.id).then((proposals) => {
             setPendingProposals(proposals);
         });
-    }, [questType, loadPool]);
+    }, [questType, loadPool, fetchPastIncompleteGames, activeGuild?.id]);
 
     const handleInsertSpecialGame = async (gameToInsert: {
         id?: string;

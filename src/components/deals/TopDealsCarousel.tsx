@@ -2,7 +2,7 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import Image from "next/image";
 import {
     Flame,
@@ -119,6 +119,7 @@ export function TopDealsCarousel({
             }
         >
     >({});
+    const inFlightAppIdsRef = useRef<Set<number>>(new Set());
 
     if (
         prevFilter !== activeFilter ||
@@ -288,21 +289,15 @@ export function TopDealsCarousel({
             const hasReviews = !!(deal.steamReviews || (current && current.reviews !== undefined));
             const hasFamily = deal.isFamilySharing !== undefined || (current && current.isFamilySharing !== undefined);
 
-            if ((!hasReviews || !hasFamily) && !current?.loading) {
+            if ((!hasReviews || !hasFamily) && !inFlightAppIdsRef.current.has(appId)) {
                 toFetch.push(appId);
+                inFlightAppIdsRef.current.add(appId);
             }
         });
 
         if (toFetch.length === 0) return;
 
-        // Mark as loading to prevent duplicate requests
-        setLiveData((prev) => {
-            const next = { ...prev };
-            toFetch.forEach((appId) => {
-                next[appId] = { ...next[appId], loading: true };
-            });
-            return next;
-        });
+// Synchronous setState eliminated - inFlightAppIdsRef prevents duplicate requests without cascading renders
 
         Promise.allSettled(
             toFetch.map(async (appId) => {

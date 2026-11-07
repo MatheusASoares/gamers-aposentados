@@ -7,7 +7,6 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
 import { authRateLimiter, getClientIp } from "@/lib/rate-limiter";
-import { getFounderGuildSlugs } from "@/lib/randomizer-players";
 
 const RegisterSchema = z.object({
     username: z.string().min(3),
@@ -46,28 +45,13 @@ export async function register(prevState: string | undefined, formData: FormData
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const user = await prisma.user.create({
+        await prisma.user.create({
             data: {
                 username,
                 email,
                 password: hashedPassword,
             },
         });
-
-        // Associar à guilda dos Fundadores se existir
-        const founderGuild = await prisma.guild.findFirst({
-            where: { slug: { in: getFounderGuildSlugs() } },
-        });
-        if (founderGuild) {
-            await prisma.guildMember.create({
-                data: {
-                    guild_id: founderGuild.id,
-                    user_id: user.id,
-                    role: "MEMBER",
-                    is_active: true,
-                },
-            });
-        }
     } catch (error) {
         console.error("Registration error:", error);
         return "Failed to register user.";
@@ -110,4 +94,3 @@ export async function authenticate(prevState: string | undefined, formData: Form
         throw error;
     }
 }
-

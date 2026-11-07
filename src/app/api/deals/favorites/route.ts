@@ -4,6 +4,79 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { DealsService } from "@/services/deals/dealsService";
+import { z } from "zod";
+
+export const SyncItemSchema = z.object({
+    id: z.union([z.string(), z.number()]).transform((val) => String(val)),
+    title: z.string().min(1, "Título é obrigatório").max(255),
+    slug: z.string().optional().nullable(),
+    steamAppId: z.union([z.string(), z.number()]).optional().nullable(),
+    coverImage: z.string().optional().nullable(),
+});
+
+export const BatchSyncSchema = z.array(SyncItemSchema).max(100, "Limite máximo de 100 itens por lote");
+
+export async function processFavoritesSync(userId: string | undefined | null, syncItems: unknown) {
+    if (!userId) {
+        return {
+            status: 401,
+            body: { error: "Você precisa estar autenticado para favoritar", isAuthenticated: false },
+        };
+    }
+
+    const parseResult = BatchSyncSchema.safeParse(syncItems);
+    if (!parseResult.success) {
+        return {
+            status: 400,
+            body: { error: "Payload inválido para syncItems", details: parseResult.error.flatten() },
+        };
+    }
+
+    const items = parseResult.data;
+    if (items.length > 0) {
+        const uniqueMap = new Map<string, {
+            user_id: string;
+            deal_id: string;
+            title: string;
+            slug: string;
+            steam_app_id: number | null;
+            cover_image: string | null;
+        }>();
+
+        for (const item of items) {
+            const cleanDealId = item.id;
+            if (!uniqueMap.has(cleanDealId)) {
+                uniqueMap.set(cleanDealId, {
+                    user_id: userId,
+                    deal_id: cleanDealId,
+                    title: item.title,
+                    slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                    steam_app_id: item.steamAppId ? Number(item.steamAppId) : null,
+                    cover_image: item.coverImage || null,
+                });
+            }
+        }
+
+        await prisma.userTrackedDeal.createMany({
+            data: Array.from(uniqueMap.values()),
+            skipDuplicates: true,
+        });
+    }
+
+    const allUserDeals = await prisma.userTrackedDeal.findMany({
+        where: { user_id: userId },
+        orderBy: { created_at: "desc" },
+    });
+
+    return {
+        status: 200,
+        body: {
+            success: true,
+            syncedCount: allUserDeals.length,
+            items: allUserDeals,
+        },
+    };
+}
 
 export async function GET() {
     try {
@@ -70,38 +143,9 @@ export async function POST(request: NextRequest) {
         const { dealId, title, steamAppId, slug, coverImage, syncItems } = body;
 
         // Batch Sync support (e.g. migrating localStorage to DB on first login)
-        if (Array.isArray(syncItems) && syncItems.length > 0) {
-            for (const item of syncItems) {
-                if (!item.id || !item.title) continue;
-                await prisma.userTrackedDeal.upsert({
-                    where: {
-                        user_id_deal_id: {
-                            user_id: session.user.id,
-                            deal_id: String(item.id),
-                        },
-                    },
-                    update: {},
-                    create: {
-                        user_id: session.user.id,
-                        deal_id: String(item.id),
-                        title: item.title,
-                        slug: item.slug || item.title.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                        steam_app_id: item.steamAppId ? Number(item.steamAppId) : null,
-                        cover_image: item.coverImage || null,
-                    },
-                });
-            }
-
-            const allUserDeals = await prisma.userTrackedDeal.findMany({
-                where: { user_id: session.user.id },
-                orderBy: { created_at: "desc" },
-            });
-
-            return NextResponse.json({
-                success: true,
-                syncedCount: allUserDeals.length,
-                items: allUserDeals,
-            });
+        if ("syncItems" in body) {
+            const result = await processFavoritesSync(session.user.id, syncItems);
+            return NextResponse.json(result.body, { status: result.status });
         }
 
         if (!dealId || !title) {

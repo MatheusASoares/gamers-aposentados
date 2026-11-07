@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useContext, useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 
 interface ThemeContextType {
@@ -24,6 +24,7 @@ interface ThemeProviderProps {
 
 export function ThemeProvider({ children, initialTheme = "cyberpunk" }: ThemeProviderProps) {
   const { data: session, status } = useSession();
+  const syncedSessionThemeRef = useRef<string | null>(null);
 
   // Resolve theme with local persistence priority:
   // 1. Existing DOM attribute if set by SSR/inline script
@@ -53,14 +54,17 @@ export function ThemeProvider({ children, initialTheme = "cyberpunk" }: ThemePro
   useEffect(() => {
     if (status === "authenticated" && session?.user?.equipped_theme) {
       const sessionTheme = session.user.equipped_theme;
-      if (sessionTheme && sessionTheme !== theme) {
+      if (sessionTheme && sessionTheme !== theme && syncedSessionThemeRef.current !== sessionTheme) {
+        syncedSessionThemeRef.current = sessionTheme;
         const local = typeof window !== "undefined" ? localStorage.getItem("gp_theme") : null;
         if (!local || local === sessionTheme) {
-          setTheme(sessionTheme);
+          queueMicrotask(() => {
+            setTheme(sessionTheme);
+          });
         }
       }
     }
-  }, [session?.user?.equipped_theme, status]);
+  }, [session?.user?.equipped_theme, status, theme]);
 
   // Keep DOM attribute in sync with state
   useEffect(() => {

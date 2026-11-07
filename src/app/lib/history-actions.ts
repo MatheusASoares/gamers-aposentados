@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export interface HistoryCandidate {
     id: string;
@@ -53,16 +54,25 @@ export async function getQuestHistoryByYear(
             }
         }
 
-        const whereClause: {
-            status: "CLOSED";
-            year?: number;
-            type?: "MAIN_QUEST" | "SIDE_QUEST";
-            winner_game_id: { not: null };
-            guild_id?: string;
-        } = {
+        let isFounderGuild = false;
+        if (guildId) {
+            const guildObj = await prisma.guild.findUnique({
+                where: { id: guildId },
+                select: { slug: true },
+            });
+            if (guildObj?.slug && ["fundadores", "aposentados"].includes(guildObj.slug)) {
+                isFounderGuild = true;
+            }
+        }
+
+        const whereClause: Prisma.PoolWhereInput = {
             status: "CLOSED",
             winner_game_id: { not: null },
-            ...(guildId ? { guild_id: guildId } : {}),
+            ...(guildId
+                ? isFounderGuild
+                    ? { OR: [{ guild_id: guildId }, { guild_id: null }] }
+                    : { guild_id: guildId }
+                : {}),
         };
 
         if (year !== "ALL") {
@@ -79,6 +89,13 @@ export async function getQuestHistoryByYear(
                 { month: "desc" },
             ],
             include: {
+                guild: {
+                    include: {
+                        members: {
+                            select: { user_id: true },
+                        },
+                    },
+                },
                 winner_game: {
                     include: {
                         progress: {
@@ -100,22 +117,18 @@ export async function getQuestHistoryByYear(
         return pools.map((pool) => {
             const winner = pool.winner_game;
             
-            // Only tracking progress for Lucas and Matheus (the primary players)
             let playerProgress: PlayerProgress[] = [];
             if (winner) {
+                const guildMemberUserIds = new Set(pool.guild?.members.map((m) => m.user_id) || []);
+
                 playerProgress = winner.progress
                     .filter((p) => {
-                        const email = (p.user.email || "").toLowerCase();
-                        const name = (p.user.name || p.user.username || "").toLowerCase();
-                        return (
-                            email.includes("matheus") ||
-                            email.includes("lucas") ||
-                            name.includes("matheus") ||
-                            name.includes("lucas") ||
-                            name.includes("fmaniacs") ||
-                            name.includes("ocobraljhonson") ||
-                            name.includes("test")
-                        );
+                        // Se a pool possui guilda vinculada, filtra pelos membros daquela guilda
+                        if (guildMemberUserIds.size > 0) {
+                            return guildMemberUserIds.has(p.user_id);
+                        }
+                        // Quests legadas antigas sem guilda pertencem aos Fundadores (Aposentados)
+                        return true;
                     })
                     .map((p) => ({
                         userId: p.user.id,
@@ -167,10 +180,25 @@ export async function getAvailableYears(targetGuildId?: string): Promise<number[
             }
         }
 
+        let isFounderGuild = false;
+        if (guildId) {
+            const guildObj = await prisma.guild.findUnique({
+                where: { id: guildId },
+                select: { slug: true },
+            });
+            if (guildObj?.slug && ["fundadores", "aposentados"].includes(guildObj.slug)) {
+                isFounderGuild = true;
+            }
+        }
+
         const pools = await prisma.pool.findMany({
             where: {
                 status: "CLOSED",
-                ...(guildId ? { guild_id: guildId } : {}),
+                ...(guildId
+                    ? isFounderGuild
+                        ? { OR: [{ guild_id: guildId }, { guild_id: null }] }
+                        : { guild_id: guildId }
+                    : {}),
             },
             select: { year: true },
             distinct: ["year"],

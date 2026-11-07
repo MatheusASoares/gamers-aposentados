@@ -551,15 +551,45 @@ export async function executeRoll(
 
 // ---------- Fetch Past Incomplete Games ----------
 
-export async function getPastIncompleteGames() {
+export async function getPastIncompleteGames(targetGuildId?: string) {
     try {
+        let guildId = targetGuildId;
+        if (!guildId) {
+            try {
+                const { getActiveGuild } = await import("@/app/lib/guild-actions");
+                const activeGuild = await getActiveGuild();
+                guildId = activeGuild?.id;
+            } catch {
+                // Fallback quando executado fora do ciclo HTTP
+            }
+        }
+
+        if (!guildId) {
+            return { success: true, games: [] };
+        }
+
+        // Obter membros da guilda
+        const members = await prisma.guildMember.findMany({
+            where: { guild_id: guildId },
+            select: { user_id: true },
+        });
+        const memberUserIds = members.map((m) => m.user_id);
+
+        if (memberUserIds.length === 0) {
+            return { success: true, games: [] };
+        }
+
+        // Buscar jogos incompletos específicos dos membros desta guilda:
+        // Pelo menos um membro da guilda sugeriu ou abandonou, E nenhum membro desta guilda completou
         const games = await prisma.game.findMany({
             where: {
                 progress: {
                     some: {
+                        user_id: { in: memberUserIds },
                         status: { in: ["DROPPED", "SUGGESTED"] },
                     },
                     none: {
+                        user_id: { in: memberUserIds },
                         status: "COMPLETED",
                     },
                 },
